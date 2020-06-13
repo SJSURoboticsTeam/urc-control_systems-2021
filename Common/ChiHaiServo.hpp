@@ -1,5 +1,6 @@
 /**
  * Header file for Chi Hai DC Brushless motor functionality.
+ * Incorporates AS5601 and Drv8801
  *
  * @author SJSU Robotics - Control Systems
  * @version Spring 2020
