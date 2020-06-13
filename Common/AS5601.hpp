@@ -1,5 +1,5 @@
 /**
- * Header file for Magnetic Encoder functionality.
+ * Header file for magnetic encoder AS5601 functionality.
  *
  * @author SJSU Robotics - Control Systems
  * @version Spring 2020
