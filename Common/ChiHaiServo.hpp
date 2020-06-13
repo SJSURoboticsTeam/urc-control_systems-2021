@@ -8,7 +8,7 @@
 
 #pragma once
 
-#include "L3_Application/Robotics/Common/MagneticEncoder.hpp"
+#include "L3_Application/Robotics/Common/AS5601.hpp"
 #include "L3_Application/Robotics/Common/Drv8801.hpp"
 #include "utility/units.hpp"
 
