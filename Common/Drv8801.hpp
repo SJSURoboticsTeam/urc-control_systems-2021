@@ -11,7 +11,7 @@
 #include "utility/units.hpp"
 #include "L1_Peripheral/pwm.hpp"
 #include "L1_Peripheral/gpio.hpp"
-#include "L3_Application/Robotics/Common/MagneticEncoder.hpp"
+#include "L3_Application/Robotics/Common/AS5601.hpp"
 
 namespace sjsu
 {
