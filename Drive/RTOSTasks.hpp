@@ -6,7 +6,7 @@
 #include "L1_Peripheral/lpc40xx/gpio.hpp"
 #include "L3_Application/Robotics/Common/Params.hpp"
 #include "L3_Application/Robotics/Common/ChiHaiServo.hpp"
-#include "L3_Application/Robotics/Common/MagneticEncoder.hpp"
+#include "L3_Application/Robotics/Common/AS5601.hpp"
 #include "L3_Application/Robotics/Common/Drv8801.hpp"
 #include "L3_Application/Robotics/Drive/HubMotor.hpp"
 #include "L3_Application/Robotics/Drive/DriveController.hpp"
