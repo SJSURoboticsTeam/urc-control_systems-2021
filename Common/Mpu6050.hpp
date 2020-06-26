@@ -25,6 +25,9 @@ class Mpu6050 : public Accelerometer
 
     /// Device configuration starting address
     kDataConfig = 0x1C,
+
+    /// Control register 1 holds the enable bit
+    kControlReg1 = 0x6B,
   };
 
   ///
@@ -67,11 +70,14 @@ class Mpu6050 : public Accelerometer
     // Check that the device is valid before proceeding.
     SJ2_RETURN_ON_ERROR(IsValidDevice());
 
-    //Reset the device
-    i2c_.Write(kAccelerometerAddress, { 0x6B, 0x0 });
+    // Put device into standby so we can configure the device.
+    SJ2_RETURN_ON_ERROR(ActiveMode(false));
 
     // Set device full-scale to the value supplied by the constructor.
     SJ2_RETURN_ON_ERROR(SetFullScaleRange());
+
+    // Activate device to allow full-scale and configuration to take effect.
+    SJ2_RETURN_ON_ERROR(ActiveMode(true));
 
     return {};
   }
@@ -158,6 +164,27 @@ class Mpu6050 : public Accelerometer
     Status status =
         i2c_.Write(kAccelerometerAddress,
                    { Value(RegisterMap::kDataConfig), configRegister });
+
+    // TODO(#1244): Migrate to using auto return macro SJ2_RETURN_VALUE_ON_ERROR
+    if (!IsOk(status))
+    {
+      return Error(Status::kBusError, "I2C transaction failure");
+    }
+
+    return {};
+  }
+
+  Returns<void> ActiveMode(bool is_active = true)
+  {
+    uint8_t controlRegister;
+    i2c_.WriteThenRead(kAccelerometerAddress,
+                       { Value(RegisterMap::kDataConfig) }, &controlRegister,
+                       1);
+    controlRegister = (controlRegister & 10111111) | (is_active << 6);
+
+    // Write enable sequence
+    Status status = i2c_.Write(kAccelerometerAddress,
+                               { Value(RegisterMap::kControlReg1), controlRegister });
 
     // TODO(#1244): Migrate to using auto return macro SJ2_RETURN_VALUE_ON_ERROR
     if (!IsOk(status))
