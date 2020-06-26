@@ -25,10 +25,10 @@ class Mpu6050 : public Accelerometer
 
     /// Device configuration starting address
     kDataConfig = 0x1C,
-
   };
 
   ///
+  /// MPU6050 Constructor
   ///
   /// @param i2c - i2c peripheral used to commnicate with device.
   /// @param full_scale - the specification maximum detectable acceleration.
@@ -51,8 +51,6 @@ class Mpu6050 : public Accelerometer
   Returns<void> Initialize() override
   {
     Status status = i2c_.Initialize();
-    i2c_.Write(kAccelerometerAddress, { 0x6B, 0x0 });
-
     // TODO(#1244): Migrate to using auto return macro SJ2_RETURN_VALUE_ON_ERROR
     if (!IsOk(status))
     {
@@ -69,14 +67,11 @@ class Mpu6050 : public Accelerometer
     // Check that the device is valid before proceeding.
     SJ2_RETURN_ON_ERROR(IsValidDevice());
 
-    // Put device into standby so we can configure the device.
-    // SJ2_RETURN_ON_ERROR(ActiveMode(false));
+    //Reset the device
+    i2c_.Write(kAccelerometerAddress, { 0x6B, 0x0 });
 
     // Set device full-scale to the value supplied by the constructor.
     SJ2_RETURN_ON_ERROR(SetFullScaleRange());
-
-    // Activate device to allow full-scale and configuration to take effect.
-    // SJ2_RETURN_ON_ERROR(ActiveMode(true));
 
     return {};
   }
@@ -111,10 +106,17 @@ class Mpu6050 : public Accelerometer
     int16_t y = static_cast<int16_t>(xyz_data[2] << 8 | xyz_data[3]);
     int16_t z = static_cast<int16_t>(xyz_data[4] << 8 | xyz_data[5]);
 
-    //Convert the 16 bit value into a floating point value in SG
-    acceleration.x = kFullScale * (float)x / (INT16_MAX+1);
-    acceleration.y = kFullScale * (float)y / (INT16_MAX+1);
-    acceleration.z = kFullScale * (float)z / (INT16_MAX+1);
+    //Convert the 16 bit value into a floating point value m/S^2
+    constexpr int16_t kMax = std::numeric_limits<int16_t>::max();
+    constexpr int16_t kMin = std::numeric_limits<int16_t>::min();
+
+    float x_ratio = sjsu::Map(x, kMin, kMax, -1.0f, 1.0f);
+    float y_ratio = sjsu::Map(y, kMin, kMax, -1.0f, 1.0f);
+    float z_ratio = sjsu::Map(z, kMin, kMax, -1.0f, 1.0f);
+
+    acceleration.x = kFullScale * x_ratio;
+    acceleration.y = kFullScale * y_ratio;
+    acceleration.z = kFullScale * z_ratio;
 
     return acceleration;
   }
@@ -146,10 +148,16 @@ class Mpu6050 : public Accelerometer
     {
       gravity_code = 0x03;
     }
-    gravity_code = gravity_code << 3;
+
+    //Write in the full scale range; but leave the self test and high pass filter config untouched
+    uint8_t configRegister;
+    i2c_.WriteThenRead(kAccelerometerAddress,
+                       { Value(RegisterMap::kDataConfig) }, &configRegister,
+                       1);
+    configRegister = (configRegister & 11100111) | (gravity_code << 3);
     Status status =
         i2c_.Write(kAccelerometerAddress,
-                   { Value(RegisterMap::kDataConfig), gravity_code });
+                   { Value(RegisterMap::kDataConfig), configRegister });
 
     // TODO(#1244): Migrate to using auto return macro SJ2_RETURN_VALUE_ON_ERROR
     if (!IsOk(status))
