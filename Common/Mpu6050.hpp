@@ -180,7 +180,7 @@ class Mpu6050 : public Accelerometer
     i2c_.WriteThenRead(kAccelerometerAddress,
                        { Value(RegisterMap::kDataConfig) }, &controlRegister,
                        1);
-    controlRegister = (controlRegister & 10111111) | (is_active << 6);
+    controlRegister = (controlRegister & 10111111) | (!is_active << 6);
 
     // Write enable sequence
     Status status = i2c_.Write(kAccelerometerAddress,
