@@ -3,17 +3,17 @@
 #include <cmath>
 #include <cstdint>
 
+#include "utility/status.hpp"
+
 namespace sjsu
 {
-    class RotationalEncoder
-    {        
-        public:
+class RotationalEncoder
+{
+ public:
+  virtual Returns<void> Initialize()            = 0;
+  virtual Returns<units::degrees> GetRotation() = 0;
 
-            virtual Returns<void> Initialize() = 0;
-            virtual Returns<units::degrees> GetRotation() = 0;
-
-            virtual Returns<void> Enable() = 0;
-            virtual void SetAngleToZero() = 0;
-
-    }
-} 
+  virtual Returns<void> Enable() = 0;
+  virtual void SetAngleToZero()  = 0;
+}
+}  // namespace sjsu
