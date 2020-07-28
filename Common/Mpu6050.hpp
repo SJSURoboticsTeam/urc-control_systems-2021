@@ -70,14 +70,11 @@ class Mpu6050 : public Accelerometer
     // Check that the device is valid before proceeding.
     SJ2_RETURN_ON_ERROR(IsValidDevice());
 
-    // Put device into standby so we can configure the device.
-    SJ2_RETURN_ON_ERROR(ActiveMode(false));
+    // Wake up the device so we can configure the device.
+    SJ2_RETURN_ON_ERROR(ActiveMode(true));
 
     // Set device full-scale to the value supplied by the constructor.
     SJ2_RETURN_ON_ERROR(SetFullScaleRange());
-
-    // Activate device to allow full-scale and configuration to take effect.
-    SJ2_RETURN_ON_ERROR(ActiveMode(true));
 
     return {};
   }
@@ -112,7 +109,7 @@ class Mpu6050 : public Accelerometer
     int16_t y = static_cast<int16_t>(xyz_data[2] << 8 | xyz_data[3]);
     int16_t z = static_cast<int16_t>(xyz_data[4] << 8 | xyz_data[5]);
 
-    //Convert the 16 bit value into a floating point value m/S^2
+    // Convert the 16 bit value into a floating point value m/S^2
     constexpr int16_t kMax = std::numeric_limits<int16_t>::max();
     constexpr int16_t kMin = std::numeric_limits<int16_t>::min();
 
@@ -155,12 +152,13 @@ class Mpu6050 : public Accelerometer
       gravity_code = 0x03;
     }
 
-    //Write in the full scale range; but leave the self test and high pass filter config untouched
+    // Write in the full scale range; but leave the self test and high pass
+    // filter config untouched
     uint8_t configRegister;
     i2c_.WriteThenRead(kAccelerometerAddress,
-                       { Value(RegisterMap::kDataConfig) }, &configRegister,
-                       1);
-    configRegister = (configRegister & 11100111) | (gravity_code << 3);
+                       { Value(RegisterMap::kDataConfig) }, &configRegister, 1);
+    auto scaleMask = bit::MaskFromRange(3, 4);
+    configRegister = bit::Insert(configRegister, gravity_code, scaleMask);
     Status status =
         i2c_.Write(kAccelerometerAddress,
                    { Value(RegisterMap::kDataConfig), configRegister });
@@ -180,11 +178,22 @@ class Mpu6050 : public Accelerometer
     i2c_.WriteThenRead(kAccelerometerAddress,
                        { Value(RegisterMap::kDataConfig) }, &controlRegister,
                        1);
-    controlRegister = (controlRegister & 10111111) | (!is_active << 6);
+    auto sleepMask = bit::MaskFromRange(6);
+    // A value of 1 in bit 6 of the control register means the MPU6050 should be
+    // in sleep mode
+    if (is_active)
+    {
+      controlRegister = bit::Clear(controlRegister, sleepMask);
+    }
+    else
+    {
+      controlRegister = bit::Set(controlRegister, sleepMask);
+    }
 
     // Write enable sequence
-    Status status = i2c_.Write(kAccelerometerAddress,
-                               { Value(RegisterMap::kControlReg1), controlRegister });
+    Status status =
+        i2c_.Write(kAccelerometerAddress,
+                   { Value(RegisterMap::kControlReg1), controlRegister });
 
     // TODO(#1244): Migrate to using auto return macro SJ2_RETURN_VALUE_ON_ERROR
     if (!IsOk(status))
