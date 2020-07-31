@@ -2,7 +2,6 @@
 
 #include "L1_Peripheral/lpc40xx/i2c.hpp"
 #include "L2_HAL/sensors/movement/accelerometer/mpu6050.hpp"
-#include "L2_HAL/sensors/movement/accelerometer/mma8452q.hpp"
 #include "utility/log.hpp"
 
 int main()
@@ -20,12 +19,12 @@ int main()
   SJ2_RETURN_VALUE_ON_ERROR(sensor.Initialize(), 1);
 
   sjsu::LogInfo("Enabling accelerometer...");
-  SJ2_RETURN_VALUE_ON_ERROR(sensor.Enable(), 1);
+  SJ2_RETURN_VALUE_ON_ERROR(sensor.Enable(), 2);
 
   while (true)
   {
     // Read the current acceleration values from the sensor
-    auto current_acceleration = SJ2_RETURN_VALUE_ON_ERROR(sensor.Read(), 2);
+    auto current_acceleration = SJ2_RETURN_VALUE_ON_ERROR(sensor.Read(), 3);
 
     // Print the acceleration values
     current_acceleration.Print();
