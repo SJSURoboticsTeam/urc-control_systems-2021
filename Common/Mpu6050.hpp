@@ -179,16 +179,10 @@ class Mpu6050 : public Accelerometer
                        { Value(RegisterMap::kDataConfig) }, &controlRegister,
                        1);
     auto sleepMask = bit::MaskFromRange(6);
-    // A value of 1 in bit 6 of the control register means the MPU6050 should be
-    // in sleep mode
-    if (is_active)
-    {
-      controlRegister = bit::Clear(controlRegister, sleepMask);
-    }
-    else
-    {
-      controlRegister = bit::Set(controlRegister, sleepMask);
-    }
+
+    // !is_active is required as the bit must be set to 0 in order to prevent it
+    // from sleeping.
+    controlRegister = bit::Insert(controlRegister, !is_active, sleepMask);
 
     // Write enable sequence
     Status status =
