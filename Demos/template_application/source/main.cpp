@@ -37,15 +37,27 @@ class OLEDTask final : public sjsu::rtos::Task<1024>
 {
 public:
   // Constructor for the rtos task. It needs a task_name argument and a scheduler priority level ranging from low to high.
-  OLEDTask(const char *task_name) : Task(task_name, sjsu::rtos::Priority::kMedium) {}
+  OLEDTask(const char *task_name) : Task(task_name, sjsu::rtos::Priority::kMedium)
+  {
+    sjsu::Graphics &oled_graphics = sjtwo::Oled();
+    sjsu::TerminalCache_t<
+        sjsu::Ssd1306::kHeight / sjsu::GraphicalTerminal::kCharacterHeight,
+        sjsu::Ssd1306::kWidth / sjsu::GraphicalTerminal::kCharacterWidth>
+        cache;
+    sjsu::GraphicalTerminal oled_terminal(&oled_graphics, &cache);
+  }
   // Setup() and Run() are required functions within the rtos class. Setup() will be run initially during instanstiation.
   bool Setup() override
   {
+    oled_terminal.Initialize();
     return true;
   }
   // Run() will be the instrutctions to be ran over and over again.
   bool Run() override
   {
+    oled_terminal.printf("Float: %.1f\nInteger: %d", 234.5, 15);
+    sjsu::Delay(3000ms);
+    oled_terminal.Clear();
     return true;
   }
 };
