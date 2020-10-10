@@ -1,8 +1,6 @@
 #include "L1_Peripheral/lpc40xx/pwm.hpp"
 #include "L3_Application/task_scheduler.hpp"
-#include "L3_Application/graphical_terminal.hpp"
 #include "L2_HAL/boards/sjtwo.hpp"
-#include "utility/time.hpp"
 #include "utility/log.hpp"
 #include "utility/rtos.hpp"
 
