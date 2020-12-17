@@ -3,16 +3,22 @@
 #include "utility/log.hpp"
 #include "utility/time.hpp"
 
+namespace sjsu
+{
 class RoverDriveSystems
 {
+  public:
+  // Three different driving modes
+  void handleDriveMode(float speed, units::angle::degree_t angle);          // Normal driving mode
+  void handleTranslationMode(float speed, units::angle::degree_t angle);    // Side to side movement
+  void handleSpinMode(float speed, units::angle::degree_t angle);           // Spin in place (turning)
+  
   // Initialization handlers
+  RoverDriveSystems();
   void Initialize();
+  void handleNewMode(char mode);
 
-  // Current speed, mode, and angle trackers ?
-  float SPEED;
-  string MODE;
-  units::angle::degree_t ANGLE;
-
+  private:
   // Creating PWM on pin 2.0, 2.1, 2.2 
   // Might not need - just handle within setup/initialization process
   sjsu::lpc40xx::Pwm pwm1;
@@ -29,8 +35,5 @@ class RoverDriveSystems
   sjsu::Servo driveRightWheel;
   sjsu::Servo driveBackWheel;
 
-  // Three different driving modes
-  void handleDriveMode(float speed, units::angle::degree_t angle);          // Normal driving mode
-  void handleTranslationMode(float speed, units::angle::degree_t angle);    // Side to side movement
-  void handleSpinMode(float speed, units::angle::degree_t angle);           // Spin in place (turning)
 };
+}  // namespace sjsu

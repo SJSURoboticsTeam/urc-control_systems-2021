@@ -1,25 +1,29 @@
-#include "./RoverDriveSystems.hpp"
+#include "L1_Peripheral/lpc40xx/pwm.hpp"
+#include "L2_HAL/actuators/servo/servo.hpp"
+#include "utility/log.hpp"
+#include "utility/time.hpp"
+
+#include "RoverDriveSystems.hpp"
 
 int main()
 {
-  string mode;
+  char mode;
   float speed;
   units::angle::degree_t angle;
 
-  RoverDriveSystems roverDriver;
+  sjsu::RoverDriveSystems roverDriver;
   roverDriver.Initialize();
 
-      while (true)
+  while (true)
   {
-    // {speed, angle, mode } = getMissionControlCommands()
-
-    if (mode == "drive")
+    if (mode == 'D')
       roverDriver.handleDriveMode(speed, angle);
 
-    if (mode == "translation")
+    if (mode == 'T')
       roverDriver.handleTranslationMode(speed, angle);
 
-    if (mode == "spin")
+    if (mode == 'S')
       roverDriver.handleSpinMode(speed, angle);
   }
+  return 0;
 }
