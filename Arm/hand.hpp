@@ -1,12 +1,16 @@
+#pragma once
+#include "L1_Peripheral/uart.hpp"
 namespace sjsu::arm
 {
-class hand
+class Hand
 {
-  // The hand uses 5 'Actuonix PQ12-100-6-R' linear Actuators that use PWM
-  // signals to control their lengths.
-  //
-  // Need to confirm that that hand is
-  // controled by the same microcontrol as rest of arm, or is its own system.
+  /// The hand has its own MCU that communicates with the arm via UART.
+  
+ public:
+  Hand(Uart & uart) : uart_(uart) {}
+  void Initialize() {}
+  void Enable(bool enable = true) {}
  private:
+  Uart & uart_;
 };
 }  // namespace sjsu::arm

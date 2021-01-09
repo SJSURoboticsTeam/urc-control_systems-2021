@@ -1,8 +1,9 @@
+#pragma once
 #include "utility/units.hpp"
 #include "joint.hpp"
 #include "wrist_joint.hpp"
 
-namespace sjsu
+namespace sjsu::arm
 {
 class RoverArmSystem
 {
@@ -11,10 +12,10 @@ class RoverArmSystem
   // be in its resting 'off' position.
   bool isOperational;
 
-  sjsu::arm::joint Rotunda;
-  sjsu::arm::joint Shoulder;
-  sjsu::arm::joint Elbow;
-  sjsu::arm::wrist_joint Wrist;
+  sjsu::arm::Joint & Rotunda;
+  sjsu::arm::Joint & Shoulder;
+  sjsu::arm::Joint & Elbow;
+  sjsu::arm::WristJoint & Wrist;
 
   // The target angle for each of the joints
   units::angle::degree_t shoulder_pos;
@@ -24,35 +25,53 @@ class RoverArmSystem
   units::angle::degree_t wrist_pitch_pos;
 
  public:
-  RoverArmSystem();
-  bool Home();
-  bool Initialize();
-  bool Get_data();
-  bool Move_arm();
+  RoverArmSystem(sjsu::arm::Joint rotunda,
+                 sjsu::arm::Joint shoulder,
+                 sjsu::arm::Joint elbow,
+                 sjsu::arm::WristJoint wrist)
+      : Rotunda(rotunda), Shoulder(shoulder), Elbow(elbow), Wrist(wrist)
+  {
+  }
+
+  /// Homes all of the joints on the arm, so that the motors know their actual
+  /// position. Returns true if successful.
+  bool Home()
+  {
+    return true;
+  }
+
+  /// Initialize all of the arms joint objects, This must be called before any
+  /// other function.
+  void Initialize()
+  {
+    Rotunda.Initialize();
+    Shoulder.Initialize();
+    Elbow.Initialize();
+    Wrist.Initialize();
+  }
+
+  /// Enables the arm to be used, should be called after Initilize and before
+  /// any other functions.
+  void Enable(bool enable = true)
+  {
+    Rotunda.Enable(enable);
+    Shoulder.Enable(enable);
+    Elbow.Enable(enable);
+    Wrist.Enable(enable);
+  }
+
+  /// Retrives all of information for arm movement from the Mission Control
+  /// server. Returns True if successful.
+  bool GetData()
+  {
+    return true;
+  }
+
+  /// Moves each of the arm joints to the aproppriate angle
+  /// Returns True if successful.
+  bool MoveArm()
+  {
+    return true;
+  }
 };
-
-RoverArmSystem::RoverArmSystem()
-{
-  Rotunda  = sjsu::arm::joint();
-  Shoulder = sjsu::arm::joint();
-  Elbow    = sjsu::arm::joint();
-  Wrist    = sjsu::arm::wrist_joint();
-}
-
-bool RoverArmSystem::Home()
-{
-  return true;
-}
-bool RoverArmSystem::Initialize()
-{
-  return true;
-}
-bool RoverArmSystem::Get_data()
-{
-  return true;
-}
-bool RoverArmSystem::Move_arm()
-{
-  return true;
-}
-}  // namespace sjsu
+}  // namespace sjsu::arm
