@@ -16,14 +16,14 @@ int main()
 
   while (true)
   {
-    if (mode == 'D')
-      roverDriver.handleDriveMode(speed, angle);
+    // if (mode == 'D')
+    //   roverDriver.handleDriveMode(speed, angle);
 
-    if (mode == 'T')
-      roverDriver.handleTranslationMode(speed, angle);
+    // if (mode == 'T')
+    //   roverDriver.handleTranslationMode(speed, angle);
 
-    if (mode == 'S')
-      roverDriver.handleSpinMode(speed, angle);
+    // if (mode == 'S')
+    //   roverDriver.handleSpinMode(speed, angle);
   }
   return 0;
 }
