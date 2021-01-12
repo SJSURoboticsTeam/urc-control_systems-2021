@@ -1,6 +1,6 @@
 #pragma once
 
-#include <string.h>
+// #include <string>
 
 #include "utility/log.hpp"
 #include "utility/time.hpp"
@@ -140,11 +140,11 @@ class RoverDriveSystem
   {
     // Format should be parsable by the Raspberry Pi like JSON ? Ex:
     // {"left_wheel_speed": "x_rpm", "right_wheel_speed": "y_rpm", ...}
-    rover_data_ = "Some key:value data struct?";
+    // rover_data_ = "Some key:value data struct?";
     return true;
   };
 
-  string rover_data_;
+  // string rover_data_ = "";
   sjsu::drive::Wheel & left_wheel_;
   sjsu::drive::Wheel & right_wheel_;
   sjsu::drive::Wheel & back_wheel_;
