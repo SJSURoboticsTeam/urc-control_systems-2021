@@ -25,17 +25,20 @@ class Wheel
     hub_motor_.Enable(enable);
     steer_motor_.Enable(enable);
   }
-
+  // Return the speed of the hub motor in RPM.
+  // May change to use rmd_x function RequestFeedbackFromMotor() & GetFeedback()
   units::angular_velocity::revolutions_per_minute_t GetSpeed()
   {
     return hub_speed_;
   };
-
+  // Return the angle/position of the steering motor.
+  // May change to use rmd_x function RequestFeedbackFromMotor() & GetFeedback()
   units::angle::degree_t GetPosition()
   {
     return zero_offset_angle_;
   };
-
+  // Sets the speed of the hub motor and updates hub_motor_ variable so long as
+  // desired speed is under the max speed
   void SetSpeed(units::angular_velocity::revolutions_per_minute_t hub_speed)
   {
     if (hub_speed > kMaxHubSpeed)  // need use abs(hub_speed) ?
@@ -45,7 +48,9 @@ class Wheel
     hub_speed_ = hub_speed;
     steer_motor_.SetSpeed(hub_speed);
   }
-  // can't do steer_speed = steer_speed_ in parameter... any better solutions?
+  // Sets the steer motor to new position/angle. Angle adjusts according to the
+  // motors current position, not absolute position. i.e. a rotation angle of
+  // 10_deg would move motor 10_deg to the right and -10_deg -> =10_deg to left
   void SetPosition(
       units::angle::degree_t rotation_angle,
       units::angular_velocity::revolutions_per_minute_t steer_speed = 20_rpm)
@@ -54,16 +59,12 @@ class Wheel
     {
       steer_speed = kMaxSteerSpeed;
     }
-    // Assuming mission control sends angles relative to itself. Such that
-    // -10_deg rotationAngle input would turn wheels slightly to the left and
-    // 10_deg rotationAngle would move to the right even if zeroOffsetAngle was
-    // at a non-starting/non-zero angle.
     units::angle::degree_t difference_angle =
         (rotation_angle + zero_offset_angle_);
     steer_motor_.SetAngle(difference_angle, steer_speed);
     zero_offset_angle_ += difference_angle;
   };
-
+  //
   void ResetZeroOffsetAngle()
   {
     SetToZeroPosition();
@@ -71,10 +72,8 @@ class Wheel
   };
 
  private:
-  void SetToZeroPosition(){
-    // Turn the wheel until it lines back up at initial zero position.
-    // Does not need to move completely back i.e -600_deg
-  };
+  // Turn the wheel until it lines back up at initial zero position.
+  void SetToZeroPosition(){};
 
   sjsu::RmdX & hub_motor_;    // controls tire direction (fwd/rev) & speed
   sjsu::RmdX & steer_motor_;  // controls wheel alignment/angle

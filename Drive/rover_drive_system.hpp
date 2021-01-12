@@ -1,6 +1,6 @@
 #pragma once
 
-#include <string>
+#include <string.h>
 
 #include "utility/log.hpp"
 #include "utility/time.hpp"
@@ -15,14 +15,14 @@ class RoverDriveSystem
   // Rover drive modes
   enum class Mode : char
   {
-    kDrive     = 'D',
-    kSpin      = 'S',
-    kTranslate = 'T'
+    kDrive       = 'D',
+    kSpin        = 'S',
+    kTranslation = 'T'
   };
 
-  RoverDriveSystem(sjsu::drive::Wheel left_wheel,
-                   sjsu::drive::Wheel right_wheel,
-                   sjsu::drive::Wheel back_wheel)
+  RoverDriveSystem(sjsu::drive::Wheel & left_wheel,
+                   sjsu::drive::Wheel & right_wheel,
+                   sjsu::drive::Wheel & back_wheel)
       : left_wheel_(left_wheel),
         right_wheel_(right_wheel),
         back_wheel_(back_wheel)
@@ -38,82 +38,113 @@ class RoverDriveSystem
 
   void Enable(bool enable = true)
   {
-    is_operational_ = enable;
+    rover_is_operational_ = enable;
     left_wheel_.Enable(enable);
     right_wheel_.Enable(enable);
     back_wheel_.Enable(enable);
     SetMode('S');
   }
-
+  // Main function for handling all the rover drive system functionality.
   void Move(char mode,
             units::angle::degree_t rotation_angle,
             units::angular_velocity::revolutions_per_minute_t speed)
   {
-    if (mode != static_cast<char>(current_mode_))
+    if (rover_is_operational_)
     {
-      SetMode(mode);
+      // checks if the mode is different than what is currently running
+      if (mode != static_cast<char>(current_mode_))
+      {
+        SetMode(mode);
+      }
+      HandleModeMovement(rotation_angle, speed);
+      UpdateMissionControlData();
     }
-    HandleModeMovement(rotation_angle, speed);
   };
 
-  bool is_operational_ = false;
+  bool rover_is_operational_ = false;
 
  private:
-  // Is there a way to
+  //  Sets the new mode for the rover. Will reduce rover movement speed to zero
+  //  before changing wheel mode & tire alignment
   void SetMode(char mode)
   {
     switch (mode)
     {
       case 'D':
         current_mode_ = Mode::kDrive;
-        SetAllWheelsSpeed(kZeroSpeed);
+        SetWheelSpeed(kZeroSpeed);
         SetDriveMode();
         break;
       case 'S':
         current_mode_ = Mode::kSpin;
-        SetAllWheelsSpeed(kZeroSpeed);
+        SetWheelSpeed(kZeroSpeed);
         SetSpinMode();
         break;
       case 'T':
-        current_mode_ = Mode::kTranslate;
-        SetAllWheelsSpeed(kZeroSpeed);
-        SetTranslateMode();
+        current_mode_ = Mode::kTranslation;
+        SetWheelSpeed(kZeroSpeed);
+        SetTranslationMode();
         break;
-      default: SetAllWheelsSpeed(kZeroSpeed);
+      default:
+        SetWheelSpeed(kZeroSpeed);
+        sjsu::LogError("Unable to assign drive mode!");
     };
   };
-
+  // Handles the rover movement depending on the mode
   void HandleModeMovement(
       units::angle::degree_t roatation_angle,
-      units::angular_velocity::revolutions_per_minute_t speed){
-
+      units::angular_velocity::revolutions_per_minute_t speed)
+  {
+    if (current_mode_ == Mode::kDrive)
+    {
+      HandleDriveMode();
+    }
+    if (current_mode_ == Mode::kSpin)
+    {
+      HandleSpinMode();
+    }
+    if (current_mode_ == Mode::kTranslation)
+    {
+      HandleTranslationMode();
+    }
   };
-  // Calculates position to set each of the rover wheels
+  // Calculates position to set each of the rover wheels to initially
   void SetDriveMode();
   void SetSpinMode();
-  void SetTranslateMode();
-
-  void MoveDriveMode();
-  void MoveSpinMode();
-  void MoveTranslateMode();
-
-  void SetAllWheelsSpeed(
-      units::angular_velocity::revolutions_per_minute_t speed)
+  void SetTranslationMode();
+  // Handles the movement for their respective modes.
+  void HandleDriveMode();
+  void HandleSpinMode();
+  void HandleTranslationMode();
+  // Sets all wheels to the speed provided. SetSpeed() handles max/min speeds
+  void SetWheelSpeed(units::angular_velocity::revolutions_per_minute_t speed)
   {
     left_wheel_.SetSpeed(speed);
     right_wheel_.SetSpeed(speed);
     back_wheel_.SetSpeed(speed);
   };
-
-  void GetWheelData(){
-    // Would be cool to get this in JSON format if possible. Ex:
+  // Sends POST to Raspberry Pi endpoint with the new rover status updates
+  void UpdateMissionControlData()
+  {
+    if (GetRoverData())
+    {
+      // POST, http://localhost:3000/drive/status, JSON.stringify(rover_data_)
+    }
+    else
+    {
+      sjsu::LogError("Unable to retrieve wheel data!");
+    }
+  };
+  // Gets the speed of each hub motor and angle of each steer motor on the rover
+  bool GetRoverData()
+  {
+    // Format should be parsable by the Raspberry Pi like JSON ? Ex:
     // {"left_wheel_speed": "x_rpm", "right_wheel_speed": "y_rpm", ...}
-    // Not sure of easy way to do that...
-
-    // left_wheel_.GetSpeed().to<double>(); // lookup .to<string> ?
-    // left_wheel_.GetPosition();
+    rover_data_ = "Some key:value data struct?";
+    return true;
   };
 
+  string rover_data_;
   sjsu::drive::Wheel & left_wheel_;
   sjsu::drive::Wheel & right_wheel_;
   sjsu::drive::Wheel & back_wheel_;
