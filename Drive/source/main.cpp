@@ -1,16 +1,13 @@
+#include "utility/units.hpp"
 #include "utility/log.hpp"
-#include "utility/time.hpp"
-#include "L1_Peripheral/lpc40xx/pwm.hpp"
-#include "L2_HAL/actuators/servo/servo.hpp"
 
 #include "rover_drive_system.hpp"
 #include "wheel.hpp"
 
 int main()
 {
-  // char mode;
-  // float speed;
-  // units::angle::degree_t angle;
+  units::angular_velocity::revolutions_per_minute_t kSpeedLimit = 20_rpm;
+  sjsu::LogInfo("print rpm", kSpeedLimit.to<double>());
 
   return 0;
 }

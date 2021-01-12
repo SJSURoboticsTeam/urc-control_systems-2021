@@ -1,7 +1,5 @@
 #pragma once
 
-// #include <string>
-
 #include "utility/log.hpp"
 #include "utility/time.hpp"
 #include "utility/units.hpp"
@@ -12,7 +10,7 @@ namespace sjsu::drive
 class RoverDriveSystem
 {
  public:
-  // Rover drive modes
+  /// Rover drive modes
   enum class Mode : char
   {
     kDrive       = 'D',
@@ -44,7 +42,7 @@ class RoverDriveSystem
     back_wheel_.Enable(enable);
     SetMode('S');
   }
-  // Main function for handling all the rover drive system functionality.
+  /// Main function for handling all the rover drive system functionality.
   void Move(char mode,
             units::angle::degree_t rotation_angle,
             units::angular_velocity::revolutions_per_minute_t speed)
@@ -64,8 +62,8 @@ class RoverDriveSystem
   bool rover_is_operational_ = false;
 
  private:
-  //  Sets the new mode for the rover. Will reduce rover movement speed to zero
-  //  before changing wheel mode & tire alignment
+  ///  Sets the new mode for the rover. Will reduce rover movement speed to zero
+  ///  before changing wheel mode & tire alignment
   void SetMode(char mode)
   {
     switch (mode)
@@ -90,7 +88,7 @@ class RoverDriveSystem
         sjsu::LogError("Unable to assign drive mode!");
     };
   };
-  // Handles the rover movement depending on the mode
+  /// Handles the rover movement depending on the mode
   void HandleModeMovement(
       units::angle::degree_t roatation_angle,
       units::angular_velocity::revolutions_per_minute_t speed)
@@ -108,22 +106,22 @@ class RoverDriveSystem
       HandleTranslationMode();
     }
   };
-  // Calculates position to set each of the rover wheels to initially
+  /// Calculates position to set each of the rover wheels to initially
   void SetDriveMode();
   void SetSpinMode();
   void SetTranslationMode();
-  // Handles the movement for their respective modes.
+  /// Handles the movement for their respective modes.
   void HandleDriveMode();
   void HandleSpinMode();
   void HandleTranslationMode();
-  // Sets all wheels to the speed provided. SetSpeed() handles max/min speeds
+  /// Sets all wheels to the speed provided. SetSpeed() handles max/min speeds
   void SetWheelSpeed(units::angular_velocity::revolutions_per_minute_t speed)
   {
     left_wheel_.SetSpeed(speed);
     right_wheel_.SetSpeed(speed);
     back_wheel_.SetSpeed(speed);
   };
-  // Sends POST to Raspberry Pi endpoint with the new rover status updates
+  /// Sends POST to Raspberry Pi endpoint with the new rover status updates
   void UpdateMissionControlData()
   {
     if (GetRoverData())
@@ -135,7 +133,8 @@ class RoverDriveSystem
       sjsu::LogError("Unable to retrieve wheel data!");
     }
   };
-  // Gets the speed of each hub motor and angle of each steer motor on the rover
+  /// Gets the speed of each hub motor and angle of each steer motor on the
+  /// rover
   bool GetRoverData()
   {
     // Format should be parsable by the Raspberry Pi like JSON ? Ex:
