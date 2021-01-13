@@ -1,4 +1,3 @@
-
 #pragma once
 
 #include "L2_HAL/actuators/servo/rmd_x.hpp"
