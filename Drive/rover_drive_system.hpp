@@ -23,9 +23,7 @@ class RoverDriveSystem
                    sjsu::drive::Wheel & back_wheel)
       : left_wheel_(left_wheel),
         right_wheel_(right_wheel),
-        back_wheel_(back_wheel)
-  {
-  }
+        back_wheel_(back_wheel){};
 
   void Initialize()
   {

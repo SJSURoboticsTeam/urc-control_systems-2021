@@ -10,21 +10,19 @@ class Wheel
 {
  public:
   Wheel(sjsu::RmdX & hub_motor, sjsu::RmdX & steer_motor)
-      : hub_motor_(hub_motor), steer_motor_(steer_motor)
-  {
-  }
+      : hub_motor_(hub_motor), steer_motor_(steer_motor){};
 
   void Initialize()
   {
     hub_motor_.Initialize();
     steer_motor_.Initialize();
-  }
+  };
 
   void Enable(bool enable = true)
   {
     hub_motor_.Enable(enable);
     steer_motor_.Enable(enable);
-  }
+  };
   /// Return the speed of the hub motor in RPM.
   /// May change to use rmd_x function RequestFeedbackFromMotor() &
   /// GetFeedback()
