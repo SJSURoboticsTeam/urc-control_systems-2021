@@ -60,6 +60,7 @@ class RoverDriveSystem
       UpdateMissionControlData();
     }
   };
+
   // Homes all the wheels so the motors know their actual position. Returns true
   // if successful.
   bool Home()
@@ -155,7 +156,7 @@ class RoverDriveSystem
   };
 
   /// Gets the speed of each hub motor and angle of each steer motor on the
-  /// rover. Does not get data from Mission Control
+  /// rover. Does not get data from Mission Control scanf
   bool GetRoverData()
   {
     // Format should be parsable by the Raspberry Pi like JSON ? Ex:
