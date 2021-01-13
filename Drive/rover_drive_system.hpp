@@ -40,7 +40,11 @@ class RoverDriveSystem
     back_wheel_.Enable(enable);
     SetMode('S');
   }
-  /// Main function for handling all the rover drive system functionality.
+
+  /// Main function for handling all the rover drive system functionality. Might
+  /// not need to take in params since maybe GetMissionControlData() will be
+  /// responsible for grabbing commands and saving them within the
+  /// RoverDriveSystem class.
   void Move(char mode,
             units::angle::degree_t rotation_angle,
             units::angular_velocity::revolutions_per_minute_t speed)
@@ -55,6 +59,12 @@ class RoverDriveSystem
       HandleModeMovement(rotation_angle, speed);
       UpdateMissionControlData();
     }
+  };
+  // Homes all the wheels so the motors know their actual position. Returns true
+  // if successful.
+  bool Home()
+  {
+    return true;
   };
 
   bool rover_is_operational_ = false;
@@ -86,6 +96,7 @@ class RoverDriveSystem
         sjsu::LogError("Unable to assign drive mode!");
     };
   };
+
   /// Handles the rover movement depending on the mode
   void HandleModeMovement(
       units::angle::degree_t roatation_angle,
@@ -104,14 +115,17 @@ class RoverDriveSystem
       HandleTranslationMode();
     }
   };
+
   /// Calculates position to set each of the rover wheels to initially
   void SetDriveMode();
   void SetSpinMode();
   void SetTranslationMode();
+
   /// Handles the movement for their respective modes.
   void HandleDriveMode();
   void HandleSpinMode();
   void HandleTranslationMode();
+
   /// Sets all wheels to the speed provided. SetSpeed() handles max/min speeds
   void SetWheelSpeed(units::angular_velocity::revolutions_per_minute_t speed)
   {
@@ -119,6 +133,14 @@ class RoverDriveSystem
     right_wheel_.SetSpeed(speed);
     back_wheel_.SetSpeed(speed);
   };
+
+  // Retrieves commands for drive movement from Mission Control. Returns true if
+  // successful.
+  bool GetMissionControlData()
+  {
+    return true;
+  }
+
   /// Sends POST to Raspberry Pi endpoint with the new rover status updates
   void UpdateMissionControlData()
   {
@@ -131,8 +153,9 @@ class RoverDriveSystem
       sjsu::LogError("Unable to retrieve wheel data!");
     }
   };
+
   /// Gets the speed of each hub motor and angle of each steer motor on the
-  /// rover
+  /// rover. Does not get data from Mission Control
   bool GetRoverData()
   {
     // Format should be parsable by the Raspberry Pi like JSON ? Ex:
