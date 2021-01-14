@@ -20,6 +20,11 @@ int main()
 
   // Create an I2C object for the IMU's as well as all of the MPU objects for
   // the arm.
+  //
+  // Note that this only works if an address translator is used for the
+  // MPU6050s; as they can only be set to use two addresses. If the chip select
+  // method is used then they would all be set to the same address and pulling
+  // the address pin HIGH/LOW would select the correct MPU to access.
   sjsu::lpc40xx::I2c i2c(sjsu::lpc40xx::I2c::Bus::kI2c2);
   sjsu::Mpu6050 mpu_rotunda(i2c, 0x68);
   sjsu::Mpu6050 mpu_shoulder(i2c, 0x69);

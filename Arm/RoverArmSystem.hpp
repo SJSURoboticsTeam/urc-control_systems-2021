@@ -25,9 +25,10 @@ class RoverArmSystem
   units::angle::degree_t wrist_pitch_pos;
 
  public:
-  RoverArmSystem(sjsu::arm::Joint rotunda,
-                 sjsu::arm::Joint shoulder,
-                 sjsu::arm::Joint elbow,
+  // TODO: Remove constructor and keep Joints within the class.
+  RoverArmSystem(sjsu::arm::Joint & rotunda,
+                 sjsu::arm::Joint & shoulder,
+                 sjsu::arm::Joint & elbow,
                  sjsu::arm::WristJoint wrist)
       : Rotunda(rotunda), Shoulder(shoulder), Elbow(elbow), Wrist(wrist)
   {
