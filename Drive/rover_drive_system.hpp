@@ -64,7 +64,7 @@ class RoverDriveSystem
            mission_control_data_.rotation_angle, mission_control_data_.speed);
       return true;
     }
-    sjsu::LogInfo("Connection Error - Unable to reach mission control server.");
+    sjsu::LogError("Unable to reach mission control server");
     return false;
   }
 
@@ -85,36 +85,6 @@ class RoverDriveSystem
     }
   };
 
-  /// Sets the new driving mode for the rover. Rover will stop before switching
-  /// @param mode Three Modes: D (drive), S (spin), T (translation)
-  void SetMode(char mode = 'S')
-  {
-    switch (mode)
-    {
-      case 'D':
-      case 'd':
-        current_mode_ = Mode::kDrive;
-        SetWheelSpeed(kZeroSpeed);
-        SetDriveMode();
-        break;
-      case 'S':
-      case 's':
-        current_mode_ = Mode::kSpin;
-        SetWheelSpeed(kZeroSpeed);
-        SetSpinMode();
-        break;
-      case 'T':
-      case 't':
-        current_mode_ = Mode::kTranslation;
-        SetWheelSpeed(kZeroSpeed);
-        SetTranslationMode();
-        break;
-      default:
-        SetWheelSpeed(kZeroSpeed);
-        sjsu::LogError("Unable to assign drive mode!");
-    };
-  };
-
   /// Resets all the wheels so the motors know their actual position.
   /// @return true if successfully resets wheels into start position
   bool Reset()
@@ -124,29 +94,6 @@ class RoverDriveSystem
   };
 
  private:
-  /// Handles the rover movement depending on the mode
-  /// @param rotation_angle adjusts wheel position depending on mode.
-  /// @param wheel_speed adjusts the movement speed of the rover.
-  void HandleRoverMovement(float roatation_angle, float wheel_speed)
-  {
-    units::angle::degree_t angle(roatation_angle);
-    units::angular_velocity::revolutions_per_minute_t speed(wheel_speed);
-
-    if (current_mode_ == Mode::kDrive)
-    {
-      HandleDriveMode(speed, angle);
-    }
-    if (current_mode_ == Mode::kSpin)
-    {
-      HandleSpinMode(speed);
-    }
-    if (current_mode_ == Mode::kTranslation)
-    {
-      HandleTranslationMode(speed, angle);
-    }
-    current_speed_ = speed;
-  };
-
   /// Sets all wheels to the speed provided. Wheel class handles max/min speeds
   /// @param speed the new movement speed of the rover
   void SetWheelSpeed(units::angular_velocity::revolutions_per_minute_t speed)
@@ -193,6 +140,68 @@ class RoverDriveSystem
     sjsu::LogInfo("back wheel speed: %f", back_wheel_.GetSpeed());
     sjsu::LogInfo("back wheel position: %f", back_wheel_.GetPosition());
     return true;
+  };
+
+  /// Sets the new driving mode for the rover. Rover will stop before switching
+  /// @param mode Three Modes: D (drive), S (spin), T (translation)
+  void SetMode(char mode = 'S')
+  {
+    switch (mode)
+    {
+      case 'D':
+      case 'd':
+        current_mode_ = Mode::kDrive;
+        SetWheelSpeed(kZeroSpeed);
+        SetDriveMode();
+        sjsu::LogInfo("Drive mode set");
+        break;
+      case 'S':
+      case 's':
+        current_mode_ = Mode::kSpin;
+        SetWheelSpeed(kZeroSpeed);
+        SetSpinMode();
+        sjsu::LogInfo("Spin mode set");
+        break;
+      case 'T':
+      case 't':
+        current_mode_ = Mode::kTranslation;
+        SetWheelSpeed(kZeroSpeed);
+        SetTranslationMode();
+        sjsu::LogInfo("Translation mode set");
+        break;
+      default:
+        SetWheelSpeed(kZeroSpeed);
+        sjsu::LogError("Unable to assign drive mode!");
+    };
+  };
+
+  /// Handles the rover movement depending on the mode
+  /// @param rotation_angle adjusts wheel position depending on mode.
+  /// @param wheel_speed adjusts the movement speed of the rover.
+  void HandleRoverMovement(float roatation_angle, float wheel_speed)
+  {
+    units::angle::degree_t angle(roatation_angle);
+    units::angular_velocity::revolutions_per_minute_t speed(wheel_speed);
+    switch (current_mode_)
+    {
+      case Mode::kDrive:
+        sjsu::LogInfo("Driving...");
+        HandleDriveMode(speed, angle);
+        break;
+      case Mode::kSpin:
+        sjsu::LogInfo("Spining...");
+        HandleSpinMode(speed);
+        break;
+      case Mode::kTranslation:
+        sjsu::LogInfo("Translating...");
+        HandleTranslationMode(speed, angle);
+        break;
+      default:
+        SetWheelSpeed(kZeroSpeed);
+        sjsu::LogError("Unable to assign drive mode handler!");
+        break;
+    }
+    current_speed_ = speed;
   };
 
   // ======================
