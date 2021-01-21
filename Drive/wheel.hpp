@@ -25,16 +25,16 @@ class Wheel
 
   /// Return the speed of the hub motor in RPM.
   /// Look into rmd_x function RequestFeedbackFromMotor() & GetFeedback()
-  units::angular_velocity::revolutions_per_minute_t GetSpeed()
+  double GetSpeed()
   {
-    return hub_speed_;
+    return hub_speed_.to<double>();
   };
 
   /// Return the angle/position of the steering motor.
   /// Look into rmd_x function RequestFeedbackFromMotor() & GetFeedback()
-  units::angle::degree_t GetPosition()
+  double GetPosition()
   {
-    return zero_offset_angle_;
+    return zero_offset_angle_.to<double>();
   };
 
   /// Sets the speed of the hub motor and updates hub_motor_ variable so long as

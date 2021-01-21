@@ -70,16 +70,19 @@ class RoverDriveSystem
   }
 
   /// Main function for handling all the rover drive system functionality.
+  /// @param mode Updates drive mode if new mode is different from current.
+  /// @param rotation_angle adjusts wheel position depending on mode.
+  /// @param speed adjusts the movement speed of the rover.
   void Move(char mode, float rotation_angle, float speed)
   {
     if (mission_control_data_.is_operational)
     {
-      // checks if the mode is different than what is currently running
       if (mode != static_cast<char>(current_mode_))
       {
         SetMode(mode);
       }
       HandleRoverMovement(rotation_angle, speed);
+      UpdateMissionControlData();
     }
   };
 
@@ -90,16 +93,19 @@ class RoverDriveSystem
     switch (mode)
     {
       case 'D':
+      case 'd':
         current_mode_ = Mode::kDrive;
         SetWheelSpeed(kZeroSpeed);
         SetDriveMode();
         break;
       case 'S':
+      case 's':
         current_mode_ = Mode::kSpin;
         SetWheelSpeed(kZeroSpeed);
         SetSpinMode();
         break;
       case 'T':
+      case 't':
         current_mode_ = Mode::kTranslation;
         SetWheelSpeed(kZeroSpeed);
         SetTranslationMode();
@@ -127,7 +133,7 @@ class RoverDriveSystem
 
     if (current_mode_ == Mode::kDrive)
     {
-      HandleDriveMode();
+      HandleDriveMode(speed, angle);
     }
     if (current_mode_ == Mode::kSpin)
     {
@@ -161,15 +167,27 @@ class RoverDriveSystem
     }
   };
 
-  void ParseMissionControlData(char * response);
+  /// Parses data from mission control to be used for commanding rover
+  void ParseMissionControlData(char * response)
+  {
+    // parse data somehow using sscanf
+    sjsu::LogInfo("MISSION CONTROL RESPONSE:\n%s", response);
 
-  /// Gets the speed of each hub motor and angle of each steer motor on the
-  /// rover. Does not get data from Mission Control scanf
+    mission_control_data_.is_operational = true;
+    mission_control_data_.drive_mode     = 'S';
+    mission_control_data_.rotation_angle = 10.0f;
+    mission_control_data_.speed          = 30.0f;
+  };
+
+  /// Gets the speed and position/angle of each wheel on the rover
   bool GetRoverData()
   {
-    // Format should be parsable by the Raspberry Pi like JSON ? Ex:
-    // {"left_wheel_speed": "x_rpm", "right_wheel_speed": "y_rpm", ...}
-    // rover_data_ = "Some key:value data struct?";
+    sjsu::LogInfo("left wheel speed: %f", left_wheel_.GetSpeed());
+    sjsu::LogInfo("left wheel position: %f", left_wheel_.GetPosition());
+    sjsu::LogInfo("right wheel speed: %f", right_wheel_.GetSpeed());
+    sjsu::LogInfo("right wheel position: %f", right_wheel_.GetPosition());
+    sjsu::LogInfo("back wheel speed: %f", back_wheel_.GetSpeed());
+    sjsu::LogInfo("back wheel position: %f", back_wheel_.GetPosition());
     return true;
   };
 
