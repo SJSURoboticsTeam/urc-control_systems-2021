@@ -18,6 +18,14 @@ class RoverDriveSystem
     kTranslation = 'T'
   };
 
+  struct MissionControlData
+  {
+    bool is_operational;
+    char drive_mode;
+    float rotation_angle;
+    float speed;
+  };
+
   RoverDriveSystem(sjsu::drive::Wheel & left_wheel,
                    sjsu::drive::Wheel & right_wheel,
                    sjsu::drive::Wheel & back_wheel)
@@ -34,30 +42,43 @@ class RoverDriveSystem
 
   void Enable(bool enable = true)
   {
-    rover_is_operational_ = enable;
+    mission_control_data_.is_operational = true;
     left_wheel_.Enable(enable);
     right_wheel_.Enable(enable);
     back_wheel_.Enable(enable);
-    SetMode('S');
+    SetMode();
   }
 
-  /// Main function for handling all the rover drive system functionality. Might
-  /// not need to take in params since maybe GetMissionControlData() will be
-  /// responsible for grabbing commands and saving them within the
-  /// RoverDriveSystem class.
-  void Move(char mode,
-            units::angle::degree_t rotation_angle,
-            units::angular_velocity::revolutions_per_minute_t speed)
+  // Retrieves commands for drive movement from Mission Control. Translates the
+  // Response data into usable format for rover functionality. Returns true if
+  // successful. Specifically drive mode, rotation angle/position to move, and
+  // speed.
+  bool GetMissionControlData()
   {
-    if (rover_is_operational_)
+    // GET /drive {sjsu::drive::RoverDriveSystem::Mode mode,
+    // units::angle::degree_t rotation_angle,
+    // units::angular_velocity::revolutions_per_minute_t speed}
+    if (true)  // localhost connection found
+    {
+      char response[] = {};
+      ParseMissionControlData(response);
+      Move(mission_control_data_.drive_mode,
+           mission_control_data_.rotation_angle, mission_control_data_.speed);
+    }
+    return true;
+  }
+
+  /// Main function for handling all the rover drive system functionality.
+  void Move(char mode, float rotation_angle, float speed)
+  {
+    if (mission_control_data_.is_operational)
     {
       // checks if the mode is different than what is currently running
       if (mode != static_cast<char>(current_mode_))
       {
-        SetMode(mode);
+        SetMode();
       }
       HandleModeMovement(rotation_angle, speed);
-      UpdateMissionControlData();
     }
   };
 
@@ -68,26 +89,24 @@ class RoverDriveSystem
     return true;
   };
 
-  bool rover_is_operational_ = false;
-
  private:
   ///  Sets the new mode for the rover. Will reduce rover movement speed to zero
   ///  before changing wheel mode & tire alignment
-  void SetMode(char mode)
+  void SetMode()
   {
-    switch (mode)
+    switch (current_mode_)
     {
-      case 'D':
+      case Mode::kDrive:
         current_mode_ = Mode::kDrive;
         SetWheelSpeed(kZeroSpeed);
         SetDriveMode();
         break;
-      case 'S':
+      case Mode::kSpin:
         current_mode_ = Mode::kSpin;
         SetWheelSpeed(kZeroSpeed);
         SetSpinMode();
         break;
-      case 'T':
+      case Mode::kTranslation:
         current_mode_ = Mode::kTranslation;
         SetWheelSpeed(kZeroSpeed);
         SetTranslationMode();
@@ -99,9 +118,7 @@ class RoverDriveSystem
   };
 
   /// Handles the rover movement depending on the mode
-  void HandleModeMovement(
-      units::angle::degree_t roatation_angle,
-      units::angular_velocity::revolutions_per_minute_t speed)
+  void HandleModeMovement(float roatation_angle, float speed)
   {
     if (current_mode_ == Mode::kDrive)
     {
@@ -135,13 +152,6 @@ class RoverDriveSystem
     back_wheel_.SetSpeed(speed);
   };
 
-  // Retrieves commands for drive movement from Mission Control. Returns true if
-  // successful.
-  bool GetMissionControlData()
-  {
-    return true;
-  }
-
   /// Sends POST to Raspberry Pi endpoint with the new rover status updates
   void UpdateMissionControlData()
   {
@@ -155,6 +165,8 @@ class RoverDriveSystem
     }
   };
 
+  void ParseMissionControlData(char * response);
+
   /// Gets the speed of each hub motor and angle of each steer motor on the
   /// rover. Does not get data from Mission Control scanf
   bool GetRoverData()
@@ -165,10 +177,10 @@ class RoverDriveSystem
     return true;
   };
 
-  // string rover_data_ = "";
   sjsu::drive::Wheel & left_wheel_;
   sjsu::drive::Wheel & right_wheel_;
   sjsu::drive::Wheel & back_wheel_;
+  MissionControlData mission_control_data_;
   sjsu::drive::RoverDriveSystem::Mode current_mode_ = Mode::kSpin;
   units::angular_velocity::revolutions_per_minute_t current_speed_   = 0_rpm;
   const units::angular_velocity::revolutions_per_minute_t kZeroSpeed = 0_rpm;
