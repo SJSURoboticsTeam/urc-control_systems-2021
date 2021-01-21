@@ -173,7 +173,7 @@ class RoverDriveSystem
     return true;
   };
 
-  /// Aligns rover wheels where all wheel start off facing same direction
+  /// Aligns rover wheels all in the same direction, facing foward
   void SetDriveMode()
   {
     units::angle::degree_t left_wheel_angle  = -45_deg;
@@ -185,12 +185,15 @@ class RoverDriveSystem
     back_wheel_.SetPosition(back_wheel_angle);
   };
 
+  /// Aligns rover wheels perpendicular to their legs using their homing mark
   void SetSpinMode()
   {
     left_wheel_.HomeWheel();
     right_wheel_.HomeWheel();
     back_wheel_.HomeWheel();
   };
+
+  /// Aligns rover wheel all in the same direction, facing towards the right
   void SetTranslationMode()
   {
     units::angle::degree_t left_wheel_angle  = 45_deg;
@@ -202,6 +205,7 @@ class RoverDriveSystem
     back_wheel_.SetPosition(back_wheel_angle);
   };
 
+  /// Handles drive mode. Adjusts only the rear wheel of the rover
   void HandleDriveMode(units::angular_velocity::revolutions_per_minute_t speed,
                        units::angle::degree_t angle)
   {
@@ -209,11 +213,13 @@ class RoverDriveSystem
     SetWheelSpeed(speed);
   };
 
+  /// Handles spin mode. Adjusts only the speed (aka the spin direction)
   void HandleSpinMode(units::angular_velocity::revolutions_per_minute_t speed)
   {
     SetWheelSpeed(speed);
   };
 
+  /// Handles translation mode. Adjusts all the wheels, keeping them parallel
   void HandleTranslationMode(
       units::angular_velocity::revolutions_per_minute_t speed,
       units::angle::degree_t angle)
@@ -231,7 +237,5 @@ class RoverDriveSystem
   sjsu::drive::RoverDriveSystem::Mode current_mode_ = Mode::kSpin;
   units::angular_velocity::revolutions_per_minute_t current_speed_   = 0_rpm;
   const units::angular_velocity::revolutions_per_minute_t kZeroSpeed = 0_rpm;
-  const units::angular_velocity::revolutions_per_minute_t kMaxSpeed  = 100_rpm;
-  const units::angular_velocity::revolutions_per_minute_t kMaxNSpeed = -100_rpm;
 };
 }  // namespace sjsu::drive
