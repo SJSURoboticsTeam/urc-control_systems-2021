@@ -45,6 +45,10 @@ class Wheel
     {
       hub_speed = kMaxHubSpeed;
     }
+    if (hub_speed < kMaxRevHubSpeed)  // need use abs(hub_speed) ?
+    {
+      hub_speed = kMaxRevHubSpeed;
+    }
     hub_speed_ = hub_speed;
     steer_motor_.SetSpeed(hub_speed);
   }
@@ -85,6 +89,8 @@ class Wheel
 
   const units::angular_velocity::revolutions_per_minute_t kMaxHubSpeed =
       100_rpm;
+  const units::angular_velocity::revolutions_per_minute_t kMaxRevHubSpeed =
+      -100_rpm;
   const units::angular_velocity::revolutions_per_minute_t kMaxSteerSpeed =
       50_rpm;
 };
