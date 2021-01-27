@@ -37,7 +37,7 @@ class Wheel
 
   /// Sets the speed of the hub motor. Will not surpass max/min value
   /// @param hub_speed the new speed of the wheel
-  void SetSpeed(units::angular_velocity::revolutions_per_minute_t hub_speed)
+  void SetHubSpeed(units::angular_velocity::revolutions_per_minute_t hub_speed)
   {
     if (hub_speed > kMaxHubSpeed)  // need use abs(hub_speed) ?
     {
@@ -48,13 +48,13 @@ class Wheel
       hub_speed = kMaxNegativeHubSpeed;
     }
     hub_speed_ = hub_speed;
-    steer_motor_.SetSpeed(hub_speed);
+    hub_motor_.SetSpeed(hub_speed);
   }
 
   /// Adjusts the steer motor by the provided rotation angle/degree.
   /// @param rotation_angle positive angle (turn right), negative angle (left)
   /// @param steer_speed speed to adjust steering motor by - might remove
-  void SetPosition(
+  void SetSteeringAngle(
       units::angle::degree_t rotation_angle,
       units::angular_velocity::revolutions_per_minute_t steer_speed = 20_rpm)
   {

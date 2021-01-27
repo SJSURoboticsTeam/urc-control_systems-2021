@@ -51,37 +51,43 @@ class RoverDriveSystem
     SetMode();
   }
 
-  // Retrieves /drive Mission Control commands.
+  // Handles GET /drive?parameters for rover drive system to mission control
   /// @return returns true if connection is established from mission control
   bool GetMissionControlData()
   {
-    // GET /drive JSON value ?
+    // TODO: GET /drive?key=value&key=value... JSON value. Refer to
+    // GetRoverData() to find GET paramater
     if (true)  // change 'true' to something for localhost connection found
     {
       char response[] = {};
       ParseMissionControlData(response);
-      Move(mission_control_data_.drive_mode,
-           mission_control_data_.rotation_angle, mission_control_data_.speed);
       return true;
     }
-    sjsu::LogError("Unable to reach mission control server");
-    return false;
+    else
+    {
+      SetMode();
+      sjsu::LogError("Unable to reach mission control server");
+      return false;
+    }
   }
 
   /// Main function for handling all the rover drive system functionality.
-  /// @param mode Updates drive mode if new mode is different from current.
-  /// @param rotation_angle adjusts wheel position depending on mode.
-  /// @param speed adjusts the movement speed of the rover.
-  void Move(char mode, float rotation_angle, float speed)
+  /// drive_mode updates drive mode if new mode is different.
+  /// rotation_angle adjusts wheel position depending on mode.
+  /// speed adjusts the movement speed of the rover.
+  void Move()
   {
     if (mission_control_data_.is_operational)
     {
-      if (mode != static_cast<char>(current_mode_))
+      if (mission_control_data_.drive_mode != static_cast<char>(current_mode_))
       {
-        SetMode(mode);
+        SetMode(mission_control_data_.drive_mode);
       }
-      HandleRoverMovement(rotation_angle, speed);
-      UpdateMissionControlData();
+      else
+      {
+        HandleRoverMovement(mission_control_data_.rotation_angle,
+                            mission_control_data_.speed);
+      }
     }
   };
 
@@ -98,9 +104,11 @@ class RoverDriveSystem
   /// @param speed the new movement speed of the rover
   void SetWheelSpeed(units::angular_velocity::revolutions_per_minute_t speed)
   {
-    left_wheel_.SetSpeed(speed);
-    right_wheel_.SetSpeed(speed);
-    back_wheel_.SetSpeed(speed);
+    // TODO: Implement linear interploation (exponentional moving average) to
+    // smooth out changes in speed.
+    left_wheel_.SetHubSpeed(speed);
+    right_wheel_.SetHubSpeed(speed);
+    back_wheel_.SetHubSpeed(speed);
   };
 
   /// Updates Mission Control /drive/status endpoint with rover's current status
@@ -120,6 +128,8 @@ class RoverDriveSystem
   /// @return true if rover is able to retrieve data from all the wheels
   bool GetRoverData()
   {
+    sjsu::LogInfo("is_operational: %d", mission_control_data_.is_operational);
+    sjsu::LogInfo("drive_mode: %c", static_cast<char>(current_mode_));
     sjsu::LogInfo("left wheel speed: %f", left_wheel_.GetSpeed());
     sjsu::LogInfo("left wheel position: %f", left_wheel_.GetPosition());
     sjsu::LogInfo("right wheel speed: %f", right_wheel_.GetSpeed());
@@ -130,10 +140,10 @@ class RoverDriveSystem
   };
 
   /// Parses incoming data from mission control to command rover
-  /// @param response incoming JSON / string data
+  /// @param response incoming JSON / string data from mission control
   void ParseMissionControlData(char * response)
   {
-    // parse data somehow using sscanf
+    // TODO: parse data using sscanf. Refer to GitHub Issue #152 for solution
     sjsu::LogInfo("MISSION CONTROL RESPONSE:\n%s", response);
     // hard coded for now
     mission_control_data_.is_operational = true;
@@ -149,21 +159,18 @@ class RoverDriveSystem
     switch (mode)
     {
       case 'D':
-      case 'd':
         current_mode_ = Mode::kDrive;
         SetWheelSpeed(kZeroSpeed);
         SetDriveMode();
         sjsu::LogInfo("Drive mode set");
         break;
       case 'S':
-      case 's':
         current_mode_ = Mode::kSpin;
         SetWheelSpeed(kZeroSpeed);
         SetSpinMode();
         sjsu::LogInfo("Spin mode set");
         break;
       case 'T':
-      case 't':
         current_mode_ = Mode::kTranslation;
         SetWheelSpeed(kZeroSpeed);
         SetTranslationMode();
@@ -182,68 +189,7 @@ class RoverDriveSystem
   {
     units::angle::degree_t angle(roatation_angle);
     units::angular_velocity::revolutions_per_minute_t speed(wheel_speed);
-    switch (current_mode_)
-    {
-      case Mode::kDrive:
-        sjsu::LogInfo("Driving...");
-        HandleDriveMode(speed, angle);
-        break;
-      case Mode::kSpin:
-        sjsu::LogInfo("Spining...");
-        HandleSpinMode(speed);
-        break;
-      case Mode::kTranslation:
-        sjsu::LogInfo("Translating...");
-        HandleTranslationMode(speed, angle);
-        break;
-      default:
-        SetWheelSpeed(kZeroSpeed);
-        sjsu::LogError("Unable to assign drive mode handler!");
-        break;
-    }
-    current_speed_ = speed;
-  };
 
-  /// Sets the new driving mode for the rover. Rover will stop before switching
-  /// @param mode Three Modes: D (drive), S (spin), T (translation)
-  void SetMode(char mode = 'S')
-  {
-    switch (mode)
-    {
-      case 'D':
-      case 'd':
-        current_mode_ = Mode::kDrive;
-        SetWheelSpeed(kZeroSpeed);
-        SetDriveMode();
-        sjsu::LogInfo("Drive mode set");
-        break;
-      case 'S':
-      case 's':
-        current_mode_ = Mode::kSpin;
-        SetWheelSpeed(kZeroSpeed);
-        SetSpinMode();
-        sjsu::LogInfo("Spin mode set");
-        break;
-      case 'T':
-      case 't':
-        current_mode_ = Mode::kTranslation;
-        SetWheelSpeed(kZeroSpeed);
-        SetTranslationMode();
-        sjsu::LogInfo("Translation mode set");
-        break;
-      default:
-        SetWheelSpeed(kZeroSpeed);
-        sjsu::LogError("Unable to assign drive mode!");
-    };
-  };
-
-  /// Handles the rover movement depending on the mode
-  /// @param rotation_angle adjusts wheel position depending on mode.
-  /// @param wheel_speed adjusts the movement speed of the rover.
-  void HandleRoverMovement(float roatation_angle, float wheel_speed)
-  {
-    units::angle::degree_t angle(roatation_angle);
-    units::angular_velocity::revolutions_per_minute_t speed(wheel_speed);
     switch (current_mode_)
     {
       case Mode::kDrive:
@@ -273,13 +219,13 @@ class RoverDriveSystem
   /// Aligns rover wheels all in the same direction, facing foward
   void SetDriveMode()
   {
-    units::angle::degree_t left_wheel_angle  = -45_deg;
-    units::angle::degree_t right_wheel_angle = -135_deg;
-    units::angle::degree_t back_wheel_angle  = 90_deg;
+    const units::angle::degree_t left_wheel_angle  = -45_deg;
+    const units::angle::degree_t right_wheel_angle = -135_deg;
+    const units::angle::degree_t back_wheel_angle  = 90_deg;
     SetSpinMode();
-    left_wheel_.SetPosition(left_wheel_angle);
-    right_wheel_.SetPosition(right_wheel_angle);
-    back_wheel_.SetPosition(back_wheel_angle);
+    left_wheel_.SetSteeringAngle(left_wheel_angle);
+    right_wheel_.SetSteeringAngle(right_wheel_angle);
+    back_wheel_.SetSteeringAngle(back_wheel_angle);
   };
 
   /// Aligns rover wheels perpendicular to their legs using their homing mark
@@ -293,13 +239,13 @@ class RoverDriveSystem
   /// Aligns rover wheel all in the same direction, facing towards the right
   void SetTranslationMode()
   {
-    units::angle::degree_t left_wheel_angle  = 45_deg;
-    units::angle::degree_t right_wheel_angle = -45_deg;
-    units::angle::degree_t back_wheel_angle  = -180_deg;
+    const units::angle::degree_t left_wheel_angle  = 45_deg;
+    const units::angle::degree_t right_wheel_angle = -45_deg;
+    const units::angle::degree_t back_wheel_angle  = -180_deg;
     SetSpinMode();
-    left_wheel_.SetPosition(left_wheel_angle);
-    right_wheel_.SetPosition(right_wheel_angle);
-    back_wheel_.SetPosition(back_wheel_angle);
+    left_wheel_.SetSteeringAngle(left_wheel_angle);
+    right_wheel_.SetSteeringAngle(right_wheel_angle);
+    back_wheel_.SetSteeringAngle(back_wheel_angle);
   };
 
   // =======================
@@ -310,7 +256,7 @@ class RoverDriveSystem
   void HandleDriveMode(units::angular_velocity::revolutions_per_minute_t speed,
                        units::angle::degree_t angle)
   {
-    back_wheel_.SetPosition(angle);
+    back_wheel_.SetSteeringAngle(angle);
     SetWheelSpeed(speed);
   };
 
@@ -325,9 +271,9 @@ class RoverDriveSystem
       units::angular_velocity::revolutions_per_minute_t speed,
       units::angle::degree_t angle)
   {
-    left_wheel_.SetPosition(angle);
-    right_wheel_.SetPosition(angle);
-    back_wheel_.SetPosition(angle);
+    left_wheel_.SetSteeringAngle(angle);
+    right_wheel_.SetSteeringAngle(angle);
+    back_wheel_.SetSteeringAngle(angle);
     SetWheelSpeed(speed);
   };
 
