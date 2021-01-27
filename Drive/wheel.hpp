@@ -39,11 +39,12 @@ class Wheel
   /// @param hub_speed the new speed of the wheel
   void SetHubSpeed(units::angular_velocity::revolutions_per_minute_t hub_speed)
   {
-    if (hub_speed > kMaxHubSpeed)  // need use abs(hub_speed) ?
+    // TODO: Implement std::clamp for handling extrema
+    if (hub_speed > kMaxHubSpeed)
     {
       hub_speed = kMaxHubSpeed;
     }
-    if (hub_speed < kMaxNegativeHubSpeed)  // need use abs(hub_speed) ?
+    if (hub_speed < kMaxNegativeHubSpeed)
     {
       hub_speed = kMaxNegativeHubSpeed;
     }
@@ -58,6 +59,7 @@ class Wheel
       units::angle::degree_t rotation_angle,
       units::angular_velocity::revolutions_per_minute_t steer_speed = 20_rpm)
   {
+    // TODO: Implement std::clamp for handling extrema
     if (steer_speed > kMaxSteerSpeed)
     {
       steer_speed = kMaxSteerSpeed;
