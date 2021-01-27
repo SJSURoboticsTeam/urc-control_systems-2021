@@ -26,6 +26,7 @@ class RoverDriveSystem
     char drive_mode;
     float rotation_angle;
     float speed;
+    char * http_GET_param;
   };
 
   RoverDriveSystem(sjsu::drive::Wheel & left_wheel,
@@ -55,6 +56,11 @@ class RoverDriveSystem
   /// @return returns true if connection is established from mission control
   bool GetMissionControlData()
   {
+    mission_control_data_.http_GET_param =
+        "?is_operational=%d&drive_mode=%c&left_wheel_speed=%f&right_wheel_"
+        "speed=%f&back_wheel_speed=%f",
+    mission_control_data_.is_operational, static_cast<char>(current_mode_),
+    left_wheel_.GetSpeed(), right_wheel_.GetSpeed(), back_wheel_.GetSpeed();
     // TODO: GET /drive?key=value&key=value... JSON value. Refer to
     // GetRoverData() to find GET paramater
     if (true)  // change 'true' to something for localhost connection found
