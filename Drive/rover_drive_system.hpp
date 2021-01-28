@@ -26,7 +26,6 @@ class RoverDriveSystem
     char drive_mode;
     float rotation_angle;
     float speed;
-    char * http_GET_param;
   };
 
   RoverDriveSystem(sjsu::drive::Wheel & left_wheel,
@@ -54,16 +53,10 @@ class RoverDriveSystem
 
   // Handles GET /drive?parameters for rover drive system to mission control
   /// @return returns true if connection is established from mission control
-  bool GetMissionControlData()
+  bool ExchangeMissionControlData()
   {
-    mission_control_data_.http_GET_param =
-        "?is_operational=%d&drive_mode=%c&left_wheel_speed=%f&right_wheel_"
-        "speed=%f&back_wheel_speed=%f",
-    mission_control_data_.is_operational, static_cast<char>(current_mode_),
-    left_wheel_.GetSpeed(), right_wheel_.GetSpeed(), back_wheel_.GetSpeed();
-    // TODO: GET /drive?key=value&key=value... JSON value. Refer to
-    // GetRoverData() to find GET paramater
-    if (true)  // change 'true' to something for localhost connection found
+    // TODO: GET /drive?key=value&key=value... JSON value
+    if (true)  // something for localhost connection found
     {
       char response[] = {};
       ParseMissionControlData(response);
@@ -118,21 +111,11 @@ class RoverDriveSystem
   };
 
   /// Updates Mission Control /drive/status endpoint with rover's current status
-  void UpdateMissionControlData()
-  {
-    if (GetRoverData())
-    {
-      // POST, http://localhost:3000/drive/status, JSON.stringify(rover_data_)
-    }
-    else
-    {
-      sjsu::LogError("Unable to retrieve wheel data!");
-    }
-  };
+  void SendGETRequest();
 
-  /// Gets the speed and position/angle of each wheel on the rover
+  /// Prints the speed and position/angle of each wheel on the rover
   /// @return true if rover is able to retrieve data from all the wheels
-  bool GetRoverData()
+  void PrintRoverData()
   {
     sjsu::LogInfo("is_operational: %d", mission_control_data_.is_operational);
     sjsu::LogInfo("drive_mode: %c", static_cast<char>(current_mode_));
@@ -142,7 +125,6 @@ class RoverDriveSystem
     sjsu::LogInfo("right wheel position: %f", right_wheel_.GetPosition());
     sjsu::LogInfo("back wheel speed: %f", back_wheel_.GetSpeed());
     sjsu::LogInfo("back wheel position: %f", back_wheel_.GetPosition());
-    return true;
   };
 
   /// Parses incoming data from mission control to command rover
