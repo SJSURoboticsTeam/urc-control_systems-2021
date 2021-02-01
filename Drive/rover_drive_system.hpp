@@ -22,7 +22,7 @@ class RoverDriveSystem
   /// Mission controls possible input values
   struct MissionControlData
   {
-    bool is_operational;
+    int is_operational;
     char drive_mode;
     float rotation_angle;
     float speed;
@@ -111,7 +111,9 @@ class RoverDriveSystem
   };
 
   /// Updates Mission Control /drive/status endpoint with rover's current status
-  void SendGETRequest();
+  void SendGETRequest(){
+
+  };
 
   /// Prints the speed and position/angle of each wheel on the rover
   /// @return true if rover is able to retrieve data from all the wheels
@@ -129,15 +131,19 @@ class RoverDriveSystem
 
   /// Parses incoming data from mission control to command rover
   /// @param response incoming JSON / string data from mission control
-  void ParseMissionControlData(char * response)
+  bool ParseMissionControlData(char * response)
   {
-    // TODO: parse data using sscanf. Refer to GitHub Issue #152 for solution
-    sjsu::LogInfo("MISSION CONTROL RESPONSE:\n%s", response);
-    // hard coded for now
-    mission_control_data_.is_operational = true;
-    mission_control_data_.drive_mode     = 'S';
-    mission_control_data_.rotation_angle = 10.0f;
-    mission_control_data_.speed          = 30.0f;
+    bool successfully_parsed;
+    int expected_num_cmds = 4;
+    int parsed_elements =
+        sscanf(response,
+               "{ \"is_operational\": %d, \"drive_mode\": "
+               "\"%c\", \"speed\": %f, \"angle\": %f}",
+               &mission_control_data_.is_operational,
+               &mission_control_data_.drive_mode, &mission_control_data_.speed,
+               &mission_control_data_.rotation_angle);
+    successfully_parsed = (parsed_elements == expected_num_cmds) ? true : false;
+    return successfully_parsed;
   };
 
   /// Sets the new driving mode for the rover. Rover will stop before switching
