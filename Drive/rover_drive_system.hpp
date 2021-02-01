@@ -126,7 +126,7 @@ class RoverDriveSystem
 
     bool successful_request = true;  // replace with some GET handler
     bool successful_parse   = ParseMissionControlResponse();
-    if (successful_request && successfully_parsed)
+    if (successful_request && successful_parse)
     {
       return true;
     }
