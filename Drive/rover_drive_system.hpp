@@ -125,8 +125,8 @@ class RoverDriveSystem
     // return true
 
     bool successful_request = true;  // replace with some GET handler
-    bool parsed_response    = ParseMissionControlResponse();
-    if (successful_request && parsed_response)
+    bool successful_parse   = ParseMissionControlResponse();
+    if (successful_request && successfully_parsed)
     {
       return true;
     }
@@ -154,7 +154,7 @@ class RoverDriveSystem
   /// @return true if successfully parsed with correct number of cmds
   bool ParseMissionControlResponse()
   {
-    int expected_num_cmds = 4;
+    const int expected_num_cmds = 4;
     int parsed_num_cmds =
         sscanf(mission_control_data_.response,
                "{ \"is_operational\": %d, \"drive_mode\": "
