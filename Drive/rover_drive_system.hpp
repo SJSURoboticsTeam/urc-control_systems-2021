@@ -26,6 +26,8 @@ class RoverDriveSystem
     char drive_mode;
     float rotation_angle;
     float speed;
+    char * response;
+    char * request;
   };
 
   RoverDriveSystem(sjsu::drive::Wheel & left_wheel,
@@ -55,11 +57,9 @@ class RoverDriveSystem
   /// @return returns true if connection is established from mission control
   bool ExchangeMissionControlData()
   {
-    // TODO: GET /drive?key=value&key=value... JSON value
-    if (true)  // something for localhost connection found
+    if (GETRequestHandler())  // successful GET request & JSON parse
     {
-      char response[] = {};
-      ParseMissionControlData(response);
+      Move();
       return true;
     }
     else
@@ -88,6 +88,10 @@ class RoverDriveSystem
                             mission_control_data_.speed);
       }
     }
+    else
+    {
+      sjsu::LogError("Rover is_operational is set to false!");
+    }
   };
 
   /// Resets all the wheels so the motors know their actual position.
@@ -111,8 +115,25 @@ class RoverDriveSystem
   };
 
   /// Updates Mission Control /drive/status endpoint with rover's current status
-  void SendGETRequest(){
+  /// @return true if GET request is 200 and response is successfully
+  /// parsed
+  bool GETRequestHandler()
+  {
+    // TODO: GET /drive?key=value&key=value... JSON value
+    // Will need to implement the ESP01 class ?
+    // if GET status is successful && ParseMissionControl is successful ->
+    // return true
 
+    bool successful_request = true;  // replace with some GET handler
+    bool parsed_response    = ParseMissionControlResponse();
+    if (successful_request && parsed_response)
+    {
+      return true;
+    }
+    else
+    {
+      return false;
+    }
   };
 
   /// Prints the speed and position/angle of each wheel on the rover
@@ -129,21 +150,27 @@ class RoverDriveSystem
     sjsu::LogInfo("back wheel position: %f", back_wheel_.GetPosition());
   };
 
-  /// Parses incoming data from mission control to command rover
-  /// @param response incoming JSON / string data from mission control
-  bool ParseMissionControlData(char * response)
+  /// Parses incoming JSON data from mission control to command rover
+  /// @return true if successfully parsed with correct number of cmds
+  bool ParseMissionControlResponse()
   {
-    bool successfully_parsed;
     int expected_num_cmds = 4;
-    int parsed_elements =
-        sscanf(response,
+    int parsed_num_cmds =
+        sscanf(mission_control_data_.response,
                "{ \"is_operational\": %d, \"drive_mode\": "
                "\"%c\", \"speed\": %f, \"angle\": %f}",
                &mission_control_data_.is_operational,
                &mission_control_data_.drive_mode, &mission_control_data_.speed,
                &mission_control_data_.rotation_angle);
-    successfully_parsed = (parsed_elements == expected_num_cmds) ? true : false;
-    return successfully_parsed;
+    if (parsed_num_cmds == expected_num_cmds)
+    {
+      return true;
+    }
+    else
+    {
+      sjsu::LogError("Expected number of cmds does not equal actual!");
+      return false;
+    }
   };
 
   /// Sets the new driving mode for the rover. Rover will stop before switching
