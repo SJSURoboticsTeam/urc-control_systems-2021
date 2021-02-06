@@ -1,6 +1,6 @@
-#include "L1_Peripheral/lpc40xx/can.hpp"
-#include "L2_HAL/actuators/servo/rmd_x.hpp"
-#include "utility/units.hpp"
+#include "peripherals/lpc40xx/can.hpp"
+#include "devices/actuators/servo/rmd_x.hpp"
+#include "utility/math/units.hpp"
 #include "utility/log.hpp"
 
 #include "rover_drive_system.hpp"

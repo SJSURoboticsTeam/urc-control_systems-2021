@@ -1,9 +1,9 @@
 #pragma once
 
 #include "utility/log.hpp"
-#include "utility/time.hpp"
-#include "utility/units.hpp"
-#include "utility/map.hpp"
+#include "utility/time/time.hpp"
+#include "utility/math/units.hpp"
+#include "utility/math/map.hpp"
 #include "wheel.hpp"
 
 namespace sjsu::drive
@@ -39,19 +39,12 @@ class RoverDriveSystem
 
   void Initialize()
   {
+    mission_control_data_.is_operational = true;
     left_wheel_.Initialize();
     right_wheel_.Initialize();
     back_wheel_.Initialize();
-  };
-
-  void Enable(bool enable = true)
-  {
-    mission_control_data_.is_operational = true;
-    left_wheel_.Enable(enable);
-    right_wheel_.Enable(enable);
-    back_wheel_.Enable(enable);
     SetMode();
-  }
+  };
 
   // Handles GET /drive?parameters for rover drive system to mission control
   /// @return returns true if connection is established from mission control
