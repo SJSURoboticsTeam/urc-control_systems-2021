@@ -117,7 +117,7 @@ class RoverDriveSystem
     // if GET status is successful && ParseMissionControl is successful ->
     // return true
 
-    bool successful_request = true;  // replace with some GET handler
+    bool successful_request = GETRequest();  // replace with some GET handler
     bool successful_parse   = ParseMissionControlResponse();
     if (successful_request && successful_parse)
     {
@@ -128,6 +128,12 @@ class RoverDriveSystem
       return false;
     }
   };
+  /// Sends the GET request with the additional params to mission control
+  /// @return true if the GET request is successful.
+  bool GETRequest()
+  {
+    return true;
+  }
 
   /// Prints the speed and position/angle of each wheel on the rover
   /// @return true if rover is able to retrieve data from all the wheels
