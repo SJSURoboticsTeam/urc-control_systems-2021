@@ -117,7 +117,7 @@ class RoverDriveSystem
     // if GET status is successful && ParseMissionControl is successful ->
     // return true
 
-    bool successful_request = GETRequest();  // replace with some GET handler
+    bool successful_request = GETRequest();
     bool successful_parse   = ParseMissionControlResponse();
     if (successful_request && successful_parse)
     {
@@ -132,6 +132,7 @@ class RoverDriveSystem
   /// @return true if the GET request is successful.
   bool GETRequest()
   {
+    // GET("url+params", "header") //(string_view, string_view)
     return true;
   }
 
