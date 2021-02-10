@@ -148,13 +148,12 @@ class RoverDriveSystem
   bool ParseMissionControlResponse()
   {
     const int expected_num_cmds = 4;
-    int parsed_num_cmds =
-        sscanf(mission_control_data_.response,
-               "{ \"is_operational\": %d, \"drive_mode\": "
-               "\"%c\", \"speed\": %f, \"angle\": %f}",
-               &mission_control_data_.is_operational,
-               &mission_control_data_.drive_mode, &mission_control_data_.speed,
-               &mission_control_data_.rotation_angle);
+    int parsed_num_cmds         = sscanf(
+        mission_control_data_.response,
+        R"({"is_opertaional": %d, "drive_mode": "%c", "speed": %f, "angle": %f})",
+        &mission_control_data_.is_operational,
+        &mission_control_data_.drive_mode, &mission_control_data_.speed,
+        &mission_control_data_.rotation_angle);
     if (parsed_num_cmds == expected_num_cmds)
     {
       // TODO: Double check that the parsed data is valid before returning ?
