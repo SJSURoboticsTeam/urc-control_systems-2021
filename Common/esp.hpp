@@ -6,13 +6,18 @@
 #include "devices/communication/esp8266.hpp"
 #include "utility/log.hpp"
 
-namespace sjsu
+namespace sjsu::common
 {
-/// WiFi class manages the WiFi modules on the rover.
-class WiFi
+/// Esp class manages the esp01/esp8266 WiFi module on the rover.
+class Esp
 {
  public:
-  WiFi() : {};
+  Esp();
+
+  // TODO: I want to be able to do this somehow...
+  // Esp(sjsu::Uart & uart){
+  //   esp_(uart);
+  // };
 
   /// Initializes the WiFi module
   void Initialize();
@@ -34,5 +39,8 @@ class WiFi
  private:
   std::string ssid_;
   std::string password_;
+  sjsu::Esp8266 & esp_;
+  sjsu::WiFi & wifi_;
+  sjsu::InternetSocket & socket_;
 };
-}  // namespace sjsu
+}  // namespace sjsu::common
