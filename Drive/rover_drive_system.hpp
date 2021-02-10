@@ -26,8 +26,8 @@ class RoverDriveSystem
     char drive_mode;
     float rotation_angle;
     float speed;
-    char * response;
-    char * request;
+    char response[200];
+    char request[100];
   };
 
   RoverDriveSystem(sjsu::drive::Wheel & left_wheel,
@@ -157,11 +157,12 @@ class RoverDriveSystem
                &mission_control_data_.rotation_angle);
     if (parsed_num_cmds == expected_num_cmds)
     {
+      // TODO: Double check that the parsed data is valid before returning ?
       return true;
     }
     else
     {
-      sjsu::LogError("Expected number of cmds does not equal actual!");
+      sjsu::LogError("Error parsing response from Mission Control!");
       return false;
     }
   };
