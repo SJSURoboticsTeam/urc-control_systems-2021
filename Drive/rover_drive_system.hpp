@@ -52,7 +52,7 @@ class RoverDriveSystem
   /// @return returns true if connection is established from mission control
   bool ExchangeMissionControlData()
   {
-    if (GETRequestHandler())  // successful GET request & JSON parse
+    if (ParseMissionControlResponse() && GETRequest())
     {
       Move();
       return true;
@@ -109,35 +109,6 @@ class RoverDriveSystem
     back_wheel_.SetHubSpeed(speed);
   };
 
-  /// Updates Mission Control /drive/status endpoint with rover's current status
-  /// @return true if GET request is 200 and response is successfully
-  /// parsed
-  bool GETRequestHandler()
-  {
-    // TODO: GET /drive?key=value&key=value... JSON value
-    // Will need to implement the ESP01 class ?
-    // if GET status is successful && ParseMissionControl is successful ->
-    // return true
-
-    bool successful_request = GETRequest();
-    bool successful_parse   = ParseMissionControlResponse();
-    if (successful_request && successful_parse)
-    {
-      return true;
-    }
-    else
-    {
-      return false;
-    }
-  };
-  /// Sends the GET request with the additional params to mission control
-  /// @return true if the GET request is successful.
-  bool GETRequest()
-  {
-    // GET("url+params", "header") //(string_view, string_view)
-    return true;
-  }
-
   /// Prints the speed and position/angle of each wheel on the rover
   /// @return true if rover is able to retrieve data from all the wheels
   void PrintRoverData()
@@ -174,6 +145,14 @@ class RoverDriveSystem
       return false;
     }
   };
+
+  /// Sends the GET request with the additional params to mission control
+  /// @return true if the GET request is successful.
+  bool GETRequest()
+  {
+    // GET("url+params", "header") //(string_view, string_view)
+    return true;
+  }
 
   /// Sets the new driving mode for the rover. Rover will stop before switching
   /// @param mode Three Modes: D (drive), S (spin), T (translation)
