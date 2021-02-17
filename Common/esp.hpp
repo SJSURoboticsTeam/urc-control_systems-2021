@@ -1,46 +1,42 @@
 #pragma once
 
-#include <string_view>
+#include <string>
 
 #include "peripherals/stm32f10x/uart.hpp"
 #include "devices/communication/esp8266.hpp"
-#include "utility/log.hpp"
 
 namespace sjsu::common
 {
-/// Esp class manages the esp01/esp8266 WiFi module on the rover.
+/// Esp class manages the esp01/esp8266 Wi-Fi module on the rover.
 class Esp
 {
+ private:
+  sjsu::Esp8266 esp_;
+  sjsu::WiFi & wifi_;
+  sjsu::InternetSocket & socket_;
+  const std::string kSsid     = "network-name";
+  const std::string kPassword = "password";
+
  public:
-  Esp();
+  Esp()
+      : esp_(sjsu::stm32f10x::GetUart<1>()),
+        wifi_(esp_.GetWiFi()),
+        socket_(esp_.GetInternetSocket()){};
 
-  // TODO: I want to be able to do this somehow...
-  // Esp(sjsu::Uart & uart){
-  //   esp_(uart);
-  // };
+  /// Initializes the Wi-Fi module
+  void Initialize(){
+    // TODO: ConnectToAccessPoint()
+  };
 
-  /// Initializes the WiFi module
-  void Initialize();
-
-  /// Connects the WiFi module to the network
-  /// @param ssid name of the network
-  /// @param password netork password
-  void Connect(std::string ssid, std::string_view password);
-
-  /// Verifies that the WiFi module is still connected to the network
+  /// Verifies that the Wi-Fi module is still connected to the network
   /// @return true if the module is still connected to the internet
   bool isConnected();
 
   /// Sends a GET request to the specified url
-  /// @param url the requested url address or endpoint
+  /// @param temp_holder
   /// @return the response body data
-  std::string GET(std::string_view url);
-
- private:
-  std::string ssid_;
-  std::string password_;
-  sjsu::Esp8266 & esp_;
-  sjsu::WiFi & wifi_;
-  sjsu::InternetSocket & socket_;
+  std::string GET(std::string temp_holder){
+    // TODO: Look into lambdas, there is a way to make this nice
+  };
 };
 }  // namespace sjsu::common
