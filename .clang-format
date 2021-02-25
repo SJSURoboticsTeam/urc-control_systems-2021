@@ -4,19 +4,29 @@ UseTab: Never
 BreakBeforeBraces: Allman
 DerivePointerAlignment: false
 PointerAlignment: Middle
+<<<<<<< HEAD
 BinPackArguments: true
 AlignConsecutiveAssignments: true
 AlignEscapedNewlines: Left
 BinPackParameters: false
 AlignAfterOpenBracket: Align
 AllowAllParametersOfDeclarationOnNextLine: false
+=======
+AlignConsecutiveAssignments: true
+AlignEscapedNewlines: Left
+BinPackParameters: false
+>>>>>>> 58ce03f61fdd213dd61fc18b6a25629563a00ef8
 AllowShortBlocksOnASingleLine: false
 AllowShortCaseLabelsOnASingleLine: true
 AllowShortFunctionsOnASingleLine: Empty
 AllowShortIfStatementsOnASingleLine: false
 AlwaysBreakAfterReturnType: None
 AlwaysBreakTemplateDeclarations: true
+<<<<<<< HEAD
 BinPackArguments: true
+=======
+BinPackArguments: false
+>>>>>>> 58ce03f61fdd213dd61fc18b6a25629563a00ef8
 BreakStringLiterals: true
 CompactNamespaces: true
 ConstructorInitializerAllOnOneLineOrOnePerLine: true

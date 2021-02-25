@@ -1,6 +1,7 @@
 # SJSU Robotics Control Systems 2021
 
 Add more content later.
+<<<<<<< HEAD
 
 ## How to clone and create branch for submitting a pull request (PR).
 
@@ -11,3 +12,5 @@ Add more content later.
 4. git push
 
 5. git status - shows all the files you made code changes to
+=======
+>>>>>>> 58ce03f61fdd213dd61fc18b6a25629563a00ef8
