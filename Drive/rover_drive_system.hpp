@@ -4,6 +4,7 @@
 #include "utility/time/time.hpp"
 #include "utility/math/units.hpp"
 #include "utility/math/map.hpp"
+
 #include "wheel.hpp"
 
 namespace sjsu::drive
@@ -39,18 +40,18 @@ class RoverDriveSystem
 
   void Initialize()
   {
-    mission_control_data_.is_operational = true;
+    &mission_control_data_.is_operational = true;
     left_wheel_.Initialize();
     right_wheel_.Initialize();
     back_wheel_.Initialize();
     SetMode();
   };
 
-  // Handles GET /drive?parameters for rover drive system to mission control
-  /// @return returns true if connection is established from mission control
+  // Handles data transfer for rover drive system to mission control
+  /// @return returns true if connection is good and request is successful
   bool ExchangeMissionControlData()
   {
-    if (GETRequestHandler())  // successful GET request & JSON parse
+    if (GETRequest() && ParseGETResponse())
     {
       Move();
       return true;
@@ -107,30 +108,20 @@ class RoverDriveSystem
     back_wheel_.SetHubSpeed(speed);
   };
 
-  /// Updates Mission Control /drive/status endpoint with rover's current status
-  /// @return true if GET request is 200 and response is successfully
-  /// parsed
-  bool GETRequestHandler()
+  /// Send HTTP GET request and updates /drive/status endpoint with rover's
+  /// telemetry readings
+  /// @return true if GET request is 200
+  bool GETRequest()
   {
-    // TODO: GET /drive?key=value&key=value... JSON value
-    // Will need to implement the ESP01 class ?
-    // if GET status is successful && ParseMissionControl is successful ->
-    // return true
-
-    bool successful_request = true;  // replace with some GET handler
-    bool successful_parse   = ParseMissionControlResponse();
-    if (successful_request && successful_parse)
-    {
-      return true;
-    }
-    else
-    {
-      return false;
-    }
+    // TODO: Need to implement Esp class & construct params for GET request
+    // Maybe use PrintRoverData() ? Or create GETRequestConstructor()
+    // &mission_control_data_.response =
+    // esp_.GETDrive(mission_control_data_.request);
+    bool successful_request = true;
+    return successful_request;
   };
 
   /// Prints the speed and position/angle of each wheel on the rover
-  /// @return true if rover is able to retrieve data from all the wheels
   void PrintRoverData()
   {
     sjsu::LogInfo("is_operational: %d", mission_control_data_.is_operational);
@@ -143,9 +134,10 @@ class RoverDriveSystem
     sjsu::LogInfo("back wheel position: %f", back_wheel_.GetPosition());
   };
 
-  /// Parses incoming JSON data from mission control to command rover
-  /// @return true if successfully parsed with correct number of cmds
-  bool ParseMissionControlResponse()
+  /// Parses incoming JSON data from mission control to rover
+  /// @return true if GET response successfully parsed with correct # of cmds
+  /// and valid drive mode entered
+  bool ParseGETResponse()
   {
     const int expected_num_cmds = 4;
     int parsed_num_cmds         = sscanf(
@@ -154,9 +146,11 @@ class RoverDriveSystem
         &mission_control_data_.is_operational,
         &mission_control_data_.drive_mode, &mission_control_data_.speed,
         &mission_control_data_.rotation_angle);
-    if (parsed_num_cmds == expected_num_cmds)
+    if ((parsed_num_cmds == expected_num_cmds) &&
+        (mission_control_data_.drive_mode == 'D' ||
+         mission_control_data_.drive_mode == 'S' ||
+         mission_control_data_.drive_mode == 'T'))
     {
-      // TODO: Double check that the parsed data is valid before returning ?
       return true;
     }
     else
