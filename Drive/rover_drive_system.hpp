@@ -27,8 +27,8 @@ class RoverDriveSystem
     char drive_mode;
     float rotation_angle;
     float speed;
-    char response[200];
-    char request[100];
+    char response[300];
+    char request_param[300];
   };
 
   RoverDriveSystem(sjsu::drive::Wheel & left_wheel,
@@ -40,7 +40,7 @@ class RoverDriveSystem
 
   void Initialize()
   {
-    &mission_control_data_.is_operational = true;
+    mission_control_data_.is_operational = true;
     left_wheel_.Initialize();
     right_wheel_.Initialize();
     back_wheel_.Initialize();
@@ -114,16 +114,33 @@ class RoverDriveSystem
   bool GETRequest()
   {
     // TODO: Need to implement Esp class & construct params for GET request
-    // Maybe use PrintRoverData() ? Or create GETRequestConstructor()
     // &mission_control_data_.response =
     // esp_.GETDrive(mission_control_data_.request);
     bool successful_request = true;
     return successful_request;
   };
 
+  /// Constructs parameters for GET request
+  void GETRequestConstructor(){
+    // TODO: Add state of charge for battery & is there a clean way to do this?
+    // This isn't valid C++, really don't want to do it normal way.
+
+    // mission_control_data_.request_param =
+    //     (R"({"is_opertaional": %d, "drive_mode": "%c", "battery": %d
+    //     "left_wheel_speed": %f, "left_wheel_angle": %f, "right_wheel_speed":
+    //     %f, "right_wheel_angle": %f, "back_wheel_speed": %f,
+    //     "back_wheel_angle": %f,})",
+    //      mission_control_data_.is_operational,
+    //      static_cast<char>(current_mode_), 50, left_wheel_.GetSpeed(),
+    //      left_wheel_.GetPosition(), right_wheel_.GetSpeed(),
+    //      right_wheel_.GetPosition(), back_wheel_.GetSpeed(),
+    //      back_wheel_.GetPosition());
+  };
+
   /// Prints the speed and position/angle of each wheel on the rover
   void PrintRoverData()
   {
+    // TODO: Add state of charge for battery
     sjsu::LogInfo("is_operational: %d", mission_control_data_.is_operational);
     sjsu::LogInfo("drive_mode: %c", static_cast<char>(current_mode_));
     sjsu::LogInfo("left wheel speed: %f", left_wheel_.GetSpeed());
