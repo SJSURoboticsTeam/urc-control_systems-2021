@@ -27,8 +27,8 @@ class RoverDriveSystem
     char drive_mode;
     float rotation_angle;
     float speed;
-    char response[300];
-    char request_param[300];
+    char response_body[300];
+    std::string request_parameter;
   };
 
   RoverDriveSystem(sjsu::drive::Wheel & left_wheel,
@@ -51,7 +51,7 @@ class RoverDriveSystem
   /// @return returns true if connection is good and request is successful
   bool ExchangeMissionControlData()
   {
-    if (GETRequest() && ParseGETResponse())
+    if (GETRequest() && ParseGETResponseBody())
     {
       Move();
       return true;
@@ -113,28 +113,37 @@ class RoverDriveSystem
   /// @return true if GET request is 200
   bool GETRequest()
   {
+    GETRequestParameterConstructor(); 
+    // TODO: Verify GET param is correct
     // TODO: Need to implement Esp class & construct params for GET request
-    // &mission_control_data_.response =
-    // esp_.GETDrive(mission_control_data_.request);
+    // EX: &mission_control_data_.response_body = esp_.GETDrive(mission_control_data_.request_parameter);
     bool successful_request = true;
     return successful_request;
   };
 
   /// Constructs parameters for GET request
-  void GETRequestConstructor(){
+  void GETRequestParameterConstructor()
+  {
     // TODO: Add state of charge for battery & is there a clean way to do this?
-    // This isn't valid C++, really don't want to do it normal way.
-
-    // mission_control_data_.request_param =
-    //     (R"({"is_opertaional": %d, "drive_mode": "%c", "battery": %d
-    //     "left_wheel_speed": %f, "left_wheel_angle": %f, "right_wheel_speed":
-    //     %f, "right_wheel_angle": %f, "back_wheel_speed": %f,
-    //     "back_wheel_angle": %f,})",
-    //      mission_control_data_.is_operational,
-    //      static_cast<char>(current_mode_), 50, left_wheel_.GetSpeed(),
-    //      left_wheel_.GetPosition(), right_wheel_.GetSpeed(),
-    //      right_wheel_.GetPosition(), back_wheel_.GetSpeed(),
-    //      back_wheel_.GetPosition());
+    mission_control_data_.request_parameter =
+        "{\"is_operational\": " + std::to_string(mission_control_data_.is_operational);
+    mission_control_data_.request_parameter +=
+        ", \"drive_mode\": " + std::to_string(static_cast<char>(current_mode_));
+    mission_control_data_.request_parameter +=
+        ", \"battery\": " + std::to_string(50);
+    mission_control_data_.request_parameter +=
+        ", \"left_wheel_speed\": " + std::to_string(left_wheel_.GetSpeed());
+    mission_control_data_.request_parameter +=
+        ", \"left_wheel_angle\": " + std::to_string(left_wheel_.GetPosition());
+    mission_control_data_.request_parameter +=
+        ", \"right_wheel_speed\": " + std::to_string(right_wheel_.GetSpeed());
+    mission_control_data_.request_parameter +=
+        ", \"right_wheel_angle\": " + std::to_string(right_wheel_.GetPosition());
+    mission_control_data_.request_parameter +=
+        ", \"back_wheel_speed\": " + std::to_string(back_wheel_.GetSpeed());
+    mission_control_data_.request_parameter +=
+        ", \"back_wheel_angle\": " + std::to_string(back_wheel_.GetPosition());
+    mission_control_data_.request_parameter += "}";
   };
 
   /// Prints the speed and position/angle of each wheel on the rover
@@ -154,11 +163,11 @@ class RoverDriveSystem
   /// Parses incoming JSON data from mission control to rover
   /// @return true if GET response successfully parsed with correct # of cmds
   /// and valid drive mode entered
-  bool ParseGETResponse()
+  bool ParseGETResponseBody()
   {
     const int expected_num_cmds = 4;
     int parsed_num_cmds         = sscanf(
-        mission_control_data_.response,
+        mission_control_data_.response_body,
         R"({"is_opertaional": %d, "drive_mode": "%c", "speed": %f, "angle": %f})",
         &mission_control_data_.is_operational,
         &mission_control_data_.drive_mode, &mission_control_data_.speed,
