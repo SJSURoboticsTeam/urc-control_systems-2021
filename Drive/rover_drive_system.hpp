@@ -113,10 +113,11 @@ class RoverDriveSystem
   /// @return true if GET request is 200
   bool GETRequest()
   {
-    GETRequestParameterConstructor(); 
+    GETRequestParameterConstructor();
     // TODO: Verify GET param is correct
     // TODO: Need to implement Esp class & construct params for GET request
-    // EX: &mission_control_data_.response_body = esp_.GETDrive(mission_control_data_.request_parameter);
+    // EX: &mission_control_data_.response_body =
+    // esp_.GETDrive(mission_control_data_.request_parameter);
     bool successful_request = true;
     return successful_request;
   };
@@ -126,24 +127,23 @@ class RoverDriveSystem
   {
     // TODO: Add state of charge for battery & is there a clean way to do this?
     mission_control_data_.request_parameter =
-        "{\"is_operational\": " + std::to_string(mission_control_data_.is_operational);
+        "?is_operational=" +
+        std::to_string(mission_control_data_.is_operational);
     mission_control_data_.request_parameter +=
-        ", \"drive_mode\": " + std::to_string(static_cast<char>(current_mode_));
+        "&drive_mode=" + std::to_string(static_cast<char>(current_mode_));
+    mission_control_data_.request_parameter += "&battery=" + std::to_string(50);
     mission_control_data_.request_parameter +=
-        ", \"battery\": " + std::to_string(50);
+        "&left_wheel_speed=" + std::to_string(left_wheel_.GetSpeed());
     mission_control_data_.request_parameter +=
-        ", \"left_wheel_speed\": " + std::to_string(left_wheel_.GetSpeed());
+        "&left_wheel_angle=" + std::to_string(left_wheel_.GetPosition());
     mission_control_data_.request_parameter +=
-        ", \"left_wheel_angle\": " + std::to_string(left_wheel_.GetPosition());
+        "&right_wheel_speed=" + std::to_string(right_wheel_.GetSpeed());
     mission_control_data_.request_parameter +=
-        ", \"right_wheel_speed\": " + std::to_string(right_wheel_.GetSpeed());
+        "&right_wheel_angle=" + std::to_string(right_wheel_.GetPosition());
     mission_control_data_.request_parameter +=
-        ", \"right_wheel_angle\": " + std::to_string(right_wheel_.GetPosition());
+        "&back_wheel_speed=" + std::to_string(back_wheel_.GetSpeed());
     mission_control_data_.request_parameter +=
-        ", \"back_wheel_speed\": " + std::to_string(back_wheel_.GetSpeed());
-    mission_control_data_.request_parameter +=
-        ", \"back_wheel_angle\": " + std::to_string(back_wheel_.GetPosition());
-    mission_control_data_.request_parameter += "}";
+        "&back_wheel_angle=" + std::to_string(back_wheel_.GetPosition());
   };
 
   /// Prints the speed and position/angle of each wheel on the rover
