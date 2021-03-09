@@ -127,7 +127,7 @@ class RoverDriveSystem
   {
     // TODO: Add state of charge for battery & is there a clean way to do this?
     mission_control_data_.request_parameter =
-        "?is_operational=" +
+        "drive?is_operational=" +
         std::to_string(mission_control_data_.is_operational);
     mission_control_data_.request_parameter +=
         "&drive_mode=" + std::to_string(static_cast<char>(current_mode_));
