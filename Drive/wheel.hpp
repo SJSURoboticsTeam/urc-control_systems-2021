@@ -1,6 +1,6 @@
 #pragma once
 
-#include "L2_HAL/actuators/servo/rmd_x.hpp"
+#include "devices/actuators/servo/rmd_x.hpp"
 
 namespace sjsu::drive
 {
@@ -15,12 +15,6 @@ class Wheel
   {
     hub_motor_.Initialize();
     steer_motor_.Initialize();
-  };
-
-  void Enable(bool enable = true)
-  {
-    hub_motor_.Enable(enable);
-    steer_motor_.Enable(enable);
   };
 
   /// Gets the speed of the hub motor.
