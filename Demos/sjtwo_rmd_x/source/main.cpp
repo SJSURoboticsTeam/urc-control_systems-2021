@@ -1,7 +1,7 @@
 #include <algorithm>
 
-#include "L1_Peripheral/lpc40xx/can.hpp"
-#include "L2_HAL/actuators/servo/rmd_x.hpp"
+#include "peripherals/lpc40xx/can.hpp"
+#include "devices/actuators/servo/rmd_x.hpp"
 #include "utility/log.hpp"
 
 int main(void)
@@ -17,8 +17,8 @@ int main(void)
 
   sjsu::LogInfo("Initializing and Enabling RMD-X driver...");
   rmd_x7.Initialize();
-  rmd_x7.Enable();
-  sjsu::LogInfo("RMD-X driver Intialized and Enabled!");
+  // rmd_x7.Enable();
+  // sjsu::LogInfo("RMD-X driver Intialized and Enabled!");
 
   sjsu::LogInfo("Spinning the motor for 3s @ %f RPM...",
                 kSpeedLimit.to<double>());

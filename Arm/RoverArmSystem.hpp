@@ -1,5 +1,5 @@
 #pragma once
-#include "utility/units.hpp"
+#include "utility/math/units.hpp"
 #include "joint.hpp"
 #include "wrist_joint.hpp"
 
@@ -49,16 +49,6 @@ class RoverArmSystem
     Shoulder.Initialize();
     Elbow.Initialize();
     Wrist.Initialize();
-  }
-
-  /// Enables the arm to be used, should be called after Initilize and before
-  /// any other functions.
-  void Enable(bool enable = true)
-  {
-    Rotunda.Enable(enable);
-    Shoulder.Enable(enable);
-    Elbow.Enable(enable);
-    Wrist.Enable(enable);
   }
 
   /// Retrives all of information for arm movement from the Mission Control
