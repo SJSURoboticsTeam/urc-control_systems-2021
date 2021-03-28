@@ -127,7 +127,6 @@ class RoverDriveSystem
   /// Constructs GET request parameter
   void GETRequestParameterConstructor()
   {
-<<<<<<< HEAD
     int parameter_size = snprintf(
         mission_control_data_.request_parameter, 300,
         "?is_operational=%d&drive_mode=%c&battery=%d&left_wheel_speed=%f&"
@@ -137,27 +136,6 @@ class RoverDriveSystem
         state_of_charge_, left_wheel_.GetSpeed(), left_wheel_.GetPosition(),
         right_wheel_.GetSpeed(), right_wheel_.GetPosition(),
         back_wheel_.GetSpeed(), back_wheel_.GetPosition());
-=======
-    // TODO: Add state of charge for battery & is there a clean way to do this?
-    mission_control_data_.request_parameter =
-        "drive?is_operational=" +
-        std::to_string(mission_control_data_.is_operational);
-    mission_control_data_.request_parameter +=
-        "&drive_mode=" + std::to_string(static_cast<char>(current_mode_));
-    mission_control_data_.request_parameter += "&battery=" + std::to_string(50);
-    mission_control_data_.request_parameter +=
-        "&left_wheel_speed=" + std::to_string(left_wheel_.GetSpeed());
-    mission_control_data_.request_parameter +=
-        "&left_wheel_angle=" + std::to_string(left_wheel_.GetPosition());
-    mission_control_data_.request_parameter +=
-        "&right_wheel_speed=" + std::to_string(right_wheel_.GetSpeed());
-    mission_control_data_.request_parameter +=
-        "&right_wheel_angle=" + std::to_string(right_wheel_.GetPosition());
-    mission_control_data_.request_parameter +=
-        "&back_wheel_speed=" + std::to_string(back_wheel_.GetSpeed());
-    mission_control_data_.request_parameter +=
-        "&back_wheel_angle=" + std::to_string(back_wheel_.GetPosition());
->>>>>>> 8f8686b6c27acdebc5b26ec0ec38d797ffc07a41
   };
 
   /// Prints the speed and position/angle of each wheel on the rover
