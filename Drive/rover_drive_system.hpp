@@ -1,5 +1,7 @@
 #pragma once
 
+#include <stdio.h>
+
 #include "utility/log.hpp"
 #include "utility/time/time.hpp"
 #include "utility/math/units.hpp"
@@ -28,7 +30,7 @@ class RoverDriveSystem
     float rotation_angle;
     float speed;
     char response_body[300];
-    std::string request_parameter;
+    char request_parameter[300];
   };
 
   RoverDriveSystem(sjsu::drive::Wheel & left_wheel,
@@ -59,7 +61,7 @@ class RoverDriveSystem
     else
     {
       SetMode();
-      sjsu::LogError("Unable to reach mission control server");
+      sjsu::LogError("Bad mission control response - stopping rover...");
       return false;
     }
   }
@@ -110,7 +112,7 @@ class RoverDriveSystem
 
   /// Send HTTP GET request and updates /drive/status endpoint with rover's
   /// telemetry readings
-  /// @return true if GET request is 200
+  /// @return true if GET request is 200 or < 300 ?
   bool GETRequest()
   {
     GETRequestParameterConstructor();
@@ -122,36 +124,26 @@ class RoverDriveSystem
     return successful_request;
   };
 
-  /// Constructs parameters for GET request
+  /// Constructs GET request parameter
   void GETRequestParameterConstructor()
   {
-    // TODO: Add state of charge for battery & is there a clean way to do this?
-    mission_control_data_.request_parameter =
-        "?is_operational=" +
-        std::to_string(mission_control_data_.is_operational);
-    mission_control_data_.request_parameter +=
-        "&drive_mode=" + std::to_string(static_cast<char>(current_mode_));
-    mission_control_data_.request_parameter += "&battery=" + std::to_string(50);
-    mission_control_data_.request_parameter +=
-        "&left_wheel_speed=" + std::to_string(left_wheel_.GetSpeed());
-    mission_control_data_.request_parameter +=
-        "&left_wheel_angle=" + std::to_string(left_wheel_.GetPosition());
-    mission_control_data_.request_parameter +=
-        "&right_wheel_speed=" + std::to_string(right_wheel_.GetSpeed());
-    mission_control_data_.request_parameter +=
-        "&right_wheel_angle=" + std::to_string(right_wheel_.GetPosition());
-    mission_control_data_.request_parameter +=
-        "&back_wheel_speed=" + std::to_string(back_wheel_.GetSpeed());
-    mission_control_data_.request_parameter +=
-        "&back_wheel_angle=" + std::to_string(back_wheel_.GetPosition());
+    int parameter_size = snprintf(
+        mission_control_data_.request_parameter, 300,
+        "?is_operational=%d&drive_mode=%c&battery=%d&left_wheel_speed=%f&"
+        "left_wheel_angle=%f&right_wheel_speed=%f&right_wheel_angle=%f&"
+        "back_wheel_speed=%f&back_wheel_angle=%f",
+        mission_control_data_.is_operational, static_cast<char>(current_mode_),
+        state_of_charge_, left_wheel_.GetSpeed(), left_wheel_.GetPosition(),
+        right_wheel_.GetSpeed(), right_wheel_.GetPosition(),
+        back_wheel_.GetSpeed(), back_wheel_.GetPosition());
   };
 
   /// Prints the speed and position/angle of each wheel on the rover
   void PrintRoverData()
   {
-    // TODO: Add state of charge for battery
     sjsu::LogInfo("is_operational: %d", mission_control_data_.is_operational);
     sjsu::LogInfo("drive_mode: %c", static_cast<char>(current_mode_));
+    sjsu::LogInfo("state of charge: %d", state_of_charge_);
     sjsu::LogInfo("left wheel speed: %f", left_wheel_.GetSpeed());
     sjsu::LogInfo("left wheel position: %f", left_wheel_.GetPosition());
     sjsu::LogInfo("right wheel speed: %f", right_wheel_.GetSpeed());
@@ -311,6 +303,7 @@ class RoverDriveSystem
     SetWheelSpeed(speed);
   };
 
+  int state_of_charge_ = 57;  // TODO: Implement at some point
   sjsu::drive::Wheel & left_wheel_;
   sjsu::drive::Wheel & right_wheel_;
   sjsu::drive::Wheel & back_wheel_;
