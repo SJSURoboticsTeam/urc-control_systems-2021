@@ -3,8 +3,8 @@
   Early prototype - WIP
 */
 
-#include "L1_Peripheral/lpc40xx/pwm.hpp"
-#include "L2_HAL/actuators/servo/servo.hpp"
+#include "peripherals/lpc40xx/pwm.hpp"
+#include "devices/actuators/servo/servo.hpp"
 #include "utility/log.hpp"
 #include "utility/time.hpp"
 
@@ -42,10 +42,10 @@ int main()
   servo2.ConfigureAngleBounds(0_deg, 180_deg);
   servo3.ConfigureAngleBounds(0_deg, 180_deg);
 
-  sjsu::LogInfo("Enabling Servo!");
-  servo1.Enable();
-  servo2.Enable();
-  servo3.Enable();
+  // sjsu::LogInfo("Enabling Servo!");
+  // servo1.Enable();
+  // servo2.Enable();
+  // servo3.Enable();
 
   servo1.SetAngle(90_deg);
   servo2.SetAngle(90_deg);

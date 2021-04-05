@@ -1,7 +1,7 @@
 #pragma once
-#include "utility/units.hpp"
-#include "L2_HAL/actuators/servo/rmd_x.hpp"
-#include "L2_HAL/sensors/movement/accelerometer/mpu6050.hpp"
+#include "utility/math/units.hpp"
+#include "devices/actuators/servo/rmd_x.hpp"
+#include "devices/sensors/movement/accelerometer/mpu6050.hpp"
 
 namespace sjsu::arm
 {
@@ -74,17 +74,9 @@ class WristJoint
     mpu.Initialize();
   }
 
-  /// Enables the Joint's motor and accelerometer for use, should be called
-  /// after Initialize and before any other functions.
-  void Enable(bool enable = true)
-  {
-    left_motor.Enable(enable);
-    right_motor.Enable(enable);
-    mpu.Enable(enable);
-  }
-
-  //Move the wrist to its callibrated roll and pitch angles
-  void SetPosition(units::angle::degree_t pitch_angle, units::angle::degree_t roll_angle)
+  // Move the wrist to its callibrated roll and pitch angles
+  void SetPosition(units::angle::degree_t pitch_angle,
+                   units::angle::degree_t roll_angle)
   {
   }
 

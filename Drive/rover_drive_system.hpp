@@ -164,6 +164,7 @@ class RoverDriveSystem
         &mission_control_data_.is_operational,
         &mission_control_data_.drive_mode, &mission_control_data_.speed,
         &mission_control_data_.rotation_angle);
+
     if ((parsed_num_cmds == expected_num_cmds) &&
         (mission_control_data_.drive_mode == 'D' ||
          mission_control_data_.drive_mode == 'S' ||
