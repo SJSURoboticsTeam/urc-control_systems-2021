@@ -5,10 +5,15 @@
 
 #include "rover_drive_system.hpp"
 #include "wheel.hpp"
+#include "../../Common/esp.hpp"
 
 int main(void)
 {
   sjsu::LogInfo("Starting the rover drive system...");
+  sjsu::common::Esp esp;
+  esp.Initialize();
+  esp.isConnectedToWiFi();
+
   // Not sure how to implement
   // sjsu::lpc40xx::Can can_network(sjsu::lpc40xx::Can::Channel::kCan2);
   // sjsu::RmdX left_hub_motor(can_network, 0x140);

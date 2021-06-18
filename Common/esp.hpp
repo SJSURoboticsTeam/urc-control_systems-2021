@@ -57,8 +57,8 @@ class Esp
     socket_.Write(request_payload, 5s);
     std::array<uint8_t, 1024 * 2> response;
     size_t read_back = socket_.Read(response, 10s);
-    // TODO: Return actual GET response
-    return "HTTP/1";
+    // TODO: Parse and return GET response body
+    return "GET Response Body";
   };
 
  private:
