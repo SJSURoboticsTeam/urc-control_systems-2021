@@ -253,24 +253,9 @@ class RoverDriveSystem
     {
       switch (mode)
       {
-        case 'D':
-          current_mode_ = Mode::kDrive;
-          SetWheelSpeed(kZeroSpeed);
-          SetDriveMode();
-          sjsu::LogInfo("Drive mode set");
-          break;
-        case 'S':
-          current_mode_ = Mode::kSpin;
-          SetWheelSpeed(kZeroSpeed);
-          SetSpinMode();
-          sjsu::LogInfo("Spin mode set");
-          break;
-        case 'T':
-          current_mode_ = Mode::kTranslation;
-          SetWheelSpeed(kZeroSpeed);
-          SetTranslationMode();
-          sjsu::LogInfo("Translation mode set");
-          break;
+        case 'D': GoDriveMode(); break;
+        case 'S': GoSpinMode(); break;
+        case 'T': GoTranslationMode(); break;
         default:
           SetWheelSpeed(kZeroSpeed);
           sjsu::LogError("Unable to assign drive mode!");
@@ -323,6 +308,54 @@ class RoverDriveSystem
   // ======================
   // = DRIVE MODE SETTERS =
   // ======================
+
+  void GoDriveMode()
+  {
+    try
+    {
+      current_mode_ = Mode::kDrive;
+      SetWheelSpeed(kZeroSpeed);
+      SetDriveMode();
+      sjsu::LogInfo("Drive mode set");
+    }
+    catch (const std::exception & e)
+    {
+      sjsu::LogError("Error switching into drive mode!");
+      throw e;
+    }
+  }
+
+  void GoSpinMode()
+  {
+    try
+    {
+      current_mode_ = Mode::kSpin;
+      SetWheelSpeed(kZeroSpeed);
+      SetSpinMode();
+      sjsu::LogInfo("Spin mode set");
+    }
+    catch (const std::exception & e)
+    {
+      sjsu::LogError("Error switching into spin mode!");
+      throw e;
+    }
+  }
+
+  void GoTranslationMode()
+  {
+    try
+    {
+      current_mode_ = Mode::kTranslation;
+      SetWheelSpeed(kZeroSpeed);
+      SetTranslationMode();
+      sjsu::LogInfo("Translation mode set");
+    }
+    catch (const std::exception & e)
+    {
+      sjsu::LogError("Error switching into translation mode!");
+      throw e;
+    }
+  }
 
   /// Aligns rover wheels all in the same direction, facing foward
   void SetDriveMode()
