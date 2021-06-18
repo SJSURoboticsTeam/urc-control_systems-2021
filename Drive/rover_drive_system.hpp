@@ -59,20 +59,18 @@ class RoverDriveSystem
 
   // Handles data transfer for rover drive system to mission control
   /// @return returns true if connection is good and request is successful
-  bool ExchangeMissionControlData()
+  void ExchangeMissionControlData()
   {
     try
     {
       if (GETRequest() && ParseGETResponseBody())
       {
         Move();
-        return true;
       }
       else
       {
-        SetMode();
+        SetWheelSpeed(kZeroSpeed);
         sjsu::LogError("Bad mission control response - stopping rover...");
-        return false;
       }
     }
     catch (const std::exception & e)
