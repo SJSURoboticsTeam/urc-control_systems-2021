@@ -57,6 +57,20 @@ class RoverDriveSystem
     }
   };
 
+  /// Prints the speed and position/angle of each wheel on the rover
+  void PrintRoverData()
+  {
+    sjsu::LogInfo("is_operational: %d", mission_control_data_.is_operational);
+    sjsu::LogInfo("drive_mode: %c", static_cast<char>(current_mode_));
+    sjsu::LogInfo("state of charge: %d", state_of_charge_);
+    sjsu::LogInfo("left wheel speed: %f", left_wheel_.GetSpeed());
+    sjsu::LogInfo("left wheel position: %f", left_wheel_.GetPosition());
+    sjsu::LogInfo("right wheel speed: %f", right_wheel_.GetSpeed());
+    sjsu::LogInfo("right wheel position: %f", right_wheel_.GetPosition());
+    sjsu::LogInfo("back wheel speed: %f", back_wheel_.GetSpeed());
+    sjsu::LogInfo("back wheel position: %f", back_wheel_.GetPosition());
+  };
+
   // Handles data transfer for rover drive system to mission control
   /// @return returns true if connection is good and request is successful
   void ExchangeMissionControlData()
@@ -129,12 +143,11 @@ class RoverDriveSystem
     }
   };
 
- private:
   /// Sets all wheels to the speed provided. Wheel class handles max/min speeds
   /// @param speed the new movement speed of the rover
   void SetWheelSpeed(units::angular_velocity::revolutions_per_minute_t speed)
   {
-    // TODO: Implement linear interploation (exponentional moving average) to
+    // TODO: Implement linear interpolation (exponential moving average) to
     // smooth out changes in speed.
     try
     {
@@ -176,7 +189,7 @@ class RoverDriveSystem
   {
     try
     {
-      int parameter_size = snprintf(
+      snprintf(
           mission_control_data_.request_parameter, 300,
           "?is_operational=%d&drive_mode=%c&battery=%d&left_wheel_speed=%f&"
           "left_wheel_angle=%f&right_wheel_speed=%f&right_wheel_angle=%f&"
@@ -194,20 +207,6 @@ class RoverDriveSystem
     }
   };
 
-  /// Prints the speed and position/angle of each wheel on the rover
-  void PrintRoverData()
-  {
-    sjsu::LogInfo("is_operational: %d", mission_control_data_.is_operational);
-    sjsu::LogInfo("drive_mode: %c", static_cast<char>(current_mode_));
-    sjsu::LogInfo("state of charge: %d", state_of_charge_);
-    sjsu::LogInfo("left wheel speed: %f", left_wheel_.GetSpeed());
-    sjsu::LogInfo("left wheel position: %f", left_wheel_.GetPosition());
-    sjsu::LogInfo("right wheel speed: %f", right_wheel_.GetSpeed());
-    sjsu::LogInfo("right wheel position: %f", right_wheel_.GetPosition());
-    sjsu::LogInfo("back wheel speed: %f", back_wheel_.GetSpeed());
-    sjsu::LogInfo("back wheel position: %f", back_wheel_.GetPosition());
-  };
-
   /// Parses incoming JSON data from mission control to rover
   /// @return true if GET response successfully parsed with correct # of cmds
   /// and valid drive mode entered
@@ -218,7 +217,7 @@ class RoverDriveSystem
       const int expected_num_cmds = 4;
       int parsed_num_cmds         = sscanf(
           mission_control_data_.response_body,
-          R"({"is_opertaional": %d, "drive_mode": "%c", "speed": %f, "angle": %f})",
+          R"({"is_operational": %d, "drive_mode": "%c", "speed": %f, "angle": %f})",
           &mission_control_data_.is_operational,
           &mission_control_data_.drive_mode, &mission_control_data_.speed,
           &mission_control_data_.rotation_angle);
@@ -269,11 +268,11 @@ class RoverDriveSystem
   /// Handles the rover movement depending on the mode
   /// @param rotation_angle adjusts wheel position depending on mode.
   /// @param wheel_speed adjusts the movement speed of the rover.
-  void HandleRoverMovement(float roatation_angle, float wheel_speed)
+  void HandleRoverMovement(float rotation_angle, float wheel_speed)
   {
     try
     {
-      units::angle::degree_t angle(roatation_angle);
+      units::angle::degree_t angle(rotation_angle);
       units::angular_velocity::revolutions_per_minute_t speed(wheel_speed);
       switch (current_mode_)
       {

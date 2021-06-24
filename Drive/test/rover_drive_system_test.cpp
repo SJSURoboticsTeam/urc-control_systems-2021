@@ -2,6 +2,7 @@
 #include "peripherals/lpc40xx/can.hpp"
 #include "devices/actuators/servo/rmd_x.hpp"
 #include "utility/log.hpp"
+#include "utility/math/units.hpp"
 
 #include "rover_drive_system.hpp"
 #include "wheel.hpp"
@@ -31,9 +32,45 @@ TEST_CASE("Testing Drive System")
   sjsu::drive::Wheel wheel_back(rmd_wheel_back, rmd_steer_back);
   sjsu::drive::RoverDriveSystem driveSystem(wheel_left, wheel_right,
                                             wheel_back);
+
   SECTION("Initialize()")
   {
     driveSystem.Initialize();
+    CHECK(driveSystem.mission_control_data_.is_operational == 1);
+  }
+
+  SECTION("Switch to drive mode")
+  {
+    driveSystem.SetMode('D');
+    driveSystem.ExchangeMissionControlData();
+    driveSystem.Move();
+    CHECK(static_cast<char>(driveSystem.current_mode_) == 'D');
+  }
+
+  SECTION("Switch to translation mode")
+  {
+    driveSystem.SetMode('T');
+    driveSystem.ExchangeMissionControlData();
+    driveSystem.Move();
+    CHECK(static_cast<char>(driveSystem.current_mode_) == 'T');
+  }
+
+  SECTION("Switch to spin mode")
+  {
+    driveSystem.SetMode();
+    driveSystem.ExchangeMissionControlData();
+    driveSystem.Move();
+    CHECK(static_cast<char>(driveSystem.current_mode_) == 'S');
   }
 }
+
 }  // namespace sjsu
+   // strcpy(driveSystem.mission_control_data_.response_body,
+   //        R"({"is_operational": 1, "drive_mode": "S", "speed": 0, "angle":
+   //        0})");
+   // strcpy(driveSystem.mission_control_data_.response_body,
+   //        R"({"is_operational": 1, "drive_mode": "T", "speed": 0, "angle":
+   //        0})");
+   // strcpy(driveSystem.mission_control_data_.response_body,
+   //        R"({"is_operational": 1, "drive_mode": "D", "speed": 0, "angle":
+   //        0})");
