@@ -67,7 +67,7 @@ class Wheel
   // Sets the wheel back in its homing position by finding mark in slip ring
   void HomeWheel()
   {
-    SetWheelToZeroPosition();
+    // SetWheelToZeroPosition();
     homing_offset_angle_ = 0_deg;
   };
 
