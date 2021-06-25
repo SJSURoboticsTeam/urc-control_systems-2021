@@ -28,8 +28,8 @@ TEST_CASE("Testing Wheel")
   SECTION("should initialize wheel")
   {
     wheel.Initialize();
-    CHECK(wheel.GetSpeed() == 0);
-    CHECK(wheel.GetPosition() == 0);
+    CHECK(wheel.GetSpeed() == doctest::Approx(0.0));
+    CHECK(wheel.GetPosition() == doctest::Approx(0.0));
     CHECK(wheel.kMaxPosSpeed == 100_rpm);
     CHECK(wheel.kMaxNegSpeed == -100_rpm);
   }
@@ -38,32 +38,32 @@ TEST_CASE("Testing Wheel")
   {
     wheel.SetHubSpeed(50_rpm);
     wheel.SetSteeringAngle(20_deg);
-    CHECK(wheel.GetSpeed() == 50);
-    CHECK(wheel.GetPosition() == 20);
+    CHECK(wheel.GetSpeed() == doctest::Approx(50.0));
+    CHECK(wheel.GetPosition() == doctest::Approx(20.0));
 
     wheel.SetHubSpeed(10_rpm);
     wheel.SetSteeringAngle(-20_deg);
-    CHECK(wheel.GetSpeed() == 10);
-    CHECK(wheel.GetPosition() == 0);
+    CHECK(wheel.GetSpeed() == doctest::Approx(10.0));
+    CHECK(wheel.GetPosition() == doctest::Approx(0.0));
   }
 
   SECTION("should set extreme wheel speeds")
   {
     wheel.SetHubSpeed(150_rpm);
-    CHECK(wheel.GetSpeed() == 100);
+    CHECK(wheel.GetSpeed() == doctest::Approx(100.0));
 
     wheel.SetHubSpeed(-200_rpm);
-    CHECK(wheel.GetSpeed() == -100);
+    CHECK(wheel.GetSpeed() == doctest::Approx(-100.0));
   }
 
   SECTION("should set extreme wheel positions")
   {
     wheel.SetSteeringAngle(500_deg);
-    CHECK(wheel.GetPosition() == 360);
+    CHECK(wheel.GetPosition() == doctest::Approx(360.0));
 
     wheel.SetSteeringAngle(-360_deg);  // resets wheel to zero
     wheel.SetSteeringAngle(-500_deg);
-    CHECK(wheel.GetPosition() == -360);
+    CHECK(wheel.GetPosition() == doctest::Approx(-360.0));
   }
 
   SECTION("should home wheel positions")

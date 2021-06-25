@@ -54,13 +54,9 @@ class Wheel
   // Sets the wheel back in its homing position by finding mark in slip ring
   void HomeWheel()
   {
-    // SetWheelToZeroPosition();
+    // TODO move wheel until slip ring indicator detected
     homing_offset_angle_ = 0_deg;
   };
-
-  /// Finds the homing slip ring mark. *Possibly by inverting
-  /// homing_offset_angle_
-  void SetWheelToZeroPosition();
 
   sjsu::RmdX & hub_motor_;    /// controls tire direction (fwd/rev) & speed
   sjsu::RmdX & steer_motor_;  /// controls wheel alignment/angle
