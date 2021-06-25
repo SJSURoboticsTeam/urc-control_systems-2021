@@ -41,36 +41,39 @@ TEST_CASE("Testing Drive System")
 
   SECTION("Switch to drive mode")
   {
-    driveSystem.SetMode('D');
-    driveSystem.ExchangeMissionControlData();
+    strcpy(driveSystem.mission_control_data_.response_body,
+           R"({"is_operational": 1, "drive_mode": "D", "speed": 10, "angle":
+           10})");
+    driveSystem.ParseGETResponseBody();
+
     driveSystem.Move();
     CHECK(static_cast<char>(driveSystem.current_mode_) == 'D');
+    driveSystem.PrintRoverData();
   }
 
   SECTION("Switch to translation mode")
   {
-    driveSystem.SetMode('T');
-    driveSystem.ExchangeMissionControlData();
+    strcpy(driveSystem.mission_control_data_.response_body,
+           R"({"is_operational": 1, "drive_mode": "T", "speed": 11, "angle":
+           11})");
+    driveSystem.ParseGETResponseBody();
     driveSystem.Move();
     CHECK(static_cast<char>(driveSystem.current_mode_) == 'T');
+    driveSystem.PrintRoverData();
   }
 
   SECTION("Switch to spin mode")
   {
-    driveSystem.SetMode();
-    driveSystem.ExchangeMissionControlData();
+    strcpy(driveSystem.mission_control_data_.response_body,
+           R"({"is_operational": 1, "drive_mode": "S", "speed": 12, "angle":
+           12})");
+    driveSystem.ParseGETResponseBody();
     driveSystem.Move();
     CHECK(static_cast<char>(driveSystem.current_mode_) == 'S');
+    driveSystem.PrintRoverData();
   }
+
+  SECTION("Adjust wheel speed") {}
 }
 
 }  // namespace sjsu
-   // strcpy(driveSystem.mission_control_data_.response_body,
-   //        R"({"is_operational": 1, "drive_mode": "S", "speed": 0, "angle":
-   //        0})");
-   // strcpy(driveSystem.mission_control_data_.response_body,
-   //        R"({"is_operational": 1, "drive_mode": "T", "speed": 0, "angle":
-   //        0})");
-   // strcpy(driveSystem.mission_control_data_.response_body,
-   //        R"({"is_operational": 1, "drive_mode": "D", "speed": 0, "angle":
-   //        0})");

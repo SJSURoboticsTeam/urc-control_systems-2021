@@ -40,6 +40,7 @@ class RoverDriveSystem
         right_wheel_(right_wheel),
         back_wheel_(back_wheel){};
 
+  // Initializes wheels and sets rover to operational starting mode (spin)
   void Initialize()
   {
     try
@@ -48,7 +49,7 @@ class RoverDriveSystem
       left_wheel_.Initialize();
       right_wheel_.Initialize();
       back_wheel_.Initialize();
-      SetMode();
+      SetMode('S');
     }
     catch (const std::exception & e)
     {
@@ -56,43 +57,6 @@ class RoverDriveSystem
       throw e;
     }
   };
-
-  /// Prints the speed and position/angle of each wheel on the rover
-  void PrintRoverData()
-  {
-    sjsu::LogInfo("is_operational: %d", mission_control_data_.is_operational);
-    sjsu::LogInfo("drive_mode: %c", static_cast<char>(current_mode_));
-    sjsu::LogInfo("state of charge: %d", state_of_charge_);
-    sjsu::LogInfo("left wheel speed: %f", left_wheel_.GetSpeed());
-    sjsu::LogInfo("left wheel position: %f", left_wheel_.GetPosition());
-    sjsu::LogInfo("right wheel speed: %f", right_wheel_.GetSpeed());
-    sjsu::LogInfo("right wheel position: %f", right_wheel_.GetPosition());
-    sjsu::LogInfo("back wheel speed: %f", back_wheel_.GetSpeed());
-    sjsu::LogInfo("back wheel position: %f", back_wheel_.GetPosition());
-  };
-
-  // Handles data transfer for rover drive system to mission control
-  /// @return returns true if connection is good and request is successful
-  void ExchangeMissionControlData()
-  {
-    try
-    {
-      if (GETRequest() && ParseGETResponseBody())
-      {
-        Move();
-      }
-      else
-      {
-        SetWheelSpeed(kZeroSpeed);
-        sjsu::LogError("Bad mission control response - stopping rover...");
-      }
-    }
-    catch (const std::exception & e)
-    {
-      sjsu::LogError("Error exchanging data!");
-      throw e;
-    }
-  }
 
   /// Main function for handling all the rover drive system functionality.
   /// drive_mode updates drive mode if new mode is different.
@@ -129,12 +93,14 @@ class RoverDriveSystem
 
   /// Resets all the wheels so the motors know their actual position.
   /// @return true if successfully resets wheels into start position
-  bool Reset()
+  void Reset()
   {
     try
     {
-      SetMode();
-      return true;
+      SetWheelSpeed(kZeroSpeed);
+      left_wheel_.HomeWheel();
+      right_wheel_.HomeWheel();
+      back_wheel_.HomeWheel();
     }
     catch (const std::exception & e)
     {
@@ -169,8 +135,8 @@ class RoverDriveSystem
   {
     try
     {
-      GETRequestParameterConstructor();
-      // TODO: Verify GET param is correct
+      std::string requestParameter = GETRequestParameterConstructor();
+
       // TODO: Need to implement Esp class & construct params for GET request
       // EX: &mission_control_data_.response_body =
       // esp_.GETDrive(mission_control_data_.request_parameter);
@@ -185,7 +151,7 @@ class RoverDriveSystem
   };
 
   /// Constructs GET request parameter
-  void GETRequestParameterConstructor()
+  char * GETRequestParameterConstructor()
   {
     try
     {
@@ -199,6 +165,7 @@ class RoverDriveSystem
           left_wheel_.GetSpeed(), left_wheel_.GetPosition(),
           right_wheel_.GetSpeed(), right_wheel_.GetPosition(),
           back_wheel_.GetSpeed(), back_wheel_.GetPosition());
+      return mission_control_data_.request_parameter;
     }
     catch (const std::exception & e)
     {
@@ -244,15 +211,15 @@ class RoverDriveSystem
 
   /// Sets the new driving mode for the rover. Rover will stop before switching
   /// @param mode Three Modes: D (drive), S (spin), T (translation)
-  void SetMode(char mode = 'S')
+  void SetMode(char mode)
   {
     try
     {
       switch (mode)
       {
-        case 'D': GoDriveMode(); break;
-        case 'S': GoSpinMode(); break;
-        case 'T': GoTranslationMode(); break;
+        case 'D': SwitchDriveMode(); break;
+        case 'S': SwitchSpinMode(); break;
+        case 'T': SwitchTranslationMode(); break;
         default:
           SetWheelSpeed(kZeroSpeed);
           sjsu::LogError("Unable to assign drive mode!");
@@ -306,7 +273,7 @@ class RoverDriveSystem
   // = DRIVE MODE SETTERS =
   // ======================
 
-  void GoDriveMode()
+  void SwitchDriveMode()
   {
     try
     {
@@ -322,7 +289,7 @@ class RoverDriveSystem
     }
   }
 
-  void GoSpinMode()
+  void SwitchSpinMode()
   {
     try
     {
@@ -338,7 +305,7 @@ class RoverDriveSystem
     }
   }
 
-  void GoTranslationMode()
+  void SwitchTranslationMode()
   {
     try
     {
@@ -362,7 +329,7 @@ class RoverDriveSystem
       const units::angle::degree_t left_wheel_angle  = -45_deg;
       const units::angle::degree_t right_wheel_angle = -135_deg;
       const units::angle::degree_t back_wheel_angle  = 90_deg;
-      SetSpinMode();
+      Reset();
       left_wheel_.SetSteeringAngle(left_wheel_angle);
       right_wheel_.SetSteeringAngle(right_wheel_angle);
       back_wheel_.SetSteeringAngle(back_wheel_angle);
@@ -379,9 +346,7 @@ class RoverDriveSystem
   {
     try
     {
-      left_wheel_.HomeWheel();
-      right_wheel_.HomeWheel();
-      back_wheel_.HomeWheel();
+      Reset();
     }
     catch (const std::exception & e)
     {
@@ -398,7 +363,7 @@ class RoverDriveSystem
       const units::angle::degree_t left_wheel_angle  = 45_deg;
       const units::angle::degree_t right_wheel_angle = -45_deg;
       const units::angle::degree_t back_wheel_angle  = -180_deg;
-      SetSpinMode();
+      Reset();
       left_wheel_.SetSteeringAngle(left_wheel_angle);
       right_wheel_.SetSteeringAngle(right_wheel_angle);
       back_wheel_.SetSteeringAngle(back_wheel_angle);
@@ -463,6 +428,20 @@ class RoverDriveSystem
     }
   };
 
+  /// Prints the speed and position/angle of each wheel on the rover
+  void PrintRoverData()
+  {
+    sjsu::LogInfo("is_operational: %d", mission_control_data_.is_operational);
+    sjsu::LogInfo("drive_mode: %c", static_cast<char>(current_mode_));
+    sjsu::LogInfo("state of charge: %d", state_of_charge_);
+    sjsu::LogInfo("left wheel speed: %f", left_wheel_.GetSpeed());
+    sjsu::LogInfo("left wheel position: %f", left_wheel_.GetPosition());
+    sjsu::LogInfo("right wheel speed: %f", right_wheel_.GetSpeed());
+    sjsu::LogInfo("right wheel position: %f", right_wheel_.GetPosition());
+    sjsu::LogInfo("back wheel speed: %f", back_wheel_.GetSpeed());
+    sjsu::LogInfo("back wheel position: %f", back_wheel_.GetPosition());
+  };
+
   int state_of_charge_ = 57;  // TODO: Implement at some point
   sjsu::drive::Wheel & left_wheel_;
   sjsu::drive::Wheel & right_wheel_;
@@ -473,3 +452,26 @@ class RoverDriveSystem
   const units::angular_velocity::revolutions_per_minute_t kZeroSpeed = 0_rpm;
 };
 }  // namespace sjsu::drive
+
+// Handles data transfer for rover drive system to mission control
+/// @return returns true if connection is good and request is successful
+// void ExchangeMissionControlData()
+// {
+//   try
+//   {
+//     if (GETRequest() && ParseGETResponseBody())
+//     {
+//       Move();
+//     }
+//     else
+//     {
+//       SetWheelSpeed(kZeroSpeed);
+//       sjsu::LogError("Bad mission control response - stopping rover...");
+//     }
+//   }
+//   catch (const std::exception & e)
+//   {
+//     sjsu::LogError("Error exchanging data!");
+//     throw e;
+//   }
+// }
