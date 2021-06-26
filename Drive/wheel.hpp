@@ -13,8 +13,8 @@ class Wheel
 
   void Initialize()
   {
-    hub_motor_.ModuleInitialize();
-    steer_motor_.ModuleInitialize();
+    hub_motor_.Initialize();
+    steer_motor_.Initialize();
   };
 
   /// Gets the speed of the hub motor.
@@ -47,7 +47,7 @@ class Wheel
     units::angle::degree_t difference_angle =
         (homing_offset_angle_ + clampedRotationAngle);
 
-    steer_motor_.SetAngle(difference_angle);
+    steer_motor_.SetAngle(difference_angle, kSteeringSpeed);
     homing_offset_angle_ += clampedRotationAngle;
   };
 
@@ -69,5 +69,7 @@ class Wheel
       100_rpm;
   const units::angular_velocity::revolutions_per_minute_t kMaxNegSpeed =
       -100_rpm;
+  const units::angular_velocity::revolutions_per_minute_t kSteeringSpeed =
+      20_rpm;
 };
 }  // namespace sjsu::drive
