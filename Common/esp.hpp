@@ -51,12 +51,12 @@ class Esp
   void GET(std::string queryStreamParameters)
   {
     request =
-        "GET / HTTP/1.1\r\nHost: "
-        "smart-garden-frontend.s3-website-us-west-2.amazonaws.com/profile"
-        "\r\nContent-Type: application/json\r\n\r\n";
+        "GET /posts/1 HTTP/1.1\r\nHost: "
+        "jsonplaceholder.typicode.com\r\nContent-Type: "
+        "application/json\r\n\r\n";
     sjsu::LogInfo("Connecting to server (%s)...", url.data());
 
-    socket_.Connect(sjsu::InternetSocket::Protocol::kTCP, url, 80,
+    socket_.Connect(sjsu::InternetSocket::Protocol::kTCP, url, kPort,
                     kDefaultTimeout);
 
     sjsu::LogInfo("Writing to server (%s)...", url.data());
@@ -68,14 +68,12 @@ class Esp
 
     sjsu::LogInfo("Reading back response from server (%s)...", url.data());
 
-    std::array<uint8_t, 1024 * 2> response;
+    std::array<uint8_t, 1024 * 5> response;
     size_t read_back = socket_.Read(response, kDefaultTimeout);
 
     sjsu::LogInfo("Printing Server Response:");
     printf("%.*s\n", read_back, response.data());
-    puts(
-        "=================================================================="
-        "=");
+    puts("================================================");
     // TODO: Parse and return GET response body
   };
 
@@ -99,8 +97,7 @@ class Esp
   sjsu::Esp8266 esp_;
   sjsu::WiFi & wifi_;
   sjsu::InternetSocket & socket_;
-  std::string_view url =
-      "smart-garden-frontend.s3-website-us-west-2.amazonaws.com/profile";
+  std::string_view url = "jsonplaceholder.typicode.com";
   std::string_view request;
   const uint16_t kPort                           = 80;
   const char * kSsid                             = "GarzaLine";
