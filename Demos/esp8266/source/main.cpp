@@ -17,7 +17,7 @@ std::string_view get_request_example =
 int main()
 {
   sjsu::LogInfo("ESP8266 Application Starting...");
-
+  std::chrono::nanoseconds kDefaultTimeout = 20s;
   // Phase #1:
   // Define all of the peripheral you plan to use as pointers. Pointers must be
   // used in order to do the next step
@@ -57,7 +57,7 @@ int main()
   while (true)
   {
     sjsu::LogInfo("Connecting to WiFi...");
-    if (wifi.ConnectToAccessPoint("KAMMCE-PHONE", "roverteam", 10s))
+    if (wifi.ConnectToAccessPoint("GarzaLine", "NRG523509", 5s))
     {
       break;
     }
@@ -68,7 +68,8 @@ int main()
   sjsu::LogInfo("Connected to WiFi!!");
   sjsu::LogInfo("Connecting to server (%s)...", host.data());
 
-  socket.Connect(sjsu::InternetSocket::Protocol::kTCP, host, 80, 5s);
+  socket.Connect(sjsu::InternetSocket::Protocol::kTCP, host, 80,
+                 kDefaultTimeout);
 
   sjsu::LogInfo("Writing to server (%s)...", host.data());
 
@@ -76,12 +77,12 @@ int main()
       reinterpret_cast<const uint8_t *>(get_request_example.data()),
       get_request_example.size());
 
-  socket.Write(write_payload, 5s);
+  socket.Write(write_payload, kDefaultTimeout);
 
   sjsu::LogInfo("Reading back response from server (%s)...", host.data());
 
   std::array<uint8_t, 1024 * 2> response;
-  size_t read_back = socket.Read(response, 10s);
+  size_t read_back = socket.Read(response, kDefaultTimeout);
 
   sjsu::LogInfo("Printing Server Response:");
   printf("%.*s\n", read_back, response.data());

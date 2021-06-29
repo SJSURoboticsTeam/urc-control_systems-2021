@@ -4,8 +4,9 @@
 #include <cstdint>
 #include <string_view>
 
+#include "utility/debug.hpp"
 #include "utility/log.hpp"
-#include "peripherals/stm32f10x/uart.hpp"
+#include "peripherals/lpc40xx/uart.hpp"
 #include "devices/communication/esp8266.hpp"
 
 namespace sjsu::common
@@ -15,13 +16,14 @@ class Esp
 {
  public:
   Esp()
-      : esp_(sjsu::stm32f10x::GetUart<1>()),
+      : esp_(sjsu::lpc40xx::GetUart<3>()),
         wifi_(esp_.GetWiFi()),
         socket_(esp_.GetInternetSocket()){};
 
   /// Initializes the Wi-Fi module by connecting to WiFi
   void Initialize()
   {
+    sjsu::LogInfo("Initializing ESP8266");
     esp_.Initialize();
     ConnectToWiFi();
   };
@@ -46,19 +48,35 @@ class Esp
   /// Sends a GET request to the specified url
   /// @param queryStreamParameters
   /// @return the response body data
-  std::string GET(std::string queryStreamParameters)
+  void GET(std::string queryStreamParameters)
   {
-    std::string host         = kHost + queryStreamParameters;
-    std::string_view request = "GET / HTTP/1.1\r\nHost: " + host + "\r\n\r\n";
+    request =
+        "GET / HTTP/1.1\r\nHost: "
+        "smart-garden-frontend.s3-website-us-west-2.amazonaws.com/profile"
+        "\r\nContent-Type: application/json\r\n\r\n";
+    sjsu::LogInfo("Connecting to server (%s)...", url.data());
 
-    socket_.Connect(sjsu::InternetSocket::Protocol::kTCP, host, kPort, 5s);
-    std::span request_payload(reinterpret_cast<const uint8_t *>(request.data()),
-                              request.size());
-    socket_.Write(request_payload, 5s);
+    socket_.Connect(sjsu::InternetSocket::Protocol::kTCP, url, 80,
+                    kDefaultTimeout);
+
+    sjsu::LogInfo("Writing to server (%s)...", url.data());
+
+    std::span write_payload(reinterpret_cast<const uint8_t *>(request.data()),
+                            request.size());
+
+    socket_.Write(write_payload, kDefaultTimeout);
+
+    sjsu::LogInfo("Reading back response from server (%s)...", url.data());
+
     std::array<uint8_t, 1024 * 2> response;
-    size_t read_back = socket_.Read(response, 10s);
+    size_t read_back = socket_.Read(response, kDefaultTimeout);
+
+    sjsu::LogInfo("Printing Server Response:");
+    printf("%.*s\n", read_back, response.data());
+    puts(
+        "=================================================================="
+        "=");
     // TODO: Parse and return GET response body
-    return "GET Response Body";
   };
 
  private:
@@ -68,7 +86,7 @@ class Esp
     while (true)
     {
       sjsu::LogInfo("Attempting to connect to %s...", kSsid);
-      if (wifi_.ConnectToAccessPoint(kSsid, kPassword, 10s))
+      if (wifi_.ConnectToAccessPoint(kSsid, kPassword, kDefaultTimeout))
       {
         break;
       }
@@ -81,9 +99,12 @@ class Esp
   sjsu::Esp8266 esp_;
   sjsu::WiFi & wifi_;
   sjsu::InternetSocket & socket_;
-  const uint16_t kPort        = 5500;
-  const std::string kHost     = "http://127.0.0.1:5500/";
-  const std::string kSsid     = "network-name";
-  const std::string kPassword = "password";
+  std::string_view url =
+      "smart-garden-frontend.s3-website-us-west-2.amazonaws.com/profile";
+  std::string_view request;
+  const uint16_t kPort                           = 80;
+  const char * kSsid                             = "GarzaLine";
+  const char * kPassword                         = "NRG523509";
+  const std::chrono::nanoseconds kDefaultTimeout = 10s;
 };
 }  // namespace sjsu::common

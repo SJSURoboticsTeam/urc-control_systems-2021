@@ -25,7 +25,8 @@ int main(void)
 
   demoWheel.Initialize();
   esp.Initialize();
-  esp.isConnectedToWiFi();
+  // esp.isConnectedToWiFi();
+  esp.GET("?example=3");
 
   // Not sure how to implement
   // sjsu::lpc40xx::Can can_network(sjsu::lpc40xx::Can::Channel::kCan2);
