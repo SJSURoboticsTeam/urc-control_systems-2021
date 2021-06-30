@@ -68,19 +68,21 @@ class Esp
 
     sjsu::LogInfo("Reading back response from server (%s)...", url_.data());
 
-    std::array<uint8_t, 1024 * 3> response;
+    std::array<uint8_t, 1024 * 2> response;
     size_t read_back = socket_.Read(response, kDefaultTimeout);
 
     sjsu::LogInfo("Printing Server Response:");
     printf("%.*s\n", read_back, response.data());
-    puts("================================================\n\n");
+    puts("================================================");
 
     // https://stackoverflow.com/questions/17746688/convert-unsigned-char-to-stdstring
-    std::string_view test(reinterpret_cast<char *>(response.data()));
-    test = test.substr(test.find("\r\n\r\n"), test.find("\n}"));
+    // std::string_view test(reinterpret_cast<char *>(response.data()));
+    std::string_view test(reinterpret_cast<char *>(response.data()), read_back);
 
-    puts(test.data());
-    // sjsu::LogInfo("%.*s", test);
+    test      = test.substr(test.find("\r\n\r\n"));
+    auto body = test.substr(test.find("{"));
+
+    puts(body.data());
   };
 
  private:

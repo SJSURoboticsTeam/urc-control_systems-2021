@@ -27,7 +27,7 @@ int main(void)
   demoWheel.Initialize();
   esp.Initialize();
   // esp.isConnectedToWiFi(); // dev2 not implemented
-  esp.GET("posts/3?example=3");
+  esp.GET("todos/3?example=3");
 
   return 0;
 }
