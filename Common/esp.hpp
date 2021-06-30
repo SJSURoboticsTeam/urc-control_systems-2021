@@ -23,7 +23,7 @@ class Esp
   /// Initializes the Wi-Fi module by connecting to WiFi
   void Initialize()
   {
-    sjsu::LogInfo("Initializing ESP8266");
+    sjsu::LogInfo("Initializing Wi-Fi module...");
     esp_.Initialize();
     ConnectToWiFi();
   };
@@ -46,27 +46,27 @@ class Esp
   };
 
   /// Sends a GET request to the specified url
-  /// @param queryStreamParameters
+  /// @param endpoint
   /// @return the response body data
-  void GET(std::string queryStreamParameters)
+  void GET(std::string endpoint)
   {
-    request =
-        "GET /posts/1 HTTP/1.1\r\nHost: "
-        "jsonplaceholder.typicode.com\r\nContent-Type: "
-        "application/json\r\n\r\n";
-    sjsu::LogInfo("Connecting to server (%s)...", url.data());
+    request_ = "GET /" + endpoint + " HTTP/1.1\r\nHost: " + url_.data() +
+               "\r\nContent-Type: application/json\r\n\r\n";
 
-    socket_.Connect(sjsu::InternetSocket::Protocol::kTCP, url, kPort,
+    // sjsu::LogInfo("Request Header: %s", request_.data());
+    sjsu::LogInfo("Connecting to server (%s)...", url_.data());
+
+    socket_.Connect(sjsu::InternetSocket::Protocol::kTCP, url_, kPort,
                     kDefaultTimeout);
 
-    sjsu::LogInfo("Writing to server (%s)...", url.data());
+    sjsu::LogInfo("Writing to server (%s)...", url_.data());
 
-    std::span write_payload(reinterpret_cast<const uint8_t *>(request.data()),
-                            request.size());
+    std::span write_payload(reinterpret_cast<const uint8_t *>(request_.data()),
+                            request_.size());
 
     socket_.Write(write_payload, kDefaultTimeout);
 
-    sjsu::LogInfo("Reading back response from server (%s)...", url.data());
+    sjsu::LogInfo("Reading back response from server (%s)...", url_.data());
 
     std::array<uint8_t, 1024 * 3> response;
     size_t read_back = socket_.Read(response, kDefaultTimeout);
@@ -75,11 +75,12 @@ class Esp
     printf("%.*s\n", read_back, response.data());
     puts("================================================\n\n");
 
-    sjsu::LogInfo("Attempt at parsing response:");
     // https://stackoverflow.com/questions/17746688/convert-unsigned-char-to-stdstring
     std::string_view test(reinterpret_cast<char *>(response.data()));
-    int endHeader = test.find("\r\n\r\n");
-    sjsu::LogInfo("Body: %.*s", test.substr(endHeader));
+    test = test.substr(test.find("\r\n\r\n"), test.find("\n}"));
+
+    puts(test.data());
+    // sjsu::LogInfo("%.*s", test);
   };
 
  private:
@@ -96,17 +97,17 @@ class Esp
       sjsu::LogError("Failed to connect to %s... Retrying...", kSsid);
       wifi_.DisconnectFromAccessPoint();
     }
-    sjsu::LogInfo("Connected to %s", kSsid);
+    sjsu::LogInfo("Connected!");
   }
 
   sjsu::Esp8266 esp_;
   sjsu::WiFi & wifi_;
   sjsu::InternetSocket & socket_;
-  std::string_view url = "jsonplaceholder.typicode.com";
-  std::string_view request;
-  const uint16_t kPort                           = 80;
-  const char * kSsid                             = "GarzaLine";
-  const char * kPassword                         = "NRG523509";
+  std::string_view request_;
+  std::string_view url_  = "jsonplaceholder.typicode.com";
+  const uint16_t kPort   = 80;
+  const char * kSsid     = "GarzaLine";
+  const char * kPassword = "NRG523509";
   const std::chrono::nanoseconds kDefaultTimeout = 10s;
 };
 }  // namespace sjsu::common

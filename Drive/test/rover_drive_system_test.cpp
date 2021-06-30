@@ -42,9 +42,9 @@ TEST_CASE("Testing Drive System")
   SECTION("should correctly create GET request with current data")
   {
     std::string expectedParam =
-        "?is_operational=1&drive_mode=S&battery=90&left_wheel_speed=0.000000&"
-        "left_wheel_angle=0.000000&right_wheel_speed=0.000000&right_wheel_"
-        "angle=0.000000&back_wheel_speed=0.000000&back_wheel_angle=0.000000";
+        "drive?is_operational=1&drive_mode=S&battery=90&left_wheel_speed=0."
+        "000000&left_wheel_angle=0.000000&right_wheel_speed=0.000000&right_"
+        "wheel_angle=0.000000&back_wheel_speed=0.000000&back_wheel_angle=0.0";
     std::string reqParam = driveSystem.CreateGETParameters();
     CHECK(reqParam == expectedParam);
   }

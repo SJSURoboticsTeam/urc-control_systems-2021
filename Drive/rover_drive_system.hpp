@@ -71,15 +71,16 @@ class RoverDriveSystem
     try
     {
       char reqParam[200];
-      snprintf(
-          reqParam, 200,
-          "?is_operational=%d&drive_mode=%c&battery=%d&left_wheel_speed=%f&"
-          "left_wheel_angle=%f&right_wheel_speed=%f&right_wheel_angle=%f&"
-          "back_wheel_speed=%f&back_wheel_angle=%f",
-          mc_data.is_operational, static_cast<char>(current_mode_),
-          state_of_charge_, left_wheel_.GetSpeed(), left_wheel_.GetPosition(),
-          right_wheel_.GetSpeed(), right_wheel_.GetPosition(),
-          back_wheel_.GetSpeed(), back_wheel_.GetPosition());
+      snprintf(reqParam, 200,
+               "drive?is_operational=%d&drive_mode=%c&battery=%d&left_wheel_"
+               "speed=%f&"
+               "left_wheel_angle=%f&right_wheel_speed=%f&right_wheel_angle=%f&"
+               "back_wheel_speed=%f&back_wheel_angle=%f",
+               mc_data.is_operational, static_cast<char>(current_mode_),
+               state_of_charge_, left_wheel_.GetSpeed(),
+               left_wheel_.GetPosition(), right_wheel_.GetSpeed(),
+               right_wheel_.GetPosition(), back_wheel_.GetSpeed(),
+               back_wheel_.GetPosition());
       std::string requestParameter = reqParam;
       return requestParameter;
     }
