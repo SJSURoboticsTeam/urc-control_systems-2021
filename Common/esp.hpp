@@ -48,41 +48,29 @@ class Esp
   /// Sends a GET request to the specified url
   /// @param endpoint
   /// @return the response body data
-  void GET(std::string endpoint)
+  std::string_view GET(std::string endpoint)
   {
     request_ = "GET /" + endpoint + " HTTP/1.1\r\nHost: " + url_.data() +
                "\r\nContent-Type: application/json\r\n\r\n";
 
-    // sjsu::LogInfo("Request Header: %s", request_.data());
-    sjsu::LogInfo("Connecting to server (%s)...", url_.data());
-
+    sjsu::LogInfo("Connecting to %s...", url_.data());
     socket_.Connect(sjsu::InternetSocket::Protocol::kTCP, url_, kPort,
                     kDefaultTimeout);
 
-    sjsu::LogInfo("Writing to server (%s)...", url_.data());
-
+    sjsu::LogInfo("Writing request to server...");
     std::span write_payload(reinterpret_cast<const uint8_t *>(request_.data()),
                             request_.size());
-
     socket_.Write(write_payload, kDefaultTimeout);
 
-    sjsu::LogInfo("Reading back response from server (%s)...", url_.data());
-
+    sjsu::LogInfo("Reading back response from server...");
     std::array<uint8_t, 1024 * 2> response;
     size_t read_back = socket_.Read(response, kDefaultTimeout);
 
-    sjsu::LogInfo("Printing Server Response:");
-    printf("%.*s\n", read_back, response.data());
-    puts("================================================");
-
-    // https://stackoverflow.com/questions/17746688/convert-unsigned-char-to-stdstring
-    // std::string_view test(reinterpret_cast<char *>(response.data()));
-    std::string_view test(reinterpret_cast<char *>(response.data()), read_back);
-
-    test      = test.substr(test.find("\r\n\r\n"));
-    auto body = test.substr(test.find("{"));
-
-    puts(body.data());
+    sjsu::LogInfo("Parsing response body for JSON...");
+    std::string_view body(reinterpret_cast<char *>(response.data()), read_back);
+    body = body.substr(body.find("\r\n\r\n"));
+    body = body.substr(body.find("{"));
+    return body.data();
   };
 
  private:

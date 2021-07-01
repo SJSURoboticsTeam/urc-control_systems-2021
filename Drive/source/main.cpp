@@ -27,7 +27,8 @@ int main(void)
   demoWheel.Initialize();
   esp.Initialize();
   // esp.isConnectedToWiFi(); // dev2 not implemented
-  esp.GET("todos/3?example=3");
+  auto body = esp.GET("todos/3?example=3");
+  sjsu::LogInfo("Body:\n%s", body.data());
 
   return 0;
 }
