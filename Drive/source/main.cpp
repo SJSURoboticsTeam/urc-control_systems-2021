@@ -34,14 +34,38 @@ int main(void)
   sjsu::drive::Wheel right_wheel(right_hub_motor, right_steer_motor);
   sjsu::drive::Wheel back_wheel(back_hub_motor, back_steer_motor);
 
+  sjsu::drive::RoverDriveSystem drive_system(left_wheel, right_wheel,
+                                             back_wheel);
+
   sjsu::LogInfo("Initializing wheels and esp...");
   esp.Initialize();
   left_wheel.Initialize();
   right_wheel.Initialize();
   back_wheel.Initialize();
 
-  std::string_view response = esp.GET("todos/3?example=3");
-  sjsu::LogInfo("Body:\n%s", response.data());
+  // Drive control loop
+  // 1. Drive sys creates GET request parameters - returns endpoint+params
+  // 2. Make GET request using esp - returns response body in string_view
+  // 3. Drive sys parses GET response
+  // 4. Drive sys handles rover movement - may move or switch modes
+
+  while (true)
+  {
+    try
+    {
+      std::string parameters    = drive_system.CreateRequestParameters();
+      std::string_view response = esp.GETRequest(parameters);
+      sjsu::LogInfo("Response Body:\n%s", response.data());
+      drive_system.ParseJSONResponse(response);
+      drive_system.HandleRoverMovement();
+      drive_system.PrintRoverData();
+    }
+    catch (const std::exception & e)
+    {
+      sjsu::LogError("Error in main()!");
+      throw e;
+    }
+  }
 
   return 0;
 }

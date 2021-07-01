@@ -1,10 +1,7 @@
 #pragma once
 
-#include <string>
-#include <cstdint>
 #include <string_view>
 
-#include "utility/debug.hpp"
 #include "utility/log.hpp"
 #include "peripherals/lpc40xx/uart.hpp"
 #include "devices/communication/esp8266.hpp"
@@ -31,7 +28,7 @@ class Esp
   /// Sends a GET request to the hardcoded URL
   /// @param endpoint i.e. /endpoint?example=parameter
   /// @return the response body of the GET request
-  std::string_view GET(std::string endpoint)
+  std::string_view GETRequest(std::string endpoint)
   {
     request_ = "GET /" + endpoint + " HTTP/1.1\r\nHost: " + url_.data() +
                "\r\nContent-Type: application/json\r\n\r\n";
