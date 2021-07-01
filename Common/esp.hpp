@@ -28,23 +28,6 @@ class Esp
     ConnectToWiFi();
   };
 
-  /// Verifies that the Wi-Fi module is still connected to the network
-  /// @return true if the module is still connected to the internet
-  bool isConnectedToWiFi()
-  {
-    if (!wifi_.IsConnected())
-    {
-      sjsu::LogError("Lost connection to %s... Reconnecting...", kSsid);
-      ConnectToWiFi();
-      if (!wifi_.IsConnected())
-      {
-        sjsu::LogError("Unable to reconnect to %s...", kSsid);
-        return false;
-      }
-    }
-    return true;
-  };
-
   /// Sends a GET request to the hardcoded URL
   /// @param endpoint i.e. /endpoint?example=parameter
   /// @return the response body of the GET request
@@ -68,7 +51,7 @@ class Esp
   };
 
  private:
-  /// Attempts to connect to the hardcoded WiFi address
+  /// Attempts to connect to the local WiFi network
   void ConnectToWiFi()
   {
     while (true)
@@ -84,6 +67,7 @@ class Esp
     sjsu::LogInfo("Connected!");
   }
 
+  /// Connects to the URL provided in member function
   void ConnectToServer()
   {
     sjsu::LogInfo("Connecting to %s...", url_.data());
@@ -91,6 +75,7 @@ class Esp
                     kDefaultTimeout);
   }
 
+  /// Sends an HTTP request to the connected server
   void WriteToServer()
   {
     sjsu::LogInfo("Writing request to server...");
@@ -98,6 +83,23 @@ class Esp
                             request_.size());
     socket_.Write(write_payload, kDefaultTimeout);
   }
+
+  /// Verifies that the Wi-Fi module is still connected to the network
+  /// @return true if the module is still connected to the internet
+  bool IsConnectedToWiFi()
+  {
+    if (!wifi_.IsConnected())  // TODO: Not implemented
+    {
+      sjsu::LogError("Lost connection to %s... Reconnecting...", kSsid);
+      ConnectToWiFi();
+      if (!wifi_.IsConnected())
+      {
+        sjsu::LogError("Unable to reconnect to %s...", kSsid);
+        return false;
+      }
+    }
+    return true;
+  };
 
   sjsu::Esp8266 esp_;
   sjsu::WiFi & wifi_;
