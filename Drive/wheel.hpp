@@ -33,60 +33,43 @@ class Wheel
   /// @param hub_speed the new speed of the wheel
   void SetHubSpeed(units::angular_velocity::revolutions_per_minute_t hub_speed)
   {
-    // TODO: Implement std::clamp for handling extrema
-    if (hub_speed > kMaxHubSpeed)
-    {
-      hub_speed = kMaxHubSpeed;
-    }
-    if (hub_speed < kMaxNegativeHubSpeed)
-    {
-      hub_speed = kMaxNegativeHubSpeed;
-    }
-    hub_speed_ = hub_speed;
-    hub_motor_.SetSpeed(hub_speed);
+    auto clampedHubSpeed = std::clamp(hub_speed, kMaxNegSpeed, kMaxPosSpeed);
+    hub_motor_.SetSpeed(clampedHubSpeed);
+    hub_speed_ = clampedHubSpeed;
   }
 
   /// Adjusts the steer motor by the provided rotation angle/degree.
   /// @param rotation_angle positive angle (turn right), negative angle (left)
-  /// @param steer_speed speed to adjust steering motor by - might remove
-  void SetSteeringAngle(
-      units::angle::degree_t rotation_angle,
-      units::angular_velocity::revolutions_per_minute_t steer_speed = 20_rpm)
+  void SetSteeringAngle(units::angle::degree_t rotation_angle)
   {
-    // TODO: Implement std::clamp for handling extrema
-    if (steer_speed > kMaxSteerSpeed)
-    {
-      steer_speed = kMaxSteerSpeed;
-    }
+    auto clampedRotationAngle =
+        std::clamp(rotation_angle, kMaxNegRotation, kMaxPosRotation);
     units::angle::degree_t difference_angle =
-        (rotation_angle + homing_offset_angle_);
-    steer_motor_.SetAngle(difference_angle, steer_speed);
-    homing_offset_angle_ += difference_angle;
+        (homing_offset_angle_ + clampedRotationAngle);
+
+    steer_motor_.SetAngle(difference_angle, kSteeringSpeed);
+    homing_offset_angle_ += clampedRotationAngle;
   };
 
   // Sets the wheel back in its homing position by finding mark in slip ring
   void HomeWheel()
   {
-    SetWheelToZeroPosition();
+    // TODO - move wheel until slip ring indicator detected
     homing_offset_angle_ = 0_deg;
   };
 
- private:
-  /// Finds the homing slip ring mark. *Possibly by inverting
-  /// homing_offset_angle_
-  void SetWheelToZeroPosition();
-
   sjsu::RmdX & hub_motor_;    /// controls tire direction (fwd/rev) & speed
   sjsu::RmdX & steer_motor_;  /// controls wheel alignment/angle
-  units::angle::degree_t homing_offset_angle_                    = 0_deg;
-  units::angular_velocity::revolutions_per_minute_t hub_speed_   = 0_rpm;
-  units::angular_velocity::revolutions_per_minute_t steer_speed_ = 20_rpm;
+  units::angle::degree_t homing_offset_angle_                  = 0_deg;
+  units::angular_velocity::revolutions_per_minute_t hub_speed_ = 0_rpm;
 
-  const units::angular_velocity::revolutions_per_minute_t kMaxHubSpeed =
+  const units::angle::degree_t kMaxPosRotation = 360_deg;
+  const units::angle::degree_t kMaxNegRotation = -360_deg;
+  const units::angular_velocity::revolutions_per_minute_t kMaxPosSpeed =
       100_rpm;
-  const units::angular_velocity::revolutions_per_minute_t kMaxNegativeHubSpeed =
+  const units::angular_velocity::revolutions_per_minute_t kMaxNegSpeed =
       -100_rpm;
-  const units::angular_velocity::revolutions_per_minute_t kMaxSteerSpeed =
-      50_rpm;
+  const units::angular_velocity::revolutions_per_minute_t kSteeringSpeed =
+      20_rpm;
 };
 }  // namespace sjsu::drive
