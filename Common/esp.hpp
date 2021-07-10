@@ -42,8 +42,8 @@ class Esp
     std::string_view body(reinterpret_cast<char *>(response.data()), read_back);
 
     sjsu::LogInfo("Parsing response body for JSON...");
-    body = body.substr(body.find("\r\n\r\n"));
-    body = body.substr(body.find("{"));
+    // body = body.substr(body.find("\r\n\r\n"));
+    // body = body.substr(body.find("{"));
     return body.data();
   };
 
@@ -102,10 +102,10 @@ class Esp
   sjsu::WiFi & wifi_;
   sjsu::InternetSocket & socket_;
   std::string_view request_;
-  std::string_view url_  = "jsonplaceholder.typicode.com";
-  const uint16_t kPort   = 80;
-  const char * kSsid     = "GarzaLine";
-  const char * kPassword = "NRG523509";
+  std::string_view url_                          = "192.168.1.103";
+  const uint16_t kPort                           = 3000;
+  const char * kSsid                             = "GarzaLine";
+  const char * kPassword                         = "NRG523509";
   const std::chrono::nanoseconds kDefaultTimeout = 10s;
 };
 }  // namespace sjsu::common
