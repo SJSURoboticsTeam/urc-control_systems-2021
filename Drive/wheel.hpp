@@ -33,9 +33,30 @@ class Wheel
   /// @param hub_speed the new speed of the wheel
   void SetHubSpeed(units::angular_velocity::revolutions_per_minute_t hub_speed)
   {
+    try
+    {
+      sjsu::LogInfo("made it to sethubspeed()");
+      // units::angular_velocity::revolutions_per_minute_t num = hub_speed / 10;
+      hub_motor_.SetSpeed(hub_speed);
+      auto clampedHubSpeed = std::clamp(hub_speed, kMaxNegSpeed, kMaxPosSpeed);
+      // for (int i = 0; i < 10; i++)
+      // {
+      //   hub_motor_.SetSpeed(num);
+      //   num += num;
+      //   sjsu::Delay(200ms);
+      // }
+    }
+    catch (const std::exception & e)
+    {
+      sjsu::LogInfo("made it to sethubspeed() - something broke!");
+      throw e;
+    }
+
+    /*
     auto clampedHubSpeed = std::clamp(hub_speed, kMaxNegSpeed, kMaxPosSpeed);
     hub_motor_.SetSpeed(clampedHubSpeed);
     hub_speed_ = clampedHubSpeed;
+    */
   }
 
   /// Adjusts the steer motor by the provided rotation angle/degree.

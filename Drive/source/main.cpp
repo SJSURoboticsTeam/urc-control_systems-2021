@@ -31,17 +31,19 @@ int main(void)
   back_hub_motor.settings.gear_ratio    = 8;
 
   sjsu::drive::Wheel left_wheel(left_hub_motor, left_steer_motor);
-  sjsu::drive::Wheel right_wheel(right_hub_motor, right_steer_motor);
-  sjsu::drive::Wheel back_wheel(back_hub_motor, back_steer_motor);
 
-  sjsu::drive::RoverDriveSystem drive_system(left_wheel, right_wheel,
-                                             back_wheel);
+  left_wheel.SetHubSpeed(10_rpm);
+  // sjsu::drive::Wheel right_wheel(right_hub_motor, right_steer_motor);
+  // sjsu::drive::Wheel back_wheel(back_hub_motor, back_steer_motor);
 
-  sjsu::LogInfo("Initializing wheels and esp...");
-  esp.Initialize();
-  left_wheel.Initialize();
-  right_wheel.Initialize();
-  back_wheel.Initialize();
+  // sjsu::drive::RoverDriveSystem drive_system(left_wheel, right_wheel,
+  //                                            back_wheel);
+
+  // sjsu::LogInfo("Initializing wheels and esp...");
+  // esp.Initialize();
+  // left_wheel.Initialize();
+  // right_wheel.Initialize();
+  // back_wheel.Initialize();
 
   // Drive control loop
   // 1. Drive sys creates GET request parameters - returns endpoint+params
@@ -49,23 +51,23 @@ int main(void)
   // 3. Drive sys parses GET response
   // 4. Drive sys handles rover movement - may move or switch modes
 
-  while (true)
-  {
-    try
-    {
-      std::string parameters    = drive_system.CreateRequestParameters();
-      std::string_view response = esp.GETRequest(parameters);
-      sjsu::LogInfo("Response Body:\n%s", response.data());
-      drive_system.ParseJSONResponse(response);
-      drive_system.HandleRoverMovement();
-      drive_system.PrintRoverData();
-    }
-    catch (const std::exception & e)
-    {
-      sjsu::LogError("Error in main()!");
-      throw e;
-    }
-  }
+  // while (true)
+  // {
+  //   try
+  //   {
+  //     std::string parameters    = drive_system.CreateRequestParameters();
+  //     std::string_view response = esp.GETRequest(parameters);
+  //     sjsu::LogInfo("Response Body:\n%s", response.data());
+  //     drive_system.ParseJSONResponse(response);
+  //     drive_system.HandleRoverMovement();
+  //     drive_system.PrintRoverData();
+  //   }
+  //   catch (const std::exception & e)
+  //   {
+  //     sjsu::LogError("Error in main()!");
+  //     throw e;
+  //   }
+  // }
 
   return 0;
 }
