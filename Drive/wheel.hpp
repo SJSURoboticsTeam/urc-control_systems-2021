@@ -1,6 +1,7 @@
 #pragma once
 
 #include "devices/actuators/servo/rmd_x.hpp"
+#include "peripherals/lpc40xx/gpio.hpp"
 
 namespace sjsu::drive
 {
@@ -15,6 +16,8 @@ class Wheel
   {
     hub_motor_.Initialize();
     steer_motor_.Initialize();
+    homing_pin_.Initialize();
+    homing_pin_.SetAsInput();
   };
 
   /// Gets the speed of the hub motor.
@@ -54,8 +57,20 @@ class Wheel
   // Sets the wheel back in its homing position by finding mark in slip ring
   void HomeWheel()
   {
-    // TODO - move wheel until slip ring indicator detected
-    homing_offset_angle_ = 0_deg;
+    sjsu::LogInfo("homing...");
+    bool home_level = sjsu::Gpio::kLow;
+    if (homing_pin_.Read() == home_level)
+    {
+      sjsu::LogInfo("already home");
+      return;
+    }
+
+    steer_motor_.SetSpeed(20_rpm);
+    while (homing_pin_.Read() != home_level)
+    {
+      sjsu::LogInfo("spinning");
+    }
+    steer_motor_.SetSpeed(0_rpm);
   };
 
   sjsu::RmdX & hub_motor_;    /// controls tire direction (fwd/rev) & speed
@@ -71,5 +86,6 @@ class Wheel
       -100_rpm;
   const units::angular_velocity::revolutions_per_minute_t kSteeringSpeed =
       20_rpm;
+  sjsu::Gpio & homing_pin_ = sjsu::lpc40xx::GetGpio<1, 30>();
 };
 }  // namespace sjsu::drive
