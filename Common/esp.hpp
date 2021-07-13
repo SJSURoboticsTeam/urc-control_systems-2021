@@ -108,8 +108,8 @@ class Esp
   std::string request_;
   std::string url_       = "my-json-server.typicode.com";
   const uint16_t kPort   = 80;
-  const char * kSsid     = "andrews";
-  const char * kPassword = "";
-  const std::chrono::nanoseconds kDefaultTimeout = 10s;
+  const char * kSsid     = "GarzaLine";
+  const char * kPassword = "NRG523509";
+  const std::chrono::nanoseconds kDefaultTimeout = 3s;
 };
 }  // namespace sjsu::common

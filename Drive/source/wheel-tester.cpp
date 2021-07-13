@@ -28,7 +28,8 @@ int main(void)
     demoWheel.Initialize();
     double currPos = demoWheel.GetPosition();
     sjsu::LogInfo("Current Position(start): %d", currPos);
-    demoWheel.SetSteeringAngle(180_deg);
+    // demoWheel.SetSteeringAngle(180_deg);
+    demoWheel.HomeWheel();
     sjsu::Delay(10s);
     currPos = demoWheel.GetPosition();
     sjsu::LogInfo("Current Position(end): %d", currPos);

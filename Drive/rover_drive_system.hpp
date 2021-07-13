@@ -60,11 +60,11 @@ class RoverDriveSystem
       // TODO - make these floats go to hundredths place (i.e. 0.00)?
       // Breaks unit test often since it never knows correct decimal value
       char reqParam[250];
-      snprintf(reqParam, 250,
+      snprintf(reqParam, 300,
+               "Vishnu-Adda/json-robo-test/"
                "drive?is_operational=%d&drive_mode=%c&battery=%d&left_wheel_"
-               "speed=%f&"
-               "left_wheel_angle=%f&right_wheel_speed=%f&right_wheel_angle=%f&"
-               "back_wheel_speed=%f&back_wheel_angle=%f",
+               "speed=%4g&left_wheel_angle=%4g&right_wheel_speed=%4g&right_"
+               "wheel_angle=%4g&back_wheel_speed=%4g&back_wheel_angle=%4g",
                mc_data.is_operational, current_mode_, state_of_charge_,
                left_wheel_.GetSpeed(), left_wheel_.GetPosition(),
                right_wheel_.GetSpeed(), right_wheel_.GetPosition(),
@@ -87,13 +87,14 @@ class RoverDriveSystem
     {
       sscanf(
           reinterpret_cast<const char *>(response.data()),
-          R"({"is_operational": %d, "drive_mode": "%c", "speed": %f, "angle": %f})",
+          R"({ "is_operational": %d, "drive_mode": "%c", "speed": %f, "angle": %f }\n)",
           &mc_data.is_operational, &mc_data.drive_mode, &mc_data.speed,
           &mc_data.rotation_angle);
-      sjsu::LogInfo(
-          "MC: is_operational: %d, drive_mode: %c, speed: %f, angle: %f",
-          mc_data.is_operational, mc_data.drive_mode, mc_data.speed,
-          mc_data.rotation_angle);
+
+      sjsu::LogInfo("is_operational: %d", mc_data.is_operational);
+      sjsu::LogInfo("drive_mode: %c", mc_data.drive_mode);
+      sjsu::LogInfo("speed: %f", mc_data.speed);
+      sjsu::LogInfo("rotation_angle: %f", mc_data.rotation_angle);
     }
     catch (const std::exception & e)
     {
@@ -108,10 +109,10 @@ class RoverDriveSystem
   {
     try
     {
-      sjsu::LogInfo("is_operational: %d", mc_data.is_operational);
-      sjsu::LogInfo("drive_mode: %d", mc_data.drive_mode);
-      sjsu::LogInfo("speed: %d", mc_data.speed);
-      sjsu::LogInfo("angle: %d", mc_data.rotation_angle);
+      // sjsu::LogInfo("is_operational: %d", mc_data.is_operational);
+      // sjsu::LogInfo("drive_mode: %c", mc_data.drive_mode);
+      // sjsu::LogInfo("speed: %f", mc_data.speed);
+      // sjsu::LogInfo("angle: %f", mc_data.rotation_angle);
 
       units::angle::degree_t angle(mc_data.rotation_angle);
       units::angular_velocity::revolutions_per_minute_t speed(mc_data.speed);
@@ -133,8 +134,7 @@ class RoverDriveSystem
       else
       {
         // If current mode is not same as mc mode value
-        sjsu::LogInfo("Switching rover from %c mode into %c mode...",
-                      current_mode_, mc_data.drive_mode);
+        sjsu::LogInfo("Switching rover into %c mode...", mc_data.drive_mode);
         SetMode();
       }
     }
@@ -188,12 +188,12 @@ class RoverDriveSystem
     sjsu::LogInfo("is_operational: %d", mc_data.is_operational);
     sjsu::LogInfo("drive_mode: %c", current_mode_);
     sjsu::LogInfo("state of charge: %d", state_of_charge_);
-    sjsu::LogInfo("left wheel speed: %f", left_wheel_.GetSpeed());
-    sjsu::LogInfo("left wheel position: %f", left_wheel_.GetPosition());
-    sjsu::LogInfo("right wheel speed: %f", right_wheel_.GetSpeed());
-    sjsu::LogInfo("right wheel position: %f", right_wheel_.GetPosition());
-    sjsu::LogInfo("back wheel speed: %f", back_wheel_.GetSpeed());
-    sjsu::LogInfo("back wheel position: %f", back_wheel_.GetPosition());
+    sjsu::LogInfo("left wheel speed: %g", left_wheel_.GetSpeed());
+    sjsu::LogInfo("left wheel position: %g", left_wheel_.GetPosition());
+    sjsu::LogInfo("right wheel speed: %g", right_wheel_.GetSpeed());
+    sjsu::LogInfo("right wheel position: %g", right_wheel_.GetPosition());
+    sjsu::LogInfo("back wheel speed: %g", back_wheel_.GetSpeed());
+    sjsu::LogInfo("back wheel position: %g", back_wheel_.GetPosition());
   };
 
  private:

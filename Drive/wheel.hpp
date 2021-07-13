@@ -69,6 +69,7 @@ class Wheel
     while (homing_pin_.Read() != home_level)
     {
       sjsu::LogInfo("spinning");
+      break;  // for testing purposes - comment out
     }
     steer_motor_.SetSpeed(0_rpm);
   };
