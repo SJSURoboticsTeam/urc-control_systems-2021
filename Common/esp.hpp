@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string_view>
+#include <algorithm>
 
 #include "utility/log.hpp"
 #include "peripherals/lpc40xx/uart.hpp"
@@ -30,7 +31,7 @@ class Esp
   /// @return the response body of the GET request
   std::string_view GETRequest(std::string endpoint)
   {
-    request_ = "GET /" + endpoint + " HTTP/1.1\r\nHost: " + url_.data() +
+    request_ = "GET /" + endpoint + " HTTP/1.1\r\nHost: " + url_ +
                "\r\nContent-Type: application/json\r\n\r\n";
 
     ConnectToServer();
@@ -38,10 +39,12 @@ class Esp
 
     sjsu::LogInfo("Reading back response from server...");
     std::array<uint8_t, 1024 * 2> response;
+    std::fill(response.begin(), response.end(), 0);
     size_t read_back = socket_.Read(response, kDefaultTimeout);
     std::string_view body(reinterpret_cast<char *>(response.data()), read_back);
 
     sjsu::LogInfo("Parsing response body for JSON...");
+
     body = body.substr(body.find("\r\n\r\n"));
     body = body.substr(body.find("{"));
     return body.data();
@@ -76,6 +79,7 @@ class Esp
   void WriteToServer()
   {
     sjsu::LogInfo("Writing request to server...");
+    sjsu::LogInfo("%s", request_.c_str());
     std::span write_payload(reinterpret_cast<const uint8_t *>(request_.data()),
                             request_.size());
     socket_.Write(write_payload, kDefaultTimeout);
@@ -101,11 +105,11 @@ class Esp
   sjsu::Esp8266 esp_;
   sjsu::WiFi & wifi_;
   sjsu::InternetSocket & socket_;
-  std::string_view request_;
-  std::string_view url_  = "jsonplaceholder.typicode.com";
+  std::string request_;
+  std::string url_       = "my-json-server.typicode.com";
   const uint16_t kPort   = 80;
   const char * kSsid     = "GarzaLine";
   const char * kPassword = "NRG523509";
-  const std::chrono::nanoseconds kDefaultTimeout = 10s;
+  const std::chrono::nanoseconds kDefaultTimeout = 3s;
 };
 }  // namespace sjsu::common
