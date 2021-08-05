@@ -54,8 +54,12 @@ int main(void)
     try
     {
       std::string parameters    = drive_system.CreateRequestParameters();
+      parameters                = "drive";
       std::string_view response = esp.GETRequest(parameters);
       sjsu::LogInfo("Response Body:\n%s", response.data());
+      response =
+          R"({ "is_operational": 0, "drive_mode": "S", "speed": 1, "angle": 1 })";
+      sjsu::LogInfo("%s", response);
       drive_system.ParseJSONResponse(response);
       drive_system.HandleRoverMovement();
       drive_system.PrintRoverData();

@@ -61,7 +61,6 @@ class RoverDriveSystem
       // Breaks unit test often since it never knows correct decimal value
       char reqParam[250];
       snprintf(reqParam, 300,
-               "Vishnu-Adda/json-robo-test/"
                "drive?is_operational=%d&drive_mode=%c&battery=%d&left_wheel_"
                "speed=%4g&left_wheel_angle=%4g&right_wheel_speed=%4g&right_"
                "wheel_angle=%4g&back_wheel_speed=%4g&back_wheel_angle=%4g",
