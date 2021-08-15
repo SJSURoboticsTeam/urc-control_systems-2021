@@ -60,13 +60,13 @@ TEST_CASE("Testing Drive System")
 
   SECTION("should parse mission control response")
   {
-    std::string_view response =
-        R"({"is_operational": 1, "drive_mode": "D", "speed": 10.0, "angle": 10.0})";
+    std::string response =
+        R"({"is_operational": 1, "drive_mode": "D", "speed": 10, "angle": 10})";
     drive_system.ParseJSONResponse(response);
     CHECK(drive_system.mc_data.is_operational == 1);
     CHECK(drive_system.mc_data.drive_mode == 'D');
-    CHECK(drive_system.mc_data.speed == doctest::Approx(10.0));
-    CHECK(drive_system.mc_data.rotation_angle == doctest::Approx(10.0));
+    CHECK(drive_system.mc_data.speed == doctest::Approx(10));
+    CHECK(drive_system.mc_data.rotation_angle == doctest::Approx(10));
   }
 
   SECTION("should stop rover & reset wheel positions")

@@ -9,6 +9,8 @@
 
 int main(void)
 {
+  sjsu::lpc40xx::SetMaximumClockSpeed();
+
   sjsu::LogInfo("Starting the rover drive system...");
   sjsu::common::Esp esp;
   sjsu::lpc40xx::Can & can = sjsu::lpc40xx::GetCan<2>();
@@ -37,37 +39,34 @@ int main(void)
   sjsu::drive::RoverDriveSystem drive_system(left_wheel, right_wheel,
                                              back_wheel);
 
-  sjsu::LogInfo("Initializing wheels and esp...");
+  sjsu::LogInfo("Initializing drive system...");
   esp.Initialize();
   left_wheel.Initialize();
   right_wheel.Initialize();
   back_wheel.Initialize();
 
   // Drive control loop
-  // 1. Drive sys creates GET request parameters - returns endpoint+params
-  // 2. Make GET request using esp - returns response body in string_view
+  // 1. Drive sys creates GET request parameters - returns endpoint+parameters
+  // 2. Make GET request using esp - returns response body as string
   // 3. Drive sys parses GET response
-  // 4. Drive sys handles rover movement - may move or switch modes
+  // 4. Drive sys handles rover movement - move or switch driving modes
 
-  while (true)
+  while (1)
   {
     try
     {
-      std::string parameters    = drive_system.CreateRequestParameters();
-      parameters                = "drive";
-      std::string_view response = esp.GETRequest(parameters);
-      sjsu::LogInfo("Response Body:\n%s", response.data());
-      response =
-          R"({ "is_operational": 0, "drive_mode": "S", "speed": 1, "angle": 1 })";
-      sjsu::LogInfo("%s", response);
+      esp.ConnectToWifi();
+      std::string parameters = drive_system.CreateRequestParameters();
+      std::string response   = esp.GETRequest(parameters);
       drive_system.ParseJSONResponse(response);
       drive_system.HandleRoverMovement();
       drive_system.PrintRoverData();
     }
     catch (const std::exception & e)
     {
-      sjsu::LogError("Error in main()!");
-      throw e;
+      sjsu::LogError("Uncaught error in main()! Stopping Rover!");
+      drive_system.SetWheelSpeed(0_rpm);
+      break;
     }
   }
 

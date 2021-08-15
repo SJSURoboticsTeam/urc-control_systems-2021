@@ -80,13 +80,13 @@ class RoverDriveSystem
 
   /// Parses GET response body and assigns it to rover variables
   /// @param response JSON response body
-  void ParseJSONResponse(std::string_view response)
+  void ParseJSONResponse(std::string response)
   {
     try
     {
       int speed, angle;
       sscanf(
-          reinterpret_cast<const char *>(response.data()),
+          response.c_str(),
           R"({ "is_operational": %d, "drive_mode": "%c", "speed": %d, "angle": %d })",
           &mc_data.is_operational, &mc_data.drive_mode, &speed, &angle);
 

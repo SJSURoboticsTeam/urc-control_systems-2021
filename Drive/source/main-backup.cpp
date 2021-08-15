@@ -49,26 +49,27 @@ int main(void)
   // 3. Drive sys parses GET response
   // 4. Drive sys handles rover movement - may move or switch modes
 
-  std::string_view response = esp.GETRequest("drive");
-  sjsu::LogInfo("Response Body:\n%s", response.data());
-
-  // while (true)
-  // {
-  //   try
-  //   {
-  //     std::string parameters    = drive_system.CreateRequestParameters();
-  //     std::string_view response = esp.GETRequest(parameters);
-  //     sjsu::LogInfo("Response Body:\n%s", response.data());
-  //     drive_system.ParseJSONResponse(response);
-  //     drive_system.HandleRoverMovement();
-  //     drive_system.PrintRoverData();
-  //   }
-  //   catch (const std::exception & e)
-  //   {
-  //     sjsu::LogError("Error in main()!");
-  //     throw e;
-  //   }
-  // }
+  while (true)
+  {
+    try
+    {
+      std::string parameters    = drive_system.CreateRequestParameters();
+      parameters                = "drive";
+      std::string_view response = esp.GETRequest(parameters);
+      sjsu::LogInfo("Response Body:\n%s", response.data());
+      response =
+          R"({ "is_operational": 0, "drive_mode": "S", "speed": 1, "angle": 1 })";
+      sjsu::LogInfo("%s", response);
+      drive_system.ParseJSONResponse(response);
+      drive_system.HandleRoverMovement();
+      drive_system.PrintRoverData();
+    }
+    catch (const std::exception & e)
+    {
+      sjsu::LogError("Error in main()!");
+      throw e;
+    }
+  }
 
   return 0;
 }
