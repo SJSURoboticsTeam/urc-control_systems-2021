@@ -23,7 +23,6 @@ class Esp
   {
     sjsu::LogInfo("Initializing Wi-Fi module...");
     esp_.Initialize();
-    ConnectToWiFi();
   };
 
   /// Sends a GET request to the hardcoded URL
@@ -38,19 +37,16 @@ class Esp
     WriteToServer();
     try
     {
-      sjsu::LogInfo("Reading back response from server...");
       std::array<uint8_t, 1024 * 4> response;
-      // TODO: Clear the buffer before reading from it
       std::fill(response.begin(), response.end(), 0);
       size_t read_back = socket_.Read(response, kDefaultTimeout);
-      sjsu::LogInfo("Printing Server Response:");
-      printf("%.*s\n", read_back, response.data());
+      printf("Response:\n%s\n", response.data());
       std::string body(reinterpret_cast<char *>(response.data()), read_back);
       try
       {
-        sjsu::LogInfo("Parsing response body for JSON...");
         body = body.substr(body.find("\r\n\r\n"));
         body = body.substr(body.find("{"));
+        sjsu::LogInfo("Parsed:\n %s", body.data());
         return body;
       }
       catch (const std::exception & e)
@@ -61,14 +57,13 @@ class Esp
     }
     catch (const std::exception & e)
     {
-      sjsu::LogError("Error in reading back response from server!");
-      throw e;
+      sjsu::LogError("Error reading response from server!");
+      return kErrorResponse;
     }
   };
 
- private:
   /// Attempts to connect to the local WiFi network
-  void ConnectToWiFi()
+  void ConnectToWifi()
   {
     while (true)
     {
@@ -83,6 +78,7 @@ class Esp
     sjsu::LogInfo("Connected!");
   }
 
+ private:
   /// Connects to the URL provided in member function
   void ConnectToServer()
   {
@@ -124,7 +120,7 @@ class Esp
     if (!wifi_.IsConnected())  // TODO: Not implemented
     {
       sjsu::LogError("Lost connection to %s... Reconnecting...", kSsid);
-      ConnectToWiFi();
+      ConnectToWifi();
       if (!wifi_.IsConnected())
       {
         sjsu::LogError("Unable to reconnect to %s...", kSsid);
@@ -139,6 +135,7 @@ class Esp
   sjsu::InternetSocket & socket_;
   std::string request_;
   std::string url_                               = "192.168.1.103";
+  std::string kErrorResponse                     = "ERROR";
   const uint16_t kPort                           = 3000;
   const char * kSsid                             = "GarzaLine";
   const char * kPassword                         = "NRG523509";
