@@ -19,8 +19,8 @@ class RoverDriveSystem
   {
     int is_operational;
     char drive_mode;
-    float rotation_angle;
-    float speed;
+    int rotation_angle;
+    int speed;
   };
 
   RoverDriveSystem(Wheel & left_wheel, Wheel & right_wheel, Wheel & back_wheel)
@@ -61,10 +61,9 @@ class RoverDriveSystem
       // Breaks unit test often since it never knows correct decimal value
       char reqParam[250];
       snprintf(reqParam, 300,
-               "Vishnu-Adda/json-robo-test/"
                "drive?is_operational=%d&drive_mode=%c&battery=%d&left_wheel_"
-               "speed=%4g&left_wheel_angle=%4g&right_wheel_speed=%4g&right_"
-               "wheel_angle=%4g&back_wheel_speed=%4g&back_wheel_angle=%4g",
+               "speed=%d&left_wheel_angle=%d&right_wheel_speed=%d&right_"
+               "wheel_angle=%d&back_wheel_speed=%d&back_wheel_angle=%d",
                mc_data.is_operational, current_mode_, state_of_charge_,
                left_wheel_.GetSpeed(), left_wheel_.GetPosition(),
                right_wheel_.GetSpeed(), right_wheel_.GetPosition(),
@@ -81,13 +80,13 @@ class RoverDriveSystem
 
   /// Parses GET response body and assigns it to rover variables
   /// @param response JSON response body
-  void ParseJSONResponse(std::string_view response)
+  void ParseJSONResponse(std::string response)
   {
     try
     {
       sscanf(
-          reinterpret_cast<const char *>(response.data()),
-          R"({ "is_operational": %d, "drive_mode": "%c", "speed": %f, "angle": %f }\n)",
+          response.c_str(),
+          R"({ "is_operational": %d, "drive_mode": "%c", "speed": %d, "angle": %d })",
           &mc_data.is_operational, &mc_data.drive_mode, &mc_data.speed,
           &mc_data.rotation_angle);
 
@@ -185,15 +184,18 @@ class RoverDriveSystem
   /// Prints the speed and position/angle of each wheel on the rover
   void PrintRoverData()
   {
-    sjsu::LogInfo("is_operational: %d", mc_data.is_operational);
-    sjsu::LogInfo("drive_mode: %c", current_mode_);
-    sjsu::LogInfo("state of charge: %d", state_of_charge_);
-    sjsu::LogInfo("left wheel speed: %g", left_wheel_.GetSpeed());
-    sjsu::LogInfo("left wheel position: %g", left_wheel_.GetPosition());
-    sjsu::LogInfo("right wheel speed: %g", right_wheel_.GetSpeed());
-    sjsu::LogInfo("right wheel position: %g", right_wheel_.GetPosition());
-    sjsu::LogInfo("back wheel speed: %g", back_wheel_.GetSpeed());
-    sjsu::LogInfo("back wheel position: %g", back_wheel_.GetPosition());
+    printf(
+        "OPERATIONAL:\t%d\nDRIVE MODE:\t%c\nMC SPEED:\t%d\nMC ANGLE:\t%d\n\n",
+        mc_data.is_operational, current_mode_, mc_data.speed,
+        mc_data.rotation_angle);
+    printf("%-10s%-10s%-10s\n", "WHEEL", "SPEED", "ANGLE");
+    printf("=========================\n");
+    printf("%-10s%-10d%-10d\n", "Left", left_wheel_.GetSpeed(),
+           left_wheel_.GetPosition());
+    printf("%-10s%-10d%-10d\n", "Right", right_wheel_.GetSpeed(),
+           right_wheel_.GetPosition());
+    printf("%-10s%-10d%-10d\n", "Back", back_wheel_.GetSpeed(),
+           back_wheel_.GetPosition());
   };
 
  private:

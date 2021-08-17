@@ -21,68 +21,93 @@ class Esp
   /// Initializes the Wi-Fi module by connecting to WiFi
   void Initialize()
   {
-    sjsu::LogInfo("Initializing Wi-Fi module...");
     esp_.Initialize();
-    ConnectToWiFi();
   };
 
   /// Sends a GET request to the hardcoded URL
   /// @param endpoint i.e. /endpoint?example=parameter
   /// @return the response body of the GET request
-  std::string_view GETRequest(std::string endpoint)
+  std::string GETRequest(std::string endpoint)
   {
     request_ = "GET /" + endpoint + " HTTP/1.1\r\nHost: " + url_ +
-               "\r\nContent-Type: application/json\r\n\r\n";
-
+               "\r\nConnection: keep-alive\r\n\r\n";
     ConnectToServer();
     WriteToServer();
-
-    sjsu::LogInfo("Reading back response from server...");
-    std::array<uint8_t, 1024 * 2> response;
-    std::fill(response.begin(), response.end(), 0);
-    size_t read_back = socket_.Read(response, kDefaultTimeout);
-    std::string_view body(reinterpret_cast<char *>(response.data()), read_back);
-
-    sjsu::LogInfo("Parsing response body for JSON...");
-
-    body = body.substr(body.find("\r\n\r\n"));
-    body = body.substr(body.find("{"));
-    return body.data();
+    try
+    {
+      std::array<uint8_t, 1024 * 2> response;
+      std::fill(response.begin(), response.end(), 0);
+      size_t read_back = socket_.Read(response, kDefaultTimeout);
+      printf("%s\n", response.data());
+      std::string body(reinterpret_cast<char *>(response.data()), read_back);
+      try
+      {
+        body = body.substr(body.find("\r\n\r\n"));
+        body = body.substr(body.find("{"));
+        // sjsu::LogInfo("Parsed:\n%s", body.data());
+        return body;
+      }
+      catch (const std::exception & e)
+      {
+        sjsu::LogError("Error parsing response from server!");
+        throw e;
+      }
+    }
+    catch (const std::exception & e)
+    {
+      sjsu::LogError("Error reading response from server!");
+      return kErrorResponse;
+    }
   };
 
- private:
   /// Attempts to connect to the local WiFi network
-  void ConnectToWiFi()
+  void ConnectToWifi()
   {
     while (true)
     {
       sjsu::LogInfo("Attempting to connect to %s...", kSsid);
-      if (wifi_.ConnectToAccessPoint(kSsid, kPassword, kDefaultTimeout))
+      if (wifi_.ConnectToAccessPoint(kSsid, kPassword, 5s))
       {
         break;
       }
-      sjsu::LogError("Failed to connect to %s... Retrying...", kSsid);
-      wifi_.DisconnectFromAccessPoint();
+      sjsu::LogWarning("Connecting...", kSsid);
+      // wifi_.DisconnectFromAccessPoint();
     }
-    sjsu::LogInfo("Connected!");
   }
 
+ private:
   /// Connects to the URL provided in member function
   void ConnectToServer()
   {
-    sjsu::LogInfo("Connecting to %s...", url_.data());
-    socket_.Connect(sjsu::InternetSocket::Protocol::kTCP, url_, kPort,
-                    kDefaultTimeout);
+    try
+    {
+      sjsu::LogInfo("Connecting to %s...", url_.data());
+      socket_.Connect(sjsu::InternetSocket::Protocol::kTCP, url_, kPort,
+                      kDefaultTimeout);
+    }
+    catch (const std::exception & e)
+    {
+      sjsu::LogError("Error connecting to server!");
+      throw e;
+    }
   }
 
   /// Sends an HTTP request to the connected server
   void WriteToServer()
   {
-    sjsu::LogInfo("Writing request to server...");
-    sjsu::LogInfo("%s", request_.c_str());
-    std::span write_payload(reinterpret_cast<const uint8_t *>(request_.data()),
-                            request_.size());
-    socket_.Write(write_payload, kDefaultTimeout);
+    try
+    {
+      // sjsu::LogInfo("Request to Server:");
+      // puts(request_.c_str());
+      std::span write_payload(
+          reinterpret_cast<const uint8_t *>(request_.data()), request_.size());
+      socket_.Write(write_payload, kDefaultTimeout);
+    }
+    catch (const std::exception & e)
+    {
+      sjsu::LogError("Error writing to server!");
+      throw e;
+    }
   }
 
   /// Verifies that the Wi-Fi module is still connected to the network
@@ -92,7 +117,7 @@ class Esp
     if (!wifi_.IsConnected())  // TODO: Not implemented
     {
       sjsu::LogError("Lost connection to %s... Reconnecting...", kSsid);
-      ConnectToWiFi();
+      ConnectToWifi();
       if (!wifi_.IsConnected())
       {
         sjsu::LogError("Unable to reconnect to %s...", kSsid);
@@ -106,10 +131,11 @@ class Esp
   sjsu::WiFi & wifi_;
   sjsu::InternetSocket & socket_;
   std::string request_;
-  std::string url_       = "my-json-server.typicode.com";
-  const uint16_t kPort   = 80;
-  const char * kSsid     = "GarzaLine";
-  const char * kPassword = "NRG523509";
-  const std::chrono::nanoseconds kDefaultTimeout = 3s;
+  std::string url_                               = "192.168.1.103";
+  std::string kErrorResponse                     = "ERROR";
+  const uint16_t kPort                           = 3000;
+  const char * kSsid                             = "GarzaLine";
+  const char * kPassword                         = "NRG523509";
+  const std::chrono::nanoseconds kDefaultTimeout = 1s;
 };
 }  // namespace sjsu::common
