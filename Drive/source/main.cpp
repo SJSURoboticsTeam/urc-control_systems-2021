@@ -41,9 +41,7 @@ int main(void)
 
   sjsu::LogInfo("Initializing drive system...");
   esp.Initialize();
-  left_wheel.Initialize();
-  right_wheel.Initialize();
-  back_wheel.Initialize();
+  drive_system.Initialize();
 
   // Drive control loop
   // 1. Drive sys creates GET request parameters - returns endpoint+parameters
