@@ -89,6 +89,11 @@ class RoverDriveSystem
           R"({ "is_operational": %d, "drive_mode": "%c", "speed": %d, "angle": %d })",
           &mc_data.is_operational, &mc_data.drive_mode, &mc_data.speed,
           &mc_data.rotation_angle);
+
+      sjsu::LogInfo("is_operational: %d", mc_data.is_operational);
+      sjsu::LogInfo("drive_mode: %c", mc_data.drive_mode);
+      sjsu::LogInfo("speed: %f", mc_data.speed);
+      sjsu::LogInfo("rotation_angle: %f", mc_data.rotation_angle);
     }
     catch (const std::exception & e)
     {
@@ -103,6 +108,11 @@ class RoverDriveSystem
   {
     try
     {
+      // sjsu::LogInfo("is_operational: %d", mc_data.is_operational);
+      // sjsu::LogInfo("drive_mode: %c", mc_data.drive_mode);
+      // sjsu::LogInfo("speed: %f", mc_data.speed);
+      // sjsu::LogInfo("angle: %f", mc_data.rotation_angle);
+
       units::angle::degree_t angle(mc_data.rotation_angle);
       units::angular_velocity::revolutions_per_minute_t speed(mc_data.speed);
       // If current mode is same as mc mode value and rover is operational
