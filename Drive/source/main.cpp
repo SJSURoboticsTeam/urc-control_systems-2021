@@ -33,10 +33,10 @@ int main(void)
   back_hub_motor.settings.gear_ratio    = 8;
 
   sjsu::drive::Wheel left_wheel(left_hub_motor, left_steer_motor);
-
-  left_wheel.SetHubSpeed(10_rpm);
-  // sjsu::drive::Wheel right_wheel(right_hub_motor, right_steer_motor);
-  // sjsu::drive::Wheel back_wheel(back_hub_motor, back_steer_motor);
+  sjsu::drive::Wheel right_wheel(right_hub_motor, right_steer_motor);
+  sjsu::drive::Wheel back_wheel(back_hub_motor, back_steer_motor);
+  sjsu::drive::RoverDriveSystem drive_system(left_wheel, right_wheel,
+                                             back_wheel);
 
   sjsu::LogInfo("Initializing drive system...");
   esp.Initialize();
