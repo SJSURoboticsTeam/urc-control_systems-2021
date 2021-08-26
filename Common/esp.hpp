@@ -75,7 +75,6 @@ class Esp
     }
   }
 
- private:
   /// Connects to the URL provided in member function
   void ConnectToServer()
   {
@@ -92,6 +91,14 @@ class Esp
     }
   }
 
+  /// Verifies that the Wi-Fi module is still connected to the network
+  /// @return true if the module is still connected to the internet
+  bool IsConnected()
+  {
+    return wifi_.IsConnected();  // TODO: Always returns false
+  };
+
+ private:
   /// Sends an HTTP request to the connected server
   void WriteToServer()
   {
@@ -107,23 +114,6 @@ class Esp
       throw e;
     }
   }
-
-  /// Verifies that the Wi-Fi module is still connected to the network
-  /// @return true if the module is still connected to the internet
-  bool IsConnectedToWiFi()
-  {
-    if (!wifi_.IsConnected())  // TODO: Not implemented - always returns false
-    {
-      sjsu::LogError("Lost connection to %s... Reconnecting...", kSsid);
-      ConnectToWifi();
-      if (!wifi_.IsConnected())
-      {
-        sjsu::LogError("Unable to reconnect to %s...", kSsid);
-        return false;
-      }
-    }
-    return true;
-  };
 
   sjsu::Esp8266 esp_;
   sjsu::WiFi & wifi_;
