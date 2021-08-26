@@ -48,7 +48,7 @@ class RoverDriveSystem
   };
 
   /// Constructs GET request parameter
-  /// @return requestParameters endpoint & parameters i.e. /drive?ex=param
+  /// @return Endpoint & parameters i.e. /drive?ex=param
   std::string GETRequestParameters()
   {
     try
@@ -164,7 +164,8 @@ class RoverDriveSystem
     }
   };
 
-  /// Prints the speed and position/angle of each wheel on the rover
+  /// Prints the mission control data & prints the current speed and steer angle
+  /// of each wheel on the rover
   void PrintRoverData()
   {
     printf(
