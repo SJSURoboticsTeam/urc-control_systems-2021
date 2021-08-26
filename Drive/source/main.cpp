@@ -39,8 +39,8 @@ int main(void)
                                              back_wheel);
 
   sjsu::LogInfo("Initializing drive system...");
-  esp.Initialize();
   drive_system.Initialize();
+  esp.Initialize();
 
   // Drive control loop
   // 1. Drive sys creates GET request parameters - returns endpoint+parameters
@@ -52,16 +52,16 @@ int main(void)
   {
     try
     {
-      esp.ConnectToWifi();
-      std::string parameters = drive_system.CreateRequestParameters();
+      std::string parameters = drive_system.GETRequestParameters();
       std::string response   = esp.GETRequest(parameters);
       drive_system.ParseJSONResponse(response);
       drive_system.HandleRoverMovement();
       drive_system.PrintRoverData();
+      // sjsu::Delay(5s);  // Testing purposes
     }
     catch (const std::exception & e)
     {
-      sjsu::LogError("Uncaught error in main()! Stopping Rover!");
+      sjsu::LogError("Uncaught error in main() - Stopping Rover!");
       drive_system.SetWheelSpeed(0_rpm);
       break;
     }

@@ -22,6 +22,9 @@ class Esp
   void Initialize()
   {
     esp_.Initialize();
+    sjsu::LogInfo("Esp initialized...");
+    ConnectToWifi();
+    ConnectToServer();
   };
 
   /// Sends a GET request to the hardcoded URL
@@ -31,7 +34,6 @@ class Esp
   {
     request_ = "GET /" + endpoint + " HTTP/1.1\r\nHost: " + url_ +
                "\r\nConnection: keep-alive\r\n\r\n";
-    ConnectToServer();
     WriteToServer();
     try
     {
@@ -44,13 +46,12 @@ class Esp
       {
         body = body.substr(body.find("\r\n\r\n"));
         body = body.substr(body.find("{"));
-        // sjsu::LogInfo("Parsed:\n%s", body.data());
         return body;
       }
       catch (const std::exception & e)
       {
         sjsu::LogError("Error parsing response from server!");
-        throw e;
+        return kErrorResponse;
       }
     }
     catch (const std::exception & e)
@@ -71,7 +72,6 @@ class Esp
         break;
       }
       sjsu::LogWarning("Connecting...", kSsid);
-      // wifi_.DisconnectFromAccessPoint();
     }
   }
 
@@ -97,8 +97,6 @@ class Esp
   {
     try
     {
-      // sjsu::LogInfo("Request to Server:");
-      // puts(request_.c_str());
       std::span write_payload(
           reinterpret_cast<const uint8_t *>(request_.data()), request_.size());
       socket_.Write(write_payload, kDefaultTimeout);
@@ -114,7 +112,7 @@ class Esp
   /// @return true if the module is still connected to the internet
   bool IsConnectedToWiFi()
   {
-    if (!wifi_.IsConnected())  // TODO: Not implemented
+    if (!wifi_.IsConnected())  // TODO: Not implemented - always returns false
     {
       sjsu::LogError("Lost connection to %s... Reconnecting...", kSsid);
       ConnectToWifi();

@@ -28,21 +28,17 @@ class RoverDriveSystem
         right_wheel_(right_wheel),
         back_wheel_(back_wheel){};
 
-  char GetCurrentMode()
-  {
-    return current_mode_;
-  }
-
   /// Initializes wheels and sets rover to operational starting mode (spin)
   void Initialize()
   {
     try
     {
-      mc_data.is_operational = true;
+      mc_data.is_operational = 1;
       left_wheel_.Initialize();
       right_wheel_.Initialize();
       back_wheel_.Initialize();
       HomeWheels();
+      sjsu::LogInfo("Drive system intialized...");
     }
     catch (const std::exception & e)
     {
@@ -53,12 +49,10 @@ class RoverDriveSystem
 
   /// Constructs GET request parameter
   /// @return requestParameters endpoint & parameters i.e. /drive?ex=param
-  std::string CreateRequestParameters()
+  std::string GETRequestParameters()
   {
     try
     {
-      // TODO - make these floats go to hundredths place (i.e. 0.00)?
-      // Breaks unit test often since it never knows correct decimal value
       char reqParam[250];
       snprintf(reqParam, 300,
                "drive?is_operational=%d&drive_mode=%c&battery=%d&left_wheel_"
@@ -89,11 +83,6 @@ class RoverDriveSystem
           R"({ "is_operational": %d, "drive_mode": "%c", "speed": %d, "angle": %d })",
           &mc_data.is_operational, &mc_data.drive_mode, &mc_data.speed,
           &mc_data.rotation_angle);
-
-      sjsu::LogInfo("is_operational: %d", mc_data.is_operational);
-      sjsu::LogInfo("drive_mode: %c", mc_data.drive_mode);
-      sjsu::LogInfo("speed: %d", mc_data.speed);
-      sjsu::LogInfo("rotation_angle: %d", mc_data.rotation_angle);
     }
     catch (const std::exception & e)
     {
@@ -161,8 +150,7 @@ class RoverDriveSystem
   /// @param speed the new movement speed of the rover
   void SetWheelSpeed(units::angular_velocity::revolutions_per_minute_t speed)
   {
-    // TODO: Implement linear interpolation (exponential moving average) to
-    // smooth out changes in speed.
+    // TODO: Implement linear interpolation (exponential moving average)
     try
     {
       left_wheel_.SetHubSpeed(speed);
@@ -200,7 +188,6 @@ class RoverDriveSystem
     try
     {
       SetWheelSpeed(kZeroSpeed);  // Stops rover
-      // TODO - Add a 1 second delay?
       switch (mc_data.drive_mode)
       {
         case 'D': SetDriveMode(); break;
