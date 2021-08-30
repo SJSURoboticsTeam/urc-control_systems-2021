@@ -214,6 +214,7 @@ class RoverDriveSystem
     try
     {
       HomeWheels();
+      // TODO: Find the angles close enough for an effective drive mode
       const units::angle::degree_t left_wheel_angle  = -45_deg;
       const units::angle::degree_t right_wheel_angle = -135_deg;
       const units::angle::degree_t back_wheel_angle  = 90_deg;
@@ -235,9 +236,10 @@ class RoverDriveSystem
     try
     {
       HomeWheels();
-      const units::angle::degree_t left_wheel_angle  = 0_deg;
-      const units::angle::degree_t right_wheel_angle = 0_deg;
-      const units::angle::degree_t back_wheel_angle  = 0_deg;
+      // TODO: Find the angles close enough for an effective spin mode
+      const units::angle::degree_t left_wheel_angle  = 45_deg;
+      const units::angle::degree_t right_wheel_angle = 45_deg;
+      const units::angle::degree_t back_wheel_angle  = 45_deg;
       left_wheel_.SetSteeringAngle(left_wheel_angle);
       right_wheel_.SetSteeringAngle(right_wheel_angle);
       back_wheel_.SetSteeringAngle(back_wheel_angle);
@@ -256,6 +258,7 @@ class RoverDriveSystem
     try
     {
       HomeWheels();
+      // TODO: Find the angles close enough for an effective translation mode
       const units::angle::degree_t left_wheel_angle  = 45_deg;
       const units::angle::degree_t right_wheel_angle = -45_deg;
       const units::angle::degree_t back_wheel_angle  = -180_deg;

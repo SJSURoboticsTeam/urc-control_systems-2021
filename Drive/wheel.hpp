@@ -9,8 +9,14 @@ namespace sjsu::drive
 class Wheel
 {
  public:
-  Wheel(std::string name, sjsu::RmdX & hub_motor, sjsu::RmdX & steer_motor)
-      : name_(name), hub_motor_(hub_motor), steer_motor_(steer_motor){};
+  Wheel(std::string name,
+        sjsu::RmdX & hub_motor,
+        sjsu::RmdX & steer_motor,
+        sjsu::Gpio & homing_pin)
+      : name_(name),
+        hub_motor_(hub_motor),
+        steer_motor_(steer_motor),
+        homing_pin_(homing_pin){};
 
   void Initialize()
   {
@@ -56,7 +62,8 @@ class Wheel
     homing_offset_angle_ += clampedRotationAngle;
   };
 
-  /// Sets the wheel back in its homing position by finding mark in slip ring
+  /// Sets the wheel back in its homing position by finding mark in slip ring.
+  /// The mark is indicated by the GPIO being set to low
   void HomeWheel()
   {
     // TODO: Needs to be cleaned up - early prototype
@@ -90,6 +97,7 @@ class Wheel
       -100_rpm;
   const units::angular_velocity::revolutions_per_minute_t kSteeringSpeed =
       20_rpm;
-  sjsu::Gpio & homing_pin_ = sjsu::lpc40xx::GetGpio<1, 30>();
+  sjsu::Gpio & homing_pin_;
+  // sjsu::Gpio & homing_pin_ = sjsu::lpc40xx::GetGpio<1, 30>();
 };
 }  // namespace sjsu::drive

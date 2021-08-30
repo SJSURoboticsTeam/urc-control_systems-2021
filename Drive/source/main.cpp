@@ -32,9 +32,16 @@ int main(void)
   back_steer_motor.settings.gear_ratio  = 8;
   back_hub_motor.settings.gear_ratio    = 8;
 
-  sjsu::drive::Wheel left_wheel("left", left_hub_motor, left_steer_motor);
-  sjsu::drive::Wheel right_wheel("right", right_hub_motor, right_steer_motor);
-  sjsu::drive::Wheel back_wheel("back", back_hub_motor, back_steer_motor);
+  sjsu::Gpio & left_wheel_homing_pin  = sjsu::lpc40xx::GetGpio<1, 30>();
+  sjsu::Gpio & right_wheel_homing_pin = sjsu::lpc40xx::GetGpio<1, 31>();
+  sjsu::Gpio & back_wheel_homing_pin  = sjsu::lpc40xx::GetGpio<0, 25>();
+
+  sjsu::drive::Wheel left_wheel("left", left_hub_motor, left_steer_motor,
+                                left_wheel_homing_pin);
+  sjsu::drive::Wheel right_wheel("right", right_hub_motor, right_steer_motor,
+                                 right_wheel_homing_pin);
+  sjsu::drive::Wheel back_wheel("back", back_hub_motor, back_steer_motor,
+                                back_wheel_homing_pin);
   sjsu::drive::RoverDriveSystem drive_system(left_wheel, right_wheel,
                                              back_wheel);
 
@@ -52,12 +59,22 @@ int main(void)
   {
     try
     {
+      // if (esp.IsConnected())
+      // {
+      //   // Esp driver changes implemeneted --> move control loop inside
+      // }
+      // else
+      // {
+      //   drive_system.SetWheelSpeed(0_rpm);
+      //   esp.ConnectToWifi();
+      //   esp.ConnectToServer();
+      // }
       std::string parameters = drive_system.GETRequestParameters();
       std::string response   = esp.GETRequest(parameters);
       drive_system.ParseJSONResponse(response);
       drive_system.HandleRoverMovement();
       drive_system.PrintRoverData();
-      // sjsu::Delay(5s);  // Testing purposes
+      sjsu::Delay(3s);  // Testing purposes
     }
     catch (const std::exception & e)
     {
