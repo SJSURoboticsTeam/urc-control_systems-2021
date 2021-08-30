@@ -119,10 +119,10 @@ class Esp
   sjsu::WiFi & wifi_;
   sjsu::InternetSocket & socket_;
   std::string request_;
-  std::string url_                               = "192.168.1.103";
+  std::string url_                               = "10.42.0.1";
   std::string kErrorResponse                     = "ERROR";
   const uint16_t kPort                           = 3000;
-  const char * kSsid                             = "GarzaLine";
+  const char * kSsid                             = "nate-hotspot";
   const char * kPassword                         = "NRG523509";
   const std::chrono::nanoseconds kDefaultTimeout = 1s;
 };
