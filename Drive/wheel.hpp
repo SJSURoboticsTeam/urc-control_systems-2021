@@ -68,19 +68,22 @@ class Wheel
   {
     // TODO: Needs to be cleaned up - early prototype
     sjsu::LogWarning("Homing %s wheel...", name_.c_str());
-    bool home_level = sjsu::Gpio::kLow;
+    bool home_level = sjsu::Gpio::kHigh;
     if (homing_pin_.Read() == home_level)
     {
       sjsu::LogInfo("Wheel %s already homed", name_.c_str());
       return;
     }
 
-    steer_motor_.SetSpeed(20_rpm);
+    steer_motor_.SetSpeed(10_rpm);
     while (homing_pin_.Read() != home_level)
     {
-      break;  // for testing purposes - comment out
+      sjsu::LogInfo("spinning");
+      continue;
+      // break;  // for testing purposes - comment out
     }
     steer_motor_.SetSpeed(0_rpm);
+    sjsu::LogInfo("Wheel %s homed!", name_.c_str());
   };
 
   std::string name_;          // Wheel name (i.e. left, right, back)
@@ -98,6 +101,5 @@ class Wheel
   const units::angular_velocity::revolutions_per_minute_t kSteeringSpeed =
       20_rpm;
   sjsu::Gpio & homing_pin_;
-  // sjsu::Gpio & homing_pin_ = sjsu::lpc40xx::GetGpio<1, 30>();
 };
 }  // namespace sjsu::drive

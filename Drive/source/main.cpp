@@ -32,9 +32,9 @@ int main(void)
   back_steer_motor.settings.gear_ratio  = 8;
   back_hub_motor.settings.gear_ratio    = 8;
 
-  sjsu::Gpio & left_wheel_homing_pin  = sjsu::lpc40xx::GetGpio<1, 30>();
-  sjsu::Gpio & right_wheel_homing_pin = sjsu::lpc40xx::GetGpio<1, 31>();
-  sjsu::Gpio & back_wheel_homing_pin  = sjsu::lpc40xx::GetGpio<0, 25>();
+  sjsu::Gpio & left_wheel_homing_pin  = sjsu::lpc40xx::GetGpio<0, 15>();
+  sjsu::Gpio & right_wheel_homing_pin = sjsu::lpc40xx::GetGpio<2, 9>();
+  sjsu::Gpio & back_wheel_homing_pin  = sjsu::lpc40xx::GetGpio<0, 18>();
 
   sjsu::drive::Wheel left_wheel("left", left_hub_motor, left_steer_motor,
                                 left_wheel_homing_pin);
