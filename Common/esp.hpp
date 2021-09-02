@@ -22,6 +22,9 @@ class Esp
   void Initialize()
   {
     esp_.Initialize();
+    sjsu::LogInfo("Esp initialized...");
+    ConnectToWifi();
+    ConnectToServer();
   };
 
   /// Sends a GET request to the hardcoded URL
@@ -31,7 +34,6 @@ class Esp
   {
     request_ = "GET /" + endpoint + " HTTP/1.1\r\nHost: " + url_ +
                "\r\nConnection: keep-alive\r\n\r\n";
-    ConnectToServer();
     WriteToServer();
     try
     {
@@ -44,13 +46,12 @@ class Esp
       {
         body = body.substr(body.find("\r\n\r\n"));
         body = body.substr(body.find("{"));
-        // sjsu::LogInfo("Parsed:\n%s", body.data());
         return body;
       }
       catch (const std::exception & e)
       {
         sjsu::LogError("Error parsing response from server!");
-        throw e;
+        return kErrorResponse;
       }
     }
     catch (const std::exception & e)
@@ -71,11 +72,9 @@ class Esp
         break;
       }
       sjsu::LogWarning("Connecting...", kSsid);
-      // wifi_.DisconnectFromAccessPoint();
     }
   }
 
- private:
   /// Connects to the URL provided in member function
   void ConnectToServer()
   {
@@ -92,13 +91,19 @@ class Esp
     }
   }
 
+  /// Verifies that the Wi-Fi module is still connected to the network
+  /// @return true if the module is still connected to the internet
+  bool IsConnected()
+  {
+    return wifi_.IsConnected();  // TODO: Always returns false
+  };
+
+ private:
   /// Sends an HTTP request to the connected server
   void WriteToServer()
   {
     try
     {
-      // sjsu::LogInfo("Request to Server:");
-      // puts(request_.c_str());
       std::span write_payload(
           reinterpret_cast<const uint8_t *>(request_.data()), request_.size());
       socket_.Write(write_payload, kDefaultTimeout);
@@ -110,31 +115,14 @@ class Esp
     }
   }
 
-  /// Verifies that the Wi-Fi module is still connected to the network
-  /// @return true if the module is still connected to the internet
-  bool IsConnectedToWiFi()
-  {
-    if (!wifi_.IsConnected())  // TODO: Not implemented
-    {
-      sjsu::LogError("Lost connection to %s... Reconnecting...", kSsid);
-      ConnectToWifi();
-      if (!wifi_.IsConnected())
-      {
-        sjsu::LogError("Unable to reconnect to %s...", kSsid);
-        return false;
-      }
-    }
-    return true;
-  };
-
   sjsu::Esp8266 esp_;
   sjsu::WiFi & wifi_;
   sjsu::InternetSocket & socket_;
   std::string request_;
-  std::string url_                               = "192.168.1.103";
+  std::string url_                               = "10.42.0.1";
   std::string kErrorResponse                     = "ERROR";
-  const uint16_t kPort                           = 3000;
-  const char * kSsid                             = "GarzaLine";
+  const uint16_t kPort                           = 5000;
+  const char * kSsid                             = "nate-hotspot";
   const char * kPassword                         = "NRG523509";
   const std::chrono::nanoseconds kDefaultTimeout = 1s;
 };

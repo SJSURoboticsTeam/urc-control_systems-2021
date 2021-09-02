@@ -9,8 +9,14 @@ namespace sjsu::drive
 class Wheel
 {
  public:
-  Wheel(sjsu::RmdX & hub_motor, sjsu::RmdX & steer_motor)
-      : hub_motor_(hub_motor), steer_motor_(steer_motor){};
+  Wheel(std::string name,
+        sjsu::RmdX & hub_motor,
+        sjsu::RmdX & steer_motor,
+        sjsu::Gpio & homing_pin)
+      : name_(name),
+        hub_motor_(hub_motor),
+        steer_motor_(steer_motor),
+        homing_pin_(homing_pin){};
 
   void Initialize()
   {
@@ -56,28 +62,33 @@ class Wheel
     homing_offset_angle_ += clampedRotationAngle;
   };
 
-  // Sets the wheel back in its homing position by finding mark in slip ring
+  /// Sets the wheel back in its homing position by finding mark in slip ring.
+  /// The mark is indicated by the GPIO being set to low
   void HomeWheel()
   {
-    sjsu::LogInfo("homing...");
-    bool home_level = sjsu::Gpio::kLow;
+    // TODO: Needs to be cleaned up - early prototype
+    sjsu::LogWarning("Homing %s wheel...", name_.c_str());
+    bool home_level = sjsu::Gpio::kHigh;
     if (homing_pin_.Read() == home_level)
     {
-      sjsu::LogInfo("already home");
+      sjsu::LogInfo("Wheel %s already homed", name_.c_str());
       return;
     }
 
-    steer_motor_.SetSpeed(20_rpm);
+    steer_motor_.SetSpeed(10_rpm);
     while (homing_pin_.Read() != home_level)
     {
       sjsu::LogInfo("spinning");
-      break;  // for testing purposes - comment out
+      continue;
+      // break;  // for testing purposes - comment out
     }
     steer_motor_.SetSpeed(0_rpm);
+    sjsu::LogInfo("Wheel %s homed!", name_.c_str());
   };
 
-  sjsu::RmdX & hub_motor_;    /// controls tire direction (fwd/rev) & speed
-  sjsu::RmdX & steer_motor_;  /// controls wheel alignment/angle
+  std::string name_;          // Wheel name (i.e. left, right, back)
+  sjsu::RmdX & hub_motor_;    // Controls tire direction (fwd/rev) & speed
+  sjsu::RmdX & steer_motor_;  // Controls wheel alignment/angle
   units::angle::degree_t homing_offset_angle_                  = 0_deg;
   units::angular_velocity::revolutions_per_minute_t hub_speed_ = 0_rpm;
 
@@ -89,6 +100,6 @@ class Wheel
       -100_rpm;
   const units::angular_velocity::revolutions_per_minute_t kSteeringSpeed =
       20_rpm;
-  sjsu::Gpio & homing_pin_ = sjsu::lpc40xx::GetGpio<1, 30>();
+  sjsu::Gpio & homing_pin_;
 };
 }  // namespace sjsu::drive
