@@ -108,6 +108,9 @@ class RoverDriveSystem
           case 'D': HandleDriveMode(speed, angle); break;
           case 'S': HandleSpinMode(speed); break;
           case 'T': HandleTranslationMode(speed, angle); break;
+          case 'L': HandleLeftWheelMode(speed, angle); break;
+          case 'R': HandleRightWheelMode(speed, angle); break;
+          case 'B': HandleBackWheelMode(speed, angle); break;
           default:
             SetWheelSpeed(kZeroSpeed);
             sjsu::LogError("Unable to assign drive mode handler!");
@@ -194,6 +197,12 @@ class RoverDriveSystem
         case 'D': SetDriveMode(); break;
         case 'S': SetSpinMode(); break;
         case 'T': SetTranslationMode(); break;
+        case 'L':
+        case 'R':
+        case 'B':
+          sjsu::LogInfo("%c mode activated!", mc_data.drive_mode);
+          current_mode_ = mc_data.drive_mode;
+          break;
         default: sjsu::LogError("Unable to set drive mode!");
       };
     }
@@ -325,6 +334,30 @@ class RoverDriveSystem
       sjsu::LogError("Error handling translation mode!");
       throw e;
     }
+  };
+
+  void HandleLeftWheelMode(
+      units::angular_velocity::revolutions_per_minute_t speed,
+      units::angle::degree_t angle)
+  {
+    left_wheel_.SetSteeringAngle(angle);
+    left_wheel_.SetHubSpeed(speed);
+  };
+
+  void HandleRightWheelMode(
+      units::angular_velocity::revolutions_per_minute_t speed,
+      units::angle::degree_t angle)
+  {
+    right_wheel_.SetSteeringAngle(angle);
+    right_wheel_.SetHubSpeed(speed);
+  };
+
+  void HandleBackWheelMode(
+      units::angular_velocity::revolutions_per_minute_t speed,
+      units::angle::degree_t angle)
+  {
+    back_wheel_.SetSteeringAngle(angle);
+    back_wheel_.SetHubSpeed(speed);
   };
 
   char current_mode_   = 'S';
