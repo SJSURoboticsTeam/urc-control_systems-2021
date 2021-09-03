@@ -33,12 +33,12 @@ class RoverDriveSystem
   {
     try
     {
+      sjsu::LogInfo("Initializing drive system...");
       mc_data.is_operational = 1;
       left_wheel_.Initialize();
       right_wheel_.Initialize();
       back_wheel_.Initialize();
       HomeWheels();
-      sjsu::LogInfo("Drive system intialized...");
     }
     catch (const std::exception & e)
     {
@@ -108,9 +108,9 @@ class RoverDriveSystem
           case 'D': HandleDriveMode(speed, angle); break;
           case 'S': HandleSpinMode(speed); break;
           case 'T': HandleTranslationMode(speed, angle); break;
-          case 'L': HandleLeftWheelMode(speed, angle); break;
-          case 'R': HandleRightWheelMode(speed, angle); break;
-          case 'B': HandleBackWheelMode(speed, angle); break;
+          case 'L':
+          case 'R':
+          case 'B': HandleSingularWheelMode(speed, angle); break;
           default:
             SetWheelSpeed(kZeroSpeed);
             sjsu::LogError("Unable to assign drive mode handler!");
@@ -120,7 +120,7 @@ class RoverDriveSystem
       else
       {
         // If current mode is not same as mc mode value
-        sjsu::LogInfo("Switching rover into %c mode...", mc_data.drive_mode);
+        sjsu::LogWarning("Switching rover into %c mode...", mc_data.drive_mode);
         SetMode();
       }
     }
@@ -183,6 +183,7 @@ class RoverDriveSystem
            right_wheel_.GetPosition());
     printf("%-10s%-10d%-10d\n", "Back", back_wheel_.GetSpeed(),
            back_wheel_.GetPosition());
+    printf("=========================\n");
   };
 
  private:
@@ -199,10 +200,7 @@ class RoverDriveSystem
         case 'T': SetTranslationMode(); break;
         case 'L':
         case 'R':
-        case 'B':
-          sjsu::LogInfo("%c mode activated!", mc_data.drive_mode);
-          current_mode_ = mc_data.drive_mode;
-          break;
+        case 'B': SetExperimentalMode(); break;
         default: sjsu::LogError("Unable to set drive mode!");
       };
     }
@@ -283,6 +281,22 @@ class RoverDriveSystem
     }
   };
 
+  /// Stops rover and updates current drive mode
+  void SetExperimentalMode()
+  {
+    try
+    {
+      // HomeWheels();
+      SetWheelSpeed(kZeroSpeed);
+      current_mode_ = mc_data.drive_mode;
+    }
+    catch (const std::exception & e)
+    {
+      sjsu::LogError("Error setting translation mode!");
+      throw e;
+    }
+  }
+
   // =======================
   // = DRIVE MODE HANDLERS =
   // =======================
@@ -336,28 +350,29 @@ class RoverDriveSystem
     }
   };
 
-  void HandleLeftWheelMode(
+  void HandleSingularWheelMode(
       units::angular_velocity::revolutions_per_minute_t speed,
       units::angle::degree_t angle)
   {
-    left_wheel_.SetSteeringAngle(angle);
-    left_wheel_.SetHubSpeed(speed);
-  };
-
-  void HandleRightWheelMode(
-      units::angular_velocity::revolutions_per_minute_t speed,
-      units::angle::degree_t angle)
-  {
-    right_wheel_.SetSteeringAngle(angle);
-    right_wheel_.SetHubSpeed(speed);
-  };
-
-  void HandleBackWheelMode(
-      units::angular_velocity::revolutions_per_minute_t speed,
-      units::angle::degree_t angle)
-  {
-    back_wheel_.SetSteeringAngle(angle);
-    back_wheel_.SetHubSpeed(speed);
+    switch (current_mode_)
+    {
+      case 'L':
+        left_wheel_.SetSteeringAngle(angle);
+        left_wheel_.SetHubSpeed(speed);
+        break;
+      case 'R':
+        right_wheel_.SetSteeringAngle(angle);
+        right_wheel_.SetHubSpeed(speed);
+        break;
+      case 'B':
+        back_wheel_.SetSteeringAngle(angle);
+        back_wheel_.SetHubSpeed(speed);
+        break;
+      default:
+        SetWheelSpeed(kZeroSpeed);
+        sjsu::LogError("Should not be reached!");
+        break;
+    }
   };
 
   char current_mode_   = 'S';
