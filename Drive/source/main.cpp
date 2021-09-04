@@ -54,42 +54,46 @@ int main(void)
 
   sjsu::LogInfo("Initializing drive system...");
   drive_system.Initialize();
-  esp.Initialize();
+  // esp.Initialize();
 
   // Drive control loop
   // 1. Drive sys creates GET request parameters - returns endpoint+parameters
   // 2. Make GET request using esp - returns response body as string
   // 3. Drive sys parses GET response
   // 4. Drive sys handles rover movement - move or switch driving modes
-
   while (1)
   {
-    try
-    {
-      sjsu::LogInfo("Making new request...");
-      std::string parameters = drive_system.GETRequestParameters();
-      std::string response   = esp.GETRequest(parameters);
-      sjsu::TimeoutTimer serverTimeout(5s);  // server has 5s timeout
-      drive_system.ParseJSONResponse(response);
-      drive_system.HandleRoverMovement();
-      drive_system.PrintRoverData();
-      if (serverTimeout.HasExpired())
-      {
-        sjsu::LogWarning("Server timed out! Must reconnect!");
-        esp.ConnectToServer();
-      }
-    }
-    catch (const std::exception & e)
-    {
-      sjsu::LogError("Uncaught error in main() - Stopping Rover!");
-      drive_system.SetWheelSpeed(0_rpm);
-      if (!esp.IsConnected())
-      {
-        esp.ConnectToWifi();
-        esp.ConnectToServer();
-      }
-    }
+    drive_system.HomeWheels();
   }
+
+  // while (1)
+  // {
+  //   try
+  //   {
+  //     sjsu::LogInfo("Making new request...");
+  //     std::string parameters = drive_system.GETRequestParameters();
+  //     std::string response   = esp.GETRequest(parameters);
+  //     sjsu::TimeoutTimer serverTimeout(5s);  // server has 5s timeout
+  //     drive_system.ParseJSONResponse(response);
+  //     drive_system.HandleRoverMovement();
+  //     drive_system.PrintRoverData();
+  //     if (serverTimeout.HasExpired())
+  //     {
+  //       sjsu::LogWarning("Server timed out! Must reconnect!");
+  //       esp.ConnectToServer();
+  //     }
+  //   }
+  //   catch (const std::exception & e)
+  //   {
+  //     sjsu::LogError("Uncaught error in main() - Stopping Rover!");
+  //     drive_system.SetWheelSpeed(0_rpm);
+  //     if (!esp.IsConnected())
+  //     {
+  //       esp.ConnectToWifi();
+  //       esp.ConnectToServer();
+  //     }
+  //   }
+  // }
 
   return 0;
 }

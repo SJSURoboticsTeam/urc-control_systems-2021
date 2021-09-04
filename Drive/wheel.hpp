@@ -23,7 +23,8 @@ class Wheel
   {
     hub_motor_.Initialize();
     steer_motor_.Initialize();
-    homing_pin_.GetPin().settings.PullDown();  // Button
+    // homing_pin_.GetPin().settings.Floating();  // for real
+    homing_pin_.GetPin().settings.PullDown();  // for testing
     homing_pin_.Initialize();
     homing_pin_.SetAsInput();
   };
@@ -47,7 +48,7 @@ class Wheel
   void SetHubSpeed(units::angular_velocity::revolutions_per_minute_t hub_speed)
   {
     hub_motor_.SetSpeed(hub_speed);
-    hub_speed_ = hub_speed;
+    // hub_speed_ = hub_speed;
     // auto clampedHubSpeed = std::clamp(hub_speed, kMaxNegSpeed, kMaxPosSpeed);
     // hub_motor_.SetSpeed(clampedHubSpeed);
     // hub_speed_ = clampedHubSpeed;
@@ -57,13 +58,13 @@ class Wheel
   /// @param rotation_angle positive angle (turn right), negative angle (left)
   void SetSteeringAngle(units::angle::degree_t rotation_angle)
   {
-    auto clampedRotationAngle =
-        std::clamp(rotation_angle, kMaxNegRotation, kMaxPosRotation);
-    units::angle::degree_t difference_angle =
-        (homing_offset_angle_ + clampedRotationAngle);
+    // auto clampedRotationAngle =
+    //     std::clamp(rotation_angle, kMaxNegRotation, kMaxPosRotation);
+    // units::angle::degree_t difference_angle =
+    //     (homing_offset_angle_ + clampedRotationAngle);
 
-    steer_motor_.SetAngle(difference_angle, kSteerSpeed);
-    homing_offset_angle_ += clampedRotationAngle;
+    steer_motor_.SetAngle(rotation_angle, kSteerSpeed);
+    // homing_offset_angle_ = rotation_angle;
   };
 
   /// Sets the wheel back in its homing position by finding mark in slip ring.
@@ -71,17 +72,35 @@ class Wheel
   void HomeWheel()
   {
     // For testing homing procedure
-    sjsu::Button homing_button_(homing_pin_);
-    homing_button_.Initialize();
+    sjsu::Button homing_button(homing_pin_);
+    homing_button.Initialize();
 
     sjsu::LogWarning("Homing %s wheel...", name_.c_str());
     bool home_level = sjsu::Gpio::kHigh;
 
-    while (homing_pin_.Read() != home_level || homing_button_.Pressed())
+    // Loop thru all possible angles (0-360)
+    // Increments through every angle
+    // When the homing pin is high stop incrementing and update homing offset
+    SetSteeringAngle(0_deg);
+    sjsu::Delay(5s);
+
+    for (int i = 0; i < (360); i += 2)
     {
-      steer_motor_.SetSpeed(kSteerSpeed);
+      sjsu::LogInfo("%d", i);
+      SetSteeringAngle(units::angle::degree_t{ i });
+      sjsu::Delay(50ms);
+      if (homing_pin_.Read() == home_level)
+      {
+        homing_offset_angle_ = units::angle::degree_t{ i };
+        break;
+      }
     }
-    steer_motor_.SetSpeed(kZeroSpeed);
+    // Old Method VV
+    // steer_motor_.SetSpeed(kSteerSpeed);
+    // while (homing_pin_.Read() != home_level || homing_button.Pressed())
+    // {
+    // }
+    // steer_motor_.SetSpeed(kZeroSpeed);
     sjsu::LogInfo("Homing %s wheel is done!", name_.c_str());
   };
 
