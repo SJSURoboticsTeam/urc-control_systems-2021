@@ -150,19 +150,104 @@ class RoverDriveSystem
   /// @param speed the new movement speed of the rover
   void SetWheelSpeed(units::angular_velocity::revolutions_per_minute_t speed)
   {
-    // TODO: Implement linear interpolation (exponential moving average)
+    //Implement linear interpolation (exponential moving average)
     try
     {
-      left_wheel_.SetHubSpeed(speed);
-      right_wheel_.SetHubSpeed(speed);
-      back_wheel_.SetHubSpeed(speed);
-    }
+      sjsu::LogInfo("made it to SetWheelSpeed()");
+       
+       auto clampedHubSpeed = std::clamp(speed, kMaxNegSpeed, kMaxPosSpeed);
+      //static cast to use clampedHubSpeed in lerp function
+      long double new_speed = static_cast<long double>(clampedHubSpeed);
+      //intialize the variable we will use to store the revolutions_per_minute_t that is returned on each call to std::lerp
+      long double lerpSpeed_leftWheel = 0;
+      long double lerpSpeed_rightWheel = 0;
+      long double lerpSpeed_backWheel = 0;
+      //intialize the variable we will use to store the current speed of the motor after each call to lerp
+      long double currentSpeed_leftWheel = 0;
+      long double currentSpeed_rightWheel = 0;
+      long double currentSpeed_backWheel = 0;
+
+      //want to make sure we are supposed to increase or decrease the speed when setting the speed
+      bool increaseSpeed_leftWheel = true;
+      bool increaseSpeed_rightWheel = true;
+      bool increaseSpeed_backWheel = true;
+      if(left_wheel_.RequestFeedbackFromMotor().GetFeedback().speed > speed)
+      {
+        increaseSpeed_leftWheel = false;
+      }
+      if(right_wheel_.RequestFeedbackFromMotor().GetFeedback().speed > speed)
+      {
+        increaseSpeed_rightWheel = false;
+      }
+      if(back_wheel_.RequestFeedbackFromMotor().GetFeedback().speed > speed)
+      {
+        increaseSpeed_backWheel = false;
+      }
+     
+
+      //lerp must continue as long as input speed(hub_speed) does not equal the output of the lerp function(lerp_speed) 
+       while((speed != std::clamp(units::angular_velocity::revolutions_per_minute_t{lerpSpeed_leftWheel}, kMaxNegSpeed, speed)) && (speed != std::clamp(units::angular_velocity::revolutions_per_minute_t{lerpSpeed_rightWheel}, kMaxNegSpeed, speed)) && (speed != std::clamp(units::angular_velocity::revolutions_per_minute_t{lerpSpeed_backWheel}, kMaxNegSpeed, speed)))
+       {
+        auto next_same_time = Uptime() + 100ms;
+
+        //current_speed is pulled from the motor feedback and casted to long double 
+        currentSpeed_leftWheel = static_cast<long double>(left_wheel_.RequestFeedbackFromMotor().GetFeedback().speed);
+        currentSpeed_rightWheel = static_cast<long double>(right_wheel_.RequestFeedbackFromMotor().GetFeedback().speed);
+        currentSpeed_backWheel = static_cast<long double>(back_wheel_.RequestFeedbackFromMotor().GetFeedback().speed);
+        
+        //lerp returns a midpoint between current_speed and the new_speed
+        lerpSpeed_leftWheel = std::lerp(currentSpeed_leftWheel, new_speed, static_cast<long double>(0.5));
+        lerpSpeed_rightWheel = std::lerp(currentSpeed_rightWheel, new_speed, static_cast<long double>(0.5));
+        lerpSpeed_backWheel = std::lerp(currentSpeed_backWheel, new_speed, static_cast<long double>(0.5));
+
+        
+        //Set the speed of the motor and convert long double lerp_speed to revolutions_per_minute_t object
+        //use std::clamp to make sure we don't set the speed higher/lower than the input speed.
+        //When using std::clamp check if the fucntion is increasing or decreasing the speed to limit the max/min speeds
+        if(increaseSpeed_leftWheel)
+        {
+            left_wheel_.SetSpeed(std::clamp(units::angular_velocity::revolutions_per_minute_t{lerpSpeed_leftWheel}, kMaxNegSpeed, speed));
+        }
+        else
+        {
+            left_wheel_.SetSpeed(std::clamp(units::angular_velocity::revolutions_per_minute_t{lerpSpeed_leftWheel}, speed, kMaxPosSpeed));
+        }
+        if(increaseSpeed_rightWheel)
+        {
+            right_wheel_.SetSpeed(std::clamp(units::angular_velocity::revolutions_per_minute_t{lerpSpeed_rightWheel}, kMaxNegSpeed, speed));
+        }
+        else
+        {
+            right_wheel_.SetSpeed(std::clamp(units::angular_velocity::revolutions_per_minute_t{lerpSpeed_rightWheel}, speed, kMaxPosSpeed));
+        }
+        if(increaseSpeed_backWheel)
+        {
+            back_wheel_.SetSpeed(std::clamp(units::angular_velocity::revolutions_per_minute_t{lerpSpeed_backWheel}, kMaxNegSpeed, speed));
+        }
+        else
+        {
+            back_wheel_.SetSpeed(std::clamp(units::angular_velocity::revolutions_per_minute_t{lerpSpeed_backWheel}, speed, kMaxPosSpeed));
+        }
+        
+        
+
+
+        sjsu::LogInfo("Set wheel speed to %f for all wheels", lerp_speed);
+
+        //make sure 100ms have passed before setting the next speed
+        while(Uptime() < next_same_time)
+        {
+          continue;
+        }
+
+       }//While
+    }//Try
     catch (const std::exception & e)
     {
       sjsu::LogError("Error setting wheels speed!");
       throw e;
     }
-  };
+  }; //SetWheelSpeed()
 
   /// Prints the mission control data & prints the current speed and steer angle
   /// of each wheel on the rover
