@@ -1,5 +1,6 @@
 #include "peripherals/lpc40xx/can.hpp"
 #include "devices/actuators/servo/rmd_x.hpp"
+#include "utility/time/timeout_timer.hpp"
 #include "utility/math/units.hpp"
 #include "utility/log.hpp"
 
@@ -9,7 +10,7 @@
 
 int main(void)
 {
-  sjsu::lpc40xx::SetMaximumClockSpeed();
+  // sjsu::lpc40xx::SetMaximumClockSpeed();
 
   sjsu::LogInfo("Starting the rover drive system...");
   sjsu::common::Esp esp;
@@ -32,9 +33,15 @@ int main(void)
   back_steer_motor.settings.gear_ratio  = 8;
   back_hub_motor.settings.gear_ratio    = 8;
 
-  sjsu::Gpio & left_wheel_homing_pin  = sjsu::lpc40xx::GetGpio<0, 15>();
-  sjsu::Gpio & right_wheel_homing_pin = sjsu::lpc40xx::GetGpio<2, 9>();
-  sjsu::Gpio & back_wheel_homing_pin  = sjsu::lpc40xx::GetGpio<0, 18>();
+  // Slip ring GPIO pins
+  // sjsu::Gpio & left_wheel_homing_pin  = sjsu::lpc40xx::GetGpio<0, 15>();
+  // sjsu::Gpio & right_wheel_homing_pin = sjsu::lpc40xx::GetGpio<2, 9>();
+  // sjsu::Gpio & back_wheel_homing_pin  = sjsu::lpc40xx::GetGpio<0, 18>();
+
+  // Button GPIO pins
+  sjsu::Gpio & left_wheel_homing_pin  = sjsu::lpc40xx::GetGpio<1, 19>();
+  sjsu::Gpio & right_wheel_homing_pin = sjsu::lpc40xx::GetGpio<1, 15>();
+  sjsu::Gpio & back_wheel_homing_pin  = sjsu::lpc40xx::GetGpio<0, 30>();
 
   sjsu::drive::Wheel left_wheel("left", left_hub_motor, left_steer_motor,
                                 left_wheel_homing_pin);
@@ -45,10 +52,8 @@ int main(void)
   sjsu::drive::RoverDriveSystem drive_system(left_wheel, right_wheel,
                                              back_wheel);
 
-  sjsu::LogInfo("Initializing drive system...");
-  drive_system.Initialize();
   esp.Initialize();
-
+  drive_system.Initialize();
   // Drive control loop
   // 1. Drive sys creates GET request parameters - returns endpoint+parameters
   // 2. Make GET request using esp - returns response body as string
@@ -59,28 +64,28 @@ int main(void)
   {
     try
     {
-      // if (esp.IsConnected())
-      // {
-      //   // Esp driver changes implemeneted --> move control loop inside
-      // }
-      // else
-      // {
-      //   drive_system.SetWheelSpeed(0_rpm);
-      //   esp.ConnectToWifi();
-      //   esp.ConnectToServer();
-      // }
+      sjsu::LogInfo("Making new request...");
       std::string parameters = drive_system.GETRequestParameters();
       std::string response   = esp.GETRequest(parameters);
+      sjsu::TimeoutTimer serverTimeout(5s);  // server has 5s timeout
       drive_system.ParseJSONResponse(response);
       drive_system.HandleRoverMovement();
       drive_system.PrintRoverData();
-      sjsu::Delay(3s);  // Testing purposes
+      if (serverTimeout.HasExpired())
+      {
+        sjsu::LogWarning("Server timed out! Must reconnect!");
+        esp.ConnectToServer();
+      }
     }
     catch (const std::exception & e)
     {
       sjsu::LogError("Uncaught error in main() - Stopping Rover!");
       drive_system.SetWheelSpeed(0_rpm);
-      break;
+      if (!esp.IsConnected())
+      {
+        esp.ConnectToWifi();
+        esp.ConnectToServer();
+      }
     }
   }
 
