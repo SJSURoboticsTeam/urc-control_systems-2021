@@ -1,4 +1,4 @@
-#include "../Arm/pca9685.hpp"
+#include "../../Arm/pca9685.hpp"
 #include "peripherals/lpc40xx/i2c.hpp"
 
 int main(void)
@@ -8,12 +8,11 @@ int main(void)
   pca.ModuleInitialize();
   sjsu::LogInfo("Starting program");
 
-
   while (true)
   {
-    pca.setPulseWidth(0,500_us);
+    pca.setPulseWidth(0, 500_us);
     sjsu::Delay(1.5_s);
-    pca.setPulseWidth(0,2500_us);
+    pca.setPulseWidth(0, 2500_us);
 
     sjsu::Delay(1.5_s);
     sjsu::LogInfo("ran program");
