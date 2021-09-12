@@ -29,13 +29,13 @@ class Wheel
   /// Gets the speed of the hub motor.
   int GetSpeed()
   {
-    return hub_motor_.RequestFeedbackFromMotor().GetFeedback().speed;
+    return hub_speed_.to<int>();
   };
 
   /// Gets the angle/position of the steering motor.
   int GetPosition()
   {
-    return hub_motor_.RequestFeedbackFromMotor().GetFeedback().position;
+    return homing_offset_angle_.to<int>();
   };
 
   /// Sets the speed of the hub motor. Will not surpass max/min value
