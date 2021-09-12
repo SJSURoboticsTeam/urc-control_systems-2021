@@ -184,7 +184,53 @@ class RoverDriveSystem
         increaseSpeed_backWheel = false;
       }
      
+     //current_speed is pulled from the motor feedback and casted to long double 
+      currentSpeed_leftWheel = static_cast<long double>(left_wheel_.RequestFeedbackFromMotor().GetFeedback().speed);
+      currentSpeed_rightWheel = static_cast<long double>(right_wheel_.RequestFeedbackFromMotor().GetFeedback().speed);
+      currentSpeed_backWheel = static_cast<long double>(back_wheel_.RequestFeedbackFromMotor().GetFeedback().speed);   
+        
+     for(int i = 0; i < 6; i++)
+     {
+       //lerp returns a midpoint between current_speed and the new_speed
+       lerpSpeed_leftWheel = std::lerp(currentSpeed_leftWheel, new_speed, static_cast<long double>(0.5));
+       lerpSpeed_rightWheel = std::lerp(currentSpeed_rightWheel, new_speed, static_cast<long double>(0.5));
+       lerpSpeed_backWheel = std::lerp(currentSpeed_backWheel, new_speed, static_cast<long double>(0.5));
+      
+       if(increaseSpeed_leftWheel)
+       {
+           left_wheel_.SetSpeed(std::clamp(units::angular_velocity::revolutions_per_minute_t{lerpSpeed_leftWheel}, kMaxNegSpeed, speed));
+       }
+       else
+       {
+           left_wheel_.SetSpeed(std::clamp(units::angular_velocity::revolutions_per_minute_t{lerpSpeed_leftWheel}, speed, kMaxPosSpeed));
+       }
+       if(increaseSpeed_rightWheel)
+       {
+           right_wheel_.SetSpeed(std::clamp(units::angular_velocity::revolutions_per_minute_t{lerpSpeed_rightWheel}, kMaxNegSpeed, speed));
+       }
+       else
+       {
+           right_wheel_.SetSpeed(std::clamp(units::angular_velocity::revolutions_per_minute_t{lerpSpeed_rightWheel}, speed, kMaxPosSpeed));
+       }
+       if(increaseSpeed_backWheel)
+       {
+           back_wheel_.SetSpeed(std::clamp(units::angular_velocity::revolutions_per_minute_t{lerpSpeed_backWheel}, kMaxNegSpeed, speed));
+       }
+       else
+       {
+           back_wheel_.SetSpeed(std::clamp(units::angular_velocity::revolutions_per_minute_t{lerpSpeed_backWheel}, speed, kMaxPosSpeed));
+       }
+      
+       currentSpeed_leftWheel = lerpSpeed_leftWheel;
+       currentSpeed_rightWheel = lerpSpeed_rightWheel;
+       currentSpeed_backWheel = lerpSpeed_backWheel;
+      
+       sjsu::Delay(100ms);
+     }
+    
 
+     
+/*
       //lerp must continue as long as input speed(hub_speed) does not equal the output of the lerp function(lerp_speed) 
        while((speed != std::clamp(units::angular_velocity::revolutions_per_minute_t{lerpSpeed_leftWheel}, kMaxNegSpeed, speed)) && (speed != std::clamp(units::angular_velocity::revolutions_per_minute_t{lerpSpeed_rightWheel}, kMaxNegSpeed, speed)) && (speed != std::clamp(units::angular_velocity::revolutions_per_minute_t{lerpSpeed_backWheel}, kMaxNegSpeed, speed)))
        {
@@ -229,7 +275,7 @@ class RoverDriveSystem
             back_wheel_.SetSpeed(std::clamp(units::angular_velocity::revolutions_per_minute_t{lerpSpeed_backWheel}, speed, kMaxPosSpeed));
         }
         
-        
+        */
 
 
         sjsu::LogInfo("Set wheel speed to %f for all wheels", lerp_speed);
