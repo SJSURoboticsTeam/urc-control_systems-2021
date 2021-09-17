@@ -58,7 +58,7 @@ class RoverArmSystem
     return true;
   }
 
-  /// Moves each of the arm joints to the aproppriate angle
+  /// Moves each of the arm joints to the appropriate angle
   /// Returns True if successful.
   bool MoveArm()
   {
