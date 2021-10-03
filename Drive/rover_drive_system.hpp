@@ -150,6 +150,49 @@ class RoverDriveSystem
   /// @param speed the new movement speed of the rover
   void SetWheelSpeed(units::angular_velocity::revolutions_per_minute_t speed)
   {
+    //Want to make sure Uptime has atleast 100 ms and don't want to waste 10ms on the first iteration
+      auto next_same_time = (Uptime() + 100ms) % 10;
+      next_same_time = Uptime() - next_same_time;
+
+
+      long double lerpSpeed_leftWheel;
+      long double lerpSpeed_rightWheel;
+      long double lerpSpeed_backWheel;
+
+      long double currentSpeed_leftWheel = static_cast<long double>(left_wheel_.GetSpeed());
+      long double currentSpeed_rightWheel = static_cast<long double>(right_wheel_.GetSpeed()); //GetSpeed);
+      long double currentSpeed_backWheel = static_cast<long double>(back_wheel_.GetSpeed());
+
+      long double new_speed = static_cast<long double>(speed);
+
+      //should be okay for almost all cases with 9 loops
+      for(int i = 0; i < 9; i++)
+      {
+        if((next_same_time % 10ms) == 0ms)
+        {
+          lerpSpeed_leftWheel = std::lerp(currentSpeed_leftWheel, new_speed, static_cast<long double>(0.5));
+          lerpSpeed_rightWheel = std::lerp(currentSpeed_rightWheel, new_speed, static_cast<long double>(0.5));
+          lerpSpeed_backWheel = std::lerp(currentSpeed_backWheel, new_speed, static_cast<long double>(0.5));
+
+          left_wheel_.SetHubSpeed(std::clamp(units::angular_velocity::revolutions_per_minute_t{lerpSpeed_leftWheel}, 0_rpm, speed));
+          right_wheel_.SetHubSpeed( (std::clamp(units::angular_velocity::revolutions_per_minute_t{lerpSpeed_rightWheel}, 0_rpm, speed) ) );
+          back_wheel_.SetHubSpeed(std::clamp(units::angular_velocity::revolutions_per_minute_t{lerpSpeed_backWheel}, 0_rpm, speed));
+
+          currentSpeed_leftWheel = lerpSpeed_leftWheel;
+          currentSpeed_rightWheel = lerpSpeed_rightWheel;
+          currentSpeed_backWheel = lerpSpeed_backWheel;
+        }
+        else
+        {
+          i -= 1;
+          continue;
+        }
+      }//end for loop
+
+       sjsu::LogInfo("Set wheel speed to %f for all wheels", lerpSpeed_rightWheel);
+      
+      
+    /*
     //Implement linear interpolation (exponential moving average)
     try
     {
@@ -227,7 +270,7 @@ class RoverDriveSystem
       
        sjsu::Delay(100ms);
      }
-    
+    */
 
      
 /*
@@ -276,10 +319,7 @@ class RoverDriveSystem
         }
         
         */
-
-
-        sjsu::LogInfo("Set wheel speed to %f for all wheels", lerp_speed);
-
+/*
         //make sure 100ms have passed before setting the next speed
         while(Uptime() < next_same_time)
         {
@@ -287,12 +327,13 @@ class RoverDriveSystem
         }
 
        }//While
-    }//Try
+  //  }//Try
     catch (const std::exception & e)
     {
       sjsu::LogError("Error setting wheels speed!");
       throw e;
     }
+    */
   }; //SetWheelSpeed()
 
   /// Prints the mission control data & prints the current speed and steer angle
