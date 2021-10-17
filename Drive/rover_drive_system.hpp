@@ -166,174 +166,188 @@ class RoverDriveSystem
       long double new_speed = static_cast<long double>(speed);
 
       //should be okay for almost all cases with 9 loops
-      for(int i = 0; i < 9; i++)
-      {
-        if((next_same_time % 10ms) == 0ms)
-        {
-          lerpSpeed_leftWheel = std::lerp(currentSpeed_leftWheel, new_speed, static_cast<long double>(0.5));
-          lerpSpeed_rightWheel = std::lerp(currentSpeed_rightWheel, new_speed, static_cast<long double>(0.5));
-          lerpSpeed_backWheel = std::lerp(currentSpeed_backWheel, new_speed, static_cast<long double>(0.5));
-
-          left_wheel_.SetHubSpeed(std::clamp(units::angular_velocity::revolutions_per_minute_t{lerpSpeed_leftWheel}, 0_rpm, speed));
-          right_wheel_.SetHubSpeed( (std::clamp(units::angular_velocity::revolutions_per_minute_t{lerpSpeed_rightWheel}, 0_rpm, speed) ) );
-          back_wheel_.SetHubSpeed(std::clamp(units::angular_velocity::revolutions_per_minute_t{lerpSpeed_backWheel}, 0_rpm, speed));
-
-          currentSpeed_leftWheel = lerpSpeed_leftWheel;
-          currentSpeed_rightWheel = lerpSpeed_rightWheel;
-          currentSpeed_backWheel = lerpSpeed_backWheel;
-        }
-        else
-        {
-          i -= 1;
+       while(next_same_time%10)
+       {
           continue;
-        }
-      }//end for loop
+       }
+    
+      lerpSpeed_leftWheel = std::lerp(currentSpeed_leftWheel, new_speed, static_cast<long double>(0.5));
+      lerpSpeed_rightWheel = std::lerp(currentSpeed_rightWheel, new_speed, static_cast<long double>(0.5));
+      lerpSpeed_backWheel = std::lerp(currentSpeed_backWheel, new_speed, static_cast<long double>(0.5));
+
+      left_wheel_.SetHubSpeed(std::clamp(units::angular_velocity::revolutions_per_minute_t{lerpSpeed_leftWheel}, 0_rpm, speed));
+      right_wheel_.SetHubSpeed( (std::clamp(units::angular_velocity::revolutions_per_minute_t{lerpSpeed_rightWheel}, 0_rpm, speed) ) );
+      back_wheel_.SetHubSpeed(std::clamp(units::angular_velocity::revolutions_per_minute_t{lerpSpeed_backWheel}, 0_rpm, speed));
+
+      currentSpeed_leftWheel = lerpSpeed_leftWheel;
+      currentSpeed_rightWheel = lerpSpeed_rightWheel;
+      currentSpeed_backWheel = lerpSpeed_backWheel;
+   
+   
+      while(next_same_time%10)
+       {
+          continue;
+       }
+      
+      
+   
+      lerpSpeed_leftWheel = std::lerp(currentSpeed_leftWheel, new_speed, static_cast<long double>(0.5));
+      lerpSpeed_rightWheel = std::lerp(currentSpeed_rightWheel, new_speed, static_cast<long double>(0.5));
+      lerpSpeed_backWheel = std::lerp(currentSpeed_backWheel, new_speed, static_cast<long double>(0.5));
+
+      left_wheel_.SetHubSpeed(std::clamp(units::angular_velocity::revolutions_per_minute_t{lerpSpeed_leftWheel}, 0_rpm, speed));
+      right_wheel_.SetHubSpeed( (std::clamp(units::angular_velocity::revolutions_per_minute_t{lerpSpeed_rightWheel}, 0_rpm, speed) ) );
+      back_wheel_.SetHubSpeed(std::clamp(units::angular_velocity::revolutions_per_minute_t{lerpSpeed_backWheel}, 0_rpm, speed));
+
+      currentSpeed_leftWheel = lerpSpeed_leftWheel;
+      currentSpeed_rightWheel = lerpSpeed_rightWheel;
+      currentSpeed_backWheel = lerpSpeed_backWheel;
+   
+   
+      while(next_same_time%10)
+      {
+         continue;
+      }
+   
+      
+   
+      lerpSpeed_leftWheel = std::lerp(currentSpeed_leftWheel, new_speed, static_cast<long double>(0.5));
+      lerpSpeed_rightWheel = std::lerp(currentSpeed_rightWheel, new_speed, static_cast<long double>(0.5));
+      lerpSpeed_backWheel = std::lerp(currentSpeed_backWheel, new_speed, static_cast<long double>(0.5));
+
+      left_wheel_.SetHubSpeed(std::clamp(units::angular_velocity::revolutions_per_minute_t{lerpSpeed_leftWheel}, 0_rpm, speed));
+      right_wheel_.SetHubSpeed( (std::clamp(units::angular_velocity::revolutions_per_minute_t{lerpSpeed_rightWheel}, 0_rpm, speed) ) );
+      back_wheel_.SetHubSpeed(std::clamp(units::angular_velocity::revolutions_per_minute_t{lerpSpeed_backWheel}, 0_rpm, speed));
+
+      currentSpeed_leftWheel = lerpSpeed_leftWheel;
+      currentSpeed_rightWheel = lerpSpeed_rightWheel;
+      currentSpeed_backWheel = lerpSpeed_backWheel;
+   
+   
+   
+      while(next_same_time%10)
+      {
+         continue;
+      }
+   
+   
+   
+      lerpSpeed_leftWheel = std::lerp(currentSpeed_leftWheel, new_speed, static_cast<long double>(0.5));
+      lerpSpeed_rightWheel = std::lerp(currentSpeed_rightWheel, new_speed, static_cast<long double>(0.5));
+      lerpSpeed_backWheel = std::lerp(currentSpeed_backWheel, new_speed, static_cast<long double>(0.5));
+
+      left_wheel_.SetHubSpeed(std::clamp(units::angular_velocity::revolutions_per_minute_t{lerpSpeed_leftWheel}, 0_rpm, speed));
+      right_wheel_.SetHubSpeed( (std::clamp(units::angular_velocity::revolutions_per_minute_t{lerpSpeed_rightWheel}, 0_rpm, speed) ) );
+      back_wheel_.SetHubSpeed(std::clamp(units::angular_velocity::revolutions_per_minute_t{lerpSpeed_backWheel}, 0_rpm, speed));
+
+      currentSpeed_leftWheel = lerpSpeed_leftWheel;
+      currentSpeed_rightWheel = lerpSpeed_rightWheel;
+      currentSpeed_backWheel = lerpSpeed_backWheel;
+   
+   
+      while(next_same_time%10)
+      {
+         continue;
+      }
+   
+   
+   
+      lerpSpeed_leftWheel = std::lerp(currentSpeed_leftWheel, new_speed, static_cast<long double>(0.5));
+      lerpSpeed_rightWheel = std::lerp(currentSpeed_rightWheel, new_speed, static_cast<long double>(0.5));
+      lerpSpeed_backWheel = std::lerp(currentSpeed_backWheel, new_speed, static_cast<long double>(0.5));
+
+      left_wheel_.SetHubSpeed(std::clamp(units::angular_velocity::revolutions_per_minute_t{lerpSpeed_leftWheel}, 0_rpm, speed));
+      right_wheel_.SetHubSpeed( (std::clamp(units::angular_velocity::revolutions_per_minute_t{lerpSpeed_rightWheel}, 0_rpm, speed) ) );
+      back_wheel_.SetHubSpeed(std::clamp(units::angular_velocity::revolutions_per_minute_t{lerpSpeed_backWheel}, 0_rpm, speed));
+
+      currentSpeed_leftWheel = lerpSpeed_leftWheel;
+      currentSpeed_rightWheel = lerpSpeed_rightWheel;
+      currentSpeed_backWheel = lerpSpeed_backWheel;
+   
+   
+   
+      while(next_same_time%10)
+      {
+         continue;
+      }
+   
+   
+      lerpSpeed_leftWheel = std::lerp(currentSpeed_leftWheel, new_speed, static_cast<long double>(0.5));
+      lerpSpeed_rightWheel = std::lerp(currentSpeed_rightWheel, new_speed, static_cast<long double>(0.5));
+      lerpSpeed_backWheel = std::lerp(currentSpeed_backWheel, new_speed, static_cast<long double>(0.5));
+
+      left_wheel_.SetHubSpeed(std::clamp(units::angular_velocity::revolutions_per_minute_t{lerpSpeed_leftWheel}, 0_rpm, speed));
+      right_wheel_.SetHubSpeed( (std::clamp(units::angular_velocity::revolutions_per_minute_t{lerpSpeed_rightWheel}, 0_rpm, speed) ) );
+      back_wheel_.SetHubSpeed(std::clamp(units::angular_velocity::revolutions_per_minute_t{lerpSpeed_backWheel}, 0_rpm, speed));
+
+      currentSpeed_leftWheel = lerpSpeed_leftWheel;
+      currentSpeed_rightWheel = lerpSpeed_rightWheel;
+      currentSpeed_backWheel = lerpSpeed_backWheel;
+   
+   
+      while(next_same_time%10)
+      {
+         continue;
+      }
+   
+   
+      lerpSpeed_leftWheel = std::lerp(currentSpeed_leftWheel, new_speed, static_cast<long double>(0.5));
+      lerpSpeed_rightWheel = std::lerp(currentSpeed_rightWheel, new_speed, static_cast<long double>(0.5));
+      lerpSpeed_backWheel = std::lerp(currentSpeed_backWheel, new_speed, static_cast<long double>(0.5));
+
+      left_wheel_.SetHubSpeed(std::clamp(units::angular_velocity::revolutions_per_minute_t{lerpSpeed_leftWheel}, 0_rpm, speed));
+      right_wheel_.SetHubSpeed( (std::clamp(units::angular_velocity::revolutions_per_minute_t{lerpSpeed_rightWheel}, 0_rpm, speed) ) );
+      back_wheel_.SetHubSpeed(std::clamp(units::angular_velocity::revolutions_per_minute_t{lerpSpeed_backWheel}, 0_rpm, speed));
+
+      currentSpeed_leftWheel = lerpSpeed_leftWheel;
+      currentSpeed_rightWheel = lerpSpeed_rightWheel;
+      currentSpeed_backWheel = lerpSpeed_backWheel;
+   
+     
+   
+     while(next_same_time%10)
+      {
+         continue;
+      }
+   
+   
+      lerpSpeed_leftWheel = std::lerp(currentSpeed_leftWheel, new_speed, static_cast<long double>(0.5));
+      lerpSpeed_rightWheel = std::lerp(currentSpeed_rightWheel, new_speed, static_cast<long double>(0.5));
+      lerpSpeed_backWheel = std::lerp(currentSpeed_backWheel, new_speed, static_cast<long double>(0.5));
+
+      left_wheel_.SetHubSpeed(std::clamp(units::angular_velocity::revolutions_per_minute_t{lerpSpeed_leftWheel}, 0_rpm, speed));
+      right_wheel_.SetHubSpeed( (std::clamp(units::angular_velocity::revolutions_per_minute_t{lerpSpeed_rightWheel}, 0_rpm, speed) ) );
+      back_wheel_.SetHubSpeed(std::clamp(units::angular_velocity::revolutions_per_minute_t{lerpSpeed_backWheel}, 0_rpm, speed));
+
+      currentSpeed_leftWheel = lerpSpeed_leftWheel;
+      currentSpeed_rightWheel = lerpSpeed_rightWheel;
+      currentSpeed_backWheel = lerpSpeed_backWheel;
+   
+      while(next_same_time%10)
+      {
+         continue;
+      }
+   
+   
+      lerpSpeed_leftWheel = std::lerp(currentSpeed_leftWheel, new_speed, static_cast<long double>(0.5));
+      lerpSpeed_rightWheel = std::lerp(currentSpeed_rightWheel, new_speed, static_cast<long double>(0.5));
+      lerpSpeed_backWheel = std::lerp(currentSpeed_backWheel, new_speed, static_cast<long double>(0.5));
+
+      left_wheel_.SetHubSpeed(std::clamp(units::angular_velocity::revolutions_per_minute_t{lerpSpeed_leftWheel}, 0_rpm, speed));
+      right_wheel_.SetHubSpeed( (std::clamp(units::angular_velocity::revolutions_per_minute_t{lerpSpeed_rightWheel}, 0_rpm, speed) ) );
+      back_wheel_.SetHubSpeed(std::clamp(units::angular_velocity::revolutions_per_minute_t{lerpSpeed_backWheel}, 0_rpm, speed));
+
+      currentSpeed_leftWheel = lerpSpeed_leftWheel;
+      currentSpeed_rightWheel = lerpSpeed_rightWheel;
+      currentSpeed_backWheel = lerpSpeed_backWheel;
+       
+      
+  
 
        sjsu::LogInfo("Set wheel speed to %f for all wheels", lerpSpeed_rightWheel);
       
       
-    /*
-    //Implement linear interpolation (exponential moving average)
-    try
-    {
-      sjsu::LogInfo("made it to SetWheelSpeed()");
-       
-       auto clampedHubSpeed = std::clamp(speed, kMaxNegSpeed, kMaxPosSpeed);
-      //static cast to use clampedHubSpeed in lerp function
-      long double new_speed = static_cast<long double>(clampedHubSpeed);
-      //intialize the variable we will use to store the revolutions_per_minute_t that is returned on each call to std::lerp
-      long double lerpSpeed_leftWheel = 0;
-      long double lerpSpeed_rightWheel = 0;
-      long double lerpSpeed_backWheel = 0;
-      //intialize the variable we will use to store the current speed of the motor after each call to lerp
-      long double currentSpeed_leftWheel = 0;
-      long double currentSpeed_rightWheel = 0;
-      long double currentSpeed_backWheel = 0;
-
-      //want to make sure we are supposed to increase or decrease the speed when setting the speed
-      bool increaseSpeed_leftWheel = true;
-      bool increaseSpeed_rightWheel = true;
-      bool increaseSpeed_backWheel = true;
-      if(left_wheel_.RequestFeedbackFromMotor().GetFeedback().speed > speed)
-      {
-        increaseSpeed_leftWheel = false;
-      }
-      if(right_wheel_.RequestFeedbackFromMotor().GetFeedback().speed > speed)
-      {
-        increaseSpeed_rightWheel = false;
-      }
-      if(back_wheel_.RequestFeedbackFromMotor().GetFeedback().speed > speed)
-      {
-        increaseSpeed_backWheel = false;
-      }
-     
-     //current_speed is pulled from the motor feedback and casted to long double 
-      currentSpeed_leftWheel = static_cast<long double>(left_wheel_.RequestFeedbackFromMotor().GetFeedback().speed);
-      currentSpeed_rightWheel = static_cast<long double>(right_wheel_.RequestFeedbackFromMotor().GetFeedback().speed);
-      currentSpeed_backWheel = static_cast<long double>(back_wheel_.RequestFeedbackFromMotor().GetFeedback().speed);   
-        
-     for(int i = 0; i < 6; i++)
-     {
-       //lerp returns a midpoint between current_speed and the new_speed
-       lerpSpeed_leftWheel = std::lerp(currentSpeed_leftWheel, new_speed, static_cast<long double>(0.5));
-       lerpSpeed_rightWheel = std::lerp(currentSpeed_rightWheel, new_speed, static_cast<long double>(0.5));
-       lerpSpeed_backWheel = std::lerp(currentSpeed_backWheel, new_speed, static_cast<long double>(0.5));
-      
-       if(increaseSpeed_leftWheel)
-       {
-           left_wheel_.SetSpeed(std::clamp(units::angular_velocity::revolutions_per_minute_t{lerpSpeed_leftWheel}, kMaxNegSpeed, speed));
-       }
-       else
-       {
-           left_wheel_.SetSpeed(std::clamp(units::angular_velocity::revolutions_per_minute_t{lerpSpeed_leftWheel}, speed, kMaxPosSpeed));
-       }
-       if(increaseSpeed_rightWheel)
-       {
-           right_wheel_.SetSpeed(std::clamp(units::angular_velocity::revolutions_per_minute_t{lerpSpeed_rightWheel}, kMaxNegSpeed, speed));
-       }
-       else
-       {
-           right_wheel_.SetSpeed(std::clamp(units::angular_velocity::revolutions_per_minute_t{lerpSpeed_rightWheel}, speed, kMaxPosSpeed));
-       }
-       if(increaseSpeed_backWheel)
-       {
-           back_wheel_.SetSpeed(std::clamp(units::angular_velocity::revolutions_per_minute_t{lerpSpeed_backWheel}, kMaxNegSpeed, speed));
-       }
-       else
-       {
-           back_wheel_.SetSpeed(std::clamp(units::angular_velocity::revolutions_per_minute_t{lerpSpeed_backWheel}, speed, kMaxPosSpeed));
-       }
-      
-       currentSpeed_leftWheel = lerpSpeed_leftWheel;
-       currentSpeed_rightWheel = lerpSpeed_rightWheel;
-       currentSpeed_backWheel = lerpSpeed_backWheel;
-      
-       sjsu::Delay(100ms);
-     }
-    */
-
-     
-/*
-      //lerp must continue as long as input speed(hub_speed) does not equal the output of the lerp function(lerp_speed) 
-       while((speed != std::clamp(units::angular_velocity::revolutions_per_minute_t{lerpSpeed_leftWheel}, kMaxNegSpeed, speed)) && (speed != std::clamp(units::angular_velocity::revolutions_per_minute_t{lerpSpeed_rightWheel}, kMaxNegSpeed, speed)) && (speed != std::clamp(units::angular_velocity::revolutions_per_minute_t{lerpSpeed_backWheel}, kMaxNegSpeed, speed)))
-       {
-        auto next_same_time = Uptime() + 100ms;
-
-        //current_speed is pulled from the motor feedback and casted to long double 
-        currentSpeed_leftWheel = static_cast<long double>(left_wheel_.RequestFeedbackFromMotor().GetFeedback().speed);
-        currentSpeed_rightWheel = static_cast<long double>(right_wheel_.RequestFeedbackFromMotor().GetFeedback().speed);
-        currentSpeed_backWheel = static_cast<long double>(back_wheel_.RequestFeedbackFromMotor().GetFeedback().speed);
-        
-        //lerp returns a midpoint between current_speed and the new_speed
-        lerpSpeed_leftWheel = std::lerp(currentSpeed_leftWheel, new_speed, static_cast<long double>(0.5));
-        lerpSpeed_rightWheel = std::lerp(currentSpeed_rightWheel, new_speed, static_cast<long double>(0.5));
-        lerpSpeed_backWheel = std::lerp(currentSpeed_backWheel, new_speed, static_cast<long double>(0.5));
-
-        
-        //Set the speed of the motor and convert long double lerp_speed to revolutions_per_minute_t object
-        //use std::clamp to make sure we don't set the speed higher/lower than the input speed.
-        //When using std::clamp check if the fucntion is increasing or decreasing the speed to limit the max/min speeds
-        if(increaseSpeed_leftWheel)
-        {
-            left_wheel_.SetSpeed(std::clamp(units::angular_velocity::revolutions_per_minute_t{lerpSpeed_leftWheel}, kMaxNegSpeed, speed));
-        }
-        else
-        {
-            left_wheel_.SetSpeed(std::clamp(units::angular_velocity::revolutions_per_minute_t{lerpSpeed_leftWheel}, speed, kMaxPosSpeed));
-        }
-        if(increaseSpeed_rightWheel)
-        {
-            right_wheel_.SetSpeed(std::clamp(units::angular_velocity::revolutions_per_minute_t{lerpSpeed_rightWheel}, kMaxNegSpeed, speed));
-        }
-        else
-        {
-            right_wheel_.SetSpeed(std::clamp(units::angular_velocity::revolutions_per_minute_t{lerpSpeed_rightWheel}, speed, kMaxPosSpeed));
-        }
-        if(increaseSpeed_backWheel)
-        {
-            back_wheel_.SetSpeed(std::clamp(units::angular_velocity::revolutions_per_minute_t{lerpSpeed_backWheel}, kMaxNegSpeed, speed));
-        }
-        else
-        {
-            back_wheel_.SetSpeed(std::clamp(units::angular_velocity::revolutions_per_minute_t{lerpSpeed_backWheel}, speed, kMaxPosSpeed));
-        }
-        
-        */
-/*
-        //make sure 100ms have passed before setting the next speed
-        while(Uptime() < next_same_time)
-        {
-          continue;
-        }
-
-       }//While
-  //  }//Try
-    catch (const std::exception & e)
-    {
-      sjsu::LogError("Error setting wheels speed!");
-      throw e;
-    }
-    */
+    
   }; //SetWheelSpeed()
 
   /// Prints the mission control data & prints the current speed and steer angle
