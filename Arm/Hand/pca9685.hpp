@@ -1,3 +1,6 @@
+// This device allows us to control multiple servo motors which is used in the
+// control of the hand. *Might need some additional work*
+
 #pragma once
 
 #include "module.hpp"
@@ -119,7 +122,6 @@ class Pca9685 : public Module<pca9685Settings_t>
     setPWM(outputNumber, onTime, offTime);
   }
 
- 
   void setPulseWidth(uint8_t outputNumber, units::time::second_t pulseLength)
   {
     uint16_t offTime = (pulseLength * settings.frequency * 4096).to<uint16_t>();

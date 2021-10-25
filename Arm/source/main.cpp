@@ -5,7 +5,7 @@
 #include "devices/actuators/servo/rmd_x.hpp"
 #include "devices/sensors/movement/accelerometer/mpu6050.hpp"
 
-#include "RoverArmSystem.hpp"
+#include "rover_arm_system.hpp"
 #include "../../Common/esp.hpp"
 
 int main()

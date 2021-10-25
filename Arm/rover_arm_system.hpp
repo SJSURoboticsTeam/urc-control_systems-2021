@@ -1,7 +1,7 @@
 #pragma once
 #include "utility/math/units.hpp"
 #include "joint.hpp"
-#include "wrist_joint.hpp"
+#include "Hand/wrist_joint.hpp"
 
 namespace sjsu::arm
 {
