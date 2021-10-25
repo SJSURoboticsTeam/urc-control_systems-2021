@@ -1,22 +1,30 @@
 /*
- *  Modified by: Joshua Ramayrat (10-17-2021)
+ *  Modified by: Joshua Ramayrat
  *
  */
 
 
 #pragma once
 
+#include <algorithm>
+
 #include "devices/actuators/servo/rmd_x.hpp"
 #include "devices/sensors/movement/accelerometer/mpu6050.hpp"
 
 #include "utility/time/time.hpp"
 #include "utility/math/units.hpp"
+#include "utility/log.hpp"
+#include "peripherals/lpc40xx/can.hpp"
 
+#define PI 3.14159265358979323846
 
-namespace sjsu::arm
+namespace sjsu::common
 {
-// the Joint class is used for the rotunda, elbow, and shoulder motors.
-class Joint
+
+// I made this general motor class to implement angular position, velocity, and acceleration sensing
+// with information from the accelerometer and the RMD-X motors.
+
+class Motor
 {
  private:
   // The minimum allowable angle the joint is able to turn to in normal
@@ -77,12 +85,12 @@ class Joint
     };
 
 
-  Joint(sjsu::RmdX & joint_motor, sjsu::Mpu6050 & accelerometer)
+  Motor(sjsu::RmdX & joint_motor, sjsu::Mpu6050 & accelerometer)
       : motor(joint_motor), mpu(accelerometer)
   {
   }
 
-  Joint(sjsu::RmdX & joint_motor,
+  Motor(sjsu::RmdX & joint_motor,
         sjsu::Mpu6050 & accelerometer,
         units::angle::degree_t min_angle,
         units::angle::degree_t max_angle,
@@ -106,11 +114,15 @@ class Joint
   /// Move the motor to the (calibrated) angle desired.
   void SetPosition(units::angle::degree_t angle)
   {
+  
     units::angle::degree_t calibrated_angle = angle - zero_offset_angle;
-    calibrated_angle                        = units::math::min(
-        units::math::max(calibrated_angle, minimum_angle), maximum_angle);
+    
+    calibrated_angle = units::math::min(units::math::max(calibrated_angle, minimum_angle), maximum_angle);
+
     sjsu::LogInfo("%f", calibrated_angle.to<double>());
+    
     motor.SetAngle(calibrated_angle);
+  
   }
 
   /// Sets the zero_offset_angle value that the motor uses to know its true '0'
@@ -129,7 +141,6 @@ class Joint
     acc_y = acc_all.y
     acc_z = acc_all.z
 
-    vel_x = (acc_a
 
     return mpu.Read();
   }
@@ -141,8 +152,11 @@ class Joint
    *  the joint at a given interval of time. I'm integrating
    *  acceleration once from the accelerometer data to get velocity.
    *  I am using the timer library of the SJSU-Dev2 firmware platform.
+   * 
+   *  Disclaimer: This will accumulate measurement errors over time. 
+   * 
    */
-  Velocity_t GetAngularVelocity(sjsu::Accelerometer::Acceleration_t accel_input)
+  Velocity_t GetAngularVelocity_1(sjsu::Accelerometer::Acceleration_t accel_input)
   {
 
       Velocity_t ang_velo;
@@ -155,15 +169,15 @@ class Joint
       // floats. I think there will be some clash if I
       // do computations with mis-matching datatypes but I
       // may be wrong.
-      float accel_xi = accel_ti.x;
-      float accel_yi = accel_ti.y;
-      float accel_zi = accel_ti.z;
+      float accel_xi = static_cast<float>(accel_ti.x);
+      float accel_yi = static_cast<float>(accel_ti.y);
+      float accel_zi = static_cast<float>(accel_ti.z);
 
       sjsu::Accelerometer::Acceleration_t accel_tf = mpu.Read();
 
-      float accel_xf = accel_tf.x;
-      float accel_yf = accel_tf.y;
-      float accel_zf = accel_tf.z;
+      float accel_xf = static_cast<float>(accel_tf.x);
+      float accel_yf = static_cast<float>(accel_tf.y);
+      float accel_zf = static_cast<float>(accel_tf.z);
 
 
       // I'm getting the next current time without running a wait command
@@ -193,24 +207,27 @@ class Joint
   /*
    *  The goal of this function is to return the angular
    *  position of the object in degrees. 
+   * 
+   *  Disclaimer: This will accumulate measurement errors over time.
+   * 
    */
-  Position_t GetAngularPosition(Velocity_t velo_input)
+  Position_t GetAngularPosition_1(Velocity_t velo_input)
   {
       Position_t ang_pos;
 
       float initial_time = DefaultUptime();
 
       Velocity_t velo_i = velo_input;
-      float velo_xi = velo_i.theta_dot_x;
-      float velo_yi = velo_i.theta_dot_y;
-      float velo_zi = velo_i.theta_dot_z;
+      float velo_xi = static_cast<float>(velo_i.theta_dot_x);
+      float velo_yi = static_cast<float>(velo_i.theta_dot_y);
+      float velo_zi = static_cast<float>(velo_i.theta_dot_z);
 
       sjsu::Accelerometer::Acceleration_t accel_current = mpu.Read();
-      Velocity_t velo_tf = GetAngularVelocity(accel_current);
+      Velocity_t velo_tf = GetAngularVelocity_1(accel_current);
 
-      float velo_xf = velo_tf.theta_dot_x;
-      float velo_yf = velo_tf.theta_dot_y;
-      float velo_zf = velo_tf.theta_dot_z;
+      float velo_xf = static_cast<float>(velo_tf.theta_dot_x);
+      float velo_yf = static_cast<float>(.theta_dot_y);
+      float velo_zf = static_cast<float>(velo_tf.theta_dot_z);
 
 
       // I'm getting the next current time without running a wait command
@@ -235,6 +252,45 @@ class Joint
       return ang_pos;
 
   }
+
+  Position_t GetAngularPosition_2(Acceleration_t accel_input)
+  {
+
+    Position_t returnPos;
+
+    sjsu::Accelerometer::Acceleration_t accel = accel_input;
+
+    float a_x = static_cast<float>(accel.x);
+    float a_y = static_cast<float>(accel.y);
+    float a_z = static_cast<float>(accel.z);
+
+
+
+    /* DISCLAIMER: I'm not sure if this is going to work because I'm not sure
+     * about what inputs/data types that 'units::math::atan' accepts.
+     * 
+     * Reference: https://www.delsys.com/downloads/USERSGUIDE/emgworks/HTMLDocuments/filteraccelerationasinclinationangle.htm
+     */
+    units::angle::radian_t rad_x = units::math::atan(a_x / (units::math::sqrt(units::math::pow(a_y, 2) + units::math::pow(a_z, 2))))
+    units::angle::radian_t rad_y = units::math::atan(a_y / (units::math::sqrt(units::math::pow(a_x, 2) + units::math::pow(a_z, 2))))
+    units::angle::radian_t rad_z = units::math::atan( ( units::math::sqrt( units::math::pow(a_x, 2) + units::math::pow(a_y, 2) ) / a_z ) )
+
+    // degree = 1 rad * 180 / pi
+    float deg_x = static_cast<float>(rad_x) * 180 / PI;
+    float deg_y = static_cast<float>(rad_y) * 180 / PI;
+    float deg_z = static_cast<float>(rad_z) * 180 / PI;
+
+    units::angle::degree th_x = deg_x;
+    units::angle::degree th_x = deg_x;
+    units::angle::degree th_x = deg_x;
+
+    returnPos.theta_x = th_x;
+    returnPos.theta_y = th_y;
+    returnPos.theta_z = th_z;
+
+  
+  }
+
 
 };
 }  // namespace sjsu::arm
