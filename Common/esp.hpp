@@ -6,6 +6,7 @@
 #include "utility/log.hpp"
 #include "peripherals/lpc40xx/uart.hpp"
 #include "devices/communication/esp8266.hpp"
+#include "utility/time/timeout_timer.hpp"
 
 namespace sjsu::common
 {
@@ -16,7 +17,8 @@ class Esp
   Esp()
       : esp_(sjsu::lpc40xx::GetUart<3>()),
         wifi_(esp_.GetWiFi()),
-        socket_(esp_.GetInternetSocket()){};
+        socket_(esp_.GetInternetSocket()),
+        serverTimeout_(sjsu::TimeoutTimer(5s)){};
 
   /// Initializes the Wi-Fi module by connecting to WiFi
   void Initialize()
@@ -32,6 +34,11 @@ class Esp
   /// @return the response body of the GET request
   std::string GETRequest(std::string endpoint)
   {
+    if (serverTimeout_.HasExpired())
+    {
+      sjsu::LogWarning("Server timed out! Reconnecting...");
+      ConnectToServer();
+    }
     request_ = "GET /" + endpoint + " HTTP/1.1\r\nHost: " + url_ + "\r\n\r\n";
     WriteToServer();
     try
@@ -41,6 +48,7 @@ class Esp
       size_t read_back = socket_.Read(response, kDefaultTimeout);
       // printf("RESPONSE:\n%s\n", response.data());
       std::string body(reinterpret_cast<char *>(response.data()), read_back);
+      serverTimeout_.SetNewTimeout(5s);
       try
       {
         body = body.substr(body.find("\r\n\r\n"));
@@ -119,6 +127,7 @@ class Esp
   sjsu::WiFi & wifi_;
   sjsu::InternetSocket & socket_;
   std::string request_;
+  sjsu::TimeoutTimer serverTimeout_;
   std::string url_                               = "192.168.1.103";
   std::string kErrorResponse                     = "ERROR";
   const uint16_t kPort                           = 5000;

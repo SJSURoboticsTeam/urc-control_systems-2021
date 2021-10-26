@@ -53,14 +53,7 @@ int main()
       sjsu::LogInfo("Making new request...");
       std::string endpoint = "arm?example=1&param=2";  // include status updates
       std::string response = esp.GETRequest(endpoint);
-      sjsu::TimeoutTimer serverTimeout(5s);  // server has 5s timeout
       // Do stuff with arm here...
-      sjsu::Delay(3s);
-      if (serverTimeout.HasExpired())
-      {
-        sjsu::LogWarning("Server timed out! Reconnecting...");
-        esp.ConnectToServer();
-      }
     }
     catch (const std::exception & e)
     {

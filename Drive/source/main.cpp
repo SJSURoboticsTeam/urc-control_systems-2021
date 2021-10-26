@@ -1,6 +1,5 @@
 #include "utility/log.hpp"
 #include "peripherals/lpc40xx/can.hpp"
-#include "utility/time/timeout_timer.hpp"
 #include "devices/actuators/servo/rmd_x.hpp"
 
 #include "wheel.hpp"
@@ -63,15 +62,9 @@ int main(void)
       sjsu::LogInfo("Making new request...");
       std::string endpoint = drive.GETRequestParameters();
       std::string response = esp.GETRequest(endpoint);
-      sjsu::TimeoutTimer serverTimeout(5s);  // server has 5s timeout
       drive.ParseJSONResponse(response);
       drive.HandleRoverMovement();
       drive.PrintRoverData();
-      if (serverTimeout.HasExpired())
-      {
-        sjsu::LogWarning("Server timed out! Reconnecting...");
-        esp.ConnectToServer();
-      }
     }
     catch (const std::exception & e)
     {
