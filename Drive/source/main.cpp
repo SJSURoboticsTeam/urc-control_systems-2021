@@ -48,9 +48,6 @@ int main(void)
   sjsu::LogInfo("Initializing drive system...");
   drive_system.Initialize();
   esp.Initialize();
-  
-  drive_system.SetWheelSpeed(15_rpm);
-  drive_system.SetWheelSpeed(0_rpm);
 
   // Drive control loop
   // 1. Drive sys creates GET request parameters - returns endpoint+parameters
