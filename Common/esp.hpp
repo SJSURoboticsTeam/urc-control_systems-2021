@@ -30,23 +30,21 @@ class Esp
   /// Sends a GET request to the hardcoded URL
   /// @param endpoint i.e. /endpoint?example=parameter
   /// @return the response body of the GET request
-  std::string GETRequest(std::string endpoint)
+  std::string GET(std::string endpoint)
   {
     request_ = "GET /" + endpoint + " HTTP/1.1\r\nHost: " + url_ + "\r\n\r\n";
     WriteToServer();
     try
     {
-      std::array<uint8_t, 1024 * 2> response;
-      std::fill(response.begin(), response.end(), 0);
-      size_t read_back = socket_.Read(response, kDefaultTimeout);
-      // printf("RESPONSE:\n%s\n", response.data());
-      std::string body(reinterpret_cast<char *>(response.data()), read_back);
+      std::array<uint8_t, 1024 * 2> raw;
+      std::fill(raw.begin(), raw.end(), 0);
+      size_t read_back = socket_.Read(raw, kDefaultTimeout);
+      std::string response(reinterpret_cast<char *>(raw.data()), read_back);
       try
       {
-        body = body.substr(body.find("\r\n\r\n"));
-        body = body.substr(body.find("{"));
-        printf("Response Body:\n%s\n", body.c_str());
-        return body;
+        response = response.substr(response.find("\r\n\r\n{"));
+        printf("Response Body:\n%s\n", response.c_str());
+        return response;
       }
       catch (const std::exception & e)
       {

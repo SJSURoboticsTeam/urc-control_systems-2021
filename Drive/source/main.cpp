@@ -50,6 +50,7 @@ int main(void)
 
   esp.Initialize();
   drive.Initialize();
+
   // Drive control loop
   // 1. Drive sys creates GET request parameters - returns endpoint+parameters
   // 2. Make GET request using esp - returns response body as string
@@ -61,8 +62,8 @@ int main(void)
     try
     {
       sjsu::LogInfo("Making new request...");
-      std::string endpoint = drive.GETRequestParameters();
-      std::string response = esp.GETRequest(endpoint);
+      std::string endpoint = "drive" + drive.GETParameters();
+      std::string response = esp.GET(endpoint);
       sjsu::TimeoutTimer serverTimeout(5s);  // server has 5s timeout
       drive.ParseJSONResponse(response);
       drive.HandleRoverMovement();

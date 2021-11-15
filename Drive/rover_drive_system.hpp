@@ -49,13 +49,13 @@ class RoverDriveSystem
 
   /// Constructs GET request parameter
   /// @return Endpoint & parameters i.e. /drive?ex=param
-  std::string GETRequestParameters()
+  std::string GETParameters()
   {
     try
     {
       char reqParam[250];
       snprintf(reqParam, 300,
-               "drive?is_operational=%d&drive_mode=%c&battery=%d&left_wheel_"
+               "?is_operational=%d&drive_mode=%c&battery=%d&left_wheel_"
                "speed=%d&left_wheel_angle=%d&right_wheel_speed=%d&right_"
                "wheel_angle=%d&back_wheel_speed=%d&back_wheel_angle=%d",
                mc_data.is_operational, current_mode_, state_of_charge_,
