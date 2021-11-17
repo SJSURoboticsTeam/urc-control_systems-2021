@@ -224,6 +224,8 @@ class RmdX : public sjsu::Module<RmdXSettings_t>
 
     PollForMessages(Value(Commands::kReadMotorStatus1AndErrorFlagCommands),
                     timeout_timer.GetTimeLeft());      
+
+    return *this;
   }
 
   /// Set the rotational speed of the motor.
