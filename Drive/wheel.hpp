@@ -44,7 +44,6 @@ class Wheel
   {
     try
     {
-       sjsu::LogInfo("made it to sethubspeed()");
        
        hub_motor_.SetSpeed(hub_speed);
        hub_speed_ = hub_speed;
@@ -52,7 +51,6 @@ class Wheel
     }
     catch (const std::exception & e)
     {
-      sjsu::LogInfo("made it to sethubspeed() - something broke!");
       throw e;
     }
   }
