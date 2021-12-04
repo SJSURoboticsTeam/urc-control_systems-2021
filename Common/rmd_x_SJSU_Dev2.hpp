@@ -65,7 +65,7 @@ class RmdX : public sjsu::Module<RmdXSettings_t>
     kWriteAccelerationDataToRAMCommand           = 0x34,
     kReadEncoderDataCommand                      = 0x90,
     kWriteEncoderOffsetCommand                   = 0x91,
-    kWriteCurrentPositionToROMAsMotorZeroCommand = 0x19,
+    kWriteCurrentPositionToROMAsMotorZeroCommand = 0x19,        // could this be used as a homing procedure?
     kReadMultiTurnsAngleCommand                  = 0x92,
     kReadSingleCircleAngleCommand                = 0x94,
     kReadMotorStatus1AndErrorFlagCommands        = 0x9A,
@@ -89,8 +89,8 @@ class RmdX : public sjsu::Module<RmdXSettings_t>
   {
 
     /// (WIP) 
-    /// PID gains from motor. The motor has different pid values for position,
-    /// speed, and torque (?)
+    /// PID gains from motor. 
+    /// The motor has different pid values for position, speed, and torque.. (unsure about torque)
     float Kp_pos;
     float Ki_pos;
     float Kp_spe;
@@ -188,7 +188,7 @@ class RmdX : public sjsu::Module<RmdXSettings_t>
     network_.CanBus().Send(
         device_id_,
         {
-            Value(Commands::kWritePIDToROMCommand),
+            Value(Commands::kWritePIDToROMCommand),                   //write to ROM so the motor remembers the PID value even when 
             0x00,
             static_cast<float>((Kp_pos >> 0) & 0xFF),
             static_cast<float>((Ki_pos >> 8) & 0xFF),
@@ -391,7 +391,7 @@ class RmdX : public sjsu::Module<RmdXSettings_t>
         auto & payload = message.payload;
 
         // (Joshua) really confused by this section
-        auto temperature = static_cast<int8_t>(payload[1]);
+        auto temperature = static_cast<int8_t>(payload[1]);    
         auto current     = static_cast<int16_t>((payload[3] << 8) | payload[2]);
         auto speed       = static_cast<int16_t>((payload[5] << 8) | payload[4]);
         auto encoder     = static_cast<int16_t>((payload[7] << 8) | payload[6]);
