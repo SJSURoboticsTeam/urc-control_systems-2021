@@ -73,12 +73,16 @@ class Wheel
     for (units::angle::degree_t angle = 0_deg; angle < 360_deg; angle += 2_deg)
     {
       SetSteeringAngle(angle);
-      sjsu::Delay(50ms);  // Lets motor move into place
+      if(!(Uptime() % 50))
+      {
       if (homing_pin_.Read() == home_level)
       {
         homing_offset_angle_ = angle;
         break;
       }
+
+      }
+
     }
     sjsu::LogInfo("Homing %s wheel done! Offset angle set to %d", name_.c_str(),
                   homing_offset_angle_.to<int>());
