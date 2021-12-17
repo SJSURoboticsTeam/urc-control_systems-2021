@@ -88,6 +88,23 @@ class Wheel
                   homing_offset_angle_.to<int>());
   };
 
+bool HomePinChk()
+{
+
+     if (homing_pin_.Read() == home_level)
+      {
+        homing_offset_angle_ = angle;
+        return true;
+      }
+  return false
+}
+
+
+
+
+
+  
+
   std::string name_;          // Wheel name (i.e. left, right, back)
   sjsu::RmdX & hub_motor_;    // Controls tire direction (fwd/rev) & speed
   sjsu::RmdX & steer_motor_;  // Controls wheel alignment/angle
