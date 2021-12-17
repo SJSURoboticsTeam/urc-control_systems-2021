@@ -94,6 +94,8 @@ bool HomePinChk()
      if (homing_pin_.Read() == home_level)
       {
         homing_offset_angle_ = angle;
+        sjsu::LogInfo("Homing %s wheel done! Offset angle set to %d", name_.c_str(),
+                          homing_offset_angle_.to<int>());
         return true;
       }
   return false
