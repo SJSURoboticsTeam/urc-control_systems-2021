@@ -30,7 +30,6 @@ class RoverDriveSystem
         right_wheel_(right_wheel),
         back_wheel_(back_wheel){};
 
-int heartbeatCount;
   /// Initializes wheels and sets rover to operational starting mode (spin)
   void Initialize()
   {
@@ -405,6 +404,7 @@ int heartbeatCount;
     }
   };
 
+  int heartbeatCount = 0;
   char current_mode_   = 'S';
   int state_of_charge_ = 90;  // TODO - hardcoded for now
 
