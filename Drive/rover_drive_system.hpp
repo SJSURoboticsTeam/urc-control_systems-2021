@@ -57,7 +57,6 @@ class RoverDriveSystem
     {
       char reqParam[250];
       snprintf(reqParam, 300,
-                //check syntax - Adrien
                "?heartbeatCount=%d&?is_operational=%d&drive_mode=%c&battery=%d&left_wheel_"
                "speed=%d&left_wheel_angle=%d&right_wheel_speed=%d&right_"
                "wheel_angle=%d&back_wheel_speed=%d&back_wheel_angle=%d",
@@ -85,7 +84,7 @@ class RoverDriveSystem
       sscanf(
           response.c_str(),
           R"({ "heartbeatCount": %d, is_operational": %d, "drive_mode": "%c", "speed": %d, "angle": %d })",
-          &mc_data.serverHeartbeat, &mc_data.is_operational, &mc_data.drive_mode, &mc_data.speed,
+          &mc_data.heartbeatCount, &mc_data.is_operational, &mc_data.drive_mode, &mc_data.speed,
           &mc_data.rotation_angle);
     }
     catch (const std::exception & e)
@@ -200,7 +199,7 @@ class RoverDriveSystem
   {
     printf(
         "HEARTBEAT COUNT:\t%d\nOPERATIONAL:\t%d\nDRIVE MODE:\t%c\nMC SPEED:\t%d\nMC ANGLE:\t%d\n\n",
-        mc_data.heartbeatCount,mc_data.is_operational, current_mode_, mc_data.speed,
+        heartbeatCount,mc_data.is_operational, current_mode_, mc_data.speed,
         mc_data.rotation_angle);
     printf("%-10s%-10s%-10s\n", "WHEEL", "SPEED", "ANGLE");
     printf("=========================\n");
