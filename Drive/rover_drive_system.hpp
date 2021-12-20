@@ -17,6 +17,7 @@ class RoverDriveSystem
  public:
   struct MissionControlData
   {
+    int heartbeatCount;
     int is_operational;
     char drive_mode;
     int rotation_angle;
@@ -35,6 +36,7 @@ class RoverDriveSystem
     {
       sjsu::LogInfo("Initializing drive system...");
       mc_data.is_operational = 1;
+      heartbeatCount = 0;
       left_wheel_.Initialize();
       right_wheel_.Initialize();
       back_wheel_.Initialize();
@@ -55,10 +57,10 @@ class RoverDriveSystem
     {
       char reqParam[250];
       snprintf(reqParam, 300,
-               "?is_operational=%d&drive_mode=%c&battery=%d&left_wheel_"
+               "?heartbeatCount=%d&?is_operational=%d&drive_mode=%c&battery=%d&left_wheel_"
                "speed=%d&left_wheel_angle=%d&right_wheel_speed=%d&right_"
                "wheel_angle=%d&back_wheel_speed=%d&back_wheel_angle=%d",
-               mc_data.is_operational, current_mode_, state_of_charge_,
+               heartbeatCount ,mc_data.is_operational, current_mode_, state_of_charge_,
                left_wheel_.GetSpeed(), left_wheel_.GetPosition(),
                right_wheel_.GetSpeed(), right_wheel_.GetPosition(),
                back_wheel_.GetSpeed(), back_wheel_.GetPosition());
@@ -81,8 +83,8 @@ class RoverDriveSystem
       // TODO: Account for heartbeat procedure i.e. "messageCount": 132
       sscanf(
           response.c_str(),
-          R"({ "is_operational": %d, "drive_mode": "%c", "speed": %d, "angle": %d })",
-          &mc_data.is_operational, &mc_data.drive_mode, &mc_data.speed,
+          R"({ "heartbeatCount": %d, is_operational": %d, "drive_mode": "%c", "speed": %d, "angle": %d })",
+          &mc_data.heartbeatCount, &mc_data.is_operational, &mc_data.drive_mode, &mc_data.speed,
           &mc_data.rotation_angle);
     }
     catch (const std::exception & e)
@@ -91,6 +93,22 @@ class RoverDriveSystem
       throw e;
     }
   };
+
+
+
+  bool isSyncedWithMissionControl()
+  {
+      int expectedHeartbeat = heartbeatCount+1;
+      if(mc_data.heartbeatCount == expectedHeartbeat){
+        sjsu::LogInfo("In Sync");
+        return true;
+      }else{
+        sjsu::LogError("Heartbeat not in sync. Resetting");
+        heartbeatCount=0;
+        return false;
+      }
+  }
+
 
   /// Handles the rover movement depending on the mode.
   /// D = Drive, S = Spin, T = Translation
@@ -101,8 +119,13 @@ class RoverDriveSystem
       units::angle::degree_t angle(static_cast<float>(mc_data.rotation_angle));
       units::angular_velocity::revolutions_per_minute_t speed(
           static_cast<float>(mc_data.speed));
+
+      if(isSyncedWithMissionControl()){
+          SetWheelSpeed(kZeroSpeed);
+      }
+
       // If current mode is same as mc mode value and rover is operational
-      if (mc_data.is_operational && (current_mode_ == mc_data.drive_mode))
+      else if (mc_data.is_operational && (current_mode_ == mc_data.drive_mode))
       {
         sjsu::LogInfo("Handling %c movement...", current_mode_);
         switch (current_mode_)
@@ -175,8 +198,8 @@ class RoverDriveSystem
   void PrintRoverData()
   {
     printf(
-        "OPERATIONAL:\t%d\nDRIVE MODE:\t%c\nMC SPEED:\t%d\nMC ANGLE:\t%d\n\n",
-        mc_data.is_operational, current_mode_, mc_data.speed,
+        "HEARTBEAT COUNT:\t%d\nOPERATIONAL:\t%d\nDRIVE MODE:\t%c\nMC SPEED:\t%d\nMC ANGLE:\t%d\n\n",
+        heartbeatCount,mc_data.is_operational, current_mode_, mc_data.speed,
         mc_data.rotation_angle);
     printf("%-10s%-10s%-10s\n", "WHEEL", "SPEED", "ANGLE");
     printf("=========================\n");
@@ -379,6 +402,7 @@ class RoverDriveSystem
     }
   };
 
+  int heartbeatCount = 0;
   char current_mode_   = 'S';
   int state_of_charge_ = 90;  // TODO - hardcoded for now
 
