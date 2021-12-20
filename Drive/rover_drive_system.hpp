@@ -120,7 +120,7 @@ class RoverDriveSystem
       units::angular_velocity::revolutions_per_minute_t speed(
           static_cast<float>(mc_data.speed));
 
-      if(isSyncedWithMissionControl()){
+      if(!isSyncedWithMissionControl()){
           SetWheelSpeed(kZeroSpeed);
       }
 
