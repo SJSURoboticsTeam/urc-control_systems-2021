@@ -1,4 +1,4 @@
-# SJSU Robotics Control Systems 2021
+# SJSU Robotics Control Systems
 
 ## How to clone and create branch for submitting a pull request (PR).
 
