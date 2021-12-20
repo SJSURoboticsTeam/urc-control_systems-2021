@@ -17,7 +17,7 @@ class RoverDriveSystem
  public:
   struct MissionControlData
   {
-    int heartbeatCount;
+    int heartbeat_count_;
     int is_operational;
     char drive_mode;
     int rotation_angle;
@@ -84,7 +84,7 @@ class RoverDriveSystem
       sscanf(
           response.c_str(),
           R"({ "heartbeatCount": %d, is_operational": %d, "drive_mode": "%c", "speed": %d, "angle": %d })",
-          &mc_data.heartbeatCount, &mc_data.is_operational, &mc_data.drive_mode, &mc_data.speed,
+          &mc_data.heartbeat_count_, &mc_data.is_operational, &mc_data.drive_mode, &mc_data.speed,
           &mc_data.rotation_angle);
     }
     catch (const std::exception & e)
@@ -99,7 +99,7 @@ class RoverDriveSystem
   bool isSyncedWithMissionControl()
   {
       int expectedHeartbeat = heartbeatCount+1;
-      if(mc_data.heartbeatCount == expectedHeartbeat){
+      if(mc_data.heartbeat_count_ == expectedHeartbeat){
         sjsu::LogInfo("In Sync");
         return true;
       }else{
