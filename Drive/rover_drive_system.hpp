@@ -18,7 +18,6 @@ class RoverDriveSystem
   struct MissionControlData
   {
     int heartbeatCount;
-    int serverHeartbeat;
     int is_operational;
     char drive_mode;
     int rotation_angle;
@@ -85,7 +84,7 @@ class RoverDriveSystem
       // TODO: Account for heartbeat procedure i.e. "messageCount": 132
       sscanf(
           response.c_str(),
-          R"({ "serverHeartbeat": %d, is_operational": %d, "drive_mode": "%c", "speed": %d, "angle": %d })",
+          R"({ "heartbeatCount": %d, is_operational": %d, "drive_mode": "%c", "speed": %d, "angle": %d })",
           &mc_data.serverHeartbeat, &mc_data.is_operational, &mc_data.drive_mode, &mc_data.speed,
           &mc_data.rotation_angle);
     }
@@ -101,7 +100,7 @@ class RoverDriveSystem
   bool isSyncedWithMissionControl()
   {
       int expectedHeartbeat = heartbeatCount+1;
-      if(mc_data.serverHeartbeat == expectedHeartbeat){
+      if(mc_data.heartbeatCount == expectedHeartbeat){
         sjsu::LogInfo("In Sync");
         return true;
       }else{
