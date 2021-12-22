@@ -37,6 +37,7 @@ class RoverDriveSystem
       sjsu::LogInfo("Initializing drive system...");
       mc_data.is_operational = 1;
       heartbeat_count_ = 0;
+
       left_wheel_.Initialize();
       right_wheel_.Initialize();
       back_wheel_.Initialize();
