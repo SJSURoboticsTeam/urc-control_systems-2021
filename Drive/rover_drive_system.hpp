@@ -57,7 +57,7 @@ class RoverDriveSystem
     {
       char reqParam[250];
       snprintf(reqParam, 300,
-               "?heartbeatCount=%d&?is_operational=%d&drive_mode=%c&battery=%d&left_wheel_"
+               "?heartbeat_count=%d&?is_operational=%d&drive_mode=%c&battery=%d&left_wheel_"
                "speed=%d&left_wheel_angle=%d&right_wheel_speed=%d&right_"
                "wheel_angle=%d&back_wheel_speed=%d&back_wheel_angle=%d",
                heartbeat_count_ ,mc_data.is_operational, current_mode_, state_of_charge_,
@@ -83,7 +83,7 @@ class RoverDriveSystem
       // TODO: Account for heartbeat procedure i.e. "messageCount": 132
       sscanf(
           response.c_str(),
-          R"({ "heartbeatCount": %d, is_operational": %d, "drive_mode": "%c", "speed": %d, "angle": %d })",
+          R"({ "heartbeat_count": %d, is_operational": %d, "drive_mode": "%c", "speed": %d, "angle": %d })",
           &mc_data.heartbeat_count, &mc_data.is_operational, &mc_data.drive_mode, &mc_data.speed,
           &mc_data.rotation_angle);
     }
@@ -98,8 +98,8 @@ class RoverDriveSystem
 
   bool isSyncedWithMissionControl()
   {
-      int expectedHeartbeat = heartbeat_count_+1;
-      if(mc_data.heartbeat_count == expectedHeartbeat){
+      int expected_heartbeat = heartbeat_count_+1;
+      if(mc_data.heartbeat_count == expected_heartbeat){
         sjsu::LogInfo("In Sync");
         return true;
       }else{
