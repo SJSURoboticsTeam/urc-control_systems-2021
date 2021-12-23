@@ -2,10 +2,11 @@
 #include "utility/math/units.hpp"
 #include "joint.hpp"
 #include "Hand/wrist_joint.hpp"
+#include "../Common/rover_system.hpp"
 
 namespace sjsu::arm
 {
-class RoverArmSystem
+class RoverArmSystem : public sjsu::common::RoverSystem
 {
  private:
   // isOperational defines if the arm should be allowed to move or if it should
