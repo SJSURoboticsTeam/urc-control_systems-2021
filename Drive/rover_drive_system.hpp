@@ -59,8 +59,8 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
     {
       char req_param[300];
       snprintf(req_param, 300,
-               "?heartbeat_count=%d&?is_operational=%d&drive_mode=%c&battery=%"
-               "d&left_wheel_speed=%d&left_wheel_angle=%d&right_wheel_speed=%d&right_"
+               "?heartbeat_count=%d&is_operational=%d&drive_mode=%c&battery=%d"
+               "&left_wheel_speed=%d&left_wheel_angle=%d&right_wheel_speed=%d&right_"
                "wheel_angle=%d&back_wheel_speed=%d&back_wheel_angle=%d",
                heartbeat_count_, mc_data.is_operational, current_mode_,
                state_of_charge_, left_wheel_.GetSpeed(),
@@ -83,14 +83,14 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
   {
     try
     {
-      // TODO: Account for heartbeat procedure i.e. "messageCount": 132
       //printf(response.c_str());
-      sscanf(
+      int test = sscanf(
           response.c_str(),
           R"({ "heartbeat_count": %d, is_operational": %d, "drive_mode": "%c", "speed": %d, "angle": %d })",
           &mc_data.heartbeat_count, &mc_data.is_operational, &mc_data.drive_mode, &mc_data.speed,
           &mc_data.rotation_angle);
 
+      sjsu::LogInfo("test %d", test);
     }
     catch (const std::exception & e)
     {
