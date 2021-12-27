@@ -11,8 +11,23 @@
 #include "../Common/esp.hpp"
 #include "wheel.hpp"
 
+// constexpr const char format[] = R"(\r\n\r\n{
+//   "heartbeat_count": %d,
+//   "is_operational": %d,
+//   "drive_mode": "%c",
+//   "speed": %d,
+//   "angle": %d
+// })";
+
 namespace sjsu::drive
 {
+const char message_format[] = "\r\n\r\n{\n"
+"  \"heartbeat_count\": %d,\n"
+"  \"is_operational\": %d,\n"
+"  \"drive_mode\": \"%c\",\n"
+"  \"speed\": %d,\n"
+"  \"angle\": %d\n"
+"}";
 class RoverDriveSystem : public sjsu::common::RoverSystem
 {
  public:
@@ -79,24 +94,19 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
 
   /// Parses GET response body and assigns it to rover variables
   /// @param response JSON response body
-  void ParseJSONResponse(std::string response)
+  void ParseJSONResponse(std::string &response)
   {
-    try
-    {
       //printf(response.c_str());
       int test = sscanf(
           response.c_str(),
-          R"({ "heartbeat_count": %d, is_operational": %d, "drive_mode": "%c", "speed": %d, "angle": %d })",
+          message_format,
           &mc_data.heartbeat_count, &mc_data.is_operational, &mc_data.drive_mode, &mc_data.speed,
           &mc_data.rotation_angle);
-
+          //puts("");
+          //sjsu::debug::Hexdump(response.data(), response.size());
+          //sjsu::debug::Hexdump((void*)messageformat, sizeof(messageformat));
+          
       sjsu::LogInfo("test %d", test);
-    }
-    catch (const std::exception & e)
-    {
-      sjsu::LogError("Error parsing GET response!");
-      throw e;
-    }
   };
 
   bool isSyncedWithMissionControl()
