@@ -11,8 +11,23 @@
 #include "../Common/esp.hpp"
 #include "wheel.hpp"
 
+// constexpr const char format[] = R"(\r\n\r\n{
+//   "heartbeat_count": %d,
+//   "is_operational": %d,
+//   "drive_mode": "%c",
+//   "speed": %d,
+//   "angle": %d
+// })";
+
 namespace sjsu::drive
 {
+const char message_format[] = "\r\n\r\n{\n"
+"  \"heartbeat_count\": %d,\n"
+"  \"is_operational\": %d,\n"
+"  \"drive_mode\": \"%c\",\n"
+"  \"speed\": %d,\n"
+"  \"angle\": %d\n"
+"}";
 class RoverDriveSystem : public sjsu::common::RoverSystem
 {
  public:
@@ -37,7 +52,6 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
     {
       sjsu::LogInfo("Initializing drive system...");
       mc_data.is_operational = 1;
-      heartbeat_count_       = 0;
 
       left_wheel_.Initialize();
       right_wheel_.Initialize();
@@ -57,19 +71,18 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
   {
     try
     {
-      char reqParam[250];
-      snprintf(reqParam, 300,
-               "?heartbeat_count=%d&?is_operational=%d&drive_mode=%c&battery=%"
-               "d&left_wheel_"
-               "speed=%d&left_wheel_angle=%d&right_wheel_speed=%d&right_"
+      char req_param[300];
+      snprintf(req_param, 300,
+               "?heartbeat_count=%d&is_operational=%d&drive_mode=%c&battery=%d"
+               "&left_wheel_speed=%d&left_wheel_angle=%d&right_wheel_speed=%d&right_"
                "wheel_angle=%d&back_wheel_speed=%d&back_wheel_angle=%d",
                heartbeat_count_, mc_data.is_operational, current_mode_,
                state_of_charge_, left_wheel_.GetSpeed(),
                left_wheel_.GetPosition(), right_wheel_.GetSpeed(),
                right_wheel_.GetPosition(), back_wheel_.GetSpeed(),
                back_wheel_.GetPosition());
-      std::string requestParameter = reqParam;
-      return requestParameter;
+      std::string request_parameter = req_param;
+      return request_parameter;
     }
     catch (const std::exception & e)
     {
@@ -80,30 +93,24 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
 
   /// Parses GET response body and assigns it to rover variables
   /// @param response JSON response body
-  void ParseJSONResponse(std::string response)
+  void ParseJSONResponse(std::string &response)
   {
-    try
-    {
-      // TODO: Account for heartbeat procedure i.e. "messageCount": 132
-      sscanf(
+      int arguments = sscanf(
           response.c_str(),
-          R"({ "heartbeat_count": %d, is_operational": %d, "drive_mode": "%c", "speed": %d, "angle": %d })",
-          &mc_data.heartbeat_count, &mc_data.is_operational,
-          &mc_data.drive_mode, &mc_data.speed, &mc_data.rotation_angle);
-    }
-    catch (const std::exception & e)
-    {
-      sjsu::LogError("Error parsing GET response!");
-      throw e;
-    }
+          message_format,
+          &mc_data.heartbeat_count, &mc_data.is_operational, &mc_data.drive_mode, &mc_data.speed,
+          &mc_data.rotation_angle);
+          
+      //TODO: Throw an error when arguments not equal to expected
   };
+
 
   bool isSyncedWithMissionControl()
   {
-    int expected_heartbeat = heartbeat_count_ + 1;
-    if (mc_data.heartbeat_count == expected_heartbeat)
+    if (mc_data.heartbeat_count == heartbeat_count_)
     {
       sjsu::LogInfo("In Sync");
+      heartbeat_count_++;
       return true;
     }
     else
@@ -126,6 +133,7 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
 
       if (!isSyncedWithMissionControl())
       {
+        //TODO: Throw an error here instead of setting wheel speed to 0
         SetWheelSpeed(kZeroSpeed);
       }
 
@@ -203,9 +211,9 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
   void PrintRoverData()
   {
     printf(
-        "HEARTBEAT COUNT:\t%d\nOPERATIONAL:\t%d\nDRIVE MODE:\t%c\nMC "
+        "HEARTBEAT:\t%d\nOPERATIONAL:\t%d\nDRIVE MODE:\t%c\nMC "
         "SPEED:\t%d\nMC ANGLE:\t%d\n\n",
-        heartbeat_count_, mc_data.is_operational, current_mode_, mc_data.speed,
+        mc_data.heartbeat_count, mc_data.is_operational, current_mode_, mc_data.speed,
         mc_data.rotation_angle);
     printf("%-10s%-10s%-10s\n", "WHEEL", "SPEED", "ANGLE");
     printf("=========================\n");
