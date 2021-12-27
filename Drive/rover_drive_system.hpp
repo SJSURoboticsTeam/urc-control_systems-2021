@@ -389,7 +389,8 @@ class RoverDriveSystem
   Wheel & right_wheel_;
   Wheel & back_wheel_;
 
-  int state_of_charge_MAX = static_cast<int>(StateOfCharge_MAX());
-  int state_of_charge_LTC = static_cast<int>(StateOfCharge_LTC());
+sjsu::common::StateOfCharge *state_of_charge_ = new sjsu::common::StateOfCharge();
+  int state_of_charge_MAX_ = static_cast<int>(state_of_charge_ -> StateOfCharge_MAX());
+  int state_of_charge_LTC_ = static_cast<int>(state_of_charge_ -> StateOfCharge_LTC());
 };
 }  // namespace sjsu::drive
