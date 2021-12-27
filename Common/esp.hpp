@@ -17,6 +17,7 @@ class Esp
       : esp_(sjsu::lpc40xx::GetUart<3>()),
         wifi_(esp_.GetWiFi()),
         socket_(esp_.GetInternetSocket()){};
+        
 
   /// Initializes the Wi-Fi module by connecting to WiFi
   void Initialize()
@@ -39,11 +40,12 @@ class Esp
       std::array<uint8_t, 1024 * 2> raw;
       std::fill(raw.begin(), raw.end(), 0);
       size_t read_back = socket_.Read(raw, kDefaultTimeout);
+      sjsu::debug::Hexdump(&raw, read_back);
       std::string response(reinterpret_cast<char *>(raw.data()), read_back);
       try
       {
         response = response.substr(response.find("\r\n\r\n{"));
-        printf("Response Body:\n%s\n", response.c_str());
+        printf("Response Body:%s", response.c_str());
         return response;
       }
       catch (const std::exception & e)
@@ -117,11 +119,11 @@ class Esp
   sjsu::WiFi & wifi_;
   sjsu::InternetSocket & socket_;
   std::string request_;
-  std::string url_                               = "192.168.1.103";
+  std::string url_                               = "192.168.50.243";
   std::string kErrorResponse                     = "ERROR";
   const uint16_t kPort                           = 5000;
-  const char * kSsid                             = "GarzaLine";
-  const char * kPassword                         = "NRG523509";
+  const char * kSsid                             = "kingdom2";
+  const char * kPassword                         = "22039622";
   const std::chrono::nanoseconds kDefaultTimeout = 5s;
 };
 }  // namespace sjsu::common
