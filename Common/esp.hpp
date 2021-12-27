@@ -40,7 +40,6 @@ class Esp
       std::array<uint8_t, 1024 * 2> raw;
       std::fill(raw.begin(), raw.end(), 0);
       size_t read_back = socket_.Read(raw, kDefaultTimeout);
-      sjsu::debug::Hexdump(&raw, read_back);
       std::string response(reinterpret_cast<char *>(raw.data()), read_back);
       try
       {

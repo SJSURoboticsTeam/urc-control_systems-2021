@@ -52,7 +52,6 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
     {
       sjsu::LogInfo("Initializing drive system...");
       mc_data.is_operational = 1;
-      heartbeat_count_       = 0;
 
       left_wheel_.Initialize();
       right_wheel_.Initialize();
@@ -96,18 +95,15 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
   /// @param response JSON response body
   void ParseJSONResponse(std::string &response)
   {
-      //printf(response.c_str());
-      int test = sscanf(
+      int arguments = sscanf(
           response.c_str(),
           message_format,
           &mc_data.heartbeat_count, &mc_data.is_operational, &mc_data.drive_mode, &mc_data.speed,
           &mc_data.rotation_angle);
-          //puts("");
-          //sjsu::debug::Hexdump(response.data(), response.size());
-          //sjsu::debug::Hexdump((void*)messageformat, sizeof(messageformat));
           
-      sjsu::LogInfo("test %d", test);
+      //TODO: Throw an error when arguments not equal to expected
   };
+
 
   bool isSyncedWithMissionControl()
   {
@@ -137,6 +133,7 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
 
       if (!isSyncedWithMissionControl())
       {
+        //TODO: Throw an error here instead of setting wheel speed to 0
         SetWheelSpeed(kZeroSpeed);
       }
 
