@@ -11,14 +11,6 @@
 #include "../Common/esp.hpp"
 #include "wheel.hpp"
 
-// constexpr const char format[] = R"(\r\n\r\n{
-//   "heartbeat_count": %d,
-//   "is_operational": %d,
-//   "drive_mode": "%c",
-//   "speed": %d,
-//   "angle": %d
-// })";
-
 namespace sjsu::drive
 {
 const char message_format[] =
@@ -103,6 +95,7 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
 
     // TODO: Throw an error when arguments not equal to expected
   };
+
 
   bool isSyncedWithMissionControl()
   {
