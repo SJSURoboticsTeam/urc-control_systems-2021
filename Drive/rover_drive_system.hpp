@@ -21,13 +21,14 @@
 
 namespace sjsu::drive
 {
-const char message_format[] = "\r\n\r\n{\n"
-"  \"heartbeat_count\": %d,\n"
-"  \"is_operational\": %d,\n"
-"  \"drive_mode\": \"%c\",\n"
-"  \"speed\": %d,\n"
-"  \"angle\": %d\n"
-"}";
+const char message_format[] =
+    "\r\n\r\n{\n"
+    "  \"heartbeat_count\": %d,\n"
+    "  \"is_operational\": %d,\n"
+    "  \"drive_mode\": \"%c\",\n"
+    "  \"speed\": %d,\n"
+    "  \"angle\": %d\n"
+    "}";
 class RoverDriveSystem : public sjsu::common::RoverSystem
 {
  public:
@@ -72,15 +73,15 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
     try
     {
       char req_param[300];
-      snprintf(req_param, 300,
-               "?heartbeat_count=%d&is_operational=%d&drive_mode=%c&battery=%d"
-               "&left_wheel_speed=%d&left_wheel_angle=%d&right_wheel_speed=%d&right_"
-               "wheel_angle=%d&back_wheel_speed=%d&back_wheel_angle=%d",
-               heartbeat_count_, mc_data.is_operational, current_mode_,
-               state_of_charge_, left_wheel_.GetSpeed(),
-               left_wheel_.GetPosition(), right_wheel_.GetSpeed(),
-               right_wheel_.GetPosition(), back_wheel_.GetSpeed(),
-               back_wheel_.GetPosition());
+      snprintf(
+          req_param, 300,
+          "?heartbeat_count=%d&is_operational=%d&drive_mode=%c&battery=%d"
+          "&left_wheel_speed=%d&left_wheel_angle=%d&right_wheel_speed=%d&right_"
+          "wheel_angle=%d&back_wheel_speed=%d&back_wheel_angle=%d",
+          heartbeat_count_, mc_data.is_operational, current_mode_,
+          state_of_charge_, left_wheel_.GetSpeed(), left_wheel_.GetPosition(),
+          right_wheel_.GetSpeed(), right_wheel_.GetPosition(),
+          back_wheel_.GetSpeed(), back_wheel_.GetPosition());
       std::string request_parameter = req_param;
       return request_parameter;
     }
@@ -93,17 +94,15 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
 
   /// Parses GET response body and assigns it to rover variables
   /// @param response JSON response body
-  void ParseJSONResponse(std::string &response)
+  void ParseJSONResponse(std::string & response)
   {
-      int arguments = sscanf(
-          response.c_str(),
-          message_format,
-          &mc_data.heartbeat_count, &mc_data.is_operational, &mc_data.drive_mode, &mc_data.speed,
-          &mc_data.rotation_angle);
-          
-      //TODO: Throw an error when arguments not equal to expected
-  };
+    int arguments =
+        sscanf(response.c_str(), message_format, &mc_data.heartbeat_count,
+               &mc_data.is_operational, &mc_data.drive_mode, &mc_data.speed,
+               &mc_data.rotation_angle);
 
+    // TODO: Throw an error when arguments not equal to expected
+  };
 
   bool isSyncedWithMissionControl()
   {
@@ -133,7 +132,7 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
 
       if (!isSyncedWithMissionControl())
       {
-        //TODO: Throw an error here instead of setting wheel speed to 0
+        // TODO: Throw an error here instead of setting wheel speed to 0
         SetWheelSpeed(kZeroSpeed);
       }
 
@@ -213,8 +212,8 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
     printf(
         "HEARTBEAT:\t%d\nOPERATIONAL:\t%d\nDRIVE MODE:\t%c\nMC "
         "SPEED:\t%d\nMC ANGLE:\t%d\n\n",
-        mc_data.heartbeat_count, mc_data.is_operational, current_mode_, mc_data.speed,
-        mc_data.rotation_angle);
+        mc_data.heartbeat_count, mc_data.is_operational, current_mode_,
+        mc_data.speed, mc_data.rotation_angle);
     printf("%-10s%-10s%-10s\n", "WHEEL", "SPEED", "ANGLE");
     printf("=========================\n");
     printf("%-10s%-10d%-10d\n", "Left", left_wheel_.GetSpeed(),
@@ -340,21 +339,36 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
   // = DRIVE MODE HANDLERS =
   // =======================
 
-  /// Handles drive mode. Adjusts only the rear wheel of the rover
+  /// Handles drive mode.
   void HandleDriveMode(units::angular_velocity::revolutions_per_minute_t speed,
                        units::angle::degree_t angle)
   {
-    try
-    {
+      units::angle::degree_t right_wheel_angle =
+          angle;  // Needs to be set by server
+      double x_angle = static_cast<double>(right_wheel_angle);
+      units::angle::degree_t left_wheel_angle(static_cast<double>(
+          0.392 + 0.744 * x_angle + -0.0187 * pow(x_angle, 2) +
+          1.84E-04 * pow(x_angle, 3)));
+
+      units::angle::degree_t back_wheel_angle(static_cast<double>(
+          -0.378 + -1.79 * x_angle + 0.0366 * pow(x_angle, 2) +
+          -3.24E-04 * pow(x_angle, 3)));
+
+      //*For testing angles*
+      double left_wheel_angle1 = static_cast<double>(
+          0.392 + 0.744 * x_angle + -0.0187 * pow(x_angle, 2) +
+          1.84E-04 * pow(x_angle, 3));
+      double back_wheel_angle1 = static_cast<double>(
+          -0.378 + -1.79 * x_angle + 0.0366 * pow(x_angle, 2) +
+          -3.24E-04 * pow(x_angle, 3));
+      sjsu::LogInfo("\n Right Wheel: %f\n LeftWheel: %f\n Back Wheel: %f\n",
+                    x_angle, left_wheel_angle1, back_wheel_angle1);
+
+      right_wheel_.SetSteeringAngle(right_wheel_angle);
+      left_wheel_.SetSteeringAngle(left_wheel_angle);
+      back_wheel_.SetSteeringAngle(back_wheel_angle);
       // TODO: Temporary placeholder till further testing - Incorrect logic
-      back_wheel_.SetSteeringAngle(angle);
       SetWheelSpeed(speed);
-    }
-    catch (const std::exception & e)
-    {
-      sjsu::LogError("Error handling drive mode!");
-      throw e;
-    }
   };
 
   /// Handles spin mode. Adjusts only the speed (aka the spin direction)
