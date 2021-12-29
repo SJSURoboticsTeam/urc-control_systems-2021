@@ -85,6 +85,10 @@ int main(void)
         esp.ConnectToServer();
       }
     }
+    catch (const sjsu::drive::RoverDriveSystem::ParseError &)
+    {
+      sjsu::LogError("Parsing Error: Arguments not equal");
+    }
   }
 
   return 0;

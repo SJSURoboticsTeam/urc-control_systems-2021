@@ -64,22 +64,23 @@ class Wheel
     // For testing homing procedure
     sjsu::Button homing_button(homing_pin_);
     homing_button.Initialize();
+    SetSteeringAngle(0_deg);
 
     sjsu::LogWarning("Homing %s wheel...", name_.c_str());
 
     // Increments through all possible angles (0-360)
     // When the homing pin is high stop incrementing and update homing offset
     bool home_level = sjsu::Gpio::kHigh;
-    for (units::angle::degree_t angle = 0_deg; angle < 360_deg; angle += 2_deg)
-    {
-      SetSteeringAngle(angle);
-      sjsu::Delay(50ms);  // Lets motor move into place
-      if (homing_pin_.Read() == home_level)
-      {
-        homing_offset_angle_ = angle;
-        break;
-      }
-    }
+    // for (units::angle::degree_t angle = 0_deg; angle < 360_deg; angle += 2_deg)
+    // {
+    //   SetSteeringAngle(angle);
+    //   sjsu::Delay(50ms);  // Lets motor move into place
+    //   if (homing_pin_.Read() == home_level)
+    //   {
+    //     homing_offset_angle_ = angle;
+    //     break;
+    //   }
+    // }
     sjsu::LogInfo("Homing %s wheel done! Offset angle set to %d", name_.c_str(),
                   homing_offset_angle_.to<int>());
   };

@@ -25,6 +25,9 @@ const char message_format[] =
 class RoverDriveSystem : public sjsu::common::RoverSystem
 {
  public:
+  struct ParseError
+  {};
+
   struct MissionControlData
   {
     int heartbeat_count;
@@ -42,31 +45,31 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
   /// Initializes wheels and sets rover to operational starting mode (spin)
   void Initialize()
   {
-      sjsu::LogInfo("Initializing drive system...");
-      mc_data.is_operational = 1;
+    sjsu::LogInfo("Initializing drive system...");
+    mc_data.is_operational = 1;
 
-      left_wheel_.Initialize();
-      right_wheel_.Initialize();
-      back_wheel_.Initialize();
-      HomeWheels();
+    left_wheel_.Initialize();
+    right_wheel_.Initialize();
+    back_wheel_.Initialize();
+    SetSpinMode();
   };
 
   /// Constructs GET request parameter
   /// @return Endpoint & parameters i.e. /drive?ex=param
   std::string GETParameters()
   {
-      char req_param[300];
-      snprintf(
-          req_param, 300,
-          "?heartbeat_count=%d&is_operational=%d&drive_mode=%c&battery=%d"
-          "&left_wheel_speed=%d&left_wheel_angle=%d&right_wheel_speed=%d&right_"
-          "wheel_angle=%d&back_wheel_speed=%d&back_wheel_angle=%d",
-          heartbeat_count_, mc_data.is_operational, current_mode_,
-          state_of_charge_, left_wheel_.GetSpeed(), left_wheel_.GetPosition(),
-          right_wheel_.GetSpeed(), right_wheel_.GetPosition(),
-          back_wheel_.GetSpeed(), back_wheel_.GetPosition());
-      std::string request_parameter = req_param;
-      return request_parameter;
+    char req_param[300];
+    snprintf(
+        req_param, 300,
+        "?heartbeat_count=%d&is_operational=%d&drive_mode=%c&battery=%d"
+        "&left_wheel_speed=%d&left_wheel_angle=%d&right_wheel_speed=%d&right_"
+        "wheel_angle=%d&back_wheel_speed=%d&back_wheel_angle=%d",
+        heartbeat_count_, mc_data.is_operational, current_mode_,
+        state_of_charge_, left_wheel_.GetSpeed(), left_wheel_.GetPosition(),
+        right_wheel_.GetSpeed(), right_wheel_.GetPosition(),
+        back_wheel_.GetSpeed(), back_wheel_.GetPosition());
+    std::string request_parameter = req_param;
+    return request_parameter;
   };
 
   /// Parses GET response body and assigns it to rover variables
@@ -78,6 +81,10 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
                &mc_data.is_operational, &mc_data.drive_mode, &mc_data.speed,
                &mc_data.rotation_angle);
 
+    if (arguments != 5)
+    {
+      throw ParseError{};
+    }
     // TODO: Throw an error when arguments not equal to expected
   };
 
@@ -101,82 +108,95 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
   /// D = Drive, S = Spin, T = Translation
   void HandleRoverMovement()
   {
-      units::angle::degree_t angle(static_cast<float>(mc_data.rotation_angle));
-      units::angular_velocity::revolutions_per_minute_t speed(
-          static_cast<float>(mc_data.speed));
+    units::angle::degree_t angle(static_cast<float>(mc_data.rotation_angle));
+    units::angular_velocity::revolutions_per_minute_t speed(
+        static_cast<float>(mc_data.speed));
 
-      if (!isSyncedWithMissionControl())
-      {
-        // TODO: Throw an error here instead of setting wheel speed to 0
-        SetWheelSpeed(kZeroSpeed);
-      }
+    if (!isSyncedWithMissionControl())
+    {
+      // TODO: Throw an error here instead of setting wheel speed to 0
+      SetWheelSpeed(kZeroSpeed);
+    }
 
-      // If current mode is same as mc mode value and rover is operational
-      else if (mc_data.is_operational && (current_mode_ == mc_data.drive_mode))
+    // If current mode is same as mc mode value and rover is operational
+    else if (mc_data.is_operational && (current_mode_ == mc_data.drive_mode))
+    {
+      sjsu::LogInfo("Handling %c movement...", current_mode_);
+      switch (current_mode_)
       {
-        sjsu::LogInfo("Handling %c movement...", current_mode_);
-        switch (current_mode_)
-        {
-          case 'D': HandleDriveMode(speed, angle); break;
-          case 'S': HandleSpinMode(speed); break;
-          case 'T': HandleTranslationMode(speed, angle); break;
-          case 'L':
-          case 'R':
-          case 'B': HandleSingularWheelMode(speed, angle); break;
-          default:
-            SetWheelSpeed(kZeroSpeed);
-            sjsu::LogError("Unable to assign drive mode handler!");
-            break;
-        }
+        case 'D': HandleDriveMode(speed, angle); break;
+        case 'S': HandleSpinMode(speed); break;
+        case 'T': HandleTranslationMode(speed, angle); break;
+        case 'L':
+        case 'R':
+        case 'B': HandleSingularWheelMode(speed, angle); break;
+        default:
+          SetWheelSpeed(kZeroSpeed);
+          sjsu::LogError("Unable to assign drive mode handler!");
+          break;
       }
-      else
-      {
-        // If current mode is not same as mc mode value
-        sjsu::LogWarning("Switching rover into %c mode...", mc_data.drive_mode);
-        SetMode();
-      }
+    }
+    else
+    {
+      // If current mode is not same as mc mode value
+      sjsu::LogWarning("Switching rover into %c mode...", mc_data.drive_mode);
+      SetMode();
+    }
   };
 
   /// HomeWheels all the wheels so the motors know their actual position.
   /// @return true if successfully moves wheels into home position
   void HomeWheels()
   {
-      // TODO: Need to implement non-sequential homing procedure
-      SetWheelSpeed(kZeroSpeed);
-      left_wheel_.HomeWheel();
-      right_wheel_.HomeWheel();
-      back_wheel_.HomeWheel();
+    // TODO: Need to implement non-sequential homing procedure
+    SetWheelSpeed(kZeroSpeed);
+    left_wheel_.HomeWheel();
+    right_wheel_.HomeWheel();
+    back_wheel_.HomeWheel();
   };
 
   /// Sets all wheels to the speed provided. Wheel class handles max/min speeds
   /// @param speed the new movement speed of the rover
   void SetWheelSpeed(units::angular_velocity::revolutions_per_minute_t speed)
   {
-    //cast speed to long double to pass in to std::lerp
+    // cast speed to long double to pass in to std::lerp
     long double goal_speed = static_cast<long double>(speed);
 
-    //get current speed of motors
-    long double leftWheel_previous_speed = static_cast<long double>(left_wheel_.GetSpeed());
-    long double rightWheel_previous_speed = static_cast<long double>(right_wheel_.GetSpeed());
-    long double backWheel_previous_speed = static_cast<long double>(back_wheel_.GetSpeed());
-    
+    // get current speed of motors
+    long double leftWheel_previous_speed =
+        static_cast<long double>(left_wheel_.GetSpeed());
+    long double rightWheel_previous_speed =
+        static_cast<long double>(right_wheel_.GetSpeed());
+    long double backWheel_previous_speed =
+        static_cast<long double>(back_wheel_.GetSpeed());
 
-    //lerp returns a midpoint between current speed and goal speed 
+    // lerp returns a midpoint between current speed and goal speed
     long double lerps = 0.5;
-    auto lerpSpeed_leftWheel = std::lerp(leftWheel_previous_speed, goal_speed, lerps);
-    auto lerpSpeed_rightWheel = std::lerp(rightWheel_previous_speed, goal_speed, lerps);
-    auto lerpSpeed_backWheel = std::lerp(backWheel_previous_speed, goal_speed, lerps);
+    auto lerpSpeed_leftWheel =
+        std::lerp(leftWheel_previous_speed, goal_speed, lerps);
+    auto lerpSpeed_rightWheel =
+        std::lerp(rightWheel_previous_speed, goal_speed, lerps);
+    auto lerpSpeed_backWheel =
+        std::lerp(backWheel_previous_speed, goal_speed, lerps);
 
-    //set lerped speed
-    left_wheel_.SetHubSpeed(std::clamp(units::angular_velocity::revolutions_per_minute_t{lerpSpeed_leftWheel}, 0_rpm, speed));
-    right_wheel_.SetHubSpeed(std::clamp(units::angular_velocity::revolutions_per_minute_t{lerpSpeed_rightWheel}, 0_rpm, speed));
-    back_wheel_.SetHubSpeed(std::clamp(units::angular_velocity::revolutions_per_minute_t{lerpSpeed_backWheel}, 0_rpm, speed));
+    // set lerped speed
+    left_wheel_.SetHubSpeed(std::clamp(
+        units::angular_velocity::revolutions_per_minute_t{
+            lerpSpeed_leftWheel },
+        0_rpm, speed));
+    right_wheel_.SetHubSpeed(std::clamp(
+        units::angular_velocity::revolutions_per_minute_t{
+            lerpSpeed_rightWheel },
+        0_rpm, speed));
+    back_wheel_.SetHubSpeed(std::clamp(
+        units::angular_velocity::revolutions_per_minute_t{
+            lerpSpeed_backWheel },
+        0_rpm, speed));
 
-    sjsu::LogInfo("SetHubSpeed to %f for all wheels", static_cast<long double>(right_wheel_.GetSpeed())  );
-      
-      
-    
-  }; //SetWheelSpeed()
+    sjsu::LogInfo("SetHubSpeed to %f for all wheels",
+                  static_cast<long double>(right_wheel_.GetSpeed()));
+
+  };  // SetWheelSpeed()
 
   /// Prints the mission control data & prints the current speed and steer angle
   /// of each wheel on the rover
@@ -202,17 +222,17 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
   /// Stops the rover and sets a new mode.
   void SetMode()
   {
-      SetWheelSpeed(kZeroSpeed);  // Stops rover
-      switch (mc_data.drive_mode)
-      {
-        case 'D': SetDriveMode(); break;
-        case 'S': SetSpinMode(); break;
-        case 'T': SetTranslationMode(); break;
-        case 'L':
-        case 'R':
-        case 'B': SetExperimentalMode(); break;
-        default: sjsu::LogError("Unable to set drive mode!");
-      };
+    SetWheelSpeed(kZeroSpeed);  // Stops rover
+    switch (mc_data.drive_mode)
+    {
+      case 'D': SetDriveMode(); break;
+      case 'S': SetSpinMode(); break;
+      case 'T': SetTranslationMode(); break;
+      case 'L':
+      case 'R':
+      case 'B': SetExperimentalMode(); break;
+      default: sjsu::LogError("Unable to set drive mode!");
+    };
   };
 
   // ======================
@@ -222,50 +242,50 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
   /// Aligns rover wheels all in the same direction, facing forward
   void SetDriveMode()
   {
-      HomeWheels();
-      // TODO: Find the angles close enough for an effective drive mode
-      const units::angle::degree_t left_wheel_angle  = -45_deg;
-      const units::angle::degree_t right_wheel_angle = -135_deg;
-      const units::angle::degree_t back_wheel_angle  = 90_deg;
-      left_wheel_.SetSteeringAngle(left_wheel_angle);
-      right_wheel_.SetSteeringAngle(right_wheel_angle);
-      back_wheel_.SetSteeringAngle(back_wheel_angle);
-      current_mode_ = 'D';
+    HomeWheels();
+    // TODO: Find the angles close enough for an effective drive mode
+    const units::angle::degree_t left_wheel_angle  = -45_deg;
+    const units::angle::degree_t right_wheel_angle = -135_deg;
+    const units::angle::degree_t back_wheel_angle  = 90_deg;
+    left_wheel_.SetSteeringAngle(left_wheel_angle);
+    right_wheel_.SetSteeringAngle(right_wheel_angle);
+    back_wheel_.SetSteeringAngle(back_wheel_angle);
+    current_mode_ = 'D';
   };
 
   /// Aligns rover wheels perpendicular to their legs using homing slip ring
   void SetSpinMode()
   {
-      HomeWheels();
-      // TODO: Find the angles close enough for an effective spin mode
-      const units::angle::degree_t left_wheel_angle  = 90_deg;
-      const units::angle::degree_t right_wheel_angle = 90_deg;
-      const units::angle::degree_t back_wheel_angle  = 90_deg;
-      left_wheel_.SetSteeringAngle(left_wheel_angle);
-      right_wheel_.SetSteeringAngle(right_wheel_angle);
-      back_wheel_.SetSteeringAngle(back_wheel_angle);
-      current_mode_ = 'S';
+    HomeWheels();
+    // TODO: Find the angles close enough for an effective spin mode
+    const units::angle::degree_t left_wheel_angle  = 90_deg;
+    const units::angle::degree_t right_wheel_angle = 90_deg;
+    const units::angle::degree_t back_wheel_angle  = 90_deg;
+    left_wheel_.SetSteeringAngle(left_wheel_angle);
+    right_wheel_.SetSteeringAngle(right_wheel_angle);
+    back_wheel_.SetSteeringAngle(back_wheel_angle);
+    current_mode_ = 'S';
   };
 
   /// Aligns rover wheel all in the same direction, facing towards the right
   void SetTranslationMode()
   {
-      HomeWheels();
-      // TODO: Find the angles close enough for an effective translation mode
-      const units::angle::degree_t left_wheel_angle  = 0_deg;
-      const units::angle::degree_t right_wheel_angle = 60_deg;
-      const units::angle::degree_t back_wheel_angle  = 110_deg;
-      left_wheel_.SetSteeringAngle(left_wheel_angle);
-      right_wheel_.SetSteeringAngle(right_wheel_angle);
-      back_wheel_.SetSteeringAngle(back_wheel_angle);
-      current_mode_ = 'T';
+    HomeWheels();
+    // TODO: Find the angles close enough for an effective translation mode
+    const units::angle::degree_t left_wheel_angle  = 0_deg;
+    const units::angle::degree_t right_wheel_angle = 60_deg;
+    const units::angle::degree_t back_wheel_angle  = 110_deg;
+    left_wheel_.SetSteeringAngle(left_wheel_angle);
+    right_wheel_.SetSteeringAngle(right_wheel_angle);
+    back_wheel_.SetSteeringAngle(back_wheel_angle);
+    current_mode_ = 'T';
   };
 
   /// Stops rover and updates current drive mode
   void SetExperimentalMode()
   {
-      SetWheelSpeed(kZeroSpeed);
-      current_mode_ = mc_data.drive_mode;
+    SetWheelSpeed(kZeroSpeed);
+    current_mode_ = mc_data.drive_mode;
   }
 
   // =======================
@@ -307,7 +327,7 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
   /// Handles spin mode. Adjusts only the speed (aka the spin direction)
   void HandleSpinMode(units::angular_velocity::revolutions_per_minute_t speed)
   {
-      SetWheelSpeed(speed);
+    SetWheelSpeed(speed);
   };
 
   /// Handles translation mode. Adjusts all the wheels, keeping them parallel
@@ -315,11 +335,11 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
       units::angular_velocity::revolutions_per_minute_t speed,
       units::angle::degree_t angle)
   {
-      // TODO: Temporary placeholder till further testing - Incorrect logic
-      left_wheel_.SetSteeringAngle(angle);
-      right_wheel_.SetSteeringAngle(angle);
-      back_wheel_.SetSteeringAngle(angle);
-      SetWheelSpeed(speed);
+    // TODO: Temporary placeholder till further testing - Incorrect logic
+    left_wheel_.SetSteeringAngle(angle);
+    right_wheel_.SetSteeringAngle(angle);
+    back_wheel_.SetSteeringAngle(angle);
+    SetWheelSpeed(speed);
   };
 
   void HandleSingularWheelMode(
