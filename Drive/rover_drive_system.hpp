@@ -7,6 +7,7 @@
 #include "utility/math/units.hpp"
 #include "utility/math/map.hpp"
 
+#include "../Common/state_of_charge.hpp"
 #include "../Common/rover_system.hpp"
 #include "../Common/esp.hpp"
 #include "wheel.hpp"
@@ -95,7 +96,6 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
 
     // TODO: Throw an error when arguments not equal to expected
   };
-
 
   bool isSyncedWithMissionControl()
   {
@@ -336,32 +336,32 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
   void HandleDriveMode(units::angular_velocity::revolutions_per_minute_t speed,
                        units::angle::degree_t angle)
   {
-      units::angle::degree_t right_wheel_angle =
-          angle;  // Needs to be set by server
-      double x_angle = static_cast<double>(right_wheel_angle);
-      units::angle::degree_t left_wheel_angle(static_cast<double>(
-          0.392 + 0.744 * x_angle + -0.0187 * pow(x_angle, 2) +
-          1.84E-04 * pow(x_angle, 3)));
+    units::angle::degree_t right_wheel_angle =
+        angle;  // Needs to be set by server
+    double x_angle = static_cast<double>(right_wheel_angle);
+    units::angle::degree_t left_wheel_angle(static_cast<double>(
+        0.392 + 0.744 * x_angle + -0.0187 * pow(x_angle, 2) +
+        1.84E-04 * pow(x_angle, 3)));
 
-      units::angle::degree_t back_wheel_angle(static_cast<double>(
-          -0.378 + -1.79 * x_angle + 0.0366 * pow(x_angle, 2) +
-          -3.24E-04 * pow(x_angle, 3)));
+    units::angle::degree_t back_wheel_angle(static_cast<double>(
+        -0.378 + -1.79 * x_angle + 0.0366 * pow(x_angle, 2) +
+        -3.24E-04 * pow(x_angle, 3)));
 
-      //*For testing angles*
-      double left_wheel_angle1 = static_cast<double>(
-          0.392 + 0.744 * x_angle + -0.0187 * pow(x_angle, 2) +
-          1.84E-04 * pow(x_angle, 3));
-      double back_wheel_angle1 = static_cast<double>(
-          -0.378 + -1.79 * x_angle + 0.0366 * pow(x_angle, 2) +
-          -3.24E-04 * pow(x_angle, 3));
-      sjsu::LogInfo("\n Right Wheel: %f\n LeftWheel: %f\n Back Wheel: %f\n",
-                    x_angle, left_wheel_angle1, back_wheel_angle1);
+    //*For testing angles*
+    double left_wheel_angle1 = static_cast<double>(0.392 + 0.744 * x_angle +
+                                                   -0.0187 * pow(x_angle, 2) +
+                                                   1.84E-04 * pow(x_angle, 3));
+    double back_wheel_angle1 = static_cast<double>(-0.378 + -1.79 * x_angle +
+                                                   0.0366 * pow(x_angle, 2) +
+                                                   -3.24E-04 * pow(x_angle, 3));
+    sjsu::LogInfo("\n Right Wheel: %f\n LeftWheel: %f\n Back Wheel: %f\n",
+                  x_angle, left_wheel_angle1, back_wheel_angle1);
 
-      right_wheel_.SetSteeringAngle(right_wheel_angle);
-      left_wheel_.SetSteeringAngle(left_wheel_angle);
-      back_wheel_.SetSteeringAngle(back_wheel_angle);
-      // TODO: Temporary placeholder till further testing - Incorrect logic
-      SetWheelSpeed(speed);
+    right_wheel_.SetSteeringAngle(right_wheel_angle);
+    left_wheel_.SetSteeringAngle(left_wheel_angle);
+    back_wheel_.SetSteeringAngle(back_wheel_angle);
+    // TODO: Temporary placeholder till further testing - Incorrect logic
+    SetWheelSpeed(speed);
   };
 
   /// Handles spin mode. Adjusts only the speed (aka the spin direction)
@@ -423,10 +423,8 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
     }
   };
 
-  int heartbeat_count_ = 0;
-  char current_mode_   = 'S';
-  int state_of_charge_ = 90;  // TODO - hardcoded for now
-
+  int heartbeat_count_                                               = 0;
+  char current_mode_                                                 = 'S';
   const units::angular_velocity::revolutions_per_minute_t kZeroSpeed = 0_rpm;
 
  public:
@@ -434,5 +432,12 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
   Wheel & left_wheel_;
   Wheel & right_wheel_;
   Wheel & back_wheel_;
+
+  sjsu::common::StateOfCharge * state_of_charge_ =
+      new sjsu::common::StateOfCharge();
+  int state_of_charge_MAX_ =
+      static_cast<int>(state_of_charge_->StateOfCharge_MAX());
+  int state_of_charge_LTC_ =
+      static_cast<int>(state_of_charge_->StateOfCharge_LTC());
 };
 }  // namespace sjsu::drive
