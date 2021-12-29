@@ -341,14 +341,12 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
   }
   double calculateLeftTurnAngle(double x_angle)
   {
-        
         double left_angle = static_cast<double>(0.392 + 0.744 * x_angle + -0.0187 * pow(x_angle, 2) +
         1.84E-04 * pow(x_angle, 3));
         return left_angle;
   }
   double calculateBackTurnAngle(double x_angle)
   {
-        
         double back_angle = static_cast<double>(-0.378 + -1.79 * x_angle + 0.0366 * pow(x_angle, 2) +
         -3.24E-04 * pow(x_angle, 3));
         return back_angle;
@@ -370,15 +368,11 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
     double back_angle = calculateBackTurnAngle(x_angle);
 
     units::angle::degree_t left_wheel_angle(left_angle);
-        
-
     units::angle::degree_t back_wheel_angle(back_angle);
 
     //*For testing angles*
-    double left_wheel_angle1 = static_cast<double>(left_angle);
-    double back_wheel_angle1 = static_cast<double>(back_angle);
     sjsu::LogInfo("\n Right Wheel: %f\n LeftWheel: %f\n Back Wheel: %f\n",
-                  x_angle, left_wheel_angle1, back_wheel_angle1);
+                  x_angle, left_angle, back_angle);
 
     right_wheel_.SetSteeringAngle(right_wheel_angle);
     left_wheel_.SetSteeringAngle(left_wheel_angle);
