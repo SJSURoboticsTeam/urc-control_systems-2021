@@ -184,19 +184,31 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
   /// @param speed the new movement speed of the rover
   void SetWheelSpeed(units::angular_velocity::revolutions_per_minute_t speed)
   {
-    // TODO: Implement linear interpolation (exponential moving average)
-    try
-    {
-      left_wheel_.SetHubSpeed(speed);
-      right_wheel_.SetHubSpeed(speed);
-      back_wheel_.SetHubSpeed(speed);
-    }
-    catch (const std::exception & e)
-    {
-      sjsu::LogError("Error setting wheels speed!");
-      throw e;
-    }
-  };
+    //cast speed to long double to pass in to std::lerp
+    long double goal_speed = static_cast<long double>(speed);
+
+    //get current speed of motors
+    long double leftWheel_previous_speed = static_cast<long double>(left_wheel_.GetSpeed());
+    long double rightWheel_previous_speed = static_cast<long double>(right_wheel_.GetSpeed());
+    long double backWheel_previous_speed = static_cast<long double>(back_wheel_.GetSpeed());
+    
+
+    //lerp returns a midpoint between current speed and goal speed 
+    long double lerps = 0.5;
+    auto lerpSpeed_leftWheel = std::lerp(leftWheel_previous_speed, goal_speed, lerps);
+    auto lerpSpeed_rightWheel = std::lerp(rightWheel_previous_speed, goal_speed, lerps);
+    auto lerpSpeed_backWheel = std::lerp(backWheel_previous_speed, goal_speed, lerps);
+
+    //set lerped speed
+    left_wheel_.SetHubSpeed(std::clamp(units::angular_velocity::revolutions_per_minute_t{lerpSpeed_leftWheel}, 0_rpm, speed));
+    right_wheel_.SetHubSpeed(std::clamp(units::angular_velocity::revolutions_per_minute_t{lerpSpeed_rightWheel}, 0_rpm, speed));
+    back_wheel_.SetHubSpeed(std::clamp(units::angular_velocity::revolutions_per_minute_t{lerpSpeed_backWheel}, 0_rpm, speed));
+
+    sjsu::LogInfo("SetHubSpeed to %f for all wheels", static_cast<long double>(right_wheel_.GetSpeed())  );
+      
+      
+    
+  }; //SetWheelSpeed()
 
   /// Prints the mission control data & prints the current speed and steer angle
   /// of each wheel on the rover
