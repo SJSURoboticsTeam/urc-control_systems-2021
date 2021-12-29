@@ -17,12 +17,13 @@ class Esp
       : esp_(sjsu::lpc40xx::GetUart<3>()),
         wifi_(esp_.GetWiFi()),
         socket_(esp_.GetInternetSocket()){};
+        
 
   /// Initializes the Wi-Fi module by connecting to WiFi
   void Initialize()
   {
+    sjsu::LogInfo("Initializing esp module...");
     esp_.Initialize();
-    sjsu::LogInfo("Esp initialized...");
     ConnectToWifi();
     ConnectToServer();
   };
@@ -30,23 +31,21 @@ class Esp
   /// Sends a GET request to the hardcoded URL
   /// @param endpoint i.e. /endpoint?example=parameter
   /// @return the response body of the GET request
-  std::string GETRequest(std::string endpoint)
+  std::string GET(std::string endpoint)
   {
-    request_ = "GET /" + endpoint + " HTTP/1.1\r\nHost: " + url_ +
-               "\r\nConnection: keep-alive\r\n\r\n";
+    request_ = "GET /" + endpoint + " HTTP/1.1\r\nHost: " + url_ + "\r\n\r\n";
     WriteToServer();
     try
     {
-      std::array<uint8_t, 1024 * 2> response;
-      std::fill(response.begin(), response.end(), 0);
-      size_t read_back = socket_.Read(response, kDefaultTimeout);
-      printf("%s\n", response.data());
-      std::string body(reinterpret_cast<char *>(response.data()), read_back);
+      std::array<uint8_t, 1024 * 2> raw;
+      std::fill(raw.begin(), raw.end(), 0);
+      size_t read_back = socket_.Read(raw, kDefaultTimeout);
+      std::string response(reinterpret_cast<char *>(raw.data()), read_back);
       try
       {
-        body = body.substr(body.find("\r\n\r\n"));
-        body = body.substr(body.find("{"));
-        return body;
+        response = response.substr(response.find("\r\n\r\n{"));
+        printf("Response Body:%s", response.c_str());
+        return response;
       }
       catch (const std::exception & e)
       {
@@ -67,7 +66,7 @@ class Esp
     while (true)
     {
       sjsu::LogInfo("Attempting to connect to %s...", kSsid);
-      if (wifi_.ConnectToAccessPoint(kSsid, kPassword, 5s))
+      if (wifi_.ConnectToAccessPoint(kSsid, kPassword, kDefaultTimeout))
       {
         break;
       }
@@ -119,11 +118,11 @@ class Esp
   sjsu::WiFi & wifi_;
   sjsu::InternetSocket & socket_;
   std::string request_;
-  std::string url_                               = "10.42.0.1";
+  std::string url_                               = "192.168.50.243";
   std::string kErrorResponse                     = "ERROR";
   const uint16_t kPort                           = 5000;
-  const char * kSsid                             = "nate-hotspot";
-  const char * kPassword                         = "NRG523509";
-  const std::chrono::nanoseconds kDefaultTimeout = 1s;
+  const char * kSsid                             = "kingdom2";
+  const char * kPassword                         = "22039622";
+  const std::chrono::nanoseconds kDefaultTimeout = 5s;
 };
 }  // namespace sjsu::common

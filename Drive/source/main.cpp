@@ -1,23 +1,22 @@
-#include "peripherals/lpc40xx/can.hpp"
-#include "devices/actuators/servo/rmd_x.hpp"
-#include "utility/math/units.hpp"
 #include "utility/log.hpp"
+#include "peripherals/lpc40xx/can.hpp"
+#include "utility/time/timeout_timer.hpp"
+#include "devices/actuators/servo/rmd_x.hpp"
 
-#include "rover_drive_system.hpp"
 #include "wheel.hpp"
 #include "../../Common/esp.hpp"
+#include "rover_drive_system.hpp"
 
 int main(void)
 {
   sjsu::lpc40xx::SetMaximumClockSpeed();
-
   sjsu::LogInfo("Starting the rover drive system...");
   sjsu::common::Esp esp;
   sjsu::lpc40xx::Can & can = sjsu::lpc40xx::GetCan<2>();
   sjsu::StaticMemoryResource<1024> memory_resource;
   sjsu::CanNetwork can_network(can, &memory_resource);
 
-  // rmd addresses 0x141 - 0x148 are available
+  // RMD addresses 0x141 - 0x148 are available
   sjsu::RmdX left_steer_motor(can_network, 0x141);
   sjsu::RmdX left_hub_motor(can_network, 0x142);
   sjsu::RmdX right_steer_motor(can_network, 0x143);
@@ -32,9 +31,15 @@ int main(void)
   back_steer_motor.settings.gear_ratio  = 8;
   back_hub_motor.settings.gear_ratio    = 8;
 
-  sjsu::Gpio & left_wheel_homing_pin  = sjsu::lpc40xx::GetGpio<0, 15>();
-  sjsu::Gpio & right_wheel_homing_pin = sjsu::lpc40xx::GetGpio<2, 9>();
-  sjsu::Gpio & back_wheel_homing_pin  = sjsu::lpc40xx::GetGpio<0, 18>();
+  // Slip ring GPIO pins
+  // sjsu::Gpio & left_wheel_homing_pin  = sjsu::lpc40xx::GetGpio<0, 15>();
+  // sjsu::Gpio & right_wheel_homing_pin = sjsu::lpc40xx::GetGpio<2, 9>();
+  // sjsu::Gpio & back_wheel_homing_pin  = sjsu::lpc40xx::GetGpio<0, 18>();
+
+  // Button GPIO pins
+  sjsu::Gpio & left_wheel_homing_pin  = sjsu::lpc40xx::GetGpio<1, 19>();
+  sjsu::Gpio & right_wheel_homing_pin = sjsu::lpc40xx::GetGpio<1, 15>();
+  sjsu::Gpio & back_wheel_homing_pin  = sjsu::lpc40xx::GetGpio<0, 30>();
 
   sjsu::drive::Wheel left_wheel("left", left_hub_motor, left_steer_motor,
                                 left_wheel_homing_pin);
@@ -42,12 +47,10 @@ int main(void)
                                  right_wheel_homing_pin);
   sjsu::drive::Wheel back_wheel("back", back_hub_motor, back_steer_motor,
                                 back_wheel_homing_pin);
-  sjsu::drive::RoverDriveSystem drive_system(left_wheel, right_wheel,
-                                             back_wheel);
+  sjsu::drive::RoverDriveSystem drive(left_wheel, right_wheel, back_wheel);
 
-  sjsu::LogInfo("Initializing drive system...");
-  drive_system.Initialize();
   esp.Initialize();
+  drive.Initialize();
 
   // Drive control loop
   // 1. Drive sys creates GET request parameters - returns endpoint+parameters
@@ -59,28 +62,28 @@ int main(void)
   {
     try
     {
-      // if (esp.IsConnected())
-      // {
-      //   // Esp driver changes implemeneted --> move control loop inside
-      // }
-      // else
-      // {
-      //   drive_system.SetWheelSpeed(0_rpm);
-      //   esp.ConnectToWifi();
-      //   esp.ConnectToServer();
-      // }
-      std::string parameters = drive_system.GETRequestParameters();
-      std::string response   = esp.GETRequest(parameters);
-      drive_system.ParseJSONResponse(response);
-      drive_system.HandleRoverMovement();
-      drive_system.PrintRoverData();
-      sjsu::Delay(3s);  // Testing purposes
+      sjsu::LogInfo("Making new request now...");
+      std::string endpoint = "drive" + drive.GETParameters();
+      std::string response = esp.GET(endpoint);
+      sjsu::TimeoutTimer serverTimeout(5s);  // server has 5s timeout
+      drive.ParseJSONResponse(response);
+      drive.HandleRoverMovement();
+      drive.PrintRoverData();
+      if (serverTimeout.HasExpired())
+      {
+        sjsu::LogWarning("Server timed out! Reconnecting...");
+        esp.ConnectToServer();
+      }
     }
     catch (const std::exception & e)
     {
       sjsu::LogError("Uncaught error in main() - Stopping Rover!");
-      drive_system.SetWheelSpeed(0_rpm);
-      break;
+      drive.SetWheelSpeed(0_rpm);
+      if (!esp.IsConnected())
+      {
+        esp.ConnectToWifi();
+        esp.ConnectToServer();
+      }
     }
   }
 

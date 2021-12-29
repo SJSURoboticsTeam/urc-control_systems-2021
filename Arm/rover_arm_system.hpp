@@ -1,11 +1,12 @@
 #pragma once
 #include "utility/math/units.hpp"
 #include "joint.hpp"
-#include "wrist_joint.hpp"
+#include "Hand/wrist_joint.hpp"
+#include "../Common/rover_system.hpp"
 
 namespace sjsu::arm
 {
-class RoverArmSystem
+class RoverArmSystem : public sjsu::common::RoverSystem
 {
  private:
   // isOperational defines if the arm should be allowed to move or if it should
@@ -25,7 +26,6 @@ class RoverArmSystem
   units::angle::degree_t wrist_pitch_pos;
 
  public:
-  // TODO: Remove constructor and keep Joints within the class.
   RoverArmSystem(sjsu::arm::Joint & rotunda,
                  sjsu::arm::Joint & shoulder,
                  sjsu::arm::Joint & elbow,
@@ -33,16 +33,6 @@ class RoverArmSystem
       : Rotunda(rotunda), Shoulder(shoulder), Elbow(elbow), Wrist(wrist)
   {
   }
-
-  /// Homes all of the joints on the arm, so that the motors know their actual
-  /// position. Returns true if successful.
-  bool Home()
-  {
-    return true;
-  }
-
-  /// Initialize all of the arms joint objects, This must be called before any
-  /// other function.
   void Initialize()
   {
     Rotunda.Initialize();
@@ -51,18 +41,40 @@ class RoverArmSystem
     Wrist.Initialize();
   }
 
-  /// Retrives all of information for arm movement from the Mission Control
-  /// server. Returns True if successful.
-  bool GetData()
-  {
-    return true;
-  }
+  void PrintRoverData(){};
 
-  /// Moves each of the arm joints to the aproppriate angle
-  /// Returns True if successful.
-  bool MoveArm()
-  {
-    return true;
-  }
+  std::string GETParameters(){};
+
+  std::string ParseJSONResponse(){};
+
+  void HandleRoverMovement(){};
+
+  void Homing(){};
+
+  void Esp(){};
+
+  void ArmMovement(){};
+
+  void ExtendArm(){};
+
+  void RotateArm(){};
+
+  void CheckValidMovement(){};
+
+  void GraspHand(){};
+
+  void Calibrate(){};
+
+  void SendUpdateToMC(){};
+
+  void PrintArmMode(){};
+
+  void MoveRotand(){};
+
+  void MoveShoulder(){};
+
+  void MoveElbow(){};
+
+  void MoveWrist(){};
 };
 }  // namespace sjsu::arm
