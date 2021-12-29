@@ -9,6 +9,7 @@
 
 int main(void)
 {
+  sjsu::lpc40xx::SetMaximumClockSpeed();
   sjsu::LogInfo("Starting the rover drive system...");
   sjsu::common::Esp esp;
   sjsu::lpc40xx::Can & can = sjsu::lpc40xx::GetCan<2>();
