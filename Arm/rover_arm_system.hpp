@@ -15,13 +15,6 @@ class RoverArmSystem : public sjsu::common::RoverSystem
   sjsu::arm::Joint & Elbow;
   sjsu::arm::WristJoint & Wrist;
 
-  // The target angle for each of the joints
-  units::angle::degree_t shoulder_pos;
-  units::angle::degree_t elbow_pos;
-  units::angle::degree_t rotunda_pos;
-  units::angle::degree_t wrist_roll_pos;
-  units::angle::degree_t wrist_pitch_pos;
-
  public:
   struct MissionControlData
   {
@@ -29,14 +22,14 @@ class RoverArmSystem : public sjsu::common::RoverSystem
     {
       kDefault = 'D',
     };
+    int is_operational;
     int heartbeat_count = 0;
     Modes modes         = Modes::kDefault;
     int rotunda_angle;
-    int elbow_angle;
     int shoulder_angle;
+    int elbow_angle;
     int wrist_roll;
     int wrist_pitch;
-    int is_operational;
     struct Fingers
     {
       int pinky;
@@ -64,64 +57,65 @@ class RoverArmSystem : public sjsu::common::RoverSystem
 
   void PrintRoverData(){};
 
-  std::string GETParameters(){};
+  std::string GETParameters(){return "Fill";};
 
-  std::string ParseJSONResponse(){};
+  std::string ParseJSONResponse(){return "Fill";};
 
   void HandleArmMovement(){};
 
   void HomeArm()
   {
     // first getting the accelerometer readings/storing readings
-    acceleration_t Rotunda_Acceleration  = Rotunda.GetAccelerometerData();
-    acceleration_t Shoulder_Acceleration = Shoulder.GetAccelerometerData();
-    acceleration_t Elbow_Acceleration    = Elbow.GetAccelerometerData();
+    Accelerometer::Acceleration_t Rotunda_Acceleration  = Rotunda.GetAccelerometerData();
+    Accelerometer::Acceleration_t Shoulder_Acceleration = Shoulder.GetAccelerometerData();
     // then homing the different parts of the arm
-    // HomeRotunda(); I don't think we need a home for the rotunda
     HomeShoulder(Rotunda_Acceleration, Shoulder_Acceleration);
-    HomeElbow();
+    Accelerometer::Acceleration_t Elbow_Acceleration = Elbow.GetAccelerometerData();
+    HomeElbow(Rotunda_Acceleration, Elbow_Acceleration);
+
     HomeWrist();
   }
-  /*void HomeRotunda(){
-
-  }*/
-  void HomeShoulder(acceleration_t Rotunda_Acceleration,
-                    acceleration_t Shoulder_Acceleration)
+  void HomeShoulder(Accelerometer::Acceleration_t Rotunda_Acceleration,
+                    Accelerometer::Acceleration_t Shoulder_Acceleration)
   {
+    float gravity = 9.81;
     float Rotunda_Angle =
-        (arccos(9.81 /
-                static_cast<float>(Rotunda_Acceleration.y))) *  // for angle
+        (acos(gravity /
+                (static_cast<float>(Rotunda_Acceleration.y))) *  // for angle
         (static_cast<float>(Rotunda_Acceleration.x) /
-         abs(static_cast<float> Rotunda_Acceleration.x));  // for direction
+         abs(static_cast<float>(Rotunda_Acceleration.x))));  // for direction
     float Shoulder_Angle =
-        (arccos(9.81 /
+        (acos(gravity /
                 static_cast<float>(Shoulder_Acceleration.y))) *  // for angle
         (static_cast<float>(Shoulder_Acceleration.x) /
-         abs(static_cast<float> Shoulder_Acceleration.x));  // for direction
+         abs(static_cast<float>(Shoulder_Acceleration.x)));  // for direction
     units::angle::degree_t Offset_Angle =
         static_cast<units::angle::degree_t>(Rotunda_Angle + Shoulder_Angle);
-    Rotunda.motor.SetAngle(Offset_Angle);
+    Rotunda.SetPosition(Offset_Angle);
   }
-  void HomeElbow(acceleration_t Rotunda_Acceleration,
-                 acceleration_t Elbow_Acceleration)
+  void HomeElbow(Accelerometer::Acceleration_t Rotunda_Acceleration,
+                 Accelerometer::Acceleration_t Elbow_Acceleration)
   {
+    int gravity = 9.81;
     float Rotunda_Angle =
-        (arccos(9.81 /
+        (acos(gravity /
                 static_cast<float>(Rotunda_Acceleration.y))) *  // for angle
         (static_cast<float>(Rotunda_Acceleration.x) /
-         abs(static_cast<float> Rotunda_Acceleration.x));  // for direction
+         abs(static_cast<float>(Rotunda_Acceleration.x)));  // for direction
     float Elbow_Angle =
-        (arccos(9.81 /
+        (acos(gravity /
                 static_cast<float>(Elbow_Acceleration.y))) *  // for angle
         (static_cast<float>(Elbow_Acceleration.x) /
          abs(static_cast<float>(Elbow_Acceleration.x))) *  // for direction
-        (static_cast<float>(Elbow.Acceleration.y) /
+        (static_cast<float>(Elbow_Acceleration.y) /
          abs(static_cast<float>(Elbow_Acceleration.y)));
     units::angle::degree_t Offset_Angle =
         static_cast<units::angle::degree_t>(Rotunda_Angle + Elbow_Angle);
-    shoulder.motor.SetAngle(Offset_Angle);
+    Shoulder.SetPosition(Offset_Angle);
   }
-  void HomeWrist() {}
+  void HomeWrist() {
+    float gravity = 9.81;
+  }
 
   void Esp(){};
 
