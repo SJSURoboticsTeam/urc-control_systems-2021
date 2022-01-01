@@ -339,7 +339,7 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
       throw e;
     }
   }
-  double calculateLeftTurnAngle(double x_angle)
+  double GetLeftWheelDriveAngle(double angle)
   {
         double left_angle = static_cast<double>(0.392 + 0.744 * x_angle + -0.0187 * pow(x_angle, 2) +
         1.84E-04 * pow(x_angle, 3));
