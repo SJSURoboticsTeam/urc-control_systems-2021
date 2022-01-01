@@ -366,8 +366,8 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
     double left_angle = calculateLeftTurnAngle(x_angle);
     double back_angle = calculateBackTurnAngle(x_angle);
 
-    units::angle::degree_t left_wheel_angle(left_angle);
-    units::angle::degree_t back_wheel_angle(back_angle);
+    units::angle::degree_t left_wheel_angle(calculateLeftTurnAngle());
+    units::angle::degree_t back_wheel_angle(calculateBackTurnAngle());
 
     //*For testing angles*
     sjsu::LogInfo("\n Right Wheel: %f\n LeftWheel: %f\n Back Wheel: %f\n",
