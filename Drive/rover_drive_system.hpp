@@ -347,9 +347,8 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
   }
   double GetBackWheelDriveAngle(double angle)
   {
-        double back_angle = static_cast<double>(-0.378 + -1.79 * x_angle + 0.0366 * pow(x_angle, 2) +
-        -3.24E-04 * pow(x_angle, 3));
-        return back_angle;
+        return (static_cast<double>(-0.378 + -1.79 * x_angle + 0.0366 * pow(x_angle, 2) +
+        -3.24E-04 * pow(x_angle, 3)));
   }
 
   // =======================
