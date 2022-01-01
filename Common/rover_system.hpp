@@ -6,6 +6,10 @@ namespace sjsu::common
 class RoverSystem
 {
  public:
+  struct MissionControlData{
+    int is_operational;
+    int heartbeat_count;
+  };
   /// Initialize all the motors and sensors that are used in the system
   void Initialize();
   /// Prints the status of all the rover devices & motors
