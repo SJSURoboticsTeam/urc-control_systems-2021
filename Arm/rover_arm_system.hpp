@@ -67,7 +67,7 @@ class RoverArmSystem : public sjsu::common::RoverSystem
   {
     // first getting the accelerometer readings/storing readings
     Accelerometer::Acceleration_t rotunda_acceleration  = Rotunda.GetAccelerometerData();
-    Accelerometer::Acceleration_t Shoulder_Acceleration = Shoulder.GetAccelerometerData();
+    Accelerometer::Acceleration_t shoulder_acceleration = Shoulder.GetAccelerometerData();
     // then homing the different parts of the arm
     HomeShoulder(Rotunda_Acceleration, Shoulder_Acceleration);
     Accelerometer::Acceleration_t Elbow_Acceleration = Elbow.GetAccelerometerData();
