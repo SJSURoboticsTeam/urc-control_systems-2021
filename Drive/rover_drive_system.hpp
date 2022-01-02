@@ -184,31 +184,44 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
   /// @param speed the new movement speed of the rover
   void SetWheelSpeed(units::angular_velocity::revolutions_per_minute_t speed)
   {
-    //cast speed to long double to pass in to std::lerp
+    // cast speed to long double to pass in to std::lerp
     long double goal_speed = static_cast<long double>(speed);
 
-    //get current speed of motors
-    long double leftWheel_previous_speed = static_cast<long double>(left_wheel_.GetSpeed());
-    long double rightWheel_previous_speed = static_cast<long double>(right_wheel_.GetSpeed());
-    long double backWheel_previous_speed = static_cast<long double>(back_wheel_.GetSpeed());
-    
+    // get current speed of motors
+    long double leftWheel_previous_speed =
+        static_cast<long double>(left_wheel_.GetSpeed());
+    long double rightWheel_previous_speed =
+        static_cast<long double>(right_wheel_.GetSpeed());
+    long double backWheel_previous_speed =
+        static_cast<long double>(back_wheel_.GetSpeed());
 
-    //lerp returns a midpoint between current speed and goal speed 
+    // lerp returns a midpoint between current speed and goal speed
     long double lerps = 0.5;
-    auto lerpSpeed_leftWheel = std::lerp(leftWheel_previous_speed, goal_speed, lerps);
-    auto lerpSpeed_rightWheel = std::lerp(rightWheel_previous_speed, goal_speed, lerps);
-    auto lerpSpeed_backWheel = std::lerp(backWheel_previous_speed, goal_speed, lerps);
+    auto lerpSpeed_leftWheel =
+        std::lerp(leftWheel_previous_speed, goal_speed, lerps);
+    auto lerpSpeed_rightWheel =
+        std::lerp(rightWheel_previous_speed, goal_speed, lerps);
+    auto lerpSpeed_backWheel =
+        std::lerp(backWheel_previous_speed, goal_speed, lerps);
 
-    //set lerped speed
-    left_wheel_.SetHubSpeed(std::clamp(units::angular_velocity::revolutions_per_minute_t{lerpSpeed_leftWheel}, 0_rpm, speed));
-    right_wheel_.SetHubSpeed(std::clamp(units::angular_velocity::revolutions_per_minute_t{lerpSpeed_rightWheel}, 0_rpm, speed));
-    back_wheel_.SetHubSpeed(std::clamp(units::angular_velocity::revolutions_per_minute_t{lerpSpeed_backWheel}, 0_rpm, speed));
+    // set lerped speed
+    left_wheel_.SetHubSpeed(std::clamp(
+        units::angular_velocity::revolutions_per_minute_t{
+            lerpSpeed_leftWheel },
+        0_rpm, speed));
+    right_wheel_.SetHubSpeed(std::clamp(
+        units::angular_velocity::revolutions_per_minute_t{
+            lerpSpeed_rightWheel },
+        0_rpm, speed));
+    back_wheel_.SetHubSpeed(std::clamp(
+        units::angular_velocity::revolutions_per_minute_t{
+            lerpSpeed_backWheel },
+        0_rpm, speed));
 
-    sjsu::LogInfo("SetHubSpeed to %f for all wheels", static_cast<long double>(right_wheel_.GetSpeed())  );
-      
-      
-    
-  }; //SetWheelSpeed()
+    sjsu::LogInfo("SetHubSpeed to %f for all wheels",
+                  static_cast<long double>(right_wheel_.GetSpeed()));
+
+  };  // SetWheelSpeed()
 
   /// Prints the mission control data & prints the current speed and steer angle
   /// of each wheel on the rover
@@ -351,6 +364,38 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
         -3.24E-04 * pow(x_angle, 3)));
   }
 
+  double GetOutterWheelDriveAngle(double angle)
+  {
+    if (angle > 0)
+    {
+      return static_cast<double>(0.392 + 0.744 * abs(angle) +
+                                 -0.0187 * pow(abs(angle), 2) +
+                                 1.84E-04 * pow(abs(angle), 3));
+    }
+    else
+    {
+      return static_cast<double>(-(0.392 + 0.744 * abs(angle) +
+                                   -0.0187 * pow(abs(angle), 2) +
+                                   1.84E-04 * pow(abs(angle), 3)));
+    }
+  }
+
+  double GetBackWheelDriveAngle(double angle)
+  {
+    if (angle > 0)
+    {
+      return static_cast<double>(-0.378 + -1.79 * abs(angle) +
+                                 0.0366 * pow(abs(angle), 2) +
+                                 -3.24E-04 * pow(abs(angle), 3));
+    }
+    else
+    {
+      return static_cast<double>(-(-0.378 + -1.79 * abs(angle) +
+                                   0.0366 * pow(abs(angle), 2) +
+                                   -3.24E-04 * pow(abs(angle), 3)));
+    }
+  }
+
   // =======================
   // = DRIVE MODE HANDLERS =
   // =======================
@@ -359,23 +404,38 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
   void HandleDriveMode(units::angular_velocity::revolutions_per_minute_t speed,
                        units::angle::degree_t angle)
   {
-    units::angle::degree_t right_wheel_angle =
-        angle;  // Needs to be set by server
-    double x_angle = static_cast<double>(right_wheel_angle);
+    if (angle > kMaxTurnRadius)
+    {
+      sjsu::LogError("Rover Steering Angle too high");
+      angle = kMaxTurnRadius;
+    } else if(angle < -kMaxTurnRadius){
+      sjsu::LogError("Angle too low");
+    }
 
-    double left_angle = calculateLeftTurnAngle(x_angle);
-    double back_angle = calculateBackTurnAngle(x_angle);
+    units::angle::degree_t inner_wheel_angle =
+        angle;
 
-    units::angle::degree_t left_wheel_angle(calculateLeftTurnAngle());
-    units::angle::degree_t back_wheel_angle(calculateBackTurnAngle());
+    double lead_wheel_angle = static_cast<double>(inner_wheel_angle);
+
+    units::angle::degree_t outter_wheel_angle(
+        GetOutterWheelDriveAngle(lead_wheel_angle));
+    units::angle::degree_t back_wheel_angle(
+        GetBackWheelDriveAngle(lead_wheel_angle));
 
     //*For testing angles*
-    sjsu::LogInfo("\n Right Wheel: %f\n LeftWheel: %f\n Back Wheel: %f\n",
-                  x_angle, left_angle, back_angle);
 
-    right_wheel_.SetSteeringAngle(right_wheel_angle);
-    left_wheel_.SetSteeringAngle(left_wheel_angle);
-    back_wheel_.SetSteeringAngle(back_wheel_angle);
+    if (angle > 0_deg)
+    {
+      right_wheel_.SetSteeringAngle(inner_wheel_angle);
+      left_wheel_.SetSteeringAngle(outter_wheel_angle);
+      back_wheel_.SetSteeringAngle(back_wheel_angle);
+    }
+    else
+    {
+      right_wheel_.SetSteeringAngle(outter_wheel_angle);
+      left_wheel_.SetSteeringAngle(inner_wheel_angle);
+      back_wheel_.SetSteeringAngle(back_wheel_angle);
+    }
     // TODO: Temporary placeholder till further testing - Incorrect logic
     SetWheelSpeed(speed);
   };
@@ -442,6 +502,7 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
   int heartbeat_count_                                               = 0;
   char current_mode_                                                 = 'S';
   const units::angular_velocity::revolutions_per_minute_t kZeroSpeed = 0_rpm;
+  const units::angle::degree_t kMaxTurnRadius = 45_deg;
 
  public:
   MissionControlData mc_data;
