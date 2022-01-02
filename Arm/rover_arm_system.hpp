@@ -25,9 +25,13 @@ class RoverArmSystem : public sjsu::common::RoverSystem
     int is_operational;
     int heartbeat_count = 0;
     Modes modes         = Modes::kDefault;
+    int rotunda_speed;
     int rotunda_angle;
+    int shoulder_speed;
     int shoulder_angle;
+    int elbow_speed;
     int elbow_angle;
+    int wrist_speed;
     int wrist_roll;
     int wrist_pitch;
     struct Fingers
@@ -40,6 +44,7 @@ class RoverArmSystem : public sjsu::common::RoverSystem
     };
     Fingers fingers;
   };
+  
   RoverArmSystem(sjsu::arm::Joint & rotunda,
                  sjsu::arm::Joint & shoulder,
                  sjsu::arm::Joint & elbow,
@@ -67,7 +72,31 @@ class RoverArmSystem : public sjsu::common::RoverSystem
     return "Fill";
   };
 
-  void HandleArmMovement(){};
+  void HandleArmMovement(){
+    //rotunda
+    units::angular_velocity::revolutions_per_minute_t rotunda_speed(static_cast<float>(mc_data.rotunda_speed));
+    units::angle::degree_t rotunda_angle(static_cast<float>(mc_data.rotunda_angle));
+    //shoulder
+    units::angular_velocity::revolutions_per_minute_t shoulder_speed(static_cast<float>(mc_data.shoulder_speed));
+    units::angle::degree_t shoulder_angle(static_cast<float>(mc_data.shoulder_angle));
+    //elbow
+    units::angular_velocity::revolutions_per_minute_t elbow_speed(static_cast<float>(mc_data.elbow_speed));
+    units::angle::degree_t elbow_angle(static_cast<float>(mc_data.elbow_angle));
+    //wrist
+    units::angular_velocity::revolutions_per_minute_t wrist_speed(static_cast<float>(mc_data.wrist_speed));
+    //units::angle::degree_t wrist_roll(static_cast<float>(mc_data.wrist_roll));
+    //units::angle::degree_t wrist_pitch(static_cast<float>(mc_data.wrist_pitch));
+    
+    //TODO: implement different arm drive modes in this function.
+
+    //D drive mode
+    Rotunda.SetSpeed(rotunda_speed);
+    Rotunda.SetPosition(rotunda_angle);
+    Shoulder.SetSpeed(shoulder_speed);
+    Shoulder.SetPosition(shoulder_angle);
+    Elbow.SetSpeed(elbow_speed);
+    Elbow.SetPosition(elbow_angle);
+  }
 
   void HomeArm()
   {
@@ -119,9 +148,9 @@ class RoverArmSystem : public sjsu::common::RoverSystem
         acos(gravity / Shoulder_Acceleration_y) *  // for angle
          (Shoulder_Acceleration_x /
           fabs(Shoulder_Acceleration_x));  // for direction
-    units::angle::degree_t Offset_Angle =
+    units::angle::degree_t home =
         static_cast<units::angle::degree_t>(Rotunda_Angle + Shoulder_Angle);
-    Rotunda.SetPosition(Offset_Angle);
+    Rotunda.SetPosition(home);
   }
   void HomeElbow(Accelerometer::Acceleration_t Rotunda_Acceleration,
                  Accelerometer::Acceleration_t Elbow_Acceleration)
@@ -158,11 +187,13 @@ class RoverArmSystem : public sjsu::common::RoverSystem
          fabs(Elbow_Acceleration_x)) *
         (Elbow_Acceleration_y /
          fabs(Elbow_Acceleration_y));  // for direction
-    units::angle::degree_t Offset_Angle =
+    units::angle::degree_t home =
         static_cast<units::angle::degree_t>(Rotunda_Angle + Elbow_Angle);
-    Shoulder.SetPosition(Offset_Angle);
+    Shoulder.SetPosition(home);
   }
   void HomeWrist(){};
+
+  bool SyncedWithMissionControl(){};
 
   void Esp(){};
 
@@ -187,5 +218,7 @@ class RoverArmSystem : public sjsu::common::RoverSystem
   void MoveElbow(){};
 
   void MoveWrist(){};
+
+  MissionControlData mc_data;
 };
 }  // namespace sjsu::arm
