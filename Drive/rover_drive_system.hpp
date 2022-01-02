@@ -363,25 +363,25 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
     }
     else
     {
-      return static_cast<double>
-             (-(0.392 + 0.744 * abs(angle) + -0.0187 * pow(abs(angle), 2) +
-              1.84E-04 * pow(abs(angle), 3)));
+      return static_cast<double>(-(0.392 + 0.744 * abs(angle) +
+                                   -0.0187 * pow(abs(angle), 2) +
+                                   1.84E-04 * pow(abs(angle), 3)));
     }
   }
-  
+
   double GetBackWheelDriveAngle(double angle)
   {
     if (angle > 0)
     {
       return static_cast<double>(-0.378 + -1.79 * abs(angle) +
-                                  0.0366 * pow(abs(angle), 2) +
-                                  -3.24E-04 * pow(abs(angle), 3));
+                                 0.0366 * pow(abs(angle), 2) +
+                                 -3.24E-04 * pow(abs(angle), 3));
     }
     else
     {
-      return static_cast<double>
-              (-(-0.378 + -1.79 * abs(angle) + 0.0366 * pow(abs(angle), 2) +
-               -3.24E-04 * pow(abs(angle), 3)));
+      return static_cast<double>(-(-0.378 + -1.79 * abs(angle) +
+                                   0.0366 * pow(abs(angle), 2) +
+                                   -3.24E-04 * pow(abs(angle), 3)));
     }
   }
 
@@ -393,8 +393,16 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
   void HandleDriveMode(units::angular_velocity::revolutions_per_minute_t speed,
                        units::angle::degree_t angle)
   {
+    if (angle > kMaxTurnRadius)
+    {
+      sjsu::LogError("Rover Steering Angle too high");
+      angle = kMaxTurnRadius;
+    } else if(angle < -kMaxTurnRadius){
+      sjsu::LogError("Angle too low");
+    }
+
     units::angle::degree_t inner_wheel_angle =
-        angle;  // Needs to be set by server
+        angle;
 
     double lead_wheel_angle = static_cast<double>(inner_wheel_angle);
 
@@ -403,19 +411,19 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
     units::angle::degree_t back_wheel_angle(
         GetBackWheelDriveAngle(lead_wheel_angle));
 
-    right_wheel_.SetSteeringAngle(inner_wheel_angle);
-    left_wheel_.SetSteeringAngle(outter_wheel_angle);
-    back_wheel_.SetSteeringAngle(back_wheel_angle);
-
     //*For testing angles*
-    if (angle > 0_deg){
-    sjsu::LogInfo("\n Right Wheel: %f\n LeftWheel: %f\n Back Wheel: %f\n",
-                  static_cast<double>(inner_wheel_angle), static_cast<double>(outter_wheel_angle),
-                  static_cast<double>(back_wheel_angle));
-    }else{
-    sjsu::LogInfo("\n Right Wheel: %f\n LeftWheel: %f\n Back Wheel: %f\n",
-                  static_cast<double>(outter_wheel_angle), static_cast<double>(inner_wheel_angle),
-                  static_cast<double>(back_wheel_angle));
+
+    if (angle > 0_deg)
+    {
+      right_wheel_.SetSteeringAngle(inner_wheel_angle);
+      left_wheel_.SetSteeringAngle(outter_wheel_angle);
+      back_wheel_.SetSteeringAngle(back_wheel_angle);
+    }
+    else
+    {
+      right_wheel_.SetSteeringAngle(outter_wheel_angle);
+      left_wheel_.SetSteeringAngle(inner_wheel_angle);
+      back_wheel_.SetSteeringAngle(back_wheel_angle);
     }
     // TODO: Temporary placeholder till further testing - Incorrect logic
     SetWheelSpeed(speed);
@@ -483,6 +491,7 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
   int heartbeat_count_                                               = 0;
   char current_mode_                                                 = 'S';
   const units::angular_velocity::revolutions_per_minute_t kZeroSpeed = 0_rpm;
+  const units::angle::degree_t kMaxTurnRadius = 45_deg;
 
  public:
   MissionControlData mc_data;
