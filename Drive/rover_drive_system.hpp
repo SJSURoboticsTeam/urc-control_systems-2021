@@ -352,6 +352,17 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
       throw e;
     }
   }
+  double GetLeftWheelDriveAngle(double angle)
+  {
+        double left_angle = static_cast<double>(0.392 + 0.744 * x_angle + -0.0187 * pow(x_angle, 2) +
+        1.84E-04 * pow(x_angle, 3));
+        return left_angle;
+  }
+  double GetBackWheelDriveAngle(double angle)
+  {
+        return (static_cast<double>(-0.378 + -1.79 * x_angle + 0.0366 * pow(x_angle, 2) +
+        -3.24E-04 * pow(x_angle, 3)));
+  }
 
   double GetOutterWheelDriveAngle(double angle)
   {
