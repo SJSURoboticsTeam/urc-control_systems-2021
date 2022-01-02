@@ -10,10 +10,10 @@ namespace sjsu::arm
 class RoverArmSystem : public sjsu::common::RoverSystem
 {
  private:
-  sjsu::arm::Joint & Rotunda;
-  sjsu::arm::Joint & Shoulder;
-  sjsu::arm::Joint & Elbow;
-  sjsu::arm::WristJoint & Wrist;
+  sjsu::arm::Joint & rotunda_;
+  sjsu::arm::Joint & shoulder_;
+  sjsu::arm::Joint & elbow_;
+  sjsu::arm::WristJoint & wrist_;
 
  public:
   struct MissionControlData
