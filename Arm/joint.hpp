@@ -74,11 +74,11 @@ class Joint
   {
     return mpu.Read();
   }
-  void SetSpeed(untis::angular_velocity::revolutions_per_minute_t speed)
+  void SetSpeed(units::angular_velocity::revolutions_per_minute_t speed)
   {
   speed_ = speed;
   motor.SetSpeed(speed_);
   }
-units::angular::velocity::rotations_per_minute_t speed_;
+units::angular_velocity::revolutions_per_minute_t speed_;
 };
 }  // namespace sjsu::arm
