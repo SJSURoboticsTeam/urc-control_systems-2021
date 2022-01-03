@@ -78,12 +78,16 @@ int main(void)
     catch (const std::exception & e)
     {
       sjsu::LogError("Uncaught error in main() - Stopping Rover!");
-      drive.SetWheelSpeed(0_rpm);
+      drive.SetWheelSpeed(0);
       if (!esp.IsConnected())
       {
         esp.ConnectToWifi();
         esp.ConnectToServer();
       }
+    }
+    catch (const sjsu::drive::RoverDriveSystem::ParseError &)
+    {
+      sjsu::LogError("Parsing Error: Arguments not equal");
     }
   }
 
