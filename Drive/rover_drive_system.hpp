@@ -51,7 +51,7 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
     left_wheel_.Initialize();
     right_wheel_.Initialize();
     back_wheel_.Initialize();
-    HomeWheels();
+    SetSpinMode();
   };
 
   /// Constructs GET request parameter
