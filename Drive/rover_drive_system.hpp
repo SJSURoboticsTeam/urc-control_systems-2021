@@ -384,6 +384,7 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
   };
 
   int heartbeat_count_     = 0;
+  int state_of_charge_     = 90;
   char current_mode_       = 'S';
   const int kZeroSpeed     = 0;
   const int kMaxTurnRadius = 45;
@@ -394,11 +395,7 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
   Wheel & right_wheel_;
   Wheel & back_wheel_;
 
-  sjsu::common::StateOfCharge * state_of_charge_ =
-      new sjsu::common::StateOfCharge();
-  int state_of_charge_MAX_ =
-      static_cast<int>(state_of_charge_->StateOfCharge_MAX());
-  int state_of_charge_LTC_ =
-      static_cast<int>(state_of_charge_->StateOfCharge_LTC());
+  // TODO: Implement this logic once SOC is tested
+  // sjsu::common::StateOfCharge & battery_;
 };
 }  // namespace sjsu::drive
