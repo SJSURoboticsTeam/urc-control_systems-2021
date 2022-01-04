@@ -354,14 +354,10 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
   }
   double GetLeftWheelDriveAngle(double angle)
   {
-        double left_angle = static_cast<double>(0.392 + 0.744 * x_angle + -0.0187 * pow(x_angle, 2) +
-        1.84E-04 * pow(x_angle, 3));
-        return left_angle;
-  }
-  double GetBackWheelDriveAngle(double angle)
-  {
-        return (static_cast<double>(-0.378 + -1.79 * x_angle + 0.0366 * pow(x_angle, 2) +
-        -3.24E-04 * pow(x_angle, 3)));
+    double left_angle =
+        static_cast<double>(0.392 + 0.744 * angle + -0.0187 * pow(angle, 2) +
+                            1.84E-04 * pow(angle, 3));
+    return left_angle;
   }
 
   double GetOutterWheelDriveAngle(double angle)
@@ -408,12 +404,13 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
     {
       sjsu::LogError("Rover Steering Angle too high");
       angle = kMaxTurnRadius;
-    } else if(angle < -kMaxTurnRadius){
+    }
+    else if (angle < -kMaxTurnRadius)
+    {
       sjsu::LogError("Angle too low");
     }
 
-    units::angle::degree_t inner_wheel_angle =
-        angle;
+    units::angle::degree_t inner_wheel_angle = angle;
 
     double lead_wheel_angle = static_cast<double>(inner_wheel_angle);
 
@@ -501,8 +498,9 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
 
   int heartbeat_count_                                               = 0;
   char current_mode_                                                 = 'S';
+  int state_of_charge_                                               = 99;
   const units::angular_velocity::revolutions_per_minute_t kZeroSpeed = 0_rpm;
-  const units::angle::degree_t kMaxTurnRadius = 45_deg;
+  const units::angle::degree_t kMaxTurnRadius                        = 45_deg;
 
  public:
   MissionControlData mc_data;
@@ -510,11 +508,8 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
   Wheel & right_wheel_;
   Wheel & back_wheel_;
 
-  sjsu::common::StateOfCharge * state_of_charge_ =
-      new sjsu::common::StateOfCharge();
-  int state_of_charge_MAX_ =
-      static_cast<int>(state_of_charge_->StateOfCharge_MAX());
-  int state_of_charge_LTC_ =
-      static_cast<int>(state_of_charge_->StateOfCharge_LTC());
+  sjsu::common::StateOfCharge * battery_ = new sjsu::common::StateOfCharge();
+  int state_of_charge_MAX_ = static_cast<int>(battery_->StateOfCharge_MAX());
+  int state_of_charge_LTC_ = static_cast<int>(battery_->StateOfCharge_LTC());
 };
 }  // namespace sjsu::drive
