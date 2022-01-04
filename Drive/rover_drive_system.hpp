@@ -14,7 +14,7 @@
 
 namespace sjsu::drive
 {
-const char message_format[] =
+const char mc_response_body[] =
     "\r\n\r\n{\n"
     "  \"heartbeat_count\": %d,\n"
     "  \"is_operational\": %d,\n"
@@ -77,7 +77,7 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
   void ParseJSONResponse(std::string & response)
   {
     int arguments =
-        sscanf(response.c_str(), message_format, &mc_data.heartbeat_count,
+        sscanf(response.c_str(), mc_response_body, &mc_data.heartbeat_count,
                &mc_data.is_operational, &mc_data.drive_mode, &mc_data.speed,
                &mc_data.rotation_angle);
 
@@ -85,15 +85,13 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
     {
       throw ParseError{};
     }
-
-    // TODO: Throw an error when arguments not equal to expected
   };
 
+  /// Verifies that mission control is sending fresh commands
   bool isSyncedWithMissionControl()
   {
     if (mc_data.heartbeat_count == heartbeat_count_)
     {
-      sjsu::LogInfo("In Sync");
       heartbeat_count_++;
       return true;
     }
@@ -106,7 +104,7 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
   }
 
   /// Handles the rover movement depending on the mode.
-  /// D = Drive, S = Spin, T = Translation
+  /// D = Drive, S = Spin, T = Translation, L/R/B = Left/Right/Back Wheel
   void HandleRoverMovement()
   {
     int angle = mc_data.rotation_angle;
@@ -168,13 +166,12 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
     int backWheel_previous_speed  = back_wheel_.GetSpeed();
 
     // lerp returns a midpoint between current speed and goal speed
-    long double lerps = 0.5;
     auto lerpSpeed_leftWheel =
-        std::lerp(leftWheel_previous_speed, goal_speed, lerps);
+        std::lerp(leftWheel_previous_speed, goal_speed, kLerpStep);
     auto lerpSpeed_rightWheel =
-        std::lerp(rightWheel_previous_speed, goal_speed, lerps);
+        std::lerp(rightWheel_previous_speed, goal_speed, kLerpStep);
     auto lerpSpeed_backWheel =
-        std::lerp(backWheel_previous_speed, goal_speed, lerps);
+        std::lerp(backWheel_previous_speed, goal_speed, kLerpStep);
 
     // set lerped speed
     left_wheel_.SetHubSpeed(std::clamp(int{ lerpSpeed_leftWheel }, 0, speed));
@@ -183,8 +180,7 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
 
     sjsu::LogInfo("SetHubSpeed to %f for all wheels",
                   static_cast<long double>(right_wheel_.GetSpeed()));
-
-  };  // SetWheelSpeed()
+  };
 
   /// Prints the mission control data & prints the current speed and steer angle
   /// of each wheel on the rover
@@ -278,30 +274,16 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
 
   int GetOutterWheelDriveAngle(int angle)
   {
-    if (angle > 0)
-    {
-      return 0.392 + 0.744 * abs(angle) + -0.0187 * pow(abs(angle), 2) +
-             1.84E-04 * pow(abs(angle), 3);
-    }
-    else
-    {
-      return -(0.392 + 0.744 * abs(angle) + -0.0187 * pow(abs(angle), 2) +
-               1.84E-04 * pow(abs(angle), 3));
-    }
+    double result = 0.392 + 0.744 * abs(angle) + -0.0187 * pow(abs(angle), 2) +
+                    1.84E-04 * pow(abs(angle), 3);
+    return (angle > 0) ? result : -result;
   }
 
   int GetBackWheelDriveAngle(int angle)
   {
-    if (angle > 0)
-    {
-      return -0.378 + -1.79 * abs(angle) + 0.0366 * pow(abs(angle), 2) +
-             -3.24E-04 * pow(abs(angle), 3);
-    }
-    else
-    {
-      return -(-0.378 + -1.79 * abs(angle) + 0.0366 * pow(abs(angle), 2) +
-               -3.24E-04 * pow(abs(angle), 3));
-    }
+    double result = -0.378 + -1.79 * abs(angle) + 0.0366 * pow(abs(angle), 2) +
+                    -3.24E-04 * pow(abs(angle), 3);
+    return (angle > 0) ? result : -result;
   }
 
   // =======================
@@ -383,11 +365,12 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
     }
   };
 
-  int heartbeat_count_     = 0;
-  int state_of_charge_     = 90;
-  char current_mode_       = 'S';
-  const int kZeroSpeed     = 0;
-  const int kMaxTurnRadius = 45;
+  int heartbeat_count_        = 0;
+  int state_of_charge_        = 90;
+  char current_mode_          = 'S';
+  const int kZeroSpeed        = 0;
+  const int kMaxTurnRadius    = 45;
+  const long double kLerpStep = 0.5;
 
  public:
   MissionControlData mc_data;
