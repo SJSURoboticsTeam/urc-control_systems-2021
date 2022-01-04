@@ -10,15 +10,13 @@ namespace sjsu::arm
 class RoverArmSystem : public sjsu::common::RoverSystem
 {
  public:
-  struct MissionControlData
+  struct MissionControlData : public RoverMissionControlData
   {
     enum class Modes : char
     {
       kDefault = 'D',
     };
-    int is_operational;
-    int heartbeat_count = 0;
-    Modes modes         = Modes::kDefault;
+    Modes modes = Modes::kDefault;
     int rotunda_speed;
     int rotunda_angle;
     int shoulder_speed;
@@ -28,7 +26,7 @@ class RoverArmSystem : public sjsu::common::RoverSystem
     int wrist_speed;
     int wrist_roll;
     int wrist_pitch;
-    struct Fingers
+    struct Finger
     {
       int pinky;
       int ring;
@@ -36,7 +34,7 @@ class RoverArmSystem : public sjsu::common::RoverSystem
       int pointer;
       int thumb;
     };
-    Fingers fingers;
+    Finger finger;
   };
 
   RoverArmSystem(sjsu::arm::Joint & rotunda,
@@ -54,7 +52,9 @@ class RoverArmSystem : public sjsu::common::RoverSystem
     wrist_.Initialize();
   }
 
-  void PrintRoverData(){};
+  void PrintRoverData(){
+
+  };
 
   std::string GETParameters()
   {
@@ -65,6 +65,59 @@ class RoverArmSystem : public sjsu::common::RoverSystem
   {
     return "Fill";
   };
+
+  bool SyncedWithMissionControl(){
+    bool fill;
+    return fill;
+  };
+
+  void MoveRotunda(units::angular_velocity::revolutions_per_minute_t speed, units::angle::degree_t angle){
+    try
+    {
+      if(!CheckValidMovement())
+      {
+        throw(angle);
+      }
+      rotunda_.SetSpeed(speed);
+      rotunda_.SetPosition(angle);
+      }
+      catch(units::angle::degree_t large_angle)
+      {
+        sjsu::LogError("Error Moving Rotunda, Requested Angle Is Too Large");
+      }
+  }
+
+  void MoveShoulder(units::angular_velocity::revolutions_per_minute_t speed, units::angle::degree_t angle){
+    try
+    {
+      if(!CheckValidMovement())
+      {
+        throw(angle);
+      }
+      shoulder_.SetSpeed(speed);
+      shoulder_.SetPosition(angle);
+      }
+      catch(units::angle::degree_t large_angle)
+      {
+        sjsu::LogError("Error Moving Shoulder, Requested Angle Is Too Large");
+      }
+  }
+
+  void MoveElbow(units::angular_velocity::revolutions_per_minute_t speed, units::angle::degree_t angle){
+    try
+    {
+      if(!CheckValidMovement())
+      {
+        throw(angle);
+      }
+      elbow_.SetSpeed(speed);
+      elbow_.SetPosition(angle);
+      }
+      catch(units::angle::degree_t large_angle)
+      {
+        sjsu::LogError("Error Moving Elbow, Requested Angle Is Too Large");
+      }
+  }
 
   void HandleArmMovement()
   {
@@ -86,21 +139,21 @@ class RoverArmSystem : public sjsu::common::RoverSystem
     units::angular_velocity::revolutions_per_minute_t wrist_speed(
         static_cast<float>(mc_data.wrist_speed));
     // units::angle::degree_t
-    // wrist_roll(static_cast<float>(mc_data.wrist_roll)); units::angle::degree_t
+    // wrist_roll(static_cast<float>(mc_data.wrist_roll));
+    // units::angle::degree_t
     // wrist_pitch(static_cast<float>(mc_data.wrist_pitch));
 
     // TODO: implement different arm drive modes in this function.
 
     // D drive mode
-    rotunda_.SetSpeed(rotunda_speed);
-    rotunda_.SetPosition(rotunda_angle);
-    shoulder_.SetSpeed(shoulder_speed);
-    shoulder_.SetPosition(shoulder_angle);
-    elbow_.SetSpeed(elbow_speed);
-    elbow_.SetPosition(elbow_angle);
+    MoveRotunda(rotunda_speed, rotunda_angle);
+    MoveShoulder(shoulder_speed, shoulder_angle);
+    MoveElbow(elbow_speed, elbow_angle);
   }
 
-  void HomeArm()
+  void MoveWrist(){};
+
+  void HomeAll()
   {
     // first getting the accelerometer readings/storing readings
     Accelerometer::Acceleration_t rotunda_acceleration =
@@ -116,6 +169,7 @@ class RoverArmSystem : public sjsu::common::RoverSystem
 
     HomeWrist();
   }
+
   void HomeShoulder(Accelerometer::Acceleration_t rotunda_acceleration,
                     Accelerometer::Acceleration_t shoulder_acceleration)
   {
@@ -154,6 +208,7 @@ class RoverArmSystem : public sjsu::common::RoverSystem
         static_cast<units::angle::degree_t>(rotunda_angle + shoulder_angle);
     rotunda_.SetPosition(home);
   }
+
   void HomeElbow(Accelerometer::Acceleration_t rotunda_acceleration,
                  Accelerometer::Acceleration_t elbow_acceleration)
   {
@@ -190,19 +245,16 @@ class RoverArmSystem : public sjsu::common::RoverSystem
         static_cast<units::angle::degree_t>(rotunda_angle + elbow_angle);
     shoulder_.SetPosition(home);
   }
-  void HomeWrist(){};
 
-  bool SyncedWithMissionControl(){};
+  void HomeWrist(){};
 
   void Esp(){};
 
-  void ExtendArm(){};
-
-  void RotateArm(){};
-
-  void CheckValidMovement(){};
-
-  void GraspHand(){};
+//TODO: need to work on valid movement
+  bool CheckValidMovement(){
+    bool fill;
+    return fill;
+  }
 
   void Calibrate(){};
 
@@ -210,21 +262,12 @@ class RoverArmSystem : public sjsu::common::RoverSystem
 
   void PrintArmMode(){};
 
-  void MoveRotand(){};
-
-  void MoveShoulder(){};
-
-  void MoveElbow(){};
-
-  void MoveWrist(){};
-
   MissionControlData mc_data;
 
-  private:
+ private:
   sjsu::arm::Joint & rotunda_;
   sjsu::arm::Joint & shoulder_;
   sjsu::arm::Joint & elbow_;
   sjsu::arm::WristJoint & wrist_;
-
 };
 }  // namespace sjsu::arm
