@@ -9,35 +9,24 @@ namespace sjsu::arm
 {
 class RoverArmSystem : public sjsu::common::RoverSystem
 {
- private:
-  sjsu::arm::Joint & Rotunda;
-  sjsu::arm::Joint & Shoulder;
-  sjsu::arm::Joint & Elbow;
-  sjsu::arm::WristJoint & Wrist;
-
-  // The target angle for each of the joints
-  units::angle::degree_t shoulder_pos;
-  units::angle::degree_t elbow_pos;
-  units::angle::degree_t rotunda_pos;
-  units::angle::degree_t wrist_roll_pos;
-  units::angle::degree_t wrist_pitch_pos;
-
  public:
-  struct MissionControlData
+  struct MissionControlData : public RoverMissionControlData
   {
     enum class Modes : char
     {
       kDefault = 'D',
     };
-    int heartbeat_count = 0;
-    Modes modes         = Modes::kDefault;
+    Modes modes = Modes::kDefault;
+    int rotunda_speed;
     int rotunda_angle;
-    int elbow_angle;
+    int shoulder_speed;
     int shoulder_angle;
+    int elbow_speed;
+    int elbow_angle;
+    int wrist_speed;
     int wrist_roll;
     int wrist_pitch;
-    int is_operational;
-    struct Fingers
+    struct Finger
     {
       int pinky;
       int ring;
@@ -45,93 +34,227 @@ class RoverArmSystem : public sjsu::common::RoverSystem
       int pointer;
       int thumb;
     };
-    Fingers fingers;
+    Finger finger;
   };
+
   RoverArmSystem(sjsu::arm::Joint & rotunda,
                  sjsu::arm::Joint & shoulder,
                  sjsu::arm::Joint & elbow,
                  sjsu::arm::WristJoint wrist)
-      : Rotunda(rotunda), Shoulder(shoulder), Elbow(elbow), Wrist(wrist)
+      : rotunda_(rotunda), shoulder_(shoulder), elbow_(elbow), wrist_(wrist)
   {
   }
   void Initialize()
   {
-    Rotunda.Initialize();
-    Shoulder.Initialize();
-    Elbow.Initialize();
-    Wrist.Initialize();
+    rotunda_.Initialize();
+    shoulder_.Initialize();
+    elbow_.Initialize();
+    wrist_.Initialize();
   }
 
-  void PrintRoverData(){};
+  void PrintRoverData(){
 
-  std::string GETParameters(){};
+  };
 
-  std::string ParseJSONResponse(){};
+  std::string GETParameters()
+  {
+    return "Fill";
+  };
 
-  void HandleArmMovement(){};
+  std::string ParseJSONResponse()
+  {
+    return "Fill";
+  };
 
-  void HomeArm()
+  bool SyncedWithMissionControl(){
+    bool fill;
+    return fill;
+  };
+
+  void MoveRotunda(units::angular_velocity::revolutions_per_minute_t speed, units::angle::degree_t angle){
+    try
+    {
+      if(!CheckValidMovement())
+      {
+        throw(angle);
+      }
+      rotunda_.SetSpeed(speed);
+      rotunda_.SetPosition(angle);
+      }
+      catch(units::angle::degree_t large_angle)
+      {
+        sjsu::LogError("Error Moving Rotunda, Requested Angle Is Too Large");
+      }
+  }
+
+  void MoveShoulder(units::angular_velocity::revolutions_per_minute_t speed, units::angle::degree_t angle){
+    try
+    {
+      if(!CheckValidMovement())
+      {
+        throw(angle);
+      }
+      shoulder_.SetSpeed(speed);
+      shoulder_.SetPosition(angle);
+      }
+      catch(units::angle::degree_t large_angle)
+      {
+        sjsu::LogError("Error Moving Shoulder, Requested Angle Is Too Large");
+      }
+  }
+
+  void MoveElbow(units::angular_velocity::revolutions_per_minute_t speed, units::angle::degree_t angle){
+    try
+    {
+      if(!CheckValidMovement())
+      {
+        throw(angle);
+      }
+      elbow_.SetSpeed(speed);
+      elbow_.SetPosition(angle);
+      }
+      catch(units::angle::degree_t large_angle)
+      {
+        sjsu::LogError("Error Moving Elbow, Requested Angle Is Too Large");
+      }
+  }
+
+  void HandleArmMovement()
+  {
+    // rotunda
+    units::angular_velocity::revolutions_per_minute_t rotunda_speed(
+        static_cast<float>(mc_data.rotunda_speed));
+    units::angle::degree_t rotunda_angle(
+        static_cast<float>(mc_data.rotunda_angle));
+    // shoulder
+    units::angular_velocity::revolutions_per_minute_t shoulder_speed(
+        static_cast<float>(mc_data.shoulder_speed));
+    units::angle::degree_t shoulder_angle(
+        static_cast<float>(mc_data.shoulder_angle));
+    // elbow
+    units::angular_velocity::revolutions_per_minute_t elbow_speed(
+        static_cast<float>(mc_data.elbow_speed));
+    units::angle::degree_t elbow_angle(static_cast<float>(mc_data.elbow_angle));
+    // wrist
+    units::angular_velocity::revolutions_per_minute_t wrist_speed(
+        static_cast<float>(mc_data.wrist_speed));
+    // units::angle::degree_t
+    // wrist_roll(static_cast<float>(mc_data.wrist_roll));
+    // units::angle::degree_t
+    // wrist_pitch(static_cast<float>(mc_data.wrist_pitch));
+
+    // TODO: implement different arm drive modes in this function.
+
+    // D drive mode
+    MoveRotunda(rotunda_speed, rotunda_angle);
+    MoveShoulder(shoulder_speed, shoulder_angle);
+    MoveElbow(elbow_speed, elbow_angle);
+  }
+
+  void MoveWrist(){};
+
+  void HomeAll()
   {
     // first getting the accelerometer readings/storing readings
-    acceleration_t Rotunda_Acceleration  = Rotunda.GetAccelerometerData();
-    acceleration_t Shoulder_Acceleration = Shoulder.GetAccelerometerData();
-    acceleration_t Elbow_Acceleration    = Elbow.GetAccelerometerData();
+    Accelerometer::Acceleration_t rotunda_acceleration =
+        rotunda_.GetAccelerometerData();
+    Accelerometer::Acceleration_t shoulder_acceleration =
+        shoulder_.GetAccelerometerData();
     // then homing the different parts of the arm
-    // HomeRotunda(); I don't think we need a home for the rotunda
-    HomeShoulder(Rotunda_Acceleration, Shoulder_Acceleration);
-    HomeElbow();
+    HomeShoulder(rotunda_acceleration, shoulder_acceleration);
+
+    Accelerometer::Acceleration_t elbow_acceleration =
+        elbow_.GetAccelerometerData();
+    HomeElbow(rotunda_acceleration, elbow_acceleration);
+
     HomeWrist();
   }
-  /*void HomeRotunda(){
 
-  }*/
-  void HomeShoulder(acceleration_t Rotunda_Acceleration,
-                    acceleration_t Shoulder_Acceleration)
+  void HomeShoulder(Accelerometer::Acceleration_t rotunda_acceleration,
+                    Accelerometer::Acceleration_t shoulder_acceleration)
   {
-    float Rotunda_Angle =
-        (arccos(9.81 /
-                static_cast<float>(Rotunda_Acceleration.y))) *  // for angle
-        (static_cast<float>(Rotunda_Acceleration.x) /
-         abs(static_cast<float> Rotunda_Acceleration.x));  // for direction
-    float Shoulder_Angle =
-        (arccos(9.81 /
-                static_cast<float>(Shoulder_Acceleration.y))) *  // for angle
-        (static_cast<float>(Shoulder_Acceleration.x) /
-         abs(static_cast<float> Shoulder_Acceleration.x));  // for direction
-    units::angle::degree_t Offset_Angle =
-        static_cast<units::angle::degree_t>(Rotunda_Angle + Shoulder_Angle);
-    Rotunda.motor.SetAngle(Offset_Angle);
+    double gravity                = 9.81;
+    double rotunda_acceleration_x = static_cast<double>(rotunda_acceleration.x);
+    double rotunda_acceleration_y = static_cast<double>(rotunda_acceleration.y);
+    double shoulder_acceleration_x =
+        static_cast<double>(shoulder_acceleration.x);
+    double shoulder_acceleration_y =
+        static_cast<double>(shoulder_acceleration.y);
+    if (rotunda_acceleration_x == 0.0)
+    {  // catches division by 0
+      rotunda_acceleration_x = .0001;
+    }
+    if (rotunda_acceleration_y == 0.0)
+    {  // catches division by 0
+      rotunda_acceleration_y = .0001;
+    }
+    if (shoulder_acceleration_x == 0.0)
+    {  // catches division by 0
+      shoulder_acceleration_x = .0001;
+    }
+    if (shoulder_acceleration_y == 0.0)
+    {  // catches division by 0
+      shoulder_acceleration_y = .0001;
+    }
+    double rotunda_angle =
+        acos(gravity / rotunda_acceleration_y) *  // for angle
+        (rotunda_acceleration_x /
+         fabs(rotunda_acceleration_x));  // for direction
+    double shoulder_angle =
+        acos(gravity / shoulder_acceleration_y) *  // for angle
+        (shoulder_acceleration_x /
+         fabs(shoulder_acceleration_x));  // for direction
+    units::angle::degree_t home =
+        static_cast<units::angle::degree_t>(rotunda_angle + shoulder_angle);
+    rotunda_.SetPosition(home);
   }
-  void HomeElbow(acceleration_t Rotunda_Acceleration,
-                 acceleration_t Elbow_Acceleration)
+
+  void HomeElbow(Accelerometer::Acceleration_t rotunda_acceleration,
+                 Accelerometer::Acceleration_t elbow_acceleration)
   {
-    float Rotunda_Angle =
-        (arccos(9.81 /
-                static_cast<float>(Rotunda_Acceleration.y))) *  // for angle
-        (static_cast<float>(Rotunda_Acceleration.x) /
-         abs(static_cast<float> Rotunda_Acceleration.x));  // for direction
-    float Elbow_Angle =
-        (arccos(9.81 /
-                static_cast<float>(Elbow_Acceleration.y))) *  // for angle
-        (static_cast<float>(Elbow_Acceleration.x) /
-         abs(static_cast<float>(Elbow_Acceleration.x))) *  // for direction
-        (static_cast<float>(Elbow.Acceleration.y) /
-         abs(static_cast<float>(Elbow_Acceleration.y)));
-    units::angle::degree_t Offset_Angle =
-        static_cast<units::angle::degree_t>(Rotunda_Angle + Elbow_Angle);
-    shoulder.motor.SetAngle(Offset_Angle);
+    double gravity                = 9.81;
+    double rotunda_acceleration_x = static_cast<double>(rotunda_acceleration.x);
+    double rotunda_acceleration_y = static_cast<double>(rotunda_acceleration.y);
+    double elbow_acceleration_x   = static_cast<double>(elbow_acceleration.x);
+    double elbow_acceleration_y   = static_cast<double>(elbow_acceleration.y);
+    if (rotunda_acceleration_x == 0.0)
+    {  // catches division by 0
+      rotunda_acceleration_x = .0001;
+    }
+    if (rotunda_acceleration_y == 0.0)
+    {  // catches division by 0
+      rotunda_acceleration_y = .0001;
+    }
+    if (elbow_acceleration_x == 0.0)
+    {  // catches division by 0
+      elbow_acceleration_x = .0001;
+    }
+    if (elbow_acceleration_y == 0.0)
+    {  // catches division by 0
+      elbow_acceleration_y = .0001;
+    }
+    double rotunda_angle =
+        acos(gravity / rotunda_acceleration_y) *  // for angle
+        (rotunda_acceleration_x /
+         fabs(rotunda_acceleration_x));  // for direction
+    double elbow_angle =
+        acos(gravity / elbow_acceleration_y) *  // for angle
+        (elbow_acceleration_x / fabs(elbow_acceleration_x)) *
+        (elbow_acceleration_y / fabs(elbow_acceleration_y));  // for direction
+    units::angle::degree_t home =
+        static_cast<units::angle::degree_t>(rotunda_angle + elbow_angle);
+    shoulder_.SetPosition(home);
   }
-  void HomeWrist() {}
+
+  void HomeWrist(){};
 
   void Esp(){};
 
-  void ExtendArm(){};
-
-  void RotateArm(){};
-
-  void CheckValidMovement(){};
-
-  void GraspHand(){};
+//TODO: need to work on valid movement
+  bool CheckValidMovement(){
+    bool fill;
+    return fill;
+  }
 
   void Calibrate(){};
 
@@ -139,12 +262,12 @@ class RoverArmSystem : public sjsu::common::RoverSystem
 
   void PrintArmMode(){};
 
-  void MoveRotand(){};
+  MissionControlData mc_data;
 
-  void MoveShoulder(){};
-
-  void MoveElbow(){};
-
-  void MoveWrist(){};
+ private:
+  sjsu::arm::Joint & rotunda_;
+  sjsu::arm::Joint & shoulder_;
+  sjsu::arm::Joint & elbow_;
+  sjsu::arm::WristJoint & wrist_;
 };
 }  // namespace sjsu::arm
