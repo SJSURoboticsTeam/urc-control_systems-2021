@@ -67,10 +67,7 @@ int main(void)
       std::string response = esp.GET(endpoint);
       sjsu::TimeoutTimer serverTimeout(5s);  // server has 5s timeout
       drive.ParseJSONResponse(response);
-      if (drive.isSyncedWithMissionControl())
-      {
-        drive.HandleRoverMovement();
-      }
+      drive.HandleRoverMovement();
       drive.PrintRoverData();
       if (serverTimeout.HasExpired())
       {

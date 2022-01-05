@@ -86,28 +86,25 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
     }
   };
 
-  /// Verifies that mission control is sending fresh commands
-  bool isSyncedWithMissionControl()
-  {
-    if (mc_data_.heartbeat_count != heartbeat_count_)
-    {
-      sjsu::LogError("Heartbeat out of sync - resetting!");
-      // TODO: Throw error if this is reached?
-      heartbeat_count_ = 0;
-      return false;
-    }
-    heartbeat_count_++;
-    return true;
-  }
-
   /// Handles the rover movement depending on the mode.
   /// D = Drive, S = Spin, T = Translation, L/R/B = Left/Right/Back Wheel
   void HandleRoverMovement()
   {
+    if (!isOperational() || !isSynced())
+    {
+      SetWheelSpeed(kZeroSpeed);
+      return;
+    }
+    if (isNewMode())
+    {
+      SetMode();
+      return;
+    }
+
     double angle = mc_data_.rotation_angle;
     double speed = mc_data_.speed;
 
-    if (mc_data_.is_operational && (current_mode_ == mc_data_.drive_mode))
+    if (!isNewMode() && isOperational() && isSynced())
     {
       sjsu::LogInfo("Handling %c movement...", current_mode_);
       switch (current_mode_)
@@ -120,14 +117,14 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
         case 'B': HandleSingularWheelMode(speed, angle); break;
         default:
           sjsu::LogError("Unable to assign drive mode handler!");
-          // TODO: Throw error if this is reached!
+          SetWheelSpeed(kZeroSpeed);
           break;
       }
     }
     else
     {
-      sjsu::LogWarning("Switching rover into %c mode...", mc_data_.drive_mode);
-      SetMode();
+      SetWheelSpeed(kZeroSpeed);
+      // TODO: Throw error if this is reached!
     }
   };
 
@@ -162,31 +159,64 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
     back_wheel_.SetHubSpeed(back_wheel_speed);
   };
 
-  /// Prints the mission control data & prints the current speed and steer angle
-  /// of each wheel on the rover
+  /// Prints the mc data and all the current wheel data
   void PrintRoverData()
   {
-    printf(
-        "HEARTBEAT:\t%d\nOPERATIONAL:\t%d\nDRIVE MODE:\t%c\nMC "
-        "SPEED:\t%d\nMC ANGLE:\t%d\n\n",
-        mc_data_.heartbeat_count, mc_data_.is_operational, current_mode_,
-        mc_data_.speed, mc_data_.rotation_angle);
-    printf("%-10s%-10s%-10s\n", "WHEEL", "SPEED", "ANGLE");
+    printf("HEARTBEAT:\t%d\n", mc_data_.heartbeat_count);
+    printf("OPERATIONAL:\t%d\n", mc_data_.is_operational);
+    printf("DRIVE MODE:\t%d\n", current_mode_);
+    printf("MC SPEED:\t%d\n", mc_data_.speed);
+    printf("MC ANGLE:\t%d\n", mc_data_.rotation_angle);
+    printf("WHEEL     SPEED     ANGLE\n");
     printf("=========================\n");
-    printf("%-10s%-10d%-10d\n", "Left", left_wheel_.GetHubSpeed(),
-           left_wheel_.GetSteerAngle());
-    printf("%-10s%-10d%-10d\n", "Right", right_wheel_.GetHubSpeed(),
-           right_wheel_.GetSteerAngle());
-    printf("%-10s%-10d%-10d\n", "Back", back_wheel_.GetHubSpeed(),
-           back_wheel_.GetSteerAngle());
+    left_wheel_.Print();
+    right_wheel_.Print();
+    back_wheel_.Print();
     printf("=========================\n");
   };
 
  private:
+  /// Checks whether the rover got a new drive mode command
+  bool isNewMode()
+  {
+    if (current_mode_ != mc_data_.drive_mode)
+    {
+      sjsu::LogWarning("Rover was assigned new drive mode!");
+      return true;
+    }
+    return false;
+  }
+
+  /// Checks that the rover is operational
+  bool isOperational()
+  {
+    if (mc_data_.is_operational != 1)
+    {
+      sjsu::LogWarning("Drive mode is not operational!");
+      return false;
+    }
+    return true;
+  }
+
+  /// Verifies that mission control is sending fresh commands to rover
+  bool isSynced()
+  {
+    if (mc_data_.heartbeat_count != heartbeat_count_)
+    {
+      // TODO: Throw error if this is reached?
+      sjsu::LogError("Heartbeat out of sync - resetting!");
+      heartbeat_count_ = 0;
+      return false;
+    }
+    heartbeat_count_++;
+    return true;
+  }
+
   /// Stops the rover and sets a new mode.
   void SetMode()
   {
-    SetWheelSpeed(kZeroSpeed);  // Stops rover
+    sjsu::LogWarning("Switching rover into %c mode...", mc_data_.drive_mode);
+    SetWheelSpeed(kZeroSpeed);
     switch (mc_data_.drive_mode)
     {
       case 'D': SetDriveMode(); break;

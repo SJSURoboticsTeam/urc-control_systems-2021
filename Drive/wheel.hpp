@@ -21,7 +21,7 @@ class Wheel
 
   void Initialize()
   {
-    home_offset_angle = 0;
+    homing_offset_angle_ = 0;
     hub_motor_.Initialize();
     steer_motor_.Initialize();
     // homing_pin_.GetPin().settings.Floating();  // testing with slip ring
@@ -29,6 +29,16 @@ class Wheel
     homing_pin_.Initialize();
     homing_pin_.SetAsInput();
   };
+
+  void Print()
+  {
+    printf("%-10s%-10d%-10d\n", name_.c_str(), GetHubSpeed(), GetSteerAngle());
+  }
+
+  std::string GetName()
+  {
+    return name_;
+  }
 
   int GetHubSpeed()
   {
@@ -40,7 +50,6 @@ class Wheel
     return int(steer_angle_);
   };
 
-  /// Adjusts only the hub motor speed
   void SetHubSpeed(double hub_speed)
   {
     hub_speed_ = float(std::clamp(hub_speed, -kMaxSpeed, kMaxSpeed));
@@ -48,15 +57,15 @@ class Wheel
     hub_motor_.SetSpeed(hub_speed_rpm);
   }
 
-  /// Adjusts only the steer motor
   void SetSteerAngle(double steer_angle)
   {
-    steer_angle_ = float((int(steer_angle) % kMaxRotation) + home_offset_angle);
+    steer_angle_ =
+        float((int(steer_angle) % kMaxRotation) + homing_offset_angle_);
     units::angle::degree_t steer_angle_degree(steer_angle_);
     steer_motor_.SetAngle(steer_angle_degree, kSteerSpeed);
   };
 
-  /// Sets steer motor to start position - press SJ2 button when done homing
+  /// TESTING - Moves wheel to start position - press SJ2 button to exit
   void HomeWheel()
   {
     sjsu::LogWarning("Homing %s wheel...", name_.c_str());
@@ -64,12 +73,15 @@ class Wheel
     sjsu::Button homing_button(homing_pin_);
     homing_button.Initialize();
 
-    SetSteerAngle(0);
-    printf("Press SJ2 %s wheel button when homed", name_.c_str());
-    while (homing_pin_.Read() != kHomeLevel)
+    for (int angle = 0; angle < 360; angle += 2)
     {
-      printf(".");
-      sjsu::Delay(500ms);
+      SetSteerAngle(0);
+      sjsu::Delay(50ms);
+      if (homing_pin_.Read() == kHomeLevel)
+      {
+        homing_offset_angle_ = 0;
+        break;
+      }
     }
   };
 
@@ -82,19 +94,20 @@ class Wheel
     {
       if (homing_pin_.Read() == kHomeLevel)
       {
-        home_offset_angle = angle;
+        homing_offset_angle_ = angle;
         break;
       }
       SetSteerAngle(angle);
       sjsu::Delay(50ms);
     }
-    sjsu::LogInfo("%s wheel offset: %d", name_.c_str(), home_offset_angle);
+    sjsu::LogInfo("%s wheel offset: %d", name_.c_str(), homing_offset_angle_);
   };
 
-  std::string name_     = "";
-  int home_offset_angle = 0;
-  float steer_angle_    = 0;
-  float hub_speed_      = 0;
+ private:
+  std::string name_        = "";
+  int homing_offset_angle_ = 0;
+  float steer_angle_       = 0;
+  float hub_speed_         = 0;
 
   sjsu::RmdX & hub_motor_;
   sjsu::RmdX & steer_motor_;
