@@ -150,10 +150,6 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
     right_wheel_speed = std::lerp(right_wheel_speed, target_speed, kLerpStep);
     back_wheel_speed  = std::lerp(back_wheel_speed, target_speed, kLerpStep);
 
-    left_wheel_speed  = std::clamp(left_wheel_speed, kZeroSpeed, target_speed);
-    right_wheel_speed = std::clamp(right_wheel_speed, kZeroSpeed, target_speed);
-    back_wheel_speed  = std::clamp(back_wheel_speed, kZeroSpeed, target_speed);
-
     left_wheel_.SetHubSpeed(left_wheel_speed);
     right_wheel_.SetHubSpeed(right_wheel_speed);
     back_wheel_.SetHubSpeed(back_wheel_speed);
