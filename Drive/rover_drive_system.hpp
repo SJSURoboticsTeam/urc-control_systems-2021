@@ -157,9 +157,9 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
   /// @param speed the new movement speed of the rover
   void SetWheelSpeed(int target_speed)
   {
-    int left_wheel_speed  = left_wheel_.GetSpeed();
-    int right_wheel_speed = right_wheel_.GetSpeed();
-    int back_wheel_speed  = back_wheel_.GetSpeed();
+    double left_wheel_speed  = left_wheel_.GetSpeed();
+    double right_wheel_speed = right_wheel_.GetSpeed();
+    double back_wheel_speed  = back_wheel_.GetSpeed();
 
     left_wheel_speed  = std::lerp(left_wheel_speed, target_speed, kLerpStep);
     right_wheel_speed = std::lerp(right_wheel_speed, target_speed, kLerpStep);
@@ -234,9 +234,9 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
   {
     HomeWheels();
     // TODO: Find the angles close enough for an effective spin mode
-    const int left_wheel_angle  = 90;
-    const int right_wheel_angle = 90;
-    const int back_wheel_angle  = 90;
+    const double left_wheel_angle  = 90;
+    const double right_wheel_angle = 90;
+    const double back_wheel_angle  = 90;
     left_wheel_.SetSteeringAngle(left_wheel_angle);
     right_wheel_.SetSteeringAngle(right_wheel_angle);
     back_wheel_.SetSteeringAngle(back_wheel_angle);
@@ -248,9 +248,9 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
   {
     HomeWheels();
     // TODO: Find the angles close enough for an effective translation mode
-    const int left_wheel_angle  = 0;
-    const int right_wheel_angle = 60;
-    const int back_wheel_angle  = 110;
+    const double left_wheel_angle  = 0;
+    const double right_wheel_angle = 60;
+    const double back_wheel_angle  = 110;
     left_wheel_.SetSteeringAngle(left_wheel_angle);
     right_wheel_.SetSteeringAngle(right_wheel_angle);
     back_wheel_.SetSteeringAngle(back_wheel_angle);
@@ -264,14 +264,14 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
     current_mode_ = mc_data.drive_mode;
   }
 
-  int GetOutterWheelDriveAngle(int angle)
+  double GetOutterWheelDriveAngle(double angle)
   {
     double result = 0.392 + 0.744 * abs(angle) + -0.0187 * pow(abs(angle), 2) +
                     1.84E-04 * pow(abs(angle), 3);
     return (angle > 0) ? result : -result;
   }
 
-  int GetBackWheelDriveAngle(int angle)
+  double GetBackWheelDriveAngle(double angle)
   {
     double result = -0.378 + -1.79 * abs(angle) + 0.0366 * pow(abs(angle), 2) +
                     -3.24E-04 * pow(abs(angle), 3);
@@ -283,7 +283,7 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
   // =======================
 
   /// Handles drive mode.
-  void HandleDriveMode(int speed, int angle)
+  void HandleDriveMode(double speed, double angle)
   {
     if (angle > kMaxTurnRadius)
     {
@@ -295,10 +295,10 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
       sjsu::LogError("Angle too low");
     }
 
-    int inner_wheel_angle = angle;
+    double inner_wheel_angle = angle;
 
-    int outter_wheel_angle(GetOutterWheelDriveAngle(inner_wheel_angle));
-    int back_wheel_angle(GetBackWheelDriveAngle(inner_wheel_angle));
+    double outter_wheel_angle(GetOutterWheelDriveAngle(inner_wheel_angle));
+    double back_wheel_angle(GetBackWheelDriveAngle(inner_wheel_angle));
 
     //*For testing angles*
 
@@ -319,13 +319,13 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
   };
 
   /// Handles spin mode. Adjusts only the speed (aka the spin direction)
-  void HandleSpinMode(int speed)
+  void HandleSpinMode(double speed)
   {
     SetWheelSpeed(speed);
   };
 
   /// Handles translation mode. Adjusts all the wheels, keeping them parallel
-  void HandleTranslationMode(int speed, int angle)
+  void HandleTranslationMode(double speed, double angle)
   {
     // TODO: Temporary placeholder till further testing - Incorrect logic
     left_wheel_.SetSteeringAngle(angle);
@@ -334,7 +334,7 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
     SetWheelSpeed(speed);
   };
 
-  void HandleSingularWheelMode(int speed, int angle)
+  void HandleSingularWheelMode(double speed, double angle)
   {
     switch (current_mode_)
     {
