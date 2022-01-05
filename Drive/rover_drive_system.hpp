@@ -282,20 +282,18 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
   /// Calculates outer wheel angle based off inner wheel angle
   double GetOutterWheelDriveAngle(double inner_wheel_angle)
   {
-    double outter_wheel_angle =
-        0.392 + 0.744 * abs(static_cast<int>(inner_wheel_angle)) +
-        -0.0187 * pow(abs(static_cast<int>(inner_wheel_angle)), 2) +
-        1.84E-04 * pow(abs(static_cast<int>(inner_wheel_angle)), 3);
+    double outter_wheel_angle = 0.392 + 0.744 * abs(int(inner_wheel_angle)) +
+                                -0.0187 * pow(abs(int(inner_wheel_angle)), 2) +
+                                1.84E-04 * pow(abs(int(inner_wheel_angle)), 3);
     return (inner_wheel_angle > 0) ? outter_wheel_angle : -outter_wheel_angle;
   }
 
   /// Calculates back wheel angle based off inner wheel angle
   double GetBackWheelDriveAngle(double inner_wheel_angle)
   {
-    double back_wheel_angle =
-        -0.378 + -1.79 * abs(static_cast<int>(inner_wheel_angle)) +
-        0.0366 * pow(abs(static_cast<int>(inner_wheel_angle)), 2) +
-        -3.24E-04 * pow(abs(static_cast<int>(inner_wheel_angle)), 3);
+    double back_wheel_angle = -0.378 + -1.79 * abs(int(inner_wheel_angle)) +
+                              0.0366 * pow(abs(int(inner_wheel_angle)), 2) +
+                              -3.24E-04 * pow(abs(int(inner_wheel_angle)), 3);
     return (inner_wheel_angle > 0) ? back_wheel_angle : -back_wheel_angle;
   }
 
