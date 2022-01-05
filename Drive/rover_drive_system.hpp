@@ -90,12 +90,12 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
   /// D = Drive, S = Spin, T = Translation, L/R/B = Left/Right/Back Wheel
   void HandleRoverMovement()
   {
-    if (!isOperational() || !isSynced())
+    if (!IsOperational() || !IsSynced())
     {
       SetWheelSpeed(kZeroSpeed);
       return;
     }
-    if (isNewMode())
+    if (IsNewMode())
     {
       SetMode();
       return;
@@ -104,7 +104,7 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
     double angle = mc_data_.rotation_angle;
     double speed = mc_data_.speed;
 
-    if (!isNewMode() && isOperational() && isSynced())
+    if (!IsNewMode() && IsOperational() && IsSynced())
     {
       sjsu::LogInfo("Handling %c movement...", current_mode_);
       switch (current_mode_)
@@ -120,7 +120,7 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
           SetWheelSpeed(kZeroSpeed);
           break;
       }
-      incrementHeartbeat();
+      IncrementHeartbeat();
     }
     else
     {
