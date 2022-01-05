@@ -120,6 +120,7 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
           SetWheelSpeed(kZeroSpeed);
           break;
       }
+      incrementHeartbeat();
     }
     else
     {
@@ -207,8 +208,12 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
       heartbeat_count_ = 0;
       return false;
     }
-    heartbeat_count_++;
     return true;
+  }
+
+  void incrementHeartbeat()
+  {
+    heartbeat_count_++;
   }
 
   /// Stops the rover and sets a new mode.
