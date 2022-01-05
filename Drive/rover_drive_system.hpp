@@ -138,8 +138,7 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
     back_wheel_.HomeWheel();
   };
 
-  /// Sets all wheels to the speed provided. Wheel class handles max/min speeds
-  /// @param speed the new movement speed of the rover
+  /// Sets all wheels to the speed provided
   void SetWheelSpeed(double target_speed)
   {
     double left_wheel_speed  = left_wheel_.GetHubSpeed();
