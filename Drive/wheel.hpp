@@ -45,6 +45,7 @@ class Wheel
   /// @param hub_speed the new speed of the wheel
   void SetHubSpeed(int hub_speed)
   {
+    hub_speed = std::clamp(hub_speed, -kMaxSpeed, kMaxSpeed);
     units::angular_velocity::revolutions_per_minute_t hub_spd_to_rpm(hub_speed);
     hub_speed_ = hub_spd_to_rpm;
     hub_motor_.SetSpeed(hub_speed_);
@@ -54,7 +55,8 @@ class Wheel
   /// @param rotation_angle positive angle (turn right), negative angle (left)
   void SetSteeringAngle(int rotation_angle)
   {
-    // units::angle::degree_t steer_angle(rotation_angle + homing_offset_angle_);
+    // units::angle::degree_t steer_angle(rotation_angle +
+    // homing_offset_angle_);
     units::angle::degree_t angle_into_deg(rotation_angle);
     steer_angle_ = angle_into_deg;
     steer_motor_.SetAngle(steer_angle_, kSteerSpeed);
@@ -91,6 +93,7 @@ class Wheel
   sjsu::RmdX & hub_motor_;    // Controls tire direction (fwd/rev) & speed
   sjsu::RmdX & steer_motor_;  // Controls wheel alignment/angle
   int homing_offset_angle_                                            = 0;
+  int kMaxSpeed                                                       = 100;
   units::angle::degree_t steer_angle_                                 = 0_deg;
   units::angular_velocity::revolutions_per_minute_t hub_speed_        = 0_rpm;
   const units::angular_velocity::revolutions_per_minute_t kZeroSpeed  = 0_rpm;

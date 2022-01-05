@@ -155,31 +155,23 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
 
   /// Sets all wheels to the speed provided. Wheel class handles max/min speeds
   /// @param speed the new movement speed of the rover
-  void SetWheelSpeed(int speed)
+  void SetWheelSpeed(int target_speed)
   {
-    // cast speed to long double to pass in to std::lerp
-    int goal_speed = speed;
+    int left_wheel_speed  = left_wheel_.GetSpeed();
+    int right_wheel_speed = right_wheel_.GetSpeed();
+    int back_wheel_speed  = back_wheel_.GetSpeed();
 
-    // get current speed of motors
-    int leftWheel_previous_speed  = left_wheel_.GetSpeed();
-    int rightWheel_previous_speed = right_wheel_.GetSpeed();
-    int backWheel_previous_speed  = back_wheel_.GetSpeed();
+    left_wheel_speed  = std::lerp(left_wheel_speed, target_speed, kLerpStep);
+    right_wheel_speed = std::lerp(right_wheel_speed, target_speed, kLerpStep);
+    back_wheel_speed  = std::lerp(back_wheel_speed, target_speed, kLerpStep);
 
-    // lerp returns a midpoint between current speed and goal speed
-    auto lerpSpeed_leftWheel =
-        std::lerp(leftWheel_previous_speed, goal_speed, kLerpStep);
-    auto lerpSpeed_rightWheel =
-        std::lerp(rightWheel_previous_speed, goal_speed, kLerpStep);
-    auto lerpSpeed_backWheel =
-        std::lerp(backWheel_previous_speed, goal_speed, kLerpStep);
+    left_wheel_speed  = std::clamp(left_wheel_speed, kZeroSpeed, target_speed);
+    right_wheel_speed = std::clamp(right_wheel_speed, kZeroSpeed, target_speed);
+    back_wheel_speed  = std::clamp(back_wheel_speed, kZeroSpeed, target_speed);
 
-    // set lerped speed
-    left_wheel_.SetHubSpeed(std::clamp(int{ lerpSpeed_leftWheel }, 0, speed));
-    right_wheel_.SetHubSpeed(std::clamp(int{ lerpSpeed_rightWheel }, 0, speed));
-    back_wheel_.SetHubSpeed(std::clamp(int{ lerpSpeed_backWheel }, 0, speed));
-
-    sjsu::LogInfo("SetHubSpeed to %f for all wheels",
-                  static_cast<long double>(right_wheel_.GetSpeed()));
+    left_wheel_.SetHubSpeed(left_wheel_speed);
+    right_wheel_.SetHubSpeed(right_wheel_speed);
+    back_wheel_.SetHubSpeed(back_wheel_speed);
   };
 
   /// Prints the mission control data & prints the current speed and steer angle
@@ -365,12 +357,12 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
     }
   };
 
-  int heartbeat_count_        = 0;
-  int state_of_charge_        = 90;
-  char current_mode_          = 'S';
-  const int kZeroSpeed        = 0;
-  const int kMaxTurnRadius    = 45;
-  const long double kLerpStep = 0.5;
+  int heartbeat_count_     = 0;
+  int state_of_charge_     = 90;
+  char current_mode_       = 'S';
+  const int kZeroSpeed     = 0;
+  const int kMaxTurnRadius = 45;
+  const double kLerpStep   = 0.5;
 
  public:
   MissionControlData mc_data;
