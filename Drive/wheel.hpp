@@ -50,17 +50,16 @@ class Wheel
     return int(steer_angle_);
   };
 
-  void SetHubSpeed(double hub_speed)
+  void SetHubSpeed(double speed)
   {
-    hub_speed_ = float(std::clamp(hub_speed, -kMaxSpeed, kMaxSpeed));
+    hub_speed_ = float(std::clamp(speed, -kMaxSpeed, kMaxSpeed));
     units::angular_velocity::revolutions_per_minute_t hub_speed_rpm(hub_speed_);
     hub_motor_.SetSpeed(hub_speed_rpm);
   }
 
-  void SetSteerAngle(double steer_angle)
+  void SetSteerAngle(double angle)
   {
-    steer_angle_ =
-        float((int(steer_angle) % kMaxRotation) + homing_offset_angle_);
+    steer_angle_ = float((int(angle) % kMaxRotation) + homing_offset_angle_);
     units::angle::degree_t steer_angle_degree(steer_angle_);
     steer_motor_.SetAngle(steer_angle_degree, kSteerSpeed);
   };

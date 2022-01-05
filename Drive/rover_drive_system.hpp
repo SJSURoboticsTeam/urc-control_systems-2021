@@ -177,7 +177,7 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
 
  private:
   /// Checks whether the rover got a new drive mode command
-  bool isNewMode()
+  bool IsNewMode()
   {
     if (current_mode_ != mc_data_.drive_mode)
     {
@@ -188,7 +188,7 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
   }
 
   /// Checks that the rover is operational
-  bool isOperational()
+  bool IsOperational()
   {
     if (mc_data_.is_operational != 1)
     {
@@ -199,7 +199,7 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
   }
 
   /// Verifies that mission control is sending fresh commands to rover
-  bool isSynced()
+  bool IsSynced()
   {
     if (mc_data_.heartbeat_count != heartbeat_count_)
     {
@@ -211,7 +211,7 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
     return true;
   }
 
-  void incrementHeartbeat()
+  void IncrementHeartbeat()
   {
     heartbeat_count_++;
   }
