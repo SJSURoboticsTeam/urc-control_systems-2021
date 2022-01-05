@@ -227,6 +227,7 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
       case 'B': SetSingleWheelMode(); break;
       default: sjsu::LogError("Unable to set drive mode!");
     };
+    IncrementHeartbeat();
   };
 
   // ======================
