@@ -8,7 +8,7 @@ namespace sjsu::arm
 // the Joint class is used for the rotunda, elbow, and shoulder motors.
 class Joint
 {
-  public:
+ public:
   struct Acceleration
   {
     double x;
@@ -45,8 +45,9 @@ class Joint
   void SetPosition(double angle)
   {
     units::angle::degree_t angle_to_degrees(angle);
-    units::angle::degree_t calibrated_angle = angle_to_degrees - zero_offset_angle;
-    calibrated_angle                        = units::math::min(
+    units::angle::degree_t calibrated_angle =
+        angle_to_degrees - zero_offset_angle;
+    calibrated_angle = units::math::min(
         units::math::max(calibrated_angle, minimum_angle), maximum_angle);
     sjsu::LogInfo("%f", calibrated_angle.to<double>());
     motor.SetAngle(calibrated_angle);
@@ -60,29 +61,32 @@ class Joint
     zero_offset_angle = offset_to_degrees;
   }
 
-  /// Return the acceleration values for the MPU6050 on the joint as a JointAcceleration of doubles
+  /// Return the acceleration values for the MPU6050 on the joint as a
+  /// JointAcceleration of doubles
   Acceleration GetAccelerometerData()
   {
     sjsu::Accelerometer::Acceleration_t acceleration_to_double(mpu.Read());
     Acceleration acceleration;
-    acceleration.x=static_cast<double>(acceleration_to_double.x);
-    acceleration.y=static_cast<double>(acceleration_to_double.y);
-    acceleration.z=static_cast<double>(acceleration_to_double.z);
+    acceleration.x = static_cast<double>(acceleration_to_double.x);
+    acceleration.y = static_cast<double>(acceleration_to_double.y);
+    acceleration.z = static_cast<double>(acceleration_to_double.z);
 
     return acceleration;
   }
 
   void SetSpeed(double speed)
   {
-  units::angular_velocity::revolutions_per_minute_t speed_to_rpm(speed);
-  speed_ = speed_to_rpm;
-  motor.SetSpeed(speed_);
+    units::angular_velocity::revolutions_per_minute_t speed_to_rpm(speed);
+    speed_ = speed_to_rpm;
+    motor.SetSpeed(speed_);
   }
 
-  private:
-  units::angle::degree_t minimum_angle = 0_deg;
-  units::angle::degree_t maximum_angle = 180_deg;
-  units::angle::degree_t rest_angle = 0_deg;
+  int GetSpeed() {}
+
+ private:
+  units::angle::degree_t minimum_angle     = 0_deg;
+  units::angle::degree_t maximum_angle     = 180_deg;
+  units::angle::degree_t rest_angle        = 0_deg;
   units::angle::degree_t zero_offset_angle = 0_deg;
   sjsu::RmdX & motor;
   sjsu::Mpu6050 & mpu;
