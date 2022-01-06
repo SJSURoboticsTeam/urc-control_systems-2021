@@ -1,15 +1,12 @@
 #include "testing/testing_frameworks.hpp"
-#include "peripherals/lpc40xx/can.hpp"
 #include "devices/actuators/servo/rmd_x.hpp"
-#include "utility/log.hpp"
-#include "utility/math/units.hpp"
 
 #include "rover_drive_system.hpp"
 #include "wheel.hpp"
 
 namespace sjsu
 {
-TEST_CASE("Testing Drive System")
+TEST_CASE("Drive system testing")
 {
   Mock<Can> mock_can;
   Fake(Method(mock_can, Can::ModuleInitialize));
@@ -20,100 +17,116 @@ TEST_CASE("Testing Drive System")
   StaticMemoryResource<1024> memory_resource;
   CanNetwork network(mock_can.get(), &memory_resource);
 
-  sjsu::RmdX left_steer_motor(network, 0x141);
-  sjsu::RmdX left_hub_motor(network, 0x142);
-  sjsu::RmdX right_steer_motor(network, 0x143);
-  sjsu::RmdX right_hub_motor(network, 0x144);
-  sjsu::RmdX back_steer_motor(network, 0x145);
-  sjsu::RmdX back_hub_motor(network, 0x146);
+  RmdX left_steer_motor(network, 0x141);
+  RmdX left_hub_motor(network, 0x142);
+  RmdX right_steer_motor(network, 0x143);
+  RmdX right_hub_motor(network, 0x144);
+  RmdX back_steer_motor(network, 0x145);
+  RmdX back_hub_motor(network, 0x146);
 
-  left_steer_motor.settings.gear_ratio  = 8;
-  left_hub_motor.settings.gear_ratio    = 8;
-  right_steer_motor.settings.gear_ratio = 8;
-  right_hub_motor.settings.gear_ratio   = 8;
-  back_steer_motor.settings.gear_ratio  = 8;
-  back_hub_motor.settings.gear_ratio    = 8;
+  Mock<Gpio> mock_wheel_homing_pin;
+  InterruptCallback interrupt;
+  Fake(Method(mock_wheel_homing_pin, Gpio::Read));
+  Fake(Method(mock_wheel_homing_pin, Gpio::GetPin));
+  Fake(Method(mock_wheel_homing_pin, Gpio::SetDirection));
+  Fake(Method(mock_wheel_homing_pin, Gpio::ModuleInitialize));
+  Fake(Method(mock_wheel_homing_pin, Gpio::DetachInterrupt));
+  When(Method(mock_wheel_homing_pin, Gpio::AttachInterrupt))
+      .AlwaysDo([&interrupt](InterruptCallback callback, Gpio::Edge) -> void
+                { interrupt = callback; });
 
-  sjsu::drive::Wheel left_wheel(left_hub_motor, left_steer_motor);
-  sjsu::drive::Wheel right_wheel(right_hub_motor, right_steer_motor);
-  sjsu::drive::Wheel back_wheel(back_hub_motor, back_steer_motor);
+  drive::Wheel left_wheel("left", left_hub_motor, left_steer_motor,
+                          mock_wheel_homing_pin.get());
+  drive::Wheel right_wheel("right", right_hub_motor, right_steer_motor,
+                           mock_wheel_homing_pin.get());
+  drive::Wheel back_wheel("back", back_hub_motor, back_steer_motor,
+                          mock_wheel_homing_pin.get());
 
-  sjsu::drive::RoverDriveSystem drive_system(left_wheel, right_wheel,
-                                             back_wheel);
-  drive_system.Initialize();
-  SECTION("is intialized")
+  drive::RoverDriveSystem drive(left_wheel, right_wheel, back_wheel);
+
+  SECTION("Checking default values")
   {
-    CHECK(drive_system.mc_data.is_operational == 1);
+    CHECK(drive.mc_data_.heartbeat_count == 0);
+    CHECK(drive.mc_data_.is_operational == 0);
+    CHECK(drive.mc_data_.drive_mode == 'S');
+    CHECK(drive.mc_data_.rotation_angle == 0);
+    CHECK(drive.mc_data_.speed == 0);
   }
 
-  SECTION("should correctly create GET request with current data")
+  SECTION("GETParameters is default values")
   {
-    std::string expectedParam =
-        "drive?is_operational=1&drive_mode=S&battery=90&left_wheel_speed=0"
-        "&left_wheel_angle=0&right_wheel_speed=0&right_"
+    std::string expected_response =
+        "?heartbeat_count=0&is_operational=0&drive_mode=S&battery=90"
+        "&left_wheel_speed=0&left_wheel_angle=0&right_wheel_speed=0&right_"
         "wheel_angle=0&back_wheel_speed=0&back_wheel_angle=0";
-    std::string reqParam = drive_system.CreateRequestParameters();
-    CHECK(reqParam == expectedParam);
+    CHECK(expected_response == drive.GETParameters());
   }
 
-  SECTION("should parse mission control response")
+  SECTION("ParseJSONResponse should return all values passed")
   {
-    std::string response =
-        R"({"is_operational": 1, "drive_mode": "D", "speed": 10, "angle": 10})";
-    drive_system.ParseJSONResponse(response);
-    CHECK(drive_system.mc_data.is_operational == 1);
-    CHECK(drive_system.mc_data.drive_mode == 'D');
-    CHECK(drive_system.mc_data.speed == doctest::Approx(10));
-    CHECK(drive_system.mc_data.rotation_angle == doctest::Approx(10));
+    std::string example_response =
+        "\r\n\r\n{\n"
+        "  \"heartbeat_count\": 0,\n"
+        "  \"is_operational\": 1,\n"
+        "  \"drive_mode\": \"S\",\n"
+        "  \"speed\": 15,\n"
+        "  \"angle\": 15\n"
+        "}";
+    drive.ParseJSONResponse(example_response);
+    CHECK(drive.mc_data_.heartbeat_count == 0);
+    CHECK(drive.mc_data_.is_operational == 1);
+    CHECK(drive.mc_data_.drive_mode == 'S');
+    CHECK(drive.mc_data_.rotation_angle == 15);
+    CHECK(drive.mc_data_.speed == 15);
   }
 
-  SECTION("should stop rover & reset wheel positions")
-  {
-    drive_system.HomeWheels();
-    CHECK(drive_system.left_wheel_.GetSpeed() == doctest::Approx(0.0));
-    CHECK(drive_system.right_wheel_.GetSpeed() == doctest::Approx(0.0));
-    CHECK(drive_system.back_wheel_.GetSpeed() == doctest::Approx(0.0));
-    CHECK(drive_system.left_wheel_.GetPosition() == doctest::Approx(0.0));
-    CHECK(drive_system.right_wheel_.GetPosition() == doctest::Approx(0.0));
-    CHECK(drive_system.back_wheel_.GetPosition() == doctest::Approx(0.0));
-  }
+  // SECTION("HandleRoverMovement should behave normally - 1st step")
+  // {
+  //   std::string example_response =
+  //       "\r\n\r\n{\n"
+  //       "  \"heartbeat_count\": 1,\n"
+  //       "  \"is_operational\": 1,\n"
+  //       "  \"drive_mode\": \"S\",\n"
+  //       "  \"speed\": 15,\n"
+  //       "  \"angle\": 15\n"
+  //       "}";
+  //   drive.ParseJSONResponse(example_response);
+  //   drive.HandleRoverMovement();
 
-  SECTION("should set wheel speeds to 10_rpm")
-  {
-    drive_system.SetWheelSpeed(10_rpm);
-    CHECK(drive_system.left_wheel_.GetSpeed() == doctest::Approx(10.0));
-    CHECK(drive_system.right_wheel_.GetSpeed() == doctest::Approx(10.0));
-    CHECK(drive_system.back_wheel_.GetSpeed() == doctest::Approx(10.0));
-  }
+  //   CHECK(drive.left_wheel_.GetHubSpeed() == 15);
+  //   CHECK(drive.right_wheel_.GetHubSpeed() == 15);
+  //   CHECK(drive.back_wheel_.GetHubSpeed() == 15);
+  //   // Spin mode angles should not change from 90
+  //   CHECK(drive.left_wheel_.GetSteerAngle() == 90);
+  //   CHECK(drive.right_wheel_.GetSteerAngle() == 90);
+  //   CHECK(drive.back_wheel_.GetSteerAngle() == 90);
+  // }
 
-  SECTION("should stop rover and set current_mode_ to drive")
-  {
-    CHECK(drive_system.GetCurrentMode() == 'S');
-    char response[100] =
-        R"({"is_operational": 1, "drive_mode": "D", "speed": 15.0, "angle": 20.0})";
-    drive_system.ParseJSONResponse(response);
-    drive_system.HandleRoverMovement();
-    CHECK(drive_system.GetCurrentMode() == 'D');
-    CHECK(drive_system.left_wheel_.GetSpeed() == doctest::Approx(0.0));
-    CHECK(drive_system.right_wheel_.GetSpeed() == doctest::Approx(0.0));
-    CHECK(drive_system.back_wheel_.GetSpeed() == doctest::Approx(0.0));
-    CHECK(drive_system.left_wheel_.GetPosition() == doctest::Approx(-45.0));
-    CHECK(drive_system.right_wheel_.GetPosition() == doctest::Approx(-135.0));
-    CHECK(drive_system.back_wheel_.GetPosition() == doctest::Approx(90.0));
-  }
-
-  SECTION("should adjust rover speed to 15.0 and rotation angle to 20.0")
-  {
-    CHECK(drive_system.GetCurrentMode() != 'D');  // TODO: why isn't it drive?
-    drive_system.HandleRoverMovement();
-    drive_system.HandleRoverMovement();
-    CHECK(drive_system.GetCurrentMode() == drive_system.mc_data.drive_mode);
-    CHECK(drive_system.left_wheel_.GetSpeed() == doctest::Approx(15.0));
-    CHECK(drive_system.right_wheel_.GetSpeed() == doctest::Approx(15.0));
-    CHECK(drive_system.back_wheel_.GetSpeed() == doctest::Approx(15.0));
-    CHECK(drive_system.left_wheel_.GetPosition() == doctest::Approx(-45.0));
-    CHECK(drive_system.right_wheel_.GetPosition() == doctest::Approx(-135.0));
-    CHECK(drive_system.back_wheel_.GetPosition() == doctest::Approx(110.0));
-  }
+  // SECTION("HandleRoverMovement should catch !is_operational - 2nd step")
+  // {
+  //   std::string example_response =
+  //       "\r\n\r\n{\n"
+  //       "  \"heartbeat_count\": 2,\n"
+  //       "  \"is_operational\": 0,\n"s
+  //       "  \"drive_mode\": \"S\",\n"
+  //       "  \"speed\": 15,\n"
+  //       "  \"angle\": 15\n"
+  //       "}";
+  //   drive.ParseJSONResponse(example_response);
+  //   CHECK(drive.mc_data_.is_operational == 0);
+  //   drive.HandleRoverMovement();
+  //   // Should lerp down a speed before stopping
+  //   CHECK(drive.left_wheel_.GetHubSpeed() != 15);
+  //   CHECK(drive.right_wheel_.GetHubSpeed() != 15);
+  //   CHECK(drive.back_wheel_.GetHubSpeed() != 15);
+  //   // Should not be fully stopped yet
+  //   CHECK(drive.left_wheel_.GetHubSpeed() > 0);
+  //   CHECK(drive.right_wheel_.GetHubSpeed() > 0);
+  //   CHECK(drive.back_wheel_.GetHubSpeed() > 0);
+  //   // Spin mode angles should not change from 90
+  //   CHECK(drive.left_wheel_.GetSteerAngle() == 90);
+  //   CHECK(drive.right_wheel_.GetSteerAngle() == 90);
+  //   CHECK(drive.back_wheel_.GetSteerAngle() == 90);
+  // }
 }
 }  // namespace sjsu

@@ -37,7 +37,7 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
     int rotation_angle  = 0;
     int speed           = 0;
   };
-
+  virtual ~RoverDriveSystem(){};
   RoverDriveSystem(Wheel & left_wheel, Wheel & right_wheel, Wheel & back_wheel)
       : left_wheel_(left_wheel),
         right_wheel_(right_wheel),

@@ -10,6 +10,7 @@ namespace sjsu::drive
 class Wheel
 {
  public:
+  virtual ~Wheel(){};
   Wheel(std::string name,
         sjsu::RmdX & hub_motor,
         sjsu::RmdX & steer_motor,
