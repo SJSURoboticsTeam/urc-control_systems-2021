@@ -9,6 +9,7 @@
 
 int main(void)
 {
+  sjsu::lpc40xx::SetMaximumClockSpeed();
   sjsu::LogInfo("Starting the rover drive system...");
   sjsu::common::Esp esp;
   sjsu::lpc40xx::Can & can = sjsu::lpc40xx::GetCan<2>();
@@ -50,6 +51,7 @@ int main(void)
 
   esp.Initialize();
   drive.Initialize();
+
   // Drive control loop
   // 1. Drive sys creates GET request parameters - returns endpoint+parameters
   // 2. Make GET request using esp - returns response body as string
@@ -60,9 +62,9 @@ int main(void)
   {
     try
     {
-      sjsu::LogInfo("Making new request...");
-      std::string endpoint = drive.GETRequestParameters();
-      std::string response = esp.GETRequest(endpoint);
+      sjsu::LogInfo("Making new request now...");
+      std::string endpoint = "drive" + drive.GETParameters();
+      std::string response = esp.GET(endpoint);
       sjsu::TimeoutTimer serverTimeout(5s);  // server has 5s timeout
       drive.ParseJSONResponse(response);
       drive.HandleRoverMovement();
@@ -76,12 +78,16 @@ int main(void)
     catch (const std::exception & e)
     {
       sjsu::LogError("Uncaught error in main() - Stopping Rover!");
-      drive.SetWheelSpeed(0_rpm);
+      drive.SetWheelSpeed(0);
       if (!esp.IsConnected())
       {
         esp.ConnectToWifi();
         esp.ConnectToServer();
       }
+    }
+    catch (const sjsu::drive::RoverDriveSystem::ParseError &)
+    {
+      sjsu::LogError("Parsing Error: Arguments not equal");
     }
   }
 

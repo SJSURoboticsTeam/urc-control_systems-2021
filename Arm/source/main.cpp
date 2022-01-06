@@ -5,7 +5,7 @@
 #include "devices/actuators/servo/rmd_x.hpp"
 #include "devices/sensors/movement/accelerometer/mpu6050.hpp"
 
-#include "RoverArmSystem.hpp"
+#include "rover_arm_system.hpp"
 #include "../../Common/esp.hpp"
 
 int main()
@@ -52,7 +52,7 @@ int main()
     {
       sjsu::LogInfo("Making new request...");
       std::string endpoint = "arm?example=1&param=2";  // include status updates
-      std::string response = esp.GETRequest(endpoint);
+      std::string response = esp.GET(endpoint);
       sjsu::TimeoutTimer serverTimeout(5s);  // server has 5s timeout
       // Do stuff with arm here...
       sjsu::Delay(3s);
