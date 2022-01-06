@@ -21,11 +21,8 @@ class Wheel
 
   void Initialize()
   {
-    homing_offset_angle_ = 0;
     hub_motor_.Initialize();
     steer_motor_.Initialize();
-    // homing_pin_.GetPin().settings.Floating();  // testing with slip ring
-    homing_pin_.GetPin().settings.PullDown();  // testing with button
     homing_pin_.Initialize();
     homing_pin_.SetAsInput();
   };
@@ -68,7 +65,7 @@ class Wheel
   void HomeWheel()
   {
     sjsu::LogWarning("Homing %s wheel...", name_.c_str());
-
+    homing_pin_.GetPin().settings.PullDown();
     sjsu::Button homing_button(homing_pin_);
     homing_button.Initialize();
 
@@ -88,7 +85,7 @@ class Wheel
   void SlipRingHomeWheel()
   {
     sjsu::LogWarning("Homing %s wheel...", name_.c_str());
-
+    homing_pin_.GetPin().settings.Floating();
     for (int angle = 0; angle < 360; angle += 2)
     {
       if (homing_pin_.Read() == kHomeLevel)
