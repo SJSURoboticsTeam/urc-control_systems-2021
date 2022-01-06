@@ -80,19 +80,12 @@ class RoverArmSystem : public sjsu::common::RoverSystem
 
   void MoveRotunda(double speed, double angle)
   {
-    try
+    if (!CheckValidMovement())
     {
-      if (!CheckValidMovement())
-      {
-        throw(angle);
-      }
-      rotunda_.SetSpeed(speed);
-      rotunda_.SetPosition(angle);
+      throw(angle);
     }
-    catch (double large_angle)
-    {
-      sjsu::LogError("Error Moving Rotunda, Requested Angle Is Too Large");
-    }
+    rotunda_.SetSpeed(speed);
+    rotunda_.SetPosition(angle);
   }
 
   void MoveShoulder(double speed, double angle)
@@ -139,7 +132,7 @@ class RoverArmSystem : public sjsu::common::RoverSystem
     MoveElbow(mc_data_.elbow_speed, mc_data_.elbow_angle);
   }
 
-  void MoveWrist() {};
+  void MoveWrist(){};
 
   void HomeArm()
   {
@@ -174,10 +167,14 @@ class RoverArmSystem : public sjsu::common::RoverSystem
       accelerations_.shoulder.y = .0001;
     }
     // cut this out into a helper function to clean up code
-    // double check logic: add the values together first then calculate the angle needed
+    // double check logic: add the values together first then calculate the
+    // angle needed
 
-      double acceleration_x = accelerations_.rotunda.x + accelerations_.shoulder.x; //might need compliment value of shoulder
-      double acceleration_y = accelerations_.rotunda.y + accelerations_.shoulder.y;
+    double acceleration_x =
+        accelerations_.rotunda.x +
+        accelerations_.shoulder.x;  // might need compliment value of shoulder
+    double acceleration_y =
+        accelerations_.rotunda.y + accelerations_.shoulder.y;
     // adding i and j vectors of acceleration
     double home = atan(acceleration_y / acceleration_x);
     MoveShoulder(10.0, home);  // move shoulder at 10 rpm to home
@@ -203,18 +200,21 @@ class RoverArmSystem : public sjsu::common::RoverSystem
     {  // catches division by 0
       accelerations_.elbow.y = .0001;
     }
-    
-    double acceleration_x = accelerations_.rotunda.x + accelerations_.elbow.x; //might need compliment value of shoulder
+
+    double acceleration_x =
+        accelerations_.rotunda.x +
+        accelerations_.elbow.x;  // might need compliment value of shoulder
     double acceleration_y = accelerations_.rotunda.y + accelerations_.elbow.y;
-    double angle_without_correction = atan(acceleration_y/acceleration_x);
-    //maybe make the following statements above the if's functions that return a bool to give a better description/make it look nicer
-    //if the elbow is in the second quadrant of a graph, add 90 to the angle
-    if(accelerations_.elbow.x >= 0 && accelerations_.elbow.y <= 0)
+    double angle_without_correction = atan(acceleration_y / acceleration_x);
+    // maybe make the following statements above the if's functions that return
+    // a bool to give a better description/make it look nicer if the elbow is in
+    // the second quadrant of a graph, add 90 to the angle
+    if (accelerations_.elbow.x >= 0 && accelerations_.elbow.y <= 0)
     {
       home = 90 - angle_without_correction;
     }
-    //if the elbow is in the third quadrant of a graph, add 180 to the angle
-    else if(accelerations_.elbow.x >= 0 && accelerations_.elbow.y >= 0)
+    // if the elbow is in the third quadrant of a graph, add 180 to the angle
+    else if (accelerations_.elbow.x >= 0 && accelerations_.elbow.y >= 0)
     {
       home = 180 + angle_without_correction;
     }
@@ -263,6 +263,8 @@ class RoverArmSystem : public sjsu::common::RoverSystem
   MissionControlData mc_data_;
   Acceleration accelerations_;
 
-  double FindComplimentValue(double, double){}; //may or may not need, will decide after testing code
+  double FindComplimentValue(
+      double,
+      double){};  // may or may not need, will decide after testing code
 };
 }  // namespace sjsu::arm
