@@ -68,7 +68,7 @@ TEST_CASE("Drive system testing")
     CHECK(drive.mc_data_.rotation_angle == 0);
     CHECK(drive.mc_data_.speed == 0);
     CHECK(drive.GetCurrentMode() == 'S');
-    CHECK(drive.IsSynced() == true);
+    CHECK(drive.IsHeartbeatSynced() == true);
     drive.Initialize();
   }
 
@@ -141,6 +141,80 @@ TEST_CASE("Drive system testing")
     CHECK(drive.IsNewMode() == true);
     drive.HandleRoverMovement();
     CHECK(drive.GetCurrentMode() == 'R');
+  }
+
+  SECTION("should turn rover off and back on")
+  {
+    drive.mc_data_.is_operational = 1;
+    drive.HandleRoverMovement();
+    CHECK(drive.IsOperational() == true);
+
+    drive.mc_data_.is_operational = 0;
+    drive.HandleRoverMovement();
+    CHECK(drive.IsOperational() == false);
+
+    drive.mc_data_.is_operational = 1;
+    drive.HandleRoverMovement();
+    CHECK(drive.IsOperational() == true);
+  }
+
+  SECTION("should increment heartbeat count")
+  {
+    CHECK(drive.GetHeartbeatCount() == 0);
+    drive.IncrementHeartbeatCount();
+    CHECK(drive.GetHeartbeatCount() == 1);
+    drive.IncrementHeartbeatCount();
+    CHECK(drive.GetHeartbeatCount() == 2);
+  }
+
+  SECTION("should reset heartbeat counter")
+  {
+    drive.IncrementHeartbeatCount();
+    drive.IncrementHeartbeatCount();
+    drive.IncrementHeartbeatCount();
+    CHECK(drive.GetHeartbeatCount() == 3);
+
+    CHECK(drive.mc_data_.heartbeat_count == 0);
+
+    CHECK(drive.IsHeartbeatSynced() == false);
+    CHECK(drive.GetHeartbeatCount() == 0);
+  }
+
+  SECTION("should reset heartbeat counter")
+  {
+    drive.IncrementHeartbeatCount();
+    drive.IncrementHeartbeatCount();
+    drive.IncrementHeartbeatCount();
+    CHECK(drive.GetHeartbeatCount() == 3);
+
+    CHECK(drive.mc_data_.heartbeat_count == 0);
+
+    CHECK(drive.IsHeartbeatSynced() == false);
+    CHECK(drive.GetHeartbeatCount() == 0);
+  }
+
+  SECTION("should spin")
+  {
+    const int kZeroSpeed   = 0;
+    const int kTargetSpeed = 50;
+
+    drive.mc_data_.is_operational = 1;
+    drive.mc_data_.speed          = kTargetSpeed;
+
+    CHECK(drive.left_wheel_.GetHubSpeed() == kZeroSpeed);
+    CHECK(drive.right_wheel_.GetHubSpeed() == kZeroSpeed);
+    CHECK(drive.back_wheel_.GetHubSpeed() == kZeroSpeed);
+
+    drive.HandleRoverMovement();
+    // Should lerp
+    CHECK(drive.left_wheel_.GetHubSpeed() > kZeroSpeed);
+    CHECK(drive.right_wheel_.GetHubSpeed() > kZeroSpeed);
+    CHECK(drive.back_wheel_.GetHubSpeed() > kZeroSpeed);
+    CHECK(drive.left_wheel_.GetHubSpeed() != kTargetSpeed);
+    CHECK(drive.right_wheel_.GetHubSpeed() != kTargetSpeed);
+    CHECK(drive.back_wheel_.GetHubSpeed() != kTargetSpeed);
+
+    CHECK(drive.GetCurrentMode() == 'S');
   }
 }
 }  // namespace sjsu

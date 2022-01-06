@@ -100,7 +100,7 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
   /// D = Drive, S = Spin, T = Translation, L/R/B = Left/Right/Back Wheel
   void HandleRoverMovement()
   {
-    if (!IsOperational() || !IsSynced())
+    if (!IsOperational() || !IsHeartbeatSynced())
     {
       SetWheelSpeed(kZeroSpeed);
       return;
@@ -114,7 +114,7 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
     double angle = mc_data_.rotation_angle;
     double speed = mc_data_.speed;
 
-    if (!IsNewMode() && IsOperational() && IsSynced())
+    if (!IsNewMode() && IsOperational() && IsHeartbeatSynced())
     {
       sjsu::LogInfo("Handling %c movement...", current_mode_);
       switch (current_mode_)
@@ -203,7 +203,7 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
   }
 
   /// Verifies that mission control is sending fresh commands to rover
-  bool IsSynced()
+  bool IsHeartbeatSynced()
   {
     if (mc_data_.heartbeat_count != heartbeat_count_)
     {
@@ -215,7 +215,7 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
     return true;
   }
 
-  void IncrementHeartbeat()
+  void IncrementHeartbeatCount()
   {
     heartbeat_count_++;
   }
