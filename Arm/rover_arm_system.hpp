@@ -36,6 +36,12 @@ class RoverArmSystem : public sjsu::common::RoverSystem
     };
     Finger finger;
   };
+  struct Acceleration
+  {
+    Joint::Acceleration rotunda;
+    Joint::Acceleration shoulder;
+    Joint::Acceleration elbow;
+  };
 
   RoverArmSystem(sjsu::arm::Joint & rotunda,
                  sjsu::arm::Joint & shoulder,
@@ -66,57 +72,61 @@ class RoverArmSystem : public sjsu::common::RoverSystem
     return "Fill";
   };
 
-  bool SyncedWithMissionControl(){
+  bool SyncedWithMissionControl()
+  {
     bool fill;
     return fill;
   };
 
-  void MoveRotunda(double speed, double angle){
+  void MoveRotunda(double speed, double angle)
+  {
     try
     {
-      if(!CheckValidMovement())
+      if (!CheckValidMovement())
       {
         throw(angle);
       }
       rotunda_.SetSpeed(speed);
       rotunda_.SetPosition(angle);
-      }
-      catch(double large_angle)
-      {
-        sjsu::LogError("Error Moving Rotunda, Requested Angle Is Too Large");
-      }
+    }
+    catch (double large_angle)
+    {
+      sjsu::LogError("Error Moving Rotunda, Requested Angle Is Too Large");
+    }
   }
 
-  void MoveShoulder(double speed, double angle){
+  void MoveShoulder(double speed, double angle)
+  {
     try
     {
-      if(!CheckValidMovement())
+      if (!CheckValidMovement())
       {
         throw(angle);
       }
       shoulder_.SetSpeed(speed);
       shoulder_.SetPosition(angle);
-      }
-      catch(double large_angle)
-      {
-        sjsu::LogError("Error Moving Shoulder, Requested Angle Is Too Large");
-      }
+    }
+    catch (double large_angle)
+    {
+      sjsu::LogError("Error Moving Shoulder, Requested Angle Is Too Large");
+    }
   }
 
-  void MoveElbow(double speed, double angle){
+  void MoveElbow(double speed, double angle)
+  {
     try
     {
-      if(!CheckValidMovement())
+      if (!CheckValidMovement())
       {
         throw(angle);
       }
       elbow_.SetSpeed(speed);
       elbow_.SetPosition(angle);
-      }
-      catch(units::angle::degree_t large_angle)
-      {
-        sjsu::LogError("Error Moving Elbow, Requested Angle Is Too Large");
-      }
+    }
+    catch (units::angle::degree_t large_angle)
+    {
+      sjsu::LogError("Error Moving Elbow, Requested Angle Is Too Large");
+    }
   }
 
   void HandleArmMovement()
@@ -129,91 +139,89 @@ class RoverArmSystem : public sjsu::common::RoverSystem
     MoveElbow(mc_data_.elbow_speed, mc_data_.elbow_angle);
   }
 
-  void MoveWrist()
+  void MoveWrist() {};
+
+  void HomeArm()
   {
-
-  }
-
-  void HomeAll()
-  {
-    // first reading the accelerometer data
-    Joint::Acceleration rotunda_acceleration =
-        rotunda_.GetAccelerometerData();
-    Joint::Acceleration shoulder_acceleration =
-        shoulder_.GetAccelerometerData();
-    HomeShoulder(rotunda_acceleration, shoulder_acceleration);
-
-    Joint::Acceleration elbow_acceleration =
-        elbow_.GetAccelerometerData();
-    HomeElbow(rotunda_acceleration, elbow_acceleration);
+    UpdateRotundaAcceleration();
+    UpdateShoulderAcceleration();
+    HomeShoulder();
+    UpdateElbowAcceleration();
+    HomeElbow();
 
     HomeWrist();
   }
 
-  void HomeShoulder(Joint::Acceleration rotunda_acceleration,
-                    Joint::Acceleration shoulder_acceleration)
+  void HomeShoulder()
   {
-    // Make this into a helper function, this checks to see if any of the acceleration values are 0, and if they are it will change
+    // Make this into a helper function, this checks to see if any of the
+    // acceleration values are 0, and if they are, it will change
     // to something close to 0
-    double gravity = 9.81;
-    if (rotunda_acceleration.x == 0.0)
+    if (accelerations_.rotunda.x == 0.0)
     {  // catches division by 0
-      rotunda_acceleration.x = .0001;
+      accelerations_.rotunda.x = .0001;
     }
-    if (rotunda_acceleration.y == 0.0)
+    if (accelerations_.rotunda.y == 0.0)
     {  // catches division by 0
-      rotunda_acceleration.y = .0001;
+      accelerations_.rotunda.y = .0001;
     }
-    if (shoulder_acceleration.x == 0.0)
+    if (accelerations_.shoulder.x == 0.0)
     {  // catches division by 0
-      shoulder_acceleration.x = .0001;
+      accelerations_.shoulder.x = .0001;
     }
-    if (shoulder_acceleration.y == 0.0)
+    if (accelerations_.shoulder.y == 0.0)
     {  // catches division by 0
-      shoulder_acceleration.y = .0001;
+      accelerations_.shoulder.y = .0001;
     }
-//TODO: clean up calculations into helper functions to make it more legible
-    double rotunda_angle =
-        acos(gravity / rotunda_acceleration.y) *  // for angle
-        (rotunda_acceleration.x /
-         fabs(rotunda_acceleration.x));  // for direction
-    double shoulder_angle =
-        acos(gravity / shoulder_acceleration.y) *  // for angle
-        (shoulder_acceleration.x /
-         fabs(shoulder_acceleration.x));  // for direction
-    double home = rotunda_angle + shoulder_angle;
-    MoveShoulder(10.0, home);
-  }
+    // cut this out into a helper function to clean up code
+    // double check logic: add the values together first then calculate the angle needed
 
-  void HomeElbow(Joint::Acceleration rotunda_acceleration,
-                 Joint::Acceleration elbow_acceleration)
+      double acceleration_x = accelerations_.rotunda.x + accelerations_.shoulder.x; //might need compliment value of shoulder
+      double acceleration_y = accelerations_.rotunda.y + accelerations_.shoulder.y;
+    // adding i and j vectors of acceleration
+    double home = atan(acceleration_y / acceleration_x);
+    MoveShoulder(10.0, home);  // move shoulder at 10 rpm to home
+  }
+  // logic needs checking.
+
+  void HomeElbow()
   {
-    double gravity                = 9.81;
-    if (rotunda_acceleration.x == 0.0)
+    double home = 0;
+    if (accelerations_.rotunda.x == 0.0)
     {  // catches division by 0
-      rotunda_acceleration.x = .0001;
+      accelerations_.rotunda.x = .0001;
     }
-    if (rotunda_acceleration.y == 0.0)
+    if (accelerations_.rotunda.y == 0.0)
     {  // catches division by 0
-      rotunda_acceleration.y = .0001;
+      accelerations_.rotunda.y = .0001;
     }
-    if (elbow_acceleration.x == 0.0)
+    if (accelerations_.elbow.x == 0.0)
     {  // catches division by 0
-      elbow_acceleration.x = .0001;
+      accelerations_.elbow.x = .0001;
     }
-    if (elbow_acceleration.y == 0.0)
+    if (accelerations_.elbow.y == 0.0)
     {  // catches division by 0
-      elbow_acceleration.y = .0001;
+      accelerations_.elbow.y = .0001;
     }
-    double rotunda_angle =
-        acos(gravity / rotunda_acceleration.y) *  // for angle
-        (rotunda_acceleration.x /
-         fabs(rotunda_acceleration.x));  // for direction
-    double elbow_angle =
-        acos(gravity / elbow_acceleration.y) *  // for angle
-        (elbow_acceleration.x / fabs(elbow_acceleration.x)) *
-        (elbow_acceleration.y / fabs(elbow_acceleration.y));  // for direction
-    double home = rotunda_angle + elbow_angle;
+    
+    double acceleration_x = accelerations_.rotunda.x + accelerations_.elbow.x; //might need compliment value of shoulder
+    double acceleration_y = accelerations_.rotunda.y + accelerations_.elbow.y;
+    double angle_without_correction = atan(acceleration_y/acceleration_x);
+    //maybe make the following statements above the if's functions that return a bool to give a better description/make it look nicer
+    //if the elbow is in the second quadrant of a graph, add 90 to the angle
+    if(accelerations_.elbow.x >= 0 && accelerations_.elbow.y <= 0)
+    {
+      home = 90 - angle_without_correction;
+    }
+    //if the elbow is in the third quadrant of a graph, add 180 to the angle
+    else if(accelerations_.elbow.x >= 0 && accelerations_.elbow.y >= 0)
+    {
+      home = 180 + angle_without_correction;
+    }
+    else
+    {
+      home = angle_without_correction;
+    }
     MoveShoulder(10.0, home);
   }
 
@@ -221,8 +229,9 @@ class RoverArmSystem : public sjsu::common::RoverSystem
 
   void Esp(){};
 
-//TODO: need to work on valid movement
-  bool CheckValidMovement(){
+  // TODO: need to work on valid movement durring in person work shop
+  bool CheckValidMovement()
+  {
     bool fill;
     return fill;
   }
@@ -233,11 +242,27 @@ class RoverArmSystem : public sjsu::common::RoverSystem
 
   void PrintArmMode(){};
 
+  void UpdateRotundaAcceleration()
+  {
+    accelerations_.rotunda = rotunda_.GetAccelerometerData();
+  }
+  void UpdateShoulderAcceleration()
+  {
+    accelerations_.shoulder = shoulder_.GetAccelerometerData();
+  }
+  void UpdateElbowAcceleration()
+  {
+    accelerations_.elbow = elbow_.GetAccelerometerData();
+  }
+
  private:
   sjsu::arm::Joint & rotunda_;
   sjsu::arm::Joint & shoulder_;
   sjsu::arm::Joint & elbow_;
   sjsu::arm::WristJoint & wrist_;
   MissionControlData mc_data_;
+  Acceleration accelerations_;
+
+  double FindComplimentValue(double, double){}; //may or may not need, will decide after testing code
 };
 }  // namespace sjsu::arm
