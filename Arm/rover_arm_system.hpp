@@ -17,22 +17,19 @@ class RoverArmSystem : public sjsu::common::RoverSystem
       kDefault = 'D',
     };
     Modes modes = Modes::kDefault;
-    double rotunda_speed;
+    double arm_speed;
     double rotunda_angle;
-    double shoulder_speed;
     double shoulder_angle;
-    double elbow_speed;
     double elbow_angle;
-    double wrist_speed;
     double wrist_roll;
     double wrist_pitch;
     struct Finger
     {
-      double pinky;
-      double ring;
-      double middle;
-      double pointer;
-      double thumb;
+      double pinky_angle;
+      double ring_angle;
+      double middle_angle;
+      double pointer_angle;
+      double thumb_angle;
     };
     Finger finger;
   };
