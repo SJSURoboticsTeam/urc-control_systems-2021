@@ -52,6 +52,16 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
     SetSpinMode();
   };
 
+  char GetCurrentMode()
+  {
+    return current_mode_;
+  }
+
+  int GetHeartbeatCount()
+  {
+    return heartbeat_count_;
+  }
+
   /// Constructs parameters for an HTTP GET request
   /// @return ?heartbeat_count=0&is_operational=1&drive_mode=
   std::string GETParameters()
@@ -120,7 +130,6 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
           SetWheelSpeed(kZeroSpeed);
           break;
       }
-      IncrementHeartbeat();
     }
     else
     {
@@ -158,9 +167,9 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
   /// Prints the mc data and all the current wheel data
   void PrintRoverData()
   {
-    printf("HEARTBEAT:\t%d\n", GetHeartbeatCount());
+    printf("HEARTBEAT:\t%d\n", mc_data_.heartbeat_count);
     printf("OPERATIONAL:\t%d\n", mc_data_.is_operational);
-    printf("DRIVE MODE:\t%d\n", GetCurrentMode());
+    printf("DRIVE MODE:\t%d\n", current_mode_);
     printf("MC SPEED:\t%d\n", mc_data_.speed);
     printf("MC ANGLE:\t%d\n", mc_data_.rotation_angle);
     printf("WHEEL     SPEED     ANGLE\n");
@@ -171,17 +180,6 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
     printf("=========================\n");
   };
 
-  int GetHeartbeatCount()
-  {
-    return heartbeat_count_;
-  }
-
-  char GetCurrentMode()
-  {
-    return current_mode_;
-  }
-
- private:
   /// Checks whether the rover got a new drive mode command
   bool IsNewMode()
   {
@@ -222,6 +220,7 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
     heartbeat_count_++;
   }
 
+ private:
   /// Stops the rover and sets a new mode.
   void SetMode()
   {
@@ -237,7 +236,6 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
       case 'B': SetSingleWheelMode(); break;
       default: sjsu::LogError("Unable to set drive mode!");
     };
-    IncrementHeartbeat();
   };
 
   // ======================

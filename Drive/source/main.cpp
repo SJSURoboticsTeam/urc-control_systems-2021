@@ -68,6 +68,7 @@ int main(void)
       sjsu::TimeoutTimer serverTimeout(5s);  // server has 5s timeout
       drive.ParseJSONResponse(response);
       drive.HandleRoverMovement();
+      drive.IncrementHeartbeat();
       drive.PrintRoverData();
       if (serverTimeout.HasExpired())
       {

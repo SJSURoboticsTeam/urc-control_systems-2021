@@ -58,6 +58,8 @@ TEST_CASE("Drive system testing")
   drive::RoverDriveSystem drive(spied_left_motor, spied_right_motor,
                                 spied_back_motor);
 
+  std::string example_response;
+
   SECTION("checking default values")
   {
     CHECK(drive.mc_data_.heartbeat_count == 0);
@@ -65,21 +67,23 @@ TEST_CASE("Drive system testing")
     CHECK(drive.mc_data_.drive_mode == 'S');
     CHECK(drive.mc_data_.rotation_angle == 0);
     CHECK(drive.mc_data_.speed == 0);
+    CHECK(drive.GetCurrentMode() == 'S');
+    CHECK(drive.IsSynced() == true);
     drive.Initialize();
   }
 
   SECTION("should create default values")
   {
-    std::string expected_response =
+    example_response =
         "?heartbeat_count=0&is_operational=0&drive_mode=S&battery=90"
         "&left_wheel_speed=0&left_wheel_angle=0&right_wheel_speed=0&right_"
         "wheel_angle=0&back_wheel_speed=0&back_wheel_angle=0";
-    CHECK(expected_response == drive.GETParameters());
+    CHECK(example_response == drive.GETParameters());
   }
 
-  SECTION("should return all values passed")
+  SECTION("should return all mc_data_ values")
   {
-    std::string example_response =
+    example_response =
         "\r\n\r\n{\n"
         "  \"heartbeat_count\": 0,\n"
         "  \"is_operational\": 1,\n"
@@ -88,65 +92,55 @@ TEST_CASE("Drive system testing")
         "  \"angle\": 15\n"
         "}";
     drive.ParseJSONResponse(example_response);
-    CHECK(drive.GetHeartbeatCount() == 0);
     CHECK(drive.mc_data_.heartbeat_count == 0);
     CHECK(drive.mc_data_.is_operational == 1);
     CHECK(drive.mc_data_.drive_mode == 'S');
     CHECK(drive.mc_data_.rotation_angle == 15);
     CHECK(drive.mc_data_.speed == 15);
+    CHECK(drive.IsNewMode() == false);
+    CHECK(drive.GetCurrentMode() == drive.mc_data_.drive_mode);
   }
 
-  SECTION("should increment heartbeat counter after HandleRoverMovement")
+  SECTION("should switch rover into all the different modes")
   {
-    CHECK(drive.GetHeartbeatCount() == 0);
-    std::string example_response =
-        "\r\n\r\n{\n"
-        "  \"heartbeat_count\": 0,\n"
-        "  \"is_operational\": 1,\n"
-        "  \"drive_mode\": \"S\",\n"
-        "  \"speed\": 15,\n"
-        "  \"angle\": 15\n"
-        "}";
-    drive.ParseJSONResponse(example_response);
+    drive.mc_data_.is_operational = 1;
+    CHECK(drive.mc_data_.is_operational == 1);
+    CHECK(drive.mc_data_.drive_mode == 'S');
+
+    drive.mc_data_.drive_mode = 'D';
+    CHECK(drive.IsNewMode() == true);
     drive.HandleRoverMovement();
-    CHECK(drive.GetHeartbeatCount() == 1);
-    example_response =
-        "\r\n\r\n{\n"
-        "  \"heartbeat_count\": 1,\n"
-        "  \"is_operational\": 1,\n"
-        "  \"drive_mode\": \"S\",\n"
-        "  \"speed\": 15,\n"
-        "  \"angle\": 15\n"
-        "}";
-    drive.ParseJSONResponse(example_response);
+    CHECK(drive.GetCurrentMode() == 'D');
+
+    drive.mc_data_.drive_mode = 'T';
+    CHECK(drive.IsNewMode() == true);
     drive.HandleRoverMovement();
-    CHECK(drive.GetHeartbeatCount() == 2);
-    example_response =
-        "\r\n\r\n{\n"
-        "  \"heartbeat_count\": 2,\n"
-        "  \"is_operational\": 1,\n"
-        "  \"drive_mode\": \"S\",\n"
-        "  \"speed\": 15,\n"
-        "  \"angle\": 15\n"
-        "}";
-    drive.ParseJSONResponse(example_response);
+    CHECK(drive.GetCurrentMode() == 'T');
+
+    drive.mc_data_.drive_mode = 'S';
+    CHECK(drive.IsNewMode() == true);
     drive.HandleRoverMovement();
-    CHECK(drive.GetHeartbeatCount() == 3);
-  }
-  SECTION("should increment heartbeat counter after HandleRoverMovement")
-  {
-    CHECK(drive.GetHeartbeatCount() == 0);
-    std::string example_response =
-        "\r\n\r\n{\n"
-        "  \"heartbeat_count\": 0,\n"
-        "  \"is_operational\": 1,\n"
-        "  \"drive_mode\": \"S\",\n"
-        "  \"speed\": 15,\n"
-        "  \"angle\": 15\n"
-        "}";
-    drive.ParseJSONResponse(example_response);
+    CHECK(drive.GetCurrentMode() == 'S');
+
+    drive.mc_data_.drive_mode = 'B';
+    CHECK(drive.IsNewMode() == true);
     drive.HandleRoverMovement();
-    CHECK(drive.GetHeartbeatCount() == 1);
+    CHECK(drive.GetCurrentMode() == 'B');
+
+    drive.mc_data_.drive_mode = 'L';
+    CHECK(drive.IsNewMode() == true);
+    drive.HandleRoverMovement();
+    CHECK(drive.GetCurrentMode() == 'L');
+
+    drive.mc_data_.drive_mode = 'R';
+    CHECK(drive.IsNewMode() == true);
+    drive.HandleRoverMovement();
+    CHECK(drive.GetCurrentMode() == 'R');
+
+    drive.mc_data_.drive_mode = 'Z';
+    CHECK(drive.IsNewMode() == true);
+    drive.HandleRoverMovement();
+    CHECK(drive.GetCurrentMode() == 'R');
   }
 }
 }  // namespace sjsu
