@@ -63,7 +63,7 @@ class Wheel
   };
 
   /// TESTING - Moves wheel to start position - press SJ2 button to exit
-  void HomeWheel()
+  virtual void HomeWheel()
   {
     sjsu::LogWarning("Homing %s wheel...", name_.c_str());
     homing_pin_.GetPin().settings.PullDown();
@@ -76,7 +76,6 @@ class Wheel
       sjsu::Delay(50ms);
       if (homing_pin_.Read() == kHomeLevel)
       {
-        homing_offset_angle_ = 0;
         break;
       }
     }
@@ -99,6 +98,11 @@ class Wheel
     }
     sjsu::LogInfo("%s wheel offset: %d", name_.c_str(), homing_offset_angle_);
   };
+
+  int GetHomingOffset()
+  {
+    return homing_offset_angle_;
+  }
 
  private:
   std::string name_        = "";

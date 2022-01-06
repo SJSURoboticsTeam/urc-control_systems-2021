@@ -32,27 +32,27 @@ TEST_CASE("Wheel testing")
   drive::Wheel wheel("wheel", hub_motor, steer_motor,
                      mock_wheel_homing_pin.get());
 
-  // Mock<drive::Wheel> wheel;
-  // Fake(Method(wheel, GetName)).AlwaysReturn("test");
+  // Spying on HomeWheel function - needs to be virtual
+  Mock<drive::Wheel> spy(wheel);
+  Fake(Method(spy, Wheel::HomeWheel));
+  drive::Wheel & spy_wheel = spy.get();
 
-  //   Mock<drive::Wheel> spy(wheel);
-  //   When(Method(spy, GetSteerAngle)).AlwaysReturn(11);
-
-  SECTION("Checking default values")
+  SECTION("checking default values")
   {
     CHECK(wheel.GetName() == "wheel");
     CHECK(wheel.GetHubSpeed() == 0);
     CHECK(wheel.GetSteerAngle() == 0);
+    CHECK(wheel.GetHomingOffset() == 0);
   }
 
-  SECTION("Initializing wheel")
+  SECTION("initializing wheel")
   {
     wheel.Initialize();
     Verify(Method(mock_can, ModuleInitialize)).Twice();
     CHECK(mock_can.get().CurrentSettings().baud_rate == 1_MHz);
   }
 
-  SECTION("Setting hub speed to random normal speed")
+  SECTION("setting hub speed to random normal speed")
   {
     int random_num = rand() % 100 + 1;
     wheel.SetHubSpeed(random_num);
@@ -66,7 +66,7 @@ TEST_CASE("Wheel testing")
     CHECK(wheel.GetHubSpeed() == 0);
   }
 
-  SECTION("Setting hub speed beyond maximum speed")
+  SECTION("setting hub speed beyond maximum speed")
   {
     wheel.SetHubSpeed(150);
     CHECK(wheel.GetHubSpeed() == 100);
@@ -75,7 +75,7 @@ TEST_CASE("Wheel testing")
     CHECK(wheel.GetHubSpeed() == -100);
   }
 
-  SECTION("Setting steer angle to random normal angle")
+  SECTION("setting steer angle to random normal angle")
   {
     int random_num = rand() % 360 + 1;
     wheel.SetSteerAngle(random_num);
@@ -89,7 +89,7 @@ TEST_CASE("Wheel testing")
     CHECK(wheel.GetSteerAngle() == 0);
   }
 
-  SECTION("Setting steer angle beyond maximum angle")
+  SECTION("setting steer angle beyond maximum angle")
   {
     wheel.SetSteerAngle(400);
     CHECK(wheel.GetSteerAngle() == 40);
@@ -98,13 +98,11 @@ TEST_CASE("Wheel testing")
     CHECK(wheel.GetSteerAngle() == -40);
   }
 
-  // SECTION("Spying on Wheel")
-  // {
-  //   // TODO: Get spy logic working correctly - idk why it's not working...
-  //   Mock<drive::Wheel> spy(wheel);
-  //   When(Method(spy, GetSteerAngle)).AlwaysReturn(10);
-  //   drive::Wheel & test = spy.get();
-  //   CHECK(test.GetSteerAngle() == 10);
-  // }
+  SECTION("should call home wheel once")
+  {
+    // TODO: Make this test case compile
+    spy_wheel.HomeWheel();
+    // Verify(Method(spy_wheel, Wheel::HomeWheel)).Once();
+  }
 }
 }  // namespace sjsu

@@ -43,7 +43,7 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
         right_wheel_(right_wheel),
         back_wheel_(back_wheel){};
 
-  void Initialize()
+  virtual void Initialize()
   {
     sjsu::LogInfo("Initializing drive system...");
     left_wheel_.Initialize();
@@ -158,9 +158,9 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
   /// Prints the mc data and all the current wheel data
   void PrintRoverData()
   {
-    printf("HEARTBEAT:\t%d\n", mc_data_.heartbeat_count);
+    printf("HEARTBEAT:\t%d\n", GetHeartbeatCount());
     printf("OPERATIONAL:\t%d\n", mc_data_.is_operational);
-    printf("DRIVE MODE:\t%d\n", current_mode_);
+    printf("DRIVE MODE:\t%d\n", GetCurrentMode());
     printf("MC SPEED:\t%d\n", mc_data_.speed);
     printf("MC ANGLE:\t%d\n", mc_data_.rotation_angle);
     printf("WHEEL     SPEED     ANGLE\n");
@@ -170,6 +170,16 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
     back_wheel_.Print();
     printf("=========================\n");
   };
+
+  int GetHeartbeatCount()
+  {
+    return heartbeat_count_;
+  }
+
+  char GetCurrentMode()
+  {
+    return current_mode_;
+  }
 
  private:
   /// Checks whether the rover got a new drive mode command
