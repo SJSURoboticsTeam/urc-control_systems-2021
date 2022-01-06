@@ -132,11 +132,34 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
   /// Homes the wheels to face directly outward in-line with slip ring
   void HomeWheels()
   {
-    // TODO: Need to implement non-sequential homing procedure
-    SetWheelSpeed(kZeroSpeed);
-    left_wheel_.HomeWheel();
-    right_wheel_.HomeWheel();
-    back_wheel_.HomeWheel();
+    try
+    {
+      // Simultaneous wheel homing
+      SetWheelSpeed(kZeroSpeed);
+      sjsu::Delay(50ms);
+      for (units::angle::degree_t angle = 0_deg; angle < 360_deg; angle += 2_deg)
+      {
+        if(!left_wheel_.IsWheelHomed)
+        {
+          left_wheel_.SetSteeringAngle(angle);
+        }
+        if(!right_wheel_.IsWheelHomed)
+        {
+          right_wheel_.SetSteeringAngle(angle);
+        }
+        if(!back_wheel_.IsWheelHomed)
+        {
+          back_wheel_.SetSteeringAngle(angle);
+        }
+      }
+      //
+      sjsu::Delay(50ms);
+    }
+    catch (const std::exception & e)
+    {
+      sjsu::LogError("Error homing the wheels!");
+      throw e;
+    }
   };
 
   /// Sets all wheels to the speed provided

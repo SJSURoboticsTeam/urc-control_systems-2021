@@ -91,16 +91,32 @@ class Wheel
 
     for (int angle = 0; angle < 360; angle += 2)
     {
-      if (homing_pin_.Read() == kHomeLevel)
+      SetSteeringAngle(angle);
+      if(!(Uptime() % 50))
       {
-        homing_offset_angle_ = angle;
-        break;
+        if (homing_pin_.Read() == home_level)
+        {
+          homing_offset_angle_ = angle;
+          break;
+        }
       }
       SetSteerAngle(angle);
       sjsu::Delay(50ms);
     }
     sjsu::LogInfo("%s wheel offset: %d", name_.c_str(), homing_offset_angle_);
   };
+
+  bool IsWheelHomed()
+  {
+      if (homing_pin_.Read() == kHomeLevel)
+        {
+          homing_offset_angle = steer_angle_;
+          sjsu::LogInfo("Homing %s wheel done! Offset angle set to %d", name_.c_str(),
+                            homing_offset_angle_.to<int>());
+          return true;
+        }
+    return false
+  }
 
  private:
   std::string name_        = "";
