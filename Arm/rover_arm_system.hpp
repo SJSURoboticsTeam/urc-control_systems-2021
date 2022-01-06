@@ -75,55 +75,22 @@ class RoverArmSystem : public sjsu::common::RoverSystem
     return fill;
   };
 
-  void MoveRotunda(double speed, double angle)
+  void MoveRotunda(double angle)
   {
-    try
-    {
-      if (!CheckValidMovement())
-      {
-        throw(angle);
-      }
-      rotunda_.SetSpeed(speed);
+      rotunda_.SetSpeed(mc_data_.arm_speed);
       rotunda_.SetPosition(angle);
-    }
-    catch (double large_angle)
-    {
-      sjsu::LogError("Error Moving Rotunda, Requested Angle Is Too Large");
-    }
   }
 
-  void MoveShoulder(double speed, double angle)
+  void MoveShoulder(double angle)
   {
-    try
-    {
-      if (!CheckValidMovement())
-      {
-        throw(angle);
-      }
-      shoulder_.SetSpeed(speed);
+      shoulder_.SetSpeed(mc_data_.arm_speed);
       shoulder_.SetPosition(angle);
-    }
-    catch (double large_angle)
-    {
-      sjsu::LogError("Error Moving Shoulder, Requested Angle Is Too Large");
-    }
   }
 
-  void MoveElbow(double speed, double angle)
+  void MoveElbow(double angle)
   {
-    try
-    {
-      if (!CheckValidMovement())
-      {
-        throw(angle);
-      }
-      elbow_.SetSpeed(speed);
+      elbow_.SetSpeed(mc_data_.arm_speed);
       elbow_.SetPosition(angle);
-    }
-    catch (units::angle::degree_t large_angle)
-    {
-      sjsu::LogError("Error Moving Elbow, Requested Angle Is Too Large");
-    }
   }
 
   void HandleArmMovement()
@@ -131,9 +98,9 @@ class RoverArmSystem : public sjsu::common::RoverSystem
     // TODO: implement different arm drive modes in this function.
 
     // D drive mode
-    MoveRotunda(mc_data_.rotunda_speed, mc_data_.rotunda_angle);
-    MoveShoulder(mc_data_.shoulder_speed, mc_data_.shoulder_angle);
-    MoveElbow(mc_data_.elbow_speed, mc_data_.elbow_angle);
+    MoveRotunda(mc_data_.rotunda_angle);
+    MoveShoulder(mc_data_.shoulder_angle);
+    MoveElbow(mc_data_.elbow_angle);
   }
 
   void MoveWrist() {};
@@ -151,6 +118,7 @@ class RoverArmSystem : public sjsu::common::RoverSystem
 
   void HomeShoulder()
   {
+    double home = 0;
     // Make this into a helper function, this checks to see if any of the
     // acceleration values are 0, and if they are, it will change
     // to something close to 0
@@ -176,8 +144,8 @@ class RoverArmSystem : public sjsu::common::RoverSystem
       double acceleration_x = accelerations_.rotunda.x + accelerations_.shoulder.x; //might need compliment value of shoulder
       double acceleration_y = accelerations_.rotunda.y + accelerations_.shoulder.y;
     // adding i and j vectors of acceleration
-    double home = atan(acceleration_y / acceleration_x);
-    MoveShoulder(10.0, home);  // move shoulder at 10 rpm to home
+    home = atan(acceleration_y / acceleration_x);
+    MoveShoulder(home);  // move shoulder at 10 rpm to home
   }
   // logic needs checking.
 
@@ -219,7 +187,7 @@ class RoverArmSystem : public sjsu::common::RoverSystem
     {
       home = angle_without_correction;
     }
-    MoveShoulder(10.0, home);
+    MoveElbow(home);
   }
 
   void HomeWrist(){};
@@ -259,6 +227,8 @@ class RoverArmSystem : public sjsu::common::RoverSystem
   sjsu::arm::WristJoint & wrist_;
   MissionControlData mc_data_;
   Acceleration accelerations_;
+  double heartbeat_count_ = 0;
+  MissionControlData::Modes current_mode_ = MissionControlData::Modes::kDefault;
 
   double FindComplimentValue(double, double){}; //may or may not need, will decide after testing code
 };
