@@ -61,11 +61,11 @@ class Joint
   }
 
   /// Return the acceleration values for the MPU6050 on the joint as a JointAcceleration of doubles
-  JointAcceleration GetAccelerometerData()
+  Acceleration GetAccelerometerData()
   {
     sjsu::Accelerometer::Acceleration_t acceleration_to_double(mpu.Read());
-    JointAcceleration acceleration;
-    acceleration.y=static_cast<double>(acceleration_to_double.y);
+    Acceleration acceleration;
+    acceleration.x=static_cast<double>(acceleration_to_double.x);
     acceleration.y=static_cast<double>(acceleration_to_double.y);
     acceleration.z=static_cast<double>(acceleration_to_double.z);
 
@@ -80,22 +80,12 @@ class Joint
   }
 
   private:
-  // The minimum allowable angle the joint is able to turn to in normal
-  // operation.
   units::angle::degree_t minimum_angle = 0_deg;
-  // The maximum allowable angle the joint is able to turn to in normal
-  // operation.
   units::angle::degree_t maximum_angle = 180_deg;
-  // The angle the joint will move to when is not operational
   units::angle::degree_t rest_angle = 0_deg;
-  // The angle between the motor's zero position and the actual homed zero
-  // positon.
   units::angle::degree_t zero_offset_angle = 0_deg;
-  // Motor object that controls the joint
   sjsu::RmdX & motor;
-  // accelerometer attached to the joint that is used to home the arm
   sjsu::Mpu6050 & mpu;
-  // speed of the joint motor
   units::angular_velocity::revolutions_per_minute_t speed_;
 };
 }  // namespace sjsu::arm
