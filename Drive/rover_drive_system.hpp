@@ -139,41 +139,26 @@ class RoverDriveSystem
   {
     try
     {
-      // TODO: Need to implement non-sequential homing procedure
+      // Simultaneous wheel homing
       SetWheelSpeed(kZeroSpeed);
-      int  l_angle = 1; // calibrator turns to 0
-      int  r_angle = 1; // calibrator turns to 0
-      int  b_angle = 1; // calibrator turns to 0
-
-      bool lhome = 0;
-      bool rhome = 0;
-      bool bhome = 0;
-    while (!lhome && !rhome  && !bhome)
-    {
-
-      left_wheel_.SetSteeringAngle(l_angle);
-      right_wheel_.SetSteeringAngle(r_angle);
-      back_wheel_.SetSteeringAngle(b_angle);
-      if(!Uptime() % 50))
+      sjsu::Delay(50ms);
+      for (units::angle::degree_t angle = 0_deg; angle < 360_deg; angle += 2_deg)
       {
-        lhome = left_wheel_.HomePinChk();
-        rhome = right_wheel_.HomePinChk();
-        bhome = back_wheel_.HomePinChk();
-        if (!lhome)
+        if(!left_wheel_.IsWheelHomed)
         {
-          l_angle += 2;
+          left_wheel_.SetSteeringAngle(angle);
         }
-        if (!rhome)
+        if(!right_wheel_.IsWheelHomed)
         {
-          r_angle += 2;
+          right_wheel_.SetSteeringAngle(angle);
         }
-        if (!bhome)
+        if(!back_wheel_.IsWheelHomed)
         {
-          b_angle += 2;
+          back_wheel_.SetSteeringAngle(angle);
         }
       }
- 
-      }
+      //
+      sjsu::Delay(50ms);
     }
     catch (const std::exception & e)
     {

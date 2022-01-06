@@ -75,37 +75,31 @@ class Wheel
       SetSteeringAngle(angle);
       if(!(Uptime() % 50))
       {
-      if (homing_pin_.Read() == home_level)
-      {
-        homing_offset_angle_ = angle;
-        break;
+        if (homing_pin_.Read() == home_level)
+        {
+          homing_offset_angle_ = angle;
+          break;
+        }
       }
-
-      }
-
     }
     sjsu::LogInfo("Homing %s wheel done! Offset angle set to %d", name_.c_str(),
                   homing_offset_angle_.to<int>());
   };
 
-bool HomePinChk()
-{
-
-     if (homing_pin_.Read() == home_level)
-      {
-        homing_offset_angle_ = angle;
-        sjsu::LogInfo("Homing %s wheel done! Offset angle set to %d", name_.c_str(),
-                          homing_offset_angle_.to<int>());
-        return true;
-      }
-  return false
-}
-
-
-
-
-
-  
+  /// Sets the homing offset angle if the wheel homing pin is found
+  /// @return true if homing pin is succesfully found
+  bool IsWheelHomed()
+  {
+      bool home_level = sjsu::Gpio::kHigh;
+      if (homing_pin_.Read() == home_level)
+        {
+          homing_offset_angle = steer_angle_;
+          sjsu::LogInfo("Homing %s wheel done! Offset angle set to %d", name_.c_str(),
+                            homing_offset_angle_.to<int>());
+          return true;
+        }
+    return false
+  }
 
   std::string name_;          // Wheel name (i.e. left, right, back)
   sjsu::RmdX & hub_motor_;    // Controls tire direction (fwd/rev) & speed
