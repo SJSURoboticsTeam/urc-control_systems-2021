@@ -81,20 +81,20 @@ class RoverArmSystem : public sjsu::common::RoverSystem
 
   void MoveRotunda(double angle)
   {
-      rotunda_.SetSpeed(mc_data_.arm_speed);
-      rotunda_.SetPosition(angle);
+    rotunda_.SetSpeed(mc_data_.arm_speed);
+    rotunda_.SetPosition(angle);
   }
 
   void MoveShoulder(double angle)
   {
-      shoulder_.SetSpeed(mc_data_.arm_speed);
-      shoulder_.SetPosition(angle);
+    shoulder_.SetSpeed(mc_data_.arm_speed);
+    shoulder_.SetPosition(angle);
   }
 
   void MoveElbow(double angle)
   {
-      elbow_.SetSpeed(mc_data_.arm_speed);
-      elbow_.SetPosition(angle);
+    elbow_.SetSpeed(mc_data_.arm_speed);
+    elbow_.SetPosition(angle);
   }
 
   void HandleArmMovement()
@@ -123,25 +123,15 @@ class RoverArmSystem : public sjsu::common::RoverSystem
   void HomeShoulder()
   {
     double home = 0;
-    // Make this into a helper function, this checks to see if any of the
+    // This checks to see if any of the
     // acceleration values are 0, and if they are, it will change
     // to something close to 0
-    if (accelerations_.rotunda.x == 0.0)
-    {  // catches division by 0
-      accelerations_.rotunda.x = .0001;
-    }
-    if (accelerations_.rotunda.y == 0.0)
-    {  // catches division by 0
-      accelerations_.rotunda.y = .0001;
-    }
-    if (accelerations_.shoulder.x == 0.0)
-    {  // catches division by 0
-      accelerations_.shoulder.x = .0001;
-    }
-    if (accelerations_.shoulder.y == 0.0)
-    {  // catches division by 0
-      accelerations_.shoulder.y = .0001;
-    }
+
+    VerifyNonZeroes(accelerations_.rotunda.x);
+    VerifyNonZeroes(accelerations_.rotunda.y);
+    VerifyNonZeroes(accelerations_.shoulder.x);
+    VerifyNonZeroes(accelerations_.shoulder.y);
+
     // cut this out into a helper function to clean up code
     // double check logic: add the values together first then calculate the
     // angle needed
@@ -160,22 +150,11 @@ class RoverArmSystem : public sjsu::common::RoverSystem
   void HomeElbow()
   {
     double home = 0;
-    if (accelerations_.rotunda.x == 0.0)
-    {  // catches division by 0
-      accelerations_.rotunda.x = .0001;
-    }
-    if (accelerations_.rotunda.y == 0.0)
-    {  // catches division by 0
-      accelerations_.rotunda.y = .0001;
-    }
-    if (accelerations_.elbow.x == 0.0)
-    {  // catches division by 0
-      accelerations_.elbow.x = .0001;
-    }
-    if (accelerations_.elbow.y == 0.0)
-    {  // catches division by 0
-      accelerations_.elbow.y = .0001;
-    }
+    // VerifyNonZeroes()
+    VerifyNonZeroes(acceleration_.rotunda.x);
+    VerifyNonZeroes(accelerations_.rotunda.y);
+    VerifyNonZeroes(accelerations_.elbow.x);
+    VerifyNonZeroes(accelerations_.elbow.y);
 
     double acceleration_x =
         accelerations_.rotunda.x +
@@ -238,8 +217,16 @@ class RoverArmSystem : public sjsu::common::RoverSystem
   sjsu::arm::WristJoint & wrist_;
   MissionControlData mc_data_;
   Acceleration accelerations_;
-  double heartbeat_count_ = 0;
+  double heartbeat_count_                 = 0;
   MissionControlData::Modes current_mode_ = MissionControlData::Modes::kDefault;
+
+  void VerifyNonZeroes(double & acceleration)
+  {
+    if (acceleration == 0)
+    {
+      acceleration = 0.0001;
+    }
+  }
 
   double FindComplimentValue(
       double,
