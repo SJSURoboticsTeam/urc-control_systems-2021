@@ -1,12 +1,12 @@
 #include "testing/testing_frameworks.hpp"
 #include "devices/actuators/servo/rmd_x.hpp"
 
-#include "rover_arm_system.cpp"
-#include "wheel.hpp"
+#include "rover_arm_system.hpp"
+#include "joint.hpp"
 
 namespace sjsu
 {
-TEST_CASE("Arm system testing")
+TEST_CASE("Drive system testing")
 {
   Mock<Can> mock_can;
   Fake(Method(mock_can, Can::ModuleInitialize));
@@ -14,16 +14,25 @@ TEST_CASE("Arm system testing")
   Fake(Method(mock_can, Can::Receive));
   Fake(Method(mock_can, Can::HasData));
 
+  Mock<I2c> mock_i2c;
+  Fake(Method(mock_i2c, I2c::ModuleInitialize));
+
   StaticMemoryResource<1024> memory_resource;
   CanNetwork network(mock_can.get(), &memory_resource);
+  RmdX motor(network, 0x142);
+  Mpu6050 mpu(mock_i2c.get(), 0x69);
+  Mock<Mpu6050> mock_mpu(mpu);
+  Fake(Method(mock_mpu, Mpu6050::ModuleInitialize));
+  Mpu6050 & test_mpu = mock_mpu.get();
 
-  RmdX left_steer_motor(network, 0x141);
-  RmdX left_hub_motor(network, 0x142);
-  RmdX right_steer_motor(network, 0x143);
-  RmdX right_hub_motor(network, 0x144);
-  RmdX back_steer_motor(network, 0x145);
-  RmdX back_hub_motor(network, 0x146);
+  arm::Joint joint(motor, test_mpu);
 
   std::string example_response;
+
+  SECTION("checking default values")
+  {
+    joint.Initialize();
+    joint.speed_ == 0_rpm;
+  }
 }
 }  // namespace sjsu

@@ -57,7 +57,7 @@ class Joint
   {
     units::angle::degree_t calibrated_angle = angle - zero_offset_angle;
     calibrated_angle                        = units::math::min(
-        units::math::max(calibrated_angle, minimum_angle), maximum_angle);
+                               units::math::max(calibrated_angle, minimum_angle), maximum_angle);
     sjsu::LogInfo("%f", calibrated_angle.to<double>());
     motor.SetAngle(calibrated_angle);
   }
@@ -76,9 +76,9 @@ class Joint
   }
   void SetSpeed(units::angular_velocity::revolutions_per_minute_t speed)
   {
-  speed_ = speed;
-  motor.SetSpeed(speed_);
+    speed_ = speed;
+    motor.SetSpeed(speed_);
   }
-units::angular_velocity::revolutions_per_minute_t speed_;
+  units::angular_velocity::revolutions_per_minute_t speed_ = 0_rpm;
 };
 }  // namespace sjsu::arm
