@@ -74,15 +74,8 @@ class Joint
     return acceleration;
   }
 
-  void SetSpeed(double speed)
-  {
-    units::angular_velocity::revolutions_per_minute_t speed_to_rpm(speed);
-    speed_ = speed_to_rpm;
-    motor.SetSpeed(speed_);
-  }
-
-  void SetSpeedLerpVers(double targetspeed){
-    double current_speed = //get current speed
+  void SetSpeed(double targetspeed){
+    double current_speed = speed_;
     speed_ = std::lerp(current_speed, targetspeed, kLerpStep);
     motor.SetSpeed(speed_);
   }
