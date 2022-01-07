@@ -87,11 +87,15 @@ class Wheel
     homing_pin_.GetPin().settings.Floating();
     for (int angle = 0; angle < 360; angle += 2)
     {
+      SetSteerAngle(angle);
+      // if (!(Uptime() % 50))
+      // {
       if (homing_pin_.Read() == kHomeLevel)
       {
         homing_offset_angle_ = angle;
         break;
       }
+      // }
       SetSteerAngle(angle);
       sjsu::Delay(50ms);
     }
@@ -101,6 +105,18 @@ class Wheel
   int GetHomingOffset()
   {
     return homing_offset_angle_;
+  }
+
+  bool IsWheelHomed()
+  {
+    if (homing_pin_.Read() == kHomeLevel)
+    {
+      homing_offset_angle_ = steer_angle_;
+      sjsu::LogInfo("Homing %s wheel done! Offset angle set to %d",
+                    name_.c_str(), homing_offset_angle_);
+      return true;
+    }
+    return false;
   }
 
  private:
