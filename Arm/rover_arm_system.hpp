@@ -7,6 +7,23 @@
 
 namespace sjsu::arm
 {
+const char response_body_format[] =
+  "\r\n\r\n{\n"
+  "  \"heartbeat_count\": %d,\n"
+  "  \"is_operational\": %d\n",
+  "  \"arm_speed\": %d,\n"
+  "  \"rotunda_angle\": %d,\n"
+  "  \"shoulder_angle\": %d,\n"
+  "  \"elbow_angle\": %d,\n"
+  "  \"wrist_roll\": %d,\n"
+  "  \"wrist_pitch\": %d,\n"
+  "  \"pinky_angle\": %d,\n"
+  "  \"ring_angle\": %d,\n"
+  "  \"middle_angle\": %d,\n"
+  "  \"pointer_angle\": %d,\n"
+  "  \"thumb_angle\": %d\n"
+  "}";
+
 class RoverArmSystem : public sjsu::common::RoverSystem
 {
  public:
