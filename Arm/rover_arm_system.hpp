@@ -81,20 +81,20 @@ class RoverArmSystem : public sjsu::common::RoverSystem
 
   void MoveRotunda(double angle)
   {
-      rotunda_.SetSpeed(mc_data_.arm_speed);
-      rotunda_.SetPosition(angle);
+    rotunda_.SetSpeed(mc_data_.arm_speed);
+    rotunda_.SetPosition(angle);
   }
 
   void MoveShoulder(double angle)
   {
-      shoulder_.SetSpeed(mc_data_.arm_speed);
-      shoulder_.SetPosition(angle);
+    shoulder_.SetSpeed(mc_data_.arm_speed);
+    shoulder_.SetPosition(angle);
   }
 
   void MoveElbow(double angle)
   {
-      elbow_.SetSpeed(mc_data_.arm_speed);
-      elbow_.SetPosition(angle);
+    elbow_.SetSpeed(mc_data_.arm_speed);
+    elbow_.SetPosition(angle);
   }
 
   void HandleArmMovement()
@@ -120,8 +120,6 @@ class RoverArmSystem : public sjsu::common::RoverSystem
     HomeWrist();
   }
 
-  
-
   void HomeShoulder()
   {
     double home = 0;
@@ -130,13 +128,10 @@ class RoverArmSystem : public sjsu::common::RoverSystem
     // to something close to 0
 
     VerifyNonZeroes(accelerations_.rotunda.x);
-
     VerifyNonZeroes(accelerations_.rotunda.y);
-
     VerifyNonZeroes(accelerations_.shoulder.x);
-    
     VerifyNonZeroes(accelerations_.shoulder.y);
-    
+
     // cut this out into a helper function to clean up code
     // double check logic: add the values together first then calculate the
     // angle needed
@@ -155,15 +150,11 @@ class RoverArmSystem : public sjsu::common::RoverSystem
   void HomeElbow()
   {
     double home = 0;
-    //VerifyNonZeroes()
+    // VerifyNonZeroes()
     VerifyNonZeroes(acceleration_.rotunda.x);
-    
     VerifyNonZeroes(accelerations_.rotunda.y);
-    
     VerifyNonZeroes(accelerations_.elbow.x);
-
     VerifyNonZeroes(accelerations_.elbow.y);
-    
 
     double acceleration_x =
         accelerations_.rotunda.x +
@@ -226,15 +217,15 @@ class RoverArmSystem : public sjsu::common::RoverSystem
   sjsu::arm::WristJoint & wrist_;
   MissionControlData mc_data_;
   Acceleration accelerations_;
-  double heartbeat_count_ = 0;
+  double heartbeat_count_                 = 0;
   MissionControlData::Modes current_mode_ = MissionControlData::Modes::kDefault;
-  
 
-  void VerifyNonZeroes(double &acceleration){
-    if (acceleration == 0){
+  void VerifyNonZeroes(double & acceleration)
+  {
+    if (acceleration == 0)
+    {
       acceleration = 0.0001;
     }
-
   }
 
   double FindComplimentValue(
