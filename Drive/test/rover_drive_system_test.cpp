@@ -193,7 +193,7 @@ TEST_CASE("Drive system testing")
     CHECK(drive.GetHeartbeatCount() == 0);
   }
 
-  SECTION("should spin")
+  SECTION("should lerp spin speed properly")
   {
     const int kZeroSpeed   = 0;
     const int kTargetSpeed = 50;

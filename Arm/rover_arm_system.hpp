@@ -46,7 +46,7 @@ class RoverArmSystem : public sjsu::common::RoverSystem
   }
   void Initialize()
   {
-    rotunda_.Initialize();
+    rotunda_.Initialize();  // returns
     shoulder_.Initialize();
     elbow_.Initialize();
     wrist_.Initialize();
@@ -58,7 +58,8 @@ class RoverArmSystem : public sjsu::common::RoverSystem
 
   std::string GETParameters()
   {
-    return "Fill";
+    std::string response = "?heartbeat_count=" + heartbeat_count_;
+    return response;
   };
 
   std::string ParseJSONResponse()
@@ -66,57 +67,64 @@ class RoverArmSystem : public sjsu::common::RoverSystem
     return "Fill";
   };
 
-  bool SyncedWithMissionControl(){
+  bool SyncedWithMissionControl()
+  {
     bool fill;
     return fill;
   };
 
-  void MoveRotunda(units::angular_velocity::revolutions_per_minute_t speed, units::angle::degree_t angle){
+  void MoveRotunda(units::angular_velocity::revolutions_per_minute_t speed,
+                   units::angle::degree_t angle)
+  {
     try
     {
-      if(!CheckValidMovement())
+      if (!CheckValidMovement())
       {
         throw(angle);
       }
       rotunda_.SetSpeed(speed);
       rotunda_.SetPosition(angle);
-      }
-      catch(units::angle::degree_t large_angle)
-      {
-        sjsu::LogError("Error Moving Rotunda, Requested Angle Is Too Large");
-      }
+    }
+    catch (units::angle::degree_t large_angle)
+    {
+      sjsu::LogError("Error Moving Rotunda, Requested Angle Is Too Large");
+    }
   }
 
-  void MoveShoulder(units::angular_velocity::revolutions_per_minute_t speed, units::angle::degree_t angle){
+  void MoveShoulder(units::angular_velocity::revolutions_per_minute_t speed,
+                    units::angle::degree_t angle)
+  {
     try
     {
-      if(!CheckValidMovement())
+      if (!CheckValidMovement())
       {
         throw(angle);
       }
       shoulder_.SetSpeed(speed);
       shoulder_.SetPosition(angle);
-      }
-      catch(units::angle::degree_t large_angle)
-      {
-        sjsu::LogError("Error Moving Shoulder, Requested Angle Is Too Large");
-      }
+    }
+    catch (units::angle::degree_t large_angle)
+    {
+      sjsu::LogError("Error Moving Shoulder, Requested Angle Is Too Large");
+    }
   }
 
-  void MoveElbow(units::angular_velocity::revolutions_per_minute_t speed, units::angle::degree_t angle){
+  void MoveElbow(units::angular_velocity::revolutions_per_minute_t speed,
+                 units::angle::degree_t angle)
+  {
     try
     {
-      if(!CheckValidMovement())
+      if (!CheckValidMovement())
       {
         throw(angle);
       }
       elbow_.SetSpeed(speed);
       elbow_.SetPosition(angle);
-      }
-      catch(units::angle::degree_t large_angle)
-      {
-        sjsu::LogError("Error Moving Elbow, Requested Angle Is Too Large");
-      }
+    }
+    catch (units::angle::degree_t large_angle)
+    {
+      sjsu::LogError("Error Moving Elbow, Requested Angle Is Too Large");
+    }
   }
 
   void HandleArmMovement()
@@ -250,8 +258,9 @@ class RoverArmSystem : public sjsu::common::RoverSystem
 
   void Esp(){};
 
-//TODO: need to work on valid movement
-  bool CheckValidMovement(){
+  // TODO: need to work on valid movement
+  bool CheckValidMovement()
+  {
     bool fill;
     return fill;
   }
@@ -269,5 +278,6 @@ class RoverArmSystem : public sjsu::common::RoverSystem
   sjsu::arm::Joint & shoulder_;
   sjsu::arm::Joint & elbow_;
   sjsu::arm::WristJoint & wrist_;
+  int heartbeat_count_ = 0;
 };
 }  // namespace sjsu::arm
