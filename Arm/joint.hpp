@@ -81,7 +81,10 @@ class Joint
     motor.SetSpeed(speed_);
   }
 
-  int GetSpeed() {}
+  int GetSpeed() 
+  {
+    return int (speed_);
+  }
 
  private:
   units::angle::degree_t minimum_angle     = 0_deg;
