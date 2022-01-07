@@ -98,6 +98,6 @@ class Joint
   units::angle::degree_t zero_offset_angle = 0_deg;
   sjsu::RmdX & motor;
   sjsu::Mpu6050 & mpu;
-  units::angular_velocity::revolutions_per_minute_t speed_;
+  units::angular_velocity::revolutions_per_minute_t speed_ = 0_rpm;
 };
 }  // namespace sjsu::arm

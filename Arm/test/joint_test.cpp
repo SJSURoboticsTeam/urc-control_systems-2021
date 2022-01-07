@@ -38,31 +38,32 @@ TEST_CASE("Drive system testing")
   SECTION("should initialize and return default values")
   {
     joint.Initialize();
-    CHECK(joint.speed_ == 0_rpm);
+    CHECK(joint.GetSpeed() == 0);
   }
 
   SECTION("should boundary test setting the motor angle")
   {
-    joint.SetPosition(5_deg);
-    joint.SetPosition(180_deg);
-    joint.SetPosition(181_deg);
-    joint.SetPosition(0_deg);
-    joint.SetPosition(-1_deg);
+    joint.SetPosition(5);
+    // CHECK(joint.GetPosition() == 5);
+    joint.SetPosition(180);
+    joint.SetPosition(181);
+    joint.SetPosition(0);
+    joint.SetPosition(-1);
     // TODO: verify the motor was / was not set to the following values
   }
 
   SECTION("should set zero offset to 25 degrees")
   {
-    joint.SetZeroOffset(25_deg);
+    joint.SetZeroOffset(25);
     // TODO: verify the offset
   }
 
   SECTION("should return 5 for accelerometer data")
   {
     auto data = joint.GetAccelerometerData();
-    CHECK(data.x == accel_value);
-    CHECK(data.y == accel_value);
-    CHECK(data.z == accel_value);
+    CHECK(data.x == 5);
+    CHECK(data.y == 5);
+    CHECK(data.z == 5);
   }
 }
 }  // namespace sjsu
