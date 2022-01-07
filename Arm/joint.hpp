@@ -80,7 +80,15 @@ class Joint
     motor.SetSpeed(speed_);
   }
 
-  int GetSpeed() {}
+  int GetSpeed()
+  {
+    return int(speed_);
+  }
+
+  int GetPosition()
+  {
+    return 0;
+  }
 
  private:
   units::angle::degree_t minimum_angle     = 0_deg;
@@ -89,7 +97,7 @@ class Joint
   units::angle::degree_t zero_offset_angle = 0_deg;
   sjsu::RmdX & motor;
   sjsu::Mpu6050 & mpu;
-  units::angular_velocity::revolutions_per_minute_t speed_;
   const double kLerpStep = 0.5;
+  units::angular_velocity::revolutions_per_minute_t speed_ = 0_rpm;
 };
 }  // namespace sjsu::arm

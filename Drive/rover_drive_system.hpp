@@ -37,13 +37,12 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
     int rotation_angle  = 0;
     int speed           = 0;
   };
-
   RoverDriveSystem(Wheel & left_wheel, Wheel & right_wheel, Wheel & back_wheel)
       : left_wheel_(left_wheel),
         right_wheel_(right_wheel),
         back_wheel_(back_wheel){};
 
-  void Initialize()
+  virtual void Initialize()
   {
     sjsu::LogInfo("Initializing drive system...");
     left_wheel_.Initialize();
@@ -51,6 +50,16 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
     back_wheel_.Initialize();
     SetSpinMode();
   };
+
+  char GetCurrentMode()
+  {
+    return current_mode_;
+  }
+
+  int GetHeartbeatCount()
+  {
+    return heartbeat_count_;
+  }
 
   /// Constructs parameters for an HTTP GET request
   /// @return ?heartbeat_count=0&is_operational=1&drive_mode=
@@ -90,7 +99,7 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
   /// D = Drive, S = Spin, T = Translation, L/R/B = Left/Right/Back Wheel
   void HandleRoverMovement()
   {
-    if (!IsOperational() || !IsSynced())
+    if (!IsOperational() || !IsHeartbeatSynced())
     {
       SetWheelSpeed(kZeroSpeed);
       return;
@@ -104,7 +113,7 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
     double angle = mc_data_.rotation_angle;
     double speed = mc_data_.speed;
 
-    if (!IsNewMode() && IsOperational() && IsSynced())
+    if (!IsNewMode() && IsOperational() && IsHeartbeatSynced())
     {
       sjsu::LogInfo("Handling %c movement...", current_mode_);
       switch (current_mode_)
@@ -120,7 +129,6 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
           SetWheelSpeed(kZeroSpeed);
           break;
       }
-      IncrementHeartbeat();
     }
     else
     {
@@ -137,19 +145,19 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
       // Simultaneous wheel homing
       SetWheelSpeed(kZeroSpeed);
       sjsu::Delay(50ms);
-      for (units::angle::degree_t angle = 0_deg; angle < 360_deg; angle += 2_deg)
+      for (int angle = 0; angle < 360; angle += 2)
       {
-        if(!left_wheel_.IsWheelHomed)
+        if (!left_wheel_.IsWheelHomed())
         {
-          left_wheel_.SetSteeringAngle(angle);
+          left_wheel_.SetSteerAngle(angle);
         }
-        if(!right_wheel_.IsWheelHomed)
+        if (!right_wheel_.IsWheelHomed())
         {
-          right_wheel_.SetSteeringAngle(angle);
+          right_wheel_.SetSteerAngle(angle);
         }
-        if(!back_wheel_.IsWheelHomed)
+        if (!back_wheel_.IsWheelHomed())
         {
-          back_wheel_.SetSteeringAngle(angle);
+          back_wheel_.SetSteerAngle(angle);
         }
       }
       //
@@ -194,7 +202,6 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
     printf("=========================\n");
   };
 
- private:
   /// Checks whether the rover got a new drive mode command
   bool IsNewMode()
   {
@@ -218,7 +225,7 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
   }
 
   /// Verifies that mission control is sending fresh commands to rover
-  bool IsSynced()
+  bool IsHeartbeatSynced()
   {
     if (mc_data_.heartbeat_count != heartbeat_count_)
     {
@@ -230,11 +237,12 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
     return true;
   }
 
-  void IncrementHeartbeat()
+  void IncrementHeartbeatCount()
   {
     heartbeat_count_++;
   }
 
+ private:
   /// Stops the rover and sets a new mode.
   void SetMode()
   {
@@ -250,7 +258,6 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
       case 'B': SetSingleWheelMode(); break;
       default: sjsu::LogError("Unable to set drive mode!");
     };
-    IncrementHeartbeat();
   };
 
   // ======================

@@ -49,7 +49,7 @@ class RoverArmSystem : public sjsu::common::RoverSystem
   }
   void Initialize()
   {
-    rotunda_.Initialize();
+    rotunda_.Initialize();  // returns
     shoulder_.Initialize();
     elbow_.Initialize();
     wrist_.Initialize();
@@ -61,10 +61,9 @@ class RoverArmSystem : public sjsu::common::RoverSystem
 
   std::string GETParameters()
   {
-    std::string parameter = "?is_operational=" + mc_data_.is_operational +
-                            "&heartbeat_count=" + heartbeat_count_ +
-                            "&rotunda_angle=" + rotunda_.SetPosition() +
-                            "&rotunda_speed=" + rotunda_.GetSpeed();
+    std::string parameter =
+        "?is_operational=" + std::to_string(mc_data_.is_operational) +
+        "&heartbeat_count=" + std::to_string(heartbeat_count_);
     return parameter;
   };
 
@@ -151,7 +150,7 @@ class RoverArmSystem : public sjsu::common::RoverSystem
   {
     double home = 0;
     // VerifyNonZeroes()
-    VerifyNonZeroes(acceleration_.rotunda.x);
+    VerifyNonZeroes(accelerations_.rotunda.x);
     VerifyNonZeroes(accelerations_.rotunda.y);
     VerifyNonZeroes(accelerations_.elbow.x);
     VerifyNonZeroes(accelerations_.elbow.y);
@@ -217,7 +216,7 @@ class RoverArmSystem : public sjsu::common::RoverSystem
   sjsu::arm::WristJoint & wrist_;
   MissionControlData mc_data_;
   Acceleration accelerations_;
-  double heartbeat_count_                 = 0;
+  int heartbeat_count_                    = 0;
   MissionControlData::Modes current_mode_ = MissionControlData::Modes::kDefault;
 
   void VerifyNonZeroes(double & acceleration)
