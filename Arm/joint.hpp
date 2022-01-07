@@ -81,6 +81,12 @@ class Joint
     motor.SetSpeed(speed_);
   }
 
+  void SetSpeedLerpVers(double targetspeed){
+    double current_speed = //get current speed
+    speed_ = std::lerp(current_speed, targetspeed, kLerpStep);
+    motor.SetSpeed(speed_);
+  }
+
   int GetSpeed() {}
 
  private:
@@ -91,5 +97,6 @@ class Joint
   sjsu::RmdX & motor;
   sjsu::Mpu6050 & mpu;
   units::angular_velocity::revolutions_per_minute_t speed_;
+  const double kLerpStep = 0.5;
 };
 }  // namespace sjsu::arm
