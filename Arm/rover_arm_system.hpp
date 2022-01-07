@@ -136,12 +136,12 @@ class RoverArmSystem : public sjsu::common::RoverSystem
     // angle needed
 
     double acceleration_x =
-        accelerations_.rotunda.x +
-        accelerations_.shoulder.x;  // might need compliment value of shoulder
-    double acceleration_y =
-        accelerations_.rotunda.y + accelerations_.shoulder.y;
+        VectorAddition(accelerations_.rotunda.x, accelerations_.shoulder.x);  // might need compliment value of shoulder
+    double acceleration_y = 
+        VectorAddition(accelerations_.rotunda.y, accelerations_.shoulder.y);
     // adding i and j vectors of acceleration
     home = atan(acceleration_y / acceleration_x);
+    shoulder_.SetZeroOffset(home);
     MoveShoulder(home);  // move shoulder at 10 rpm to home
   }
   // logic needs checking.
@@ -156,9 +156,9 @@ class RoverArmSystem : public sjsu::common::RoverSystem
     VerifyNonZeroes(accelerations_.elbow.y);
 
     double acceleration_x =
-        accelerations_.rotunda.x +
-        accelerations_.elbow.x;  // might need compliment value of shoulder
-    double acceleration_y = accelerations_.rotunda.y + accelerations_.elbow.y;
+        VectorAddition(accelerations_.rotunda.x, accelerations_.elbow.x);  // might need compliment value of shoulder
+    double acceleration_y = 
+        VectorAddition(accelerations_.rotunda.y, accelerations_.elbow.y);
     double angle_without_correction = atan(acceleration_y / acceleration_x);
     // maybe make the following statements above the if's functions that return
     // a bool to give a better description/make it look nicer if the elbow is in
@@ -176,6 +176,7 @@ class RoverArmSystem : public sjsu::common::RoverSystem
     {
       home = angle_without_correction;
     }
+    elbow_.SetZeroOffset(home);
     MoveElbow(home);
   }
 
@@ -210,6 +211,19 @@ class RoverArmSystem : public sjsu::common::RoverSystem
   }
 
  private:
+  void VerifyNonZeroes(double & acceleration)
+  {
+    if (acceleration == 0)
+    {
+      acceleration = 0.0001;
+    }
+  }
+  double VectorAddition(double left, double right)
+  {
+    return(left + right);
+  }
+  double FindComplimentValue(){};  // may or may not need, will decide after testing code
+  
   sjsu::arm::Joint & rotunda_;
   sjsu::arm::Joint & shoulder_;
   sjsu::arm::Joint & elbow_;
@@ -219,16 +233,5 @@ class RoverArmSystem : public sjsu::common::RoverSystem
   int heartbeat_count_                    = 0;
   MissionControlData::Modes current_mode_ = MissionControlData::Modes::kDefault;
 
-  void VerifyNonZeroes(double & acceleration)
-  {
-    if (acceleration == 0)
-    {
-      acceleration = 0.0001;
-    }
-  }
-
-  double FindComplimentValue(
-      double,
-      double){};  // may or may not need, will decide after testing code
 };
 }  // namespace sjsu::arm

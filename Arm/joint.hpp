@@ -88,7 +88,7 @@ class Joint
 
   int GetPosition()
   {
-    return 0;
+    return int(position_);
   }
 
  private:
@@ -99,5 +99,6 @@ class Joint
   sjsu::RmdX & motor;
   sjsu::Mpu6050 & mpu;
   units::angular_velocity::revolutions_per_minute_t speed_ = 0_rpm;
+  units::angle::degree_t position_ = 0_deg;
 };
 }  // namespace sjsu::arm
