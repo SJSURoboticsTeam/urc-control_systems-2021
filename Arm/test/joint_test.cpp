@@ -52,12 +52,24 @@ TEST_CASE("Drive system testing")
     // TODO: verify the motor was / was not set to the following values
   }
 
+  SECTION("Should set motor speed to 5, 10 , 45, 100")
+  {
+    joint.SetSpeed(5);
+    CHECK(joint.GetSpeed() == 5);
+    joint.SetSpeed(10);
+    CHECK(joint.GetSpeed() == 10);
+    joint.SetSpeed(45);
+    CHECK(joint.GetSpeed() == 45);
+    joint.SetSpeed(100);
+    CHECK(joint.GetSpeed() == 100);
+  }
+
   SECTION("should set zero offset to 25 degrees")
   {
     joint.SetZeroOffset(25);
     // TODO: verify the offset
   }
-
+  
   SECTION("should return 5 for accelerometer data")
   {
     auto data = joint.GetAccelerometerData();

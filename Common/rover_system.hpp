@@ -17,7 +17,7 @@ class RoverSystem
   /// Creates the GET request parameters that contain the current rover status
   std::string GETParameters();
   /// Parses the JSON response retrieved from mission control
-  std::string ParseJSONResponse();
+  void ParseJSONResponse();
   /// Move the rover according to the data sent from mission control
   void HandleRoverMovement();
 };
