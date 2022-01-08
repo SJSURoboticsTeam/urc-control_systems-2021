@@ -82,11 +82,22 @@ class RoverArmSystem : public sjsu::common::RoverSystem
   };
 
   std::string GETParameters()
-  {
-    std::string parameter =
-        "?is_operational=" + std::to_string(mc_data_.is_operational) +
-        "&heartbeat_count=" + std::to_string(heartbeat_count_);
-    return parameter;
+   {
+    char request_parameter[300];
+    snprintf(
+
+      request_parameter, 300,
+      "?hearbeat_count=%d&is_operational=%d&arm_speed=%d&battery=%d&rotunda_angle=%d"
+      "&shoulder_angle=%d&elbow_angle=%d&wrist_roll=%d&wrist_pitch=%d&pinky_angle=%d"
+      "&ring_angle=%d&middle_angle=%d&pointer_angle=%d&thumb_angle=%d",
+      heartbeat_count_, mc_data_. is_operational, arm_speed_.GetSpeed(),
+      state_of_charge_,rotunda_angle_.GetPosition(), shoulder_angle_.GetPosition(),
+      elbow_angle_.GetPosition(),wrist_roll_.GetSpeed(),wrist_pitch_.GetSpeed(),
+      pinky_angle_.GetPosition(),ring_angle_.GetPosition(),middle_angle_.GetPosition(),
+      pointer_angle_.GetPosition(),thumb_angle_.GetPosition());
+
+    return request_parameter;
+
   };
 
   void ParseJSONResponse(std::string & response)
@@ -274,8 +285,9 @@ class RoverArmSystem : public sjsu::common::RoverSystem
   sjsu::arm::WristJoint & wrist_;
   MissionControlData mc_data_;
   Acceleration accelerations_;
-  int heartbeat_count_                    = 0;
-  const int kExpectedArguments            = 5;
+  int heartbeat_count_   = 0;
+  int state_of_charge_ = 90;
+  const int kExpectedArguments  = 5;
   MissionControlData::Modes current_mode_ = MissionControlData::Modes::kDefault;
 
   void VerifyNonZeroes(double & acceleration)
