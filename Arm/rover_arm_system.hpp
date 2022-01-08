@@ -7,22 +7,45 @@
 
 namespace sjsu::arm
 {
+const char response_body_format[] =
+    "\r\n\r\n{\n"
+    "  \"heartbeat_count\": %d,\n"
+    "  \"is_operational\": %d,\n"
+    "  \"arm_speed\": %d,\n"
+    "  \"rotunda_angle\": %d,\n"
+    "  \"shoulder_angle\": %d,\n"
+    "  \"elbow_angle\": %d,\n"
+    "  \"wrist_roll\": %d,\n"
+    "  \"wrist_pitch\": %d,\n"
+    "  \"pinky_angle\": %d,\n"
+    "  \"ring_angle\": %d,\n"
+    "  \"middle_angle\": %d,\n"
+    "  \"pointer_angle\": %d,\n"
+    "  \"thumb_angle\": %d\n"
+    "}";
+
 class RoverArmSystem : public sjsu::common::RoverSystem
 {
  public:
+  struct ParseError
+  {
+  };
   struct MissionControlData : public RoverMissionControlData
   {
     enum class Modes : char
     {
       kDefault = 'D',
     };
-    Modes modes = Modes::kDefault;
+    Modes modes         = Modes::kDefault;
+    int is_operational  = 1;
+    int heartbeat_count = 0;
     double arm_speed;
     double rotunda_angle;
     double shoulder_angle;
     double elbow_angle;
     double wrist_roll;
     double wrist_pitch;
+
     struct Finger
     {
       double pinky_angle;
@@ -61,22 +84,70 @@ class RoverArmSystem : public sjsu::common::RoverSystem
 
   std::string GETParameters()
   {
-    std::string parameter =
-        "?is_operational=" + std::to_string(mc_data_.is_operational) +
-        "&heartbeat_count=" + std::to_string(heartbeat_count_);
-    return parameter;
+    char request_parameter[300];
+    snprintf(request_parameter, 300,
+             "?heartbeat_count=%d&is_operational=%d&arm_speed=%c&battery=%d"
+             "&rotunda_angle=%d&shoulder_angle=%d&elbow_angle=%d&wrist_roll=%d"
+             "&back_wheel_speed=%d&wrist_pitch=%d&pinky_angle=%d&ring_angle=%d"
+             "&middle_angle=%d&pointer_angle=%d&thumb_angle=%d",
+             heartbeat_count_, mc_data_.is_operational, mc_data_.arm_speed,
+             state_of_charge_, rotunda_.GetPosition(), shoulder_.GetPosition(),
+             elbow_.GetPosition(), wrist_.GetRollPosition(),
+             wrist_.GetPitchPosition(),
+             mc_data_.finger.pinky_angle.GetPosition(),
+             mc_data_.finger.ring_angle.GetPosition(),
+             mc_data_.finger.middle_angle.GetPosition(),
+             mc_data_.finger.pointer_angle.GetPosition(),
+             mc_data_.finger.thumb_angle.GetPosition());
+    return request_parameter;
   };
 
-  std::string ParseJSONResponse()
+  void ParseJSONResponse(std::string & response)
   {
-    return "Fill";
+    int actual_arguments = sscanf(
+        response.c_str(), response_body_format, &mc_data_.heartbeat_count,
+        &mc_data_.is_operational, &mc_data_.arm_speed, &mc_data_.rotunda_angle,
+        &mc_data_.shoulder_angle, &mc_data_.elbow_angle, &mc_data_.wrist_roll,
+        &mc_data_.wrist_pitch, &mc_data_.finger.pinky_angle,
+        &mc_data_.finger.ring_angle, &mc_data_.finger.middle_angle,
+        &mc_data_.finger.pointer_angle, &mc_data_.finger.thumb_angle);
+
+    if (actual_arguments != kExpectedArguments)
+    {
+      sjsu::LogError("Arguments# %d != expected# %d!", actual_arguments,
+                     kExpectedArguments);
+      throw ParseError{};
+    }
   };
 
-  bool SyncedWithMissionControl()
+  /// Checks that the rover is operational
+  bool IsOperational()
   {
-    bool fill;
-    return fill;
-  };
+    if (mc_data_.is_operational != 1)
+    {
+      sjsu::LogWarning("Drive mode is not operational!");
+      return false;
+    }
+    return true;
+  }
+
+  /// Verifies that mission control is sending fresh commands to rover
+  bool IsHeartbeatSynced()
+  {
+    if (mc_data_.heartbeat_count != heartbeat_count_)
+    {
+      // TODO: Throw error if this is reached?
+      sjsu::LogError("Heartbeat out of sync - resetting!");
+      heartbeat_count_ = 0;
+      return false;
+    }
+    return true;
+  }
+
+  void IncrementHeartbeatCount()
+  {
+    heartbeat_count_++;
+  }
 
   void MoveRotunda(double angle)
   {
@@ -230,7 +301,9 @@ class RoverArmSystem : public sjsu::common::RoverSystem
   sjsu::arm::WristJoint & wrist_;
   MissionControlData mc_data_;
   Acceleration accelerations_;
-  int heartbeat_count_                    = 0;
+  int heartbeat_count_   = 0;
+  int state_of_charge_ = 90;
+  const int kExpectedArguments  = 5;
   MissionControlData::Modes current_mode_ = MissionControlData::Modes::kDefault;
 
 };
