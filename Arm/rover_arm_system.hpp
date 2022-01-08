@@ -2,6 +2,7 @@
 #include "utility/math/units.hpp"
 #include "joint.hpp"
 #include "Hand/wrist_joint.hpp"
+#include "Hand/hand.hpp"
 #include "../Common/rover_system.hpp"
 #include <cmath>
 
@@ -94,11 +95,12 @@ class RoverArmSystem : public sjsu::common::RoverSystem
              state_of_charge_, rotunda_.GetPosition(), shoulder_.GetPosition(),
              elbow_.GetPosition(), wrist_.GetRollPosition(),
              wrist_.GetPitchPosition(),
-             mc_data_.finger.pinky_angle.GetPosition(),
-             mc_data_.finger.ring_angle.GetPosition(),
-             mc_data_.finger.middle_angle.GetPosition(),
-             mc_data_.finger.pointer_angle.GetPosition(),
-             mc_data_.finger.thumb_angle.GetPosition());
+            hand_.GetPinkyPosition(),
+            hand_.GetRingPosition(),
+            hand_.GetMiddlePosition(),
+            hand_.GetPointerPosition(),
+            hand_.GetThumbPosition());
+
     return request_parameter;
   };
 
@@ -197,22 +199,22 @@ class RoverArmSystem : public sjsu::common::RoverSystem
     // acceleration values are 0, and if they are, it will change
     // to something close to 0
 
-    VerifyNonZeroes(accelerations_.rotunda.x);
-    VerifyNonZeroes(accelerations_.rotunda.y);
-    VerifyNonZeroes(accelerations_.shoulder.x);
-    VerifyNonZeroes(accelerations_.shoulder.y);
+    ChangeIfZero(accelerations_.rotunda.x);
+    ChangeIfZero(accelerations_.rotunda.y);
+    ChangeIfZero(accelerations_.shoulder.x);
+    ChangeIfZero(accelerations_.shoulder.y);
 
     // cut this out into a helper function to clean up code
     // double check logic: add the values together first then calculate the
     // angle needed
 
     double acceleration_x =
-        accelerations_.rotunda.x +
-        accelerations_.shoulder.x;  // might need compliment value of shoulder
-    double acceleration_y =
+        accelerations_.rotunda.x + accelerations_.shoulder.x;  // might need compliment value of shoulder
+    double acceleration_y = 
         accelerations_.rotunda.y + accelerations_.shoulder.y;
     // adding i and j vectors of acceleration
     home = atan(acceleration_y / acceleration_x);
+    shoulder_.SetZeroOffset(home);
     MoveShoulder(home);  // move shoulder at 10 rpm to home
   }
   // logic needs checking.
@@ -220,16 +222,16 @@ class RoverArmSystem : public sjsu::common::RoverSystem
   void HomeElbow()
   {
     double home = 0;
-    // VerifyNonZeroes()
-    VerifyNonZeroes(accelerations_.rotunda.x);
-    VerifyNonZeroes(accelerations_.rotunda.y);
-    VerifyNonZeroes(accelerations_.elbow.x);
-    VerifyNonZeroes(accelerations_.elbow.y);
+    // ChangeIfZero()
+    ChangeIfZero(accelerations_.rotunda.x);
+    ChangeIfZero(accelerations_.rotunda.y);
+    ChangeIfZero(accelerations_.elbow.x);
+    ChangeIfZero(accelerations_.elbow.y);
 
     double acceleration_x =
-        accelerations_.rotunda.x +
-        accelerations_.elbow.x;  // might need compliment value of shoulder
-    double acceleration_y = accelerations_.rotunda.y + accelerations_.elbow.y;
+        accelerations_.rotunda.x + accelerations_.elbow.x;  // might need compliment value of shoulder
+    double acceleration_y = 
+        accelerations_.rotunda.y + accelerations_.elbow.y;
     double angle_without_correction = atan(acceleration_y / acceleration_x);
     // maybe make the following statements above the if's functions that return
     // a bool to give a better description/make it look nicer if the elbow is in
@@ -247,6 +249,7 @@ class RoverArmSystem : public sjsu::common::RoverSystem
     {
       home = angle_without_correction;
     }
+    elbow_.SetZeroOffset(home);
     MoveElbow(home);
   }
 
@@ -281,6 +284,15 @@ class RoverArmSystem : public sjsu::common::RoverSystem
   }
 
  private:
+  void ChangeIfZero(double & acceleration)
+  {
+    if (acceleration == 0)
+    {
+      acceleration = 0.0001;
+    }
+  }
+  double FindComplimentValue(){};  // may or may not need, will decide after testing code
+  
   sjsu::arm::Joint & rotunda_;
   sjsu::arm::Joint & shoulder_;
   sjsu::arm::Joint & elbow_;
@@ -291,17 +303,6 @@ class RoverArmSystem : public sjsu::common::RoverSystem
   int state_of_charge_ = 90;
   const int kExpectedArguments  = 5;
   MissionControlData::Modes current_mode_ = MissionControlData::Modes::kDefault;
-
-  void VerifyNonZeroes(double & acceleration)
-  {
-    if (acceleration == 0)
-    {
-      acceleration = 0.0001;
-    }
-  }
-
-  double FindComplimentValue(
-      double,
-      double){};  // may or may not need, will decide after testing code
+  sjsu::arm::Hand hand_;
 };
 }  // namespace sjsu::arm
