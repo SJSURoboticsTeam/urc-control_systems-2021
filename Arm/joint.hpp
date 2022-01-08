@@ -101,7 +101,6 @@ class Joint
   const double kLerpStep                   = 0.5;
   sjsu::RmdX & motor;
   sjsu::Mpu6050 & mpu;
-  const double kLerpStep = 0.5;
   units::angular_velocity::revolutions_per_minute_t speed_ = 0_rpm;
   units::angular_velocity::revolutions_per_minute_t max_speed_ = 100_rpm;
   units::angle::degree_t position_ = 0_deg;
