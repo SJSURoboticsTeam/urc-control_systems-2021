@@ -47,7 +47,7 @@ class Joint
     units::angle::degree_t angle_to_degrees(angle);
     units::angle::degree_t calibrated_angle =
         angle_to_degrees - zero_offset_angle;
-    units::angle::degree_t calibrated_angle = std::clamp(calibrated_angle, maximum_angle, minimum_angle);
+    calibrated_angle = std::clamp(calibrated_angle, maximum_angle, minimum_angle);
     sjsu::LogInfo("%f", calibrated_angle.to<double>());
     motor.SetAngle(calibrated_angle);
   }
@@ -73,8 +73,8 @@ class Joint
     return acceleration;
   }
 
-  void SetSpeed(double targetspeed){
-    double current_speed = speed_;
+  void SetSpeed(float targetspeed){
+    units::angular_velocity::revolutions_per_minute_t current_speed = speed_;
     speed_ = std::lerp(current_speed, targetspeed, kLerpStep);
     motor.SetSpeed(std::clamp(speed_, max_speed_, -max_speed_));
   }
@@ -98,7 +98,7 @@ class Joint
   sjsu::Mpu6050 & mpu;
   const double kLerpStep = 0.5;
   units::angular_velocity::revolutions_per_minute_t speed_ = 0_rpm;
-  int max_speed_ = 100;
+  units::angular_velocity::revolutions_per_minute_t max_speed_ = 100_rpm;
   units::angle::degree_t position_ = 0_deg;
 };
 }  // namespace sjsu::arm
