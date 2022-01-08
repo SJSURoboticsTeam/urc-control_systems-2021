@@ -45,6 +45,7 @@ class RoverArmSystem : public sjsu::common::RoverSystem
     double elbow_angle;
     double wrist_roll;
     double wrist_pitch;
+
     struct Finger
     {
       double pinky_angle;
@@ -83,10 +84,22 @@ class RoverArmSystem : public sjsu::common::RoverSystem
 
   std::string GETParameters()
   {
-    std::string parameter =
-        "?is_operational=" + std::to_string(mc_data_.is_operational) +
-        "&heartbeat_count=" + std::to_string(heartbeat_count_);
-    return parameter;
+    char request_parameter[300];
+    snprintf(request_parameter, 300,
+             "?heartbeat_count=%d&is_operational=%d&arm_speed=%c&battery=%d"
+             "&rotunda_angle=%d&shoulder_angle=%d&elbow_angle=%d&wrist_roll=%d"
+             "&back_wheel_speed=%d&wrist_pitch=%d&pinky_angle=%d&ring_angle=%d"
+             "&middle_angle=%d&pointer_angle=%d&thumb_angle=%d",
+             heartbeat_count_, mc_data_.is_operational, mc_data_.arm_speed,
+             state_of_charge_, rotunda_.GetPosition(), shoulder_.GetPosition(),
+             elbow_.GetPosition(), wrist_.GetRollPosition(),
+             wrist_.GetPitchPosition(),
+             mc_data_.finger.pinky_angle.GetPosition(),
+             mc_data_.finger.ring_angle.GetPosition(),
+             mc_data_.finger.middle_angle.GetPosition(),
+             mc_data_.finger.pointer_angle.GetPosition(),
+             mc_data_.finger.thumb_angle.GetPosition());
+    return request_parameter;
   };
 
   void ParseJSONResponse(std::string & response)
