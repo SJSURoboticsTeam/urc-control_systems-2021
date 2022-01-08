@@ -74,10 +74,9 @@ class Joint
     return acceleration;
   }
 
-  void SetSpeed(double speed)
-  {
-    units::angular_velocity::revolutions_per_minute_t speed_to_rpm(speed);
-    speed_ = speed_to_rpm;
+  void SetSpeed(double targetspeed){
+    double current_speed = speed_;
+    speed_ = std::lerp(current_speed, targetspeed, kLerpStep);
     motor.SetSpeed(speed_);
   }
 
@@ -98,6 +97,7 @@ class Joint
   units::angle::degree_t zero_offset_angle = 0_deg;
   sjsu::RmdX & motor;
   sjsu::Mpu6050 & mpu;
+  const double kLerpStep = 0.5;
   units::angular_velocity::revolutions_per_minute_t speed_ = 0_rpm;
   units::angle::degree_t position_ = 0_deg;
 };
