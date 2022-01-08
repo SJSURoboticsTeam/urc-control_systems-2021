@@ -2,6 +2,7 @@
 #include "utility/math/units.hpp"
 #include "joint.hpp"
 #include "Hand/wrist_joint.hpp"
+#include "Hand/hand.hpp"
 #include "../Common/rover_system.hpp"
 #include <cmath>
 
@@ -94,11 +95,12 @@ class RoverArmSystem : public sjsu::common::RoverSystem
              state_of_charge_, rotunda_.GetPosition(), shoulder_.GetPosition(),
              elbow_.GetPosition(), wrist_.GetRollPosition(),
              wrist_.GetPitchPosition(),
-             mc_data_.finger.pinky_angle.GetPosition(),
-             mc_data_.finger.ring_angle.GetPosition(),
-             mc_data_.finger.middle_angle.GetPosition(),
-             mc_data_.finger.pointer_angle.GetPosition(),
-             mc_data_.finger.thumb_angle.GetPosition());
+            hand_.GetPinkyPosition(),
+            hand_.GetRingPosition(),
+            hand_.GetMiddlePosition(),
+            hand_.GetPointerPosition(),
+            hand_.GetThumbPosition());
+
     return request_parameter;
   };
 
@@ -209,7 +211,7 @@ class RoverArmSystem : public sjsu::common::RoverSystem
     double acceleration_x =
         accelerations_.rotunda.x + accelerations_.shoulder.x;  // might need compliment value of shoulder
     double acceleration_y = 
-        accelerations_.rotunda.y + accelerations_.shoulder.y);
+        accelerations_.rotunda.y + accelerations_.shoulder.y;
     // adding i and j vectors of acceleration
     home = atan(acceleration_y / acceleration_x);
     shoulder_.SetZeroOffset(home);
@@ -301,6 +303,6 @@ class RoverArmSystem : public sjsu::common::RoverSystem
   int state_of_charge_ = 90;
   const int kExpectedArguments  = 5;
   MissionControlData::Modes current_mode_ = MissionControlData::Modes::kDefault;
-
+  sjsu::arm::Hand hand_;
 };
 }  // namespace sjsu::arm
