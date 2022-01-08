@@ -35,6 +35,13 @@ class WristJoint
   sjsu::Mpu6050 & mpu;
 
  public:
+   struct Acceleration
+  {
+    float x;
+    float y;
+    float z;
+  };
+  
   WristJoint(sjsu::RmdX & left_joint_motor,
              sjsu::RmdX & right_joint_motor,
              sjsu::Mpu6050 & accelerometer)
@@ -89,8 +96,8 @@ class WristJoint
   {
     units::angle::degree_t left_offset_to_degree(left_offset);
     units::angle::degree_t right_offset_to_degree(right_offset);
-    left_zero_offset_angle  = left_offset;
-    right_zero_offset_angle = right_offset;
+    left_zero_offset_angle  = left_offset_to_degree;
+    right_zero_offset_angle = right_offset_to_degree;
   }
 
   /// Return the acceleration values for the MPU6050 on the joint.
@@ -111,12 +118,6 @@ int GetRollPosition(){
   return 0;
 }
 private:
-  struct Acceleration
-  {
-    float x;
-    float y;
-    float z;
-  }
 
 };
 }  // namespace sjsu::arm
