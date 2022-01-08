@@ -64,6 +64,21 @@ TEST_CASE("Drive system testing")
     CHECK(joint.GetSpeed() == 100);
   }
 
+  SECTION("Should avoid setting speed and angles beyond the limits")
+  {
+    joint.SetSpeed(5);
+    CHECK(joint.GetSpeed() == 5);
+    joint.SetSpeed(101);
+    CHECK(joint.GetSpeed() == 5);
+    joint.SetSpeed(-101);
+    CHECK(joint.GetSpeed() == 5);
+    joint.SetPosition(45);
+    joint.SetPosition(200);
+    CHECK(joint.GetPosition() == 45);
+    joint.SetPosition(-10);
+    CHECK(joint.GetPosition() == 45);
+  }
+
   SECTION("should set zero offset to 25 degrees")
   {
     joint.SetZeroOffset(25);
