@@ -287,8 +287,9 @@ class RoverArmSystem : public sjsu::common::RoverSystem
   sjsu::arm::WristJoint & wrist_;
   MissionControlData mc_data_;
   Acceleration accelerations_;
-  int heartbeat_count_                    = 0;
-  const int kExpectedArguments            = 5;
+  int heartbeat_count_   = 0;
+  int state_of_charge_ = 90;
+  const int kExpectedArguments  = 5;
   MissionControlData::Modes current_mode_ = MissionControlData::Modes::kDefault;
 
   void VerifyNonZeroes(double & acceleration)
