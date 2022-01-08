@@ -46,15 +46,23 @@ int main()
   esp.Initialize();
   arm.Initialize();
 
+  // Arm control loop
+  // 1. Arm sys creates GET request parameters - returns endpoint+parameters
+  // 2. Make GET request using esp - returns response body as string
+  // 3. Arm sys parses GET response
+  // 4. Arm sys handles arm movement
   while (1)
   {
     try
     {
-      sjsu::LogInfo("Making new request...");
-      std::string endpoint = "arm?example=1&param=2";  // include status updates
+      sjsu::LogInfo("Making new request now...");
+      std::string endpoint = "arm" + arm.GETParameters();
       std::string response = esp.GET(endpoint);
       sjsu::TimeoutTimer serverTimeout(5s);  // server has 5s timeout
-      // Do stuff with arm here...
+      arm.ParseJSONResponse(response);
+      arm.HandleArmMovement();
+      arm.IncrementHeartbeatCount();
+      arm.PrintRoverData();
       sjsu::Delay(3s);
       if (serverTimeout.HasExpired())
       {
@@ -64,12 +72,19 @@ int main()
     }
     catch (const std::exception & e)
     {
-      sjsu::LogError("Uncaught error in main()!");
+      sjsu::LogError("Uncaught error in main() - Stopping Arm!");
+      //Stop arm
       if (!esp.IsConnected())
       {
         esp.ConnectToWifi();
         esp.ConnectToServer();
       }
     }
+    catch (const sjsu::arm::RoverArmSystem::ParseError &)
+    {
+      sjsu::LogError("Parsing Error: Arguments not equal");
+    }
   }
+
+  return 0;
 }

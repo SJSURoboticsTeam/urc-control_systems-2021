@@ -94,5 +94,13 @@ class WristJoint
   {
     return mpu.Read();
   }
+int GetPitchPosition(){
+  return 0;
+}
+
+int GetRollPosition(){
+  return 0;
+}
+
 };
 }  // namespace sjsu::arm
