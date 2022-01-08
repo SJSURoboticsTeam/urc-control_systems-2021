@@ -126,19 +126,19 @@ class RoverArmSystem : public sjsu::common::RoverSystem
     // acceleration values are 0, and if they are, it will change
     // to something close to 0
 
-    VerifyNonZeroes(accelerations_.rotunda.x);
-    VerifyNonZeroes(accelerations_.rotunda.y);
-    VerifyNonZeroes(accelerations_.shoulder.x);
-    VerifyNonZeroes(accelerations_.shoulder.y);
+    ChangeIfZero(accelerations_.rotunda.x);
+    ChangeIfZero(accelerations_.rotunda.y);
+    ChangeIfZero(accelerations_.shoulder.x);
+    ChangeIfZero(accelerations_.shoulder.y);
 
     // cut this out into a helper function to clean up code
     // double check logic: add the values together first then calculate the
     // angle needed
 
     double acceleration_x =
-        VectorAddition(accelerations_.rotunda.x, accelerations_.shoulder.x);  // might need compliment value of shoulder
+        accelerations_.rotunda.x + accelerations_.shoulder.x;  // might need compliment value of shoulder
     double acceleration_y = 
-        VectorAddition(accelerations_.rotunda.y, accelerations_.shoulder.y);
+        accelerations_.rotunda.y + accelerations_.shoulder.y);
     // adding i and j vectors of acceleration
     home = atan(acceleration_y / acceleration_x);
     shoulder_.SetZeroOffset(home);
@@ -149,16 +149,16 @@ class RoverArmSystem : public sjsu::common::RoverSystem
   void HomeElbow()
   {
     double home = 0;
-    // VerifyNonZeroes()
-    VerifyNonZeroes(accelerations_.rotunda.x);
-    VerifyNonZeroes(accelerations_.rotunda.y);
-    VerifyNonZeroes(accelerations_.elbow.x);
-    VerifyNonZeroes(accelerations_.elbow.y);
+    // ChangeIfZero()
+    ChangeIfZero(accelerations_.rotunda.x);
+    ChangeIfZero(accelerations_.rotunda.y);
+    ChangeIfZero(accelerations_.elbow.x);
+    ChangeIfZero(accelerations_.elbow.y);
 
     double acceleration_x =
-        VectorAddition(accelerations_.rotunda.x, accelerations_.elbow.x);  // might need compliment value of shoulder
+        accelerations_.rotunda.x + accelerations_.elbow.x;  // might need compliment value of shoulder
     double acceleration_y = 
-        VectorAddition(accelerations_.rotunda.y, accelerations_.elbow.y);
+        accelerations_.rotunda.y + accelerations_.elbow.y;
     double angle_without_correction = atan(acceleration_y / acceleration_x);
     // maybe make the following statements above the if's functions that return
     // a bool to give a better description/make it look nicer if the elbow is in
@@ -211,16 +211,12 @@ class RoverArmSystem : public sjsu::common::RoverSystem
   }
 
  private:
-  void VerifyNonZeroes(double & acceleration)
+  void ChangeIfZero(double & acceleration)
   {
     if (acceleration == 0)
     {
       acceleration = 0.0001;
     }
-  }
-  double VectorAddition(double left, double right)
-  {
-    return(left + right);
   }
   double FindComplimentValue(){};  // may or may not need, will decide after testing code
   
