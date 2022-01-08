@@ -75,24 +75,33 @@ class WristJoint
   }
 
   // Move the wrist to its callibrated roll and pitch angles
-  void SetPosition(units::angle::degree_t pitch_angle,
-                   units::angle::degree_t roll_angle)
+  void SetPosition(float pitch_angle,
+                   float roll_angle)
   {
+    //units::angle::degree_t pitch_angle_to_degree(pitch_angle);
+    //units::angle::degree_t roll_angle_to_degree(roll_angle);
   }
 
   /// Sets the zero_offset_angle value that the motors use to know its true '0'
   /// position. Called by RoverArmSystem::Home
-  void SetZeroOffsets(units::angle::degree_t left_offset,
-                      units::angle::degree_t right_offset)
+  void SetZeroOffsets(float left_offset,
+                      float right_offset)
   {
+    units::angle::degree_t left_offset_to_degree(left_offset);
+    units::angle::degree_t right_offset_to_degree(right_offset);
     left_zero_offset_angle  = left_offset;
     right_zero_offset_angle = right_offset;
   }
 
   /// Return the acceleration values for the MPU6050 on the joint.
-  sjsu::Accelerometer::Acceleration_t GetAccelerometerData()
+  Acceleration GetAccelerometerData()
   {
-    return mpu.Read();
+    sjsu::Accelerometer::Acceleration_t acceleration_to_float(mpu.Read());
+    Acceleration acceleration;
+    acceleration.x = static_cast<float>(acceleration_to_float.x);
+    acceleration.y = static_cast<float>(acceleration_to_float.y);
+    acceleration.z = static_cast<float>(acceleration_to_float.z);
+    return acceleration;
   }
 int GetPitchPosition(){
   return 0;
@@ -101,6 +110,13 @@ int GetPitchPosition(){
 int GetRollPosition(){
   return 0;
 }
+private:
+  struct Acceleration
+  {
+    float x;
+    float y;
+    float z;
+  }
 
 };
 }  // namespace sjsu::arm

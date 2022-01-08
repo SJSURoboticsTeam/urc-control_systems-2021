@@ -40,20 +40,20 @@ class RoverArmSystem : public sjsu::common::RoverSystem
     Modes modes         = Modes::kDefault;
     int is_operational  = 1;
     int heartbeat_count = 0;
-    double arm_speed;
-    double rotunda_angle;
-    double shoulder_angle;
-    double elbow_angle;
-    double wrist_roll;
-    double wrist_pitch;
+    float arm_speed;
+    float rotunda_angle;
+    float shoulder_angle;
+    float elbow_angle;
+    float wrist_roll;
+    float wrist_pitch;
 
     struct Finger
     {
-      double pinky_angle;
-      double ring_angle;
-      double middle_angle;
-      double pointer_angle;
-      double thumb_angle;
+      float pinky_angle;
+      float ring_angle;
+      float middle_angle;
+      float pointer_angle;
+      float thumb_angle;
     };
     Finger finger;
   };
@@ -151,19 +151,19 @@ class RoverArmSystem : public sjsu::common::RoverSystem
     heartbeat_count_++;
   }
 
-  void MoveRotunda(double angle)
+  void MoveRotunda(float angle)
   {
     rotunda_.SetSpeed(mc_data_.arm_speed);
     rotunda_.SetPosition(angle);
   }
 
-  void MoveShoulder(double angle)
+  void MoveShoulder(float angle)
   {
     shoulder_.SetSpeed(mc_data_.arm_speed);
     shoulder_.SetPosition(angle);
   }
 
-  void MoveElbow(double angle)
+  void MoveElbow(float angle)
   {
     elbow_.SetSpeed(mc_data_.arm_speed);
     elbow_.SetPosition(angle);
@@ -194,7 +194,7 @@ class RoverArmSystem : public sjsu::common::RoverSystem
 
   void HomeShoulder()
   {
-    double home = 0;
+    float home = 0;
     // This checks to see if any of the
     // acceleration values are 0, and if they are, it will change
     // to something close to 0
@@ -205,12 +205,12 @@ class RoverArmSystem : public sjsu::common::RoverSystem
     ChangeIfZero(accelerations_.shoulder.y);
 
     // cut this out into a helper function to clean up code
-    // double check logic: add the values together first then calculate the
+    // float check logic: add the values together first then calculate the
     // angle needed
 
-    double acceleration_x =
+    float acceleration_x =
         accelerations_.rotunda.x + accelerations_.shoulder.x;  // might need compliment value of shoulder
-    double acceleration_y = 
+    float acceleration_y = 
         accelerations_.rotunda.y + accelerations_.shoulder.y;
     // adding i and j vectors of acceleration
     home = atan(acceleration_y / acceleration_x);
@@ -221,18 +221,18 @@ class RoverArmSystem : public sjsu::common::RoverSystem
 
   void HomeElbow()
   {
-    double home = 0;
+    float home = 0;
     // ChangeIfZero()
     ChangeIfZero(accelerations_.rotunda.x);
     ChangeIfZero(accelerations_.rotunda.y);
     ChangeIfZero(accelerations_.elbow.x);
     ChangeIfZero(accelerations_.elbow.y);
 
-    double acceleration_x =
+    float acceleration_x =
         accelerations_.rotunda.x + accelerations_.elbow.x;  // might need compliment value of shoulder
-    double acceleration_y = 
+    float acceleration_y = 
         accelerations_.rotunda.y + accelerations_.elbow.y;
-    double angle_without_correction = atan(acceleration_y / acceleration_x);
+    float angle_without_correction = atan(acceleration_y / acceleration_x);
     // maybe make the following statements above the if's functions that return
     // a bool to give a better description/make it look nicer if the elbow is in
     // the second quadrant of a graph, add 90 to the angle
@@ -284,14 +284,14 @@ class RoverArmSystem : public sjsu::common::RoverSystem
   }
 
  private:
-  void ChangeIfZero(double & acceleration)
+  void ChangeIfZero(float & acceleration)
   {
     if (acceleration == 0)
     {
       acceleration = 0.0001;
     }
   }
-  double FindComplimentValue(){};  // may or may not need, will decide after testing code
+  float FindComplimentValue(){};  // may or may not need, will decide after testing code
   
   sjsu::arm::Joint & rotunda_;
   sjsu::arm::Joint & shoulder_;
