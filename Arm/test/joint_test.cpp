@@ -52,16 +52,22 @@ TEST_CASE("Drive system testing")
     // TODO: verify the motor was / was not set to the following values
   }
 
+  SECTION("should boundary test the max and min angles for SetPostion")
+  {
+    int maxPosition = 180;
+    int minPosition = 0;
+
+    joint.SetPosition(-10);
+    CHECK(joint.GetPosition() == minPosition);
+
+    joint.SetPosition(200);
+    CHECK(joint.GetPosition() == maxPosition);
+  }
+
   SECTION("Should set motor speed to 5, 10 , 45, 100")
   {
     joint.SetSpeed(5);
-    CHECK(joint.GetSpeed() == 5);
-    joint.SetSpeed(10);
-    CHECK(joint.GetSpeed() == 10);
-    joint.SetSpeed(45);
-    CHECK(joint.GetSpeed() == 45);
-    joint.SetSpeed(100);
-    CHECK(joint.GetSpeed() == 100);
+    CHECK(joint.GetSpeed() == 2.5);
   }
 
   SECTION("Should avoid setting speed and angles beyond the limits")
@@ -84,7 +90,7 @@ TEST_CASE("Drive system testing")
     joint.SetZeroOffset(25);
     // TODO: verify the offset
   }
-  
+
   SECTION("should return 5 for accelerometer data")
   {
     auto data = joint.GetAccelerometerData();
