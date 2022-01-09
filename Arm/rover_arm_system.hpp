@@ -8,7 +8,7 @@
 
 namespace sjsu::arm
 {
-const char response_body_format[] =
+const char response_body_format[400] =
     "\r\n\r\n{\n"
     "  \"heartbeat_count\": %d,\n"
     "  \"is_operational\": %d,\n"
@@ -87,7 +87,7 @@ class RoverArmSystem : public sjsu::common::RoverSystem
   {
     char request_parameter[300];
     snprintf(request_parameter, 300,
-             "?heartbeat_count=%d&is_operational=%d&arm_speed=%c&battery=%d"
+             "?heartbeat_count=%d&is_operational=%d&arm_speed=%d&battery=%d"
              "&rotunda_angle=%d&shoulder_angle=%d&elbow_angle=%d&wrist_roll=%d"
              "&back_wheel_speed=%d&wrist_pitch=%d&pinky_angle=%d&ring_angle=%d"
              "&middle_angle=%d&pointer_angle=%d&thumb_angle=%d",

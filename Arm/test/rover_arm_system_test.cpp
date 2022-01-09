@@ -76,11 +76,12 @@ TEST_CASE("Arm system testing")
   SECTION("should return default GET parameters")
   {
     std::string expected_parameter =
-        "?heartbeat_count=0&is_operational=0&rotunda_speed=0&rotunda_angle=0&"
-        "shoulder_speed=0&shoulder_angle=0&elbow_angle=0&elbow_speed=0&wrist_"
-        "speed=0&wrist_roll=0&wrist_pitch=0&finger.pinky=0&finger.ring=0&"
-        "finger.middle=0&finger.pointer=0&finger.thumb=0&modes='D'";
-    CHECK(expected_parameter == arm.GETParameters());
+        "?heartbeat_count=3&is_operational=3&arm_speed=3&battery=3"
+        "&rotunda_angle=3&shoulder_angle=3&elbow_angle=3&wrist_roll=3"
+        "&back_wheel_speed=3&wrist_pitch=3&pinky_angle=3&ring_angle=3"
+        "&middle_angle=3&pointer_angle=3&thumb_angle=3";
+    std::string actual_parameter = arm.GETParameters();
+    CHECK(expected_parameter == actual_parameter);
   }
 
   SECTION("should parse json response correctly")
