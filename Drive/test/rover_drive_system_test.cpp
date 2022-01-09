@@ -510,5 +510,24 @@ TEST_CASE("Drive system testing")
     CHECK(drive.right_wheel_.GetHubSpeed() == drive.back_wheel_.GetHubSpeed());
     CHECK(drive.IsStopped() == false);
   }
+
+  SECTION("15.10.1 should adjust only the speed and angle of one wheel")
+  {
+    drive.mc_data_.is_operational = 1;
+    drive.mc_data_.drive_mode     = 'L';
+    drive.mc_data_.speed          = kNonZero;
+    drive.mc_data_.rotation_angle = kNonZero;
+
+    drive.HandleRoverMovement();
+    drive.HandleRoverMovement();
+
+    CHECK(drive.left_wheel_.GetHubSpeed() != 0);
+    CHECK(drive.right_wheel_.GetHubSpeed() == 0);
+    CHECK(drive.back_wheel_.GetHubSpeed() == 0);
+
+    CHECK(drive.left_wheel_.GetSteerAngle() != 0);
+    CHECK(drive.right_wheel_.GetSteerAngle() == 0);
+    CHECK(drive.back_wheel_.GetSteerAngle() == 0);
+  }
 }
 }  // namespace sjsu
