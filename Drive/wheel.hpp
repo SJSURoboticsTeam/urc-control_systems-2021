@@ -21,6 +21,7 @@ class Wheel
 
   void Initialize()
   {
+    sjsu::LogInfo("Initializing %s wheel...", name_.c_str());
     hub_motor_.Initialize();
     steer_motor_.Initialize();
     homing_pin_.Initialize();
@@ -61,59 +62,19 @@ class Wheel
     steer_motor_.SetAngle(steer_angle_degree, kSteerSpeed);
   };
 
-  /// TESTING - Moves wheel to start position - press SJ2 button to exit
-  virtual void HomeWheel()
-  {
-    sjsu::LogWarning("Homing %s wheel...", name_.c_str());
-    homing_pin_.GetPin().settings.PullDown();
-    sjsu::Button homing_button(homing_pin_);
-    homing_button.Initialize();
-
-    for (int angle = 0; angle < 360; angle += 2)
-    {
-      SetSteerAngle(0);
-      sjsu::Delay(50ms);
-      if (homing_pin_.Read() == kHomeLevel)
-      {
-        break;
-      }
-    }
-  };
-
-  /// Sets the wheel back in its homing position by finding mark in slip ring
-  void SlipRingHomeWheel()
-  {
-    sjsu::LogWarning("Homing %s wheel...", name_.c_str());
-    homing_pin_.GetPin().settings.Floating();
-    for (int angle = 0; angle < 360; angle += 2)
-    {
-      SetSteerAngle(angle);
-      // if (!(Uptime() % 50))
-      // {
-      if (homing_pin_.Read() == kHomeLevel)
-      {
-        homing_offset_angle_ = angle;
-        break;
-      }
-      // }
-      SetSteerAngle(angle);
-      sjsu::Delay(50ms);
-    }
-    sjsu::LogInfo("%s wheel offset: %d", name_.c_str(), homing_offset_angle_);
-  };
-
   int GetHomingOffset()
   {
     return homing_offset_angle_;
   }
 
-  bool IsWheelHomed()
+  /// Checks if the steer wheel is aligned with slip ring
+  bool IsHomed()
   {
-    if (homing_pin_.Read() == kHomeLevel)
+    // homing_pin_.GetPin().settings.Floating();
+    // if (homing_pin_.Read() == kHomeLevel) // w/ slip ring
+    if (GetSteerAngle() == 0)  // no slip ring - for testing purposes
     {
-      homing_offset_angle_ = steer_angle_;
-      sjsu::LogInfo("Homing %s wheel done! Offset angle set to %d",
-                    name_.c_str(), homing_offset_angle_);
+      homing_offset_angle_ = int(steer_angle_);
       return true;
     }
     return false;
@@ -129,10 +90,10 @@ class Wheel
   sjsu::RmdX & steer_motor_;
   sjsu::Gpio & homing_pin_;
 
-  const bool kHomeLevel   = sjsu::Gpio::kHigh;
-  const int kMaxRotation  = 360;
-  const double kMaxSpeed  = 100;
-  const double kZeroSpeed = 0;
+  const bool kHomeLevel  = sjsu::Gpio::kHigh;
+  const int kMaxRotation = 360;
+  const double kMaxSpeed = 100;
+  const double kZero     = 0;
   const units::angular_velocity::revolutions_per_minute_t kSteerSpeed = 10_rpm;
 };
 }  // namespace sjsu::drive

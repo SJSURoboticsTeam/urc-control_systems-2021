@@ -32,11 +32,6 @@ TEST_CASE("Wheel testing")
   drive::Wheel wheel("wheel", hub_motor, steer_motor,
                      mock_wheel_homing_pin.get());
 
-  // Spying on HomeWheel function - needs to be virtual
-  Mock<drive::Wheel> spy(wheel);
-  Fake(Method(spy, Wheel::HomeWheel));
-  drive::Wheel & spy_wheel = spy.get();
-
   SECTION("checking default values")
   {
     CHECK(wheel.GetName() == "wheel");
@@ -49,7 +44,6 @@ TEST_CASE("Wheel testing")
   {
     wheel.Initialize();
     Verify(Method(mock_can, ModuleInitialize)).Twice();
-    CHECK(mock_can.get().CurrentSettings().baud_rate == 1_MHz);
   }
 
   SECTION("setting hub speed to random normal speed")
@@ -96,13 +90,6 @@ TEST_CASE("Wheel testing")
 
     wheel.SetSteerAngle(-400);
     CHECK(wheel.GetSteerAngle() == -40);
-  }
-
-  SECTION("should call home wheel once")
-  {
-    // TODO: Make this test case compile
-    spy_wheel.HomeWheel();
-    // Verify(Method(spy_wheel, Wheel::HomeWheel)).Once();
   }
 }
 }  // namespace sjsu

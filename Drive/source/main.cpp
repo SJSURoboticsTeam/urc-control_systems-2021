@@ -4,7 +4,7 @@
 #include "devices/actuators/servo/rmd_x.hpp"
 
 #include "wheel.hpp"
-#include "../../Common/esp.hpp"
+#include "../Common/esp.hpp"
 #include "rover_drive_system.hpp"
 
 int main(void)
@@ -31,15 +31,9 @@ int main(void)
   back_steer_motor.settings.gear_ratio  = 8;
   back_hub_motor.settings.gear_ratio    = 8;
 
-  // Slip ring GPIO pins
-  // sjsu::Gpio & left_wheel_homing_pin  = sjsu::lpc40xx::GetGpio<0, 15>();
-  // sjsu::Gpio & right_wheel_homing_pin = sjsu::lpc40xx::GetGpio<2, 9>();
-  // sjsu::Gpio & back_wheel_homing_pin  = sjsu::lpc40xx::GetGpio<0, 18>();
-
-  // Button GPIO pins
-  sjsu::Gpio & left_wheel_homing_pin  = sjsu::lpc40xx::GetGpio<1, 19>();
-  sjsu::Gpio & right_wheel_homing_pin = sjsu::lpc40xx::GetGpio<1, 15>();
-  sjsu::Gpio & back_wheel_homing_pin  = sjsu::lpc40xx::GetGpio<0, 30>();
+  sjsu::Gpio & left_wheel_homing_pin  = sjsu::lpc40xx::GetGpio<0, 15>();
+  sjsu::Gpio & right_wheel_homing_pin = sjsu::lpc40xx::GetGpio<2, 9>();
+  sjsu::Gpio & back_wheel_homing_pin  = sjsu::lpc40xx::GetGpio<0, 18>();
 
   sjsu::drive::Wheel left_wheel("left", left_hub_motor, left_steer_motor,
                                 left_wheel_homing_pin);
