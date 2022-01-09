@@ -1,12 +1,12 @@
-# Should only run when file changes are made to drive system
-name: Drive CI
+# Should only run when file changes are made to arm system
+name: Arm CI
 
 on:
   push:
     branches: [master]
   pull_request:
     paths:
-      - "Drive/**"
+      - "Arm/**"
     branches: [master]
   workflow_dispatch:
 
@@ -26,7 +26,7 @@ jobs:
           ./setup
           cd ..
 
-      - name: Testing drive system 🦿
+      - name: Testing arm system 🦾
         run: |
-          cd Drive/
+          cd Arm/
           make test
