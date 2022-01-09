@@ -67,22 +67,18 @@ TEST_CASE("Drive system testing")
   SECTION("Should set motor speed to 5, 10 , 45, 100")
   {
     joint.SetSpeed(5);
-    CHECK(joint.GetSpeed() == 2.5);
+    CHECK(joint.GetSpeed() == 2);
+    joint.SetSpeed(0);
+    CHECK(joint.GetSpeed() == 3);
   }
 
-  SECTION("Should avoid setting speed and angles beyond the limits")
+  SECTION("Should avoid setting speed beyond the limits")
   {
-    joint.SetSpeed(5);
-    CHECK(joint.GetSpeed() == 5);
+    int max_speed = 100;
     joint.SetSpeed(101);
-    CHECK(joint.GetSpeed() == 5);
+    CHECK(joint.getSpeed() == maxSpeed);
     joint.SetSpeed(-101);
-    CHECK(joint.GetSpeed() == 5);
-    joint.SetPosition(45);
-    joint.SetPosition(200);
-    CHECK(joint.GetPosition() == 45);
-    joint.SetPosition(-10);
-    CHECK(joint.GetPosition() == 45);
+    CHECK(joint.getSpeed() == -maxSpeed);
   }
 
   SECTION("should set zero offset to 25 degrees")
