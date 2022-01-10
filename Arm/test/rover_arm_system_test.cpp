@@ -70,7 +70,9 @@ TEST_CASE("Arm system testing")
 
   SECTION("should initialize and return default values")
   {
-    // arm.Initialize();
+    arm.Initialize();
+    CHECK_EQ(arm.wrist_.GetPitchPosition(), 0);
+    CHECK_EQ(arm.wrist_.GetRollPosition(), 0);
   }
 
   SECTION("should return default GET parameters")

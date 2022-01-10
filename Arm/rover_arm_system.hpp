@@ -67,7 +67,7 @@ class RoverArmSystem : public sjsu::common::RoverSystem
   RoverArmSystem(sjsu::arm::Joint & rotunda,
                  sjsu::arm::Joint & shoulder,
                  sjsu::arm::Joint & elbow,
-                 sjsu::arm::WristJoint wrist)
+                 sjsu::arm::WristJoint & wrist)
       : rotunda_(rotunda), shoulder_(shoulder), elbow_(elbow), wrist_(wrist)
   {
   }
