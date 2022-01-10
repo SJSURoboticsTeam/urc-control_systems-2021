@@ -47,7 +47,7 @@ class RoverArmSystem : public sjsu::common::RoverSystem
 
   std::string ParseJSONResponse(){};
 
-  void HandleRoverMovement(){};
+   void HandleRoverMovement(){};
 
   void Homing(){};
 

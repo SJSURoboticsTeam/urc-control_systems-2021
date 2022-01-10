@@ -28,7 +28,7 @@ const char message_format[] = "\r\n\r\n{\n"
 "  \"speed\": %d,\n"
 "  \"angle\": %d\n"
 "}";
-class RoverDriveSystem : public sjsu::common::RoverSystem
+class RoverDriveSystem: public sjsu::common::RoverSystem
 {
  public:
   struct MissionControlData
@@ -91,8 +91,8 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
     }
   };
 
-  /// Parses GET response body and assigns it to rover variables
-  /// @param response JSON response body
+  // Parses GET response body and assigns it to rover variables
+  // @param response JSON response body
   void ParseJSONResponse(std::string &response)
   {
       int arguments = sscanf(
@@ -416,11 +416,13 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
     }
   };
 
+
   int heartbeat_count_ = 0;
   char current_mode_   = 'S';
   int state_of_charge_ = 90;  // TODO - hardcoded for now
 
   const units::angular_velocity::revolutions_per_minute_t kZeroSpeed = 0_rpm;
+
 
  public:
   MissionControlData mc_data;
