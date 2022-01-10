@@ -3,17 +3,17 @@
 #include "devices/sensors/movement/accelerometer/mpu6050.hpp"
 
 #include "rover_arm_system.hpp"
-// #include "arm_helper.hpp"
 #include "joint.hpp"
 
 namespace sjsu
 {
-TEST_CASE("Drive system testing")
+TEST_CASE("Joint system testing")
 {
   auto accel_value = units::acceleration::meters_per_second_squared_t(5);
   Accelerometer::Acceleration_t example_acceleration = { accel_value,
                                                          accel_value,
                                                          accel_value };
+
   Mock<Can> mock_can;
   Fake(Method(mock_can, Can::ModuleInitialize));
   Fake(OverloadedMethod(mock_can, Can::Send, void(const Can::Message_t &)));
@@ -39,6 +39,7 @@ TEST_CASE("Drive system testing")
   {
     joint.Initialize();
     CHECK(joint.GetSpeed() == 0);
+    CHECK(joint.GetPosition() == 0);
   }
 
   SECTION("should boundary test setting the motor angle")
