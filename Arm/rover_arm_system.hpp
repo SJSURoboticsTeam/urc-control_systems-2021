@@ -301,9 +301,9 @@ class RoverArmSystem : public sjsu::common::RoverSystem
  public:
   sjsu::arm::Hand hand_;
   MissionControlData mc_data_;
-  sjsu::arm::WristJoint & wrist_;
   sjsu::arm::Joint & rotunda_;
   sjsu::arm::Joint & shoulder_;
   sjsu::arm::Joint & elbow_;
+  sjsu::arm::WristJoint & wrist_;
 };
 }  // namespace sjsu::arm
