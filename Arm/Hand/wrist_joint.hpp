@@ -7,33 +7,6 @@ namespace sjsu::arm
 {
 class WristJoint
 {
- private:
-  // The Minimum and Maximum angles that the wrist pitch is allowed to rotate.
-  units::angle::degree_t pitch_minimum_angle = 0_deg;
-  units::angle::degree_t pitch_maximum_angle = 180_deg;
-  // The pitch angle of the wrist when not in operation.
-  units::angle::degree_t pitch_rest_angle = 90_deg;
-  // The Minimum and Maximum angles that the wrist roll is allowed to rotate.
-  units::angle::degree_t roll_minimum_angle = 0_deg;
-  units::angle::degree_t roll_maximum_angle = 180_deg;
-  // The roll angle of the wrist when not in operation.
-  units::angle::degree_t roll_rest_angle = 90_deg;
-
-  // The wrist uses two Rmd_x7 motors in a differential drive to control its
-  // pitch and roll. If the motors are traveling in the same speed and
-  // direction, then the pitch of the wrist will change, a difference in speed
-  // causes roll
-
-  // The angle between the motors' zero positon and the actual homed zero
-  // positions.
-  units::angle::degree_t left_zero_offset_angle  = 0_deg;
-  units::angle::degree_t right_zero_offset_angle = 0_deg;
-  sjsu::RmdX & left_motor;
-  sjsu::RmdX & right_motor;
-
-  // accelerometer attached to the joint that is used to home the arm
-  sjsu::Mpu6050 & mpu;
-
  public:
    struct Acceleration
   {
@@ -45,40 +18,25 @@ class WristJoint
   WristJoint(sjsu::RmdX & left_joint_motor,
              sjsu::RmdX & right_joint_motor,
              sjsu::Mpu6050 & accelerometer)
-      : left_motor(left_joint_motor),
-        right_motor(right_joint_motor),
-        mpu(accelerometer)
+      : left_motor_(left_joint_motor),
+        right_motor_(right_joint_motor),
+        mpu_(accelerometer)
   {
   }
 
-  WristJoint(sjsu::RmdX & left_joint_motor,
-             sjsu::RmdX & right_joint_motor,
-             sjsu::Mpu6050 & accelerometer,
-             units::angle::degree_t pitch_min_angle,
-             units::angle::degree_t pitch_max_angle,
-             units::angle::degree_t pitch_standby_angle,
-             units::angle::degree_t roll_min_angle,
-             units::angle::degree_t roll_max_angle,
-             units::angle::degree_t roll_standby_angle)
-      : pitch_minimum_angle(pitch_min_angle),
-        pitch_maximum_angle(pitch_max_angle),
-        pitch_rest_angle(pitch_standby_angle),
-        roll_minimum_angle(roll_min_angle),
-        roll_maximum_angle(roll_max_angle),
-        roll_rest_angle(roll_standby_angle),
-        left_motor(left_joint_motor),
-        right_motor(right_joint_motor),
-        mpu(accelerometer)
-  {
-  }
-
-  /// Initialize the WristJoint object, This must be called before any other
-  /// function.
   void Initialize()
   {
-    left_motor.Initialize();
-    right_motor.Initialize();
-    mpu.Initialize();
+    left_motor_.Initialize();
+    right_motor_.Initialize();
+    mpu_.Initialize();
+  }
+
+  void SetPitchPosition(float pitch_angle)
+  {
+    pitch_angle_ = pitch_angle;
+    units::angle::degree_t angle_to_degrees(pitch_angle);
+    left_motor_.SetAngle(angle_to_degrees);
+    right_motor_.SetAngle(angle_to_degrees);
   }
 
   // Move the wrist to its callibrated roll and pitch angles
@@ -110,14 +68,17 @@ class WristJoint
     acceleration.z = static_cast<float>(acceleration_to_float.z);
     return acceleration;
   }
-int GetPitchPosition(){
-  return 0;
-}
 
 int GetRollPosition(){
   return 0;
 }
 private:
 
+  const float kPitchMinimumAngle = 0;
+  const float kPitchMaximumAngle = 180;
+  const float kPitchRestAngle    = 90;
+  const float kRollMinimumAngle  = 0;
+  const float kRollMaximumAngle  = 180;
+  const float kRollRestAngle     = 90;
 };
 }  // namespace sjsu::arm
