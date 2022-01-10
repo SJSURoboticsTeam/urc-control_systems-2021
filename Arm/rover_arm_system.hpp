@@ -40,20 +40,20 @@ class RoverArmSystem : public sjsu::common::RoverSystem
     Modes modes           = Modes::kDefault;
     int is_operational    = 0;
     int heartbeat_count   = 0;
-    double arm_speed      = 0;
-    double rotunda_angle  = 0;
-    double shoulder_angle = 0;
-    double elbow_angle    = 0;
-    double wrist_roll     = 0;
-    double wrist_pitch    = 0;
+    float arm_speed      = 0;
+    float rotunda_angle  = 0;
+    float shoulder_angle = 0;
+    float elbow_angle    = 0;
+    float wrist_roll     = 0;
+    float wrist_pitch    = 0;
 
     struct Finger
     {
-      double pinky_angle   = 0;
-      double ring_angle    = 0;
-      double middle_angle  = 0;
-      double pointer_angle = 0;
-      double thumb_angle   = 0;
+      float pinky_angle   = 0;
+      float ring_angle    = 0;
+      float middle_angle  = 0;
+      float pointer_angle = 0;
+      float thumb_angle   = 0;
     };
     Finger finger;
   };
@@ -149,19 +149,19 @@ class RoverArmSystem : public sjsu::common::RoverSystem
     heartbeat_count_++;
   }
 
-  void MoveRotunda(double angle)
+  void MoveRotunda(float angle)
   {
     rotunda_.SetSpeed(mc_data_.arm_speed);
     rotunda_.SetPosition(angle);
   }
 
-  void MoveShoulder(double angle)
+  void MoveShoulder(float angle)
   {
     shoulder_.SetSpeed(mc_data_.arm_speed);
     shoulder_.SetPosition(angle);
   }
 
-  void MoveElbow(double angle)
+  void MoveElbow(float angle)
   {
     elbow_.SetSpeed(mc_data_.arm_speed);
     elbow_.SetPosition(angle);
@@ -192,7 +192,7 @@ class RoverArmSystem : public sjsu::common::RoverSystem
 
   void HomeShoulder()
   {
-    double home_angle = 0;
+    float home_angle = 0;
     // TODO: std might have solution for this e.g. std::clamp or std::max?
     ChangeIfZero(accelerations_.rotunda.x);
     ChangeIfZero(accelerations_.rotunda.y);
@@ -200,9 +200,9 @@ class RoverArmSystem : public sjsu::common::RoverSystem
     ChangeIfZero(accelerations_.shoulder.y);
 
     // TODO:  Verify we don't need compliment value of shoulder
-    double acceleration_x =
+    float acceleration_x =
         accelerations_.rotunda.x + accelerations_.shoulder.x;
-    double acceleration_y =
+    float acceleration_y =
         accelerations_.rotunda.y + accelerations_.shoulder.y;
 
     home_angle = atan(acceleration_y / acceleration_x);
@@ -213,7 +213,7 @@ class RoverArmSystem : public sjsu::common::RoverSystem
 
   void HomeElbow()
   {
-    double home_angle = 0;
+    float home_angle = 0;
     // TODO: std might have solution for this e.g. std::clamp or std::max?
     ChangeIfZero(accelerations_.rotunda.x);
     ChangeIfZero(accelerations_.rotunda.y);
@@ -221,9 +221,9 @@ class RoverArmSystem : public sjsu::common::RoverSystem
     ChangeIfZero(accelerations_.elbow.y);
 
     // TODO:  Verify we don't need compliment value of shoulder
-    double acceleration_x = accelerations_.rotunda.x + accelerations_.elbow.x;
-    double acceleration_y = accelerations_.rotunda.y + accelerations_.elbow.y;
-    double angle_without_correction = atan(acceleration_y / acceleration_x);
+    float acceleration_x = accelerations_.rotunda.x + accelerations_.elbow.x;
+    float acceleration_y = accelerations_.rotunda.y + accelerations_.elbow.y;
+    float angle_without_correction = atan(acceleration_y / acceleration_x);
     // maybe make the following statements above the if's functions that return
     // a bool to give a better description/make it look nicer if the elbow is in
     // the second quadrant of a graph, add 90 to the angle
@@ -277,7 +277,7 @@ class RoverArmSystem : public sjsu::common::RoverSystem
 
  private:
   /// Checks if value is zero. If it's zero make it not zero
-  void ChangeIfZero(double & acceleration)
+  void ChangeIfZero(float & acceleration)
   {
     if (acceleration == 0)
     {
@@ -286,7 +286,7 @@ class RoverArmSystem : public sjsu::common::RoverSystem
   }
 
   /// TODO: test if we even need this function
-  double FindComplimentValue()
+  float FindComplimentValue()
   {
     return 0;
   };
