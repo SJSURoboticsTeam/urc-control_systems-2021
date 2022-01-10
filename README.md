@@ -1,5 +1,7 @@
 # SJSU Robotics Control Systems
 
+[Testing Document](https://docs.google.com/document/d/1GoI3ypr8xW_N2GrNbO3eNoYoz85498nix4rTv1WexoA/edit?usp=sharing)
+
 ## How to clone and create branch for submitting a pull request (PR).
 
 1. Clone / Download the Repo  

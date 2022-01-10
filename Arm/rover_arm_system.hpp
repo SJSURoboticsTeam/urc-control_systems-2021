@@ -94,12 +94,9 @@ class RoverArmSystem : public sjsu::common::RoverSystem
              heartbeat_count_, mc_data_.is_operational, mc_data_.arm_speed,
              state_of_charge_, rotunda_.GetPosition(), shoulder_.GetPosition(),
              elbow_.GetPosition(), wrist_.GetRollPosition(),
-             wrist_.GetPitchPosition(),
-            hand_.GetPinkyPosition(),
-            hand_.GetRingPosition(),
-            hand_.GetMiddlePosition(),
-            hand_.GetPointerPosition(),
-            hand_.GetThumbPosition());
+             wrist_.GetPitchPosition(), hand_.GetPinkyPosition(),
+             hand_.GetRingPosition(), hand_.GetMiddlePosition(),
+             hand_.GetPointerPosition(), hand_.GetThumbPosition());
 
     return request_parameter;
   };
@@ -209,8 +206,9 @@ class RoverArmSystem : public sjsu::common::RoverSystem
     // angle needed
 
     double acceleration_x =
-        accelerations_.rotunda.x + accelerations_.shoulder.x;  // might need compliment value of shoulder
-    double acceleration_y = 
+        accelerations_.rotunda.x +
+        accelerations_.shoulder.x;  // might need compliment value of shoulder
+    double acceleration_y =
         accelerations_.rotunda.y + accelerations_.shoulder.y;
     // adding i and j vectors of acceleration
     home = atan(acceleration_y / acceleration_x);
@@ -229,9 +227,9 @@ class RoverArmSystem : public sjsu::common::RoverSystem
     ChangeIfZero(accelerations_.elbow.y);
 
     double acceleration_x =
-        accelerations_.rotunda.x + accelerations_.elbow.x;  // might need compliment value of shoulder
-    double acceleration_y = 
-        accelerations_.rotunda.y + accelerations_.elbow.y;
+        accelerations_.rotunda.x +
+        accelerations_.elbow.x;  // might need compliment value of shoulder
+    double acceleration_y = accelerations_.rotunda.y + accelerations_.elbow.y;
     double angle_without_correction = atan(acceleration_y / acceleration_x);
     // maybe make the following statements above the if's functions that return
     // a bool to give a better description/make it look nicer if the elbow is in
@@ -260,7 +258,7 @@ class RoverArmSystem : public sjsu::common::RoverSystem
   // TODO: need to work on valid movement durring in person work shop
   bool CheckValidMovement()
   {
-    bool fill;
+    bool fill = true;
     return fill;
   }
 
@@ -291,18 +289,21 @@ class RoverArmSystem : public sjsu::common::RoverSystem
       acceleration = 0.0001;
     }
   }
-  double FindComplimentValue(){};  // may or may not need, will decide after testing code
-  
+  double FindComplimentValue(){};  // may or may not need, will decide after
+                                   // testing code
+
+  Acceleration accelerations_;
+  int heartbeat_count_                    = 0;
+  int state_of_charge_                    = 90;
+  const int kExpectedArguments            = 13;
+  MissionControlData::Modes current_mode_ = MissionControlData::Modes::kDefault;
+
+ public:
+  sjsu::arm::Hand hand_;
+  MissionControlData mc_data_;
+  sjsu::arm::WristJoint & wrist_;
   sjsu::arm::Joint & rotunda_;
   sjsu::arm::Joint & shoulder_;
   sjsu::arm::Joint & elbow_;
-  sjsu::arm::WristJoint & wrist_;
-  MissionControlData mc_data_;
-  Acceleration accelerations_;
-  int heartbeat_count_   = 0;
-  int state_of_charge_ = 90;
-  const int kExpectedArguments  = 5;
-  MissionControlData::Modes current_mode_ = MissionControlData::Modes::kDefault;
-  sjsu::arm::Hand hand_;
 };
 }  // namespace sjsu::arm

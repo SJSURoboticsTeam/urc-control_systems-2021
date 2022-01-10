@@ -85,7 +85,25 @@ TEST_CASE("Arm system testing")
 
   SECTION("should parse json response correctly")
   {
-    // CHECK(arm.ParseJSONResponse() == "Fill");
+    std::string example_response =
+        "\r\n\r\n{\n"
+        "  \"heartbeat_count\": 0,\n"
+        "  \"is_operational\": 1,\n"
+        "  \"arm_speed\": 5,\n"
+        "  \"rotunda_angle\": 5,\n"
+        "  \"shoulder_angle\": 5,\n"
+        "  \"elbow_angle\": 5,\n"
+        "  \"wrist_roll\": 5,\n"
+        "  \"wrist_pitch\": 5,\n"
+        "  \"pinky_angle\": 5,\n"
+        "  \"ring_angle\": 5,\n"
+        "  \"middle_angle\": 5,\n"
+        "  \"pointer_angle\": 5,\n"
+        "  \"thumb_angle\": 5\n"
+        "}";
+    arm.ParseJSONResponse(example_response);
+    CHECK(arm.mc_data_.heartbeat_count == 0);
+    CHECK(arm.mc_data_.is_operational == 1);
   }
 }
 }  // namespace sjsu

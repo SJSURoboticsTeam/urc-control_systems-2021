@@ -1,11 +1,6 @@
 #pragma once
 
-#include <stdio.h>
-
 #include "utility/log.hpp"
-#include "utility/time/time.hpp"
-#include "utility/math/units.hpp"
-#include "utility/math/map.hpp"
 
 #include "../Common/state_of_charge.hpp"
 #include "../Common/rover_system.hpp"
@@ -49,20 +44,11 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
     right_wheel_.Initialize();
     back_wheel_.Initialize();
     SetSpinMode();
+    sjsu::LogInfo("Drive system initialized!");
   };
 
-  char GetCurrentMode()
-  {
-    return current_mode_;
-  }
-
-  int GetHeartbeatCount()
-  {
-    return heartbeat_count_;
-  }
-
   /// Constructs parameters for an HTTP GET request
-  /// @return ?heartbeat_count=0&is_operational=1&drive_mode=
+  /// @return ?heartbeat_count=0&is_operational=1&drive_mode=S ...
   std::string GETParameters()
   {
     char request_parameter[300];
@@ -99,9 +85,14 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
   /// D = Drive, S = Spin, T = Translation, L/R/B = Left/Right/Back Wheel
   void HandleRoverMovement()
   {
-    if (!IsOperational() || !IsHeartbeatSynced())
+    if (!IsHeartbeatSynced())
     {
       SetWheelSpeed(kZeroSpeed);
+      return;
+    }
+    if (!IsOperational())
+    {
+      StopWheels();
       return;
     }
     if (IsNewMode())
@@ -113,64 +104,89 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
     double angle = mc_data_.rotation_angle;
     double speed = mc_data_.speed;
 
-    if (!IsNewMode() && IsOperational() && IsHeartbeatSynced())
+    switch (current_mode_)
     {
-      sjsu::LogInfo("Handling %c movement...", current_mode_);
-      switch (current_mode_)
-      {
-        case 'D': HandleDriveMode(speed, angle); break;
-        case 'S': HandleSpinMode(speed); break;
-        case 'T': HandleTranslationMode(speed, angle); break;
-        case 'L':
-        case 'R':
-        case 'B': HandleSingularWheelMode(speed, angle); break;
-        default:
-          sjsu::LogError("Unable to assign drive mode handler!");
-          SetWheelSpeed(kZeroSpeed);
-          break;
-      }
-    }
-    else
-    {
-      SetWheelSpeed(kZeroSpeed);
-      // TODO: Throw error if this is reached!
+      case 'D': HandleDriveMode(speed, angle); break;
+      case 'S': HandleSpinMode(speed); break;
+      case 'T': HandleTranslationMode(speed, angle); break;
+      case 'L':
+      case 'R':
+      case 'B': HandleSingularWheelMode(speed, angle); break;
+      default:
+        sjsu::LogError("Unable to assign drive mode handler!");
+        StopWheels();
+        break;
     }
   };
 
-  /// Homes the wheels to face directly outward in-line with slip ring
-  void HomeWheels()
+  /// Checks if the mission control heartbeat matches rover heartbeat
+  bool IsHeartbeatSynced()
   {
-    try
+    if (GetHeartbeatCount() != mc_data_.heartbeat_count)
     {
-      // Simultaneous wheel homing
-      SetWheelSpeed(kZeroSpeed);
-      sjsu::Delay(50ms);
-      for (int angle = 0; angle < 360; angle += 2)
-      {
-        if (!left_wheel_.IsWheelHomed())
-        {
-          left_wheel_.SetSteerAngle(angle);
-        }
-        if (!right_wheel_.IsWheelHomed())
-        {
-          right_wheel_.SetSteerAngle(angle);
-        }
-        if (!back_wheel_.IsWheelHomed())
-        {
-          back_wheel_.SetSteerAngle(angle);
-        }
-      }
-      //
-      sjsu::Delay(50ms);
+      // TODO: Should throw error in an attempt to reconnect?
+      sjsu::LogError("Heartbeat out of sync - resetting!");
+      heartbeat_count_ = 0;
+      return false;
     }
-    catch (const std::exception & e)
-    {
-      sjsu::LogError("Error homing the wheels!");
-      throw e;
-    }
-  };
+    return true;
+  }
 
-  /// Sets all wheels to the speed provided
+  int GetHeartbeatCount()
+  {
+    return heartbeat_count_;
+  }
+
+  void IncrementHeartbeatCount()
+  {
+    heartbeat_count_++;
+  }
+
+  /// Checks if the rover is operational
+  bool IsOperational()
+  {
+    if (mc_data_.is_operational != 1)
+    {
+      sjsu::LogWarning("Drive mode is not operational!");
+      return false;
+    }
+    return true;
+  }
+
+  /// Checks if the rover got a new drive mode command
+  bool IsNewMode()
+  {
+    if (current_mode_ != mc_data_.drive_mode)
+    {
+      sjsu::LogWarning("Rover was assigned new drive mode!");
+      return true;
+    }
+    return false;
+  }
+
+  char GetCurrentMode()
+  {
+    return current_mode_;
+  }
+
+  /// Locks the thread until all wheels are stopped
+  void StopWheels()
+  {
+    sjsu::LogInfo("Stopping rover...");
+    while (!IsStopped())
+    {
+      SetWheelSpeed(kZeroSpeed);
+    }
+  }
+
+  /// Checks if the rover wheels are all stopped
+  bool IsStopped()
+  {
+    return (left_wheel_.GetHubSpeed() == 0 && right_wheel_.GetHubSpeed() == 0 &&
+            back_wheel_.GetHubSpeed() == 0);
+  }
+
+  /// Slowly lerps the wheels toward the target speed
   void SetWheelSpeed(double target_speed)
   {
     double left_wheel_speed  = left_wheel_.GetHubSpeed();
@@ -185,6 +201,41 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
     right_wheel_.SetHubSpeed(right_wheel_speed);
     back_wheel_.SetHubSpeed(back_wheel_speed);
   };
+
+  /// Locks thread until all wheels are homed
+  void HomeWheels()
+  {
+    StopWheels();
+    sjsu::LogInfo("Homing the wheels...");
+    // Setting wheels to zero (normally angle) until slip ring gets fixed
+    for (int angle = 0; angle < 360; angle += 2)
+    {
+      if (AllWheelsAreHomed())
+      {
+        break;
+      }
+      if (!left_wheel_.IsHomed())
+      {
+        left_wheel_.SetSteerAngle(0);
+      }
+      if (!right_wheel_.IsHomed())
+      {
+        right_wheel_.SetSteerAngle(0);
+      }
+      if (!back_wheel_.IsHomed())
+      {
+        back_wheel_.SetSteerAngle(0);
+      }
+      sjsu::Delay(50ms);
+    }
+    sjsu::LogInfo("Wheels homed!");
+  };
+
+  bool AllWheelsAreHomed()
+  {
+    return (left_wheel_.IsHomed() && right_wheel_.IsHomed() &&
+            back_wheel_.IsHomed());
+  }
 
   /// Prints the mc data and all the current wheel data
   void PrintRoverData()
@@ -202,52 +253,12 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
     printf("=========================\n");
   };
 
-  /// Checks whether the rover got a new drive mode command
-  bool IsNewMode()
-  {
-    if (current_mode_ != mc_data_.drive_mode)
-    {
-      sjsu::LogWarning("Rover was assigned new drive mode!");
-      return true;
-    }
-    return false;
-  }
-
-  /// Checks that the rover is operational
-  bool IsOperational()
-  {
-    if (mc_data_.is_operational != 1)
-    {
-      sjsu::LogWarning("Drive mode is not operational!");
-      return false;
-    }
-    return true;
-  }
-
-  /// Verifies that mission control is sending fresh commands to rover
-  bool IsHeartbeatSynced()
-  {
-    if (mc_data_.heartbeat_count != heartbeat_count_)
-    {
-      // TODO: Throw error if this is reached?
-      sjsu::LogError("Heartbeat out of sync - resetting!");
-      heartbeat_count_ = 0;
-      return false;
-    }
-    return true;
-  }
-
-  void IncrementHeartbeatCount()
-  {
-    heartbeat_count_++;
-  }
-
  private:
   /// Stops the rover and sets a new mode.
   void SetMode()
   {
     sjsu::LogWarning("Switching rover into %c mode...", mc_data_.drive_mode);
-    SetWheelSpeed(kZeroSpeed);
+    StopWheels();
     switch (mc_data_.drive_mode)
     {
       case 'D': SetDriveMode(); break;
@@ -267,8 +278,6 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
   /// Aligns rover wheels all in the same direction, facing forward
   void SetDriveMode()
   {
-    HomeWheels();
-    // TODO: Find the angles close enough for an effective drive mode
     const int left_wheel_angle  = -45;
     const int right_wheel_angle = -135;
     const int back_wheel_angle  = 90;
@@ -281,8 +290,6 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
   /// Aligns rover wheels perpendicular to their legs using homing slip ring
   void SetSpinMode()
   {
-    HomeWheels();
-    // TODO: Find the angles close enough for an effective spin mode
     const double left_wheel_angle  = 90;
     const double right_wheel_angle = 90;
     const double back_wheel_angle  = 90;
@@ -295,8 +302,7 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
   /// Aligns rover wheel all in the same direction, facing towards the right
   void SetTranslationMode()
   {
-    HomeWheels();
-    // TODO: Find the angles close enough for an effective translation mode
+    // TODO: Find the angles for translation mode
     const double left_wheel_angle  = 0;
     const double right_wheel_angle = 60;
     const double back_wheel_angle  = 110;
@@ -308,7 +314,6 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
 
   void SetSingleWheelMode()
   {
-    SetWheelSpeed(kZeroSpeed);
     current_mode_ = mc_data_.drive_mode;
   }
 
@@ -358,7 +363,7 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
     return (inner_wheel_angle > 0) ? back_wheel_angle : -back_wheel_angle;
   }
 
-  /// Adjusts only the speed since rover spins in place
+  /// Adjusts only the hub speed since rover will spin in place
   void HandleSpinMode(double speed)
   {
     SetWheelSpeed(speed);
@@ -367,7 +372,7 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
   /// Adjusts all the wheels by keeping them in parallel
   void HandleTranslationMode(double speed, double angle)
   {
-    // TODO: Temporary placeholder till further testing - Incorrect logic
+    // TODO: Need to find correct angles
     left_wheel_.SetSteerAngle(angle);
     right_wheel_.SetSteerAngle(angle);
     back_wheel_.SetSteerAngle(angle);
@@ -390,10 +395,6 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
       case 'B':
         back_wheel_.SetSteerAngle(angle);
         back_wheel_.SetHubSpeed(speed);
-        break;
-      default:
-        SetWheelSpeed(kZeroSpeed);
-        // TODO: Throw error if this is reached!
         break;
     }
   };
