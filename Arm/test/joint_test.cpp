@@ -76,9 +76,9 @@ TEST_CASE("Drive system testing")
   {
     int max_speed = 100;
     joint.SetSpeed(101);
-    CHECK(joint.getSpeed() == maxSpeed);
+    CHECK(joint.GetSpeed() == max_speed);
     joint.SetSpeed(-101);
-    CHECK(joint.getSpeed() == -maxSpeed);
+    CHECK(joint.GetSpeed() == -max_speed);
   }
 
   SECTION("should set zero offset to 25 degrees")
