@@ -60,6 +60,21 @@ TEST_CASE("Drive system testing")
     CHECK(joint.GetSpeed() == 3);
     joint.SetSpeed(4);
     CHECK(joint.GetSpeed() < 4);
+    joint.SetSpeed(0);
+    CHECK(joint.GetSpeed() > 0);
+    CHECK(joint.GetSpeed() < 2);
+  }
+
+  SECTION("should boundary test the max and min angles for SetPostion")
+  {
+    int maxPosition = 180;
+    int minPosition = 0;
+
+    joint.SetPosition(-10);
+    // CHECK(joint.GetPosition() == minPosition);
+
+    joint.SetPosition(200);
+    // CHECK(joint.GetPosition() == maxPosition);
   }
 
   SECTION("should set zero offset to 25 degrees")
