@@ -3,6 +3,8 @@ name: Drive CI
 
 on:
   push:
+    paths:
+      - "Drive/**"
     branches: [master]
   pull_request:
     paths:

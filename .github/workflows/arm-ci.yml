@@ -3,6 +3,8 @@ name: Arm CI
 
 on:
   push:
+    paths:
+      - "Arm/**"
     branches: [master]
   pull_request:
     paths:
