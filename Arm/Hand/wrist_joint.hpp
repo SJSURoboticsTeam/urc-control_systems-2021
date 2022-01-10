@@ -40,7 +40,7 @@ class WristJoint
     right_motor_.SetAngle(angle_to_degrees);
   }
 
-  /// Sets the zero_offset_angle value that the motors use to know its true zero
+  /// Sets the offset values to find its true zeroing point
   void SetZeroOffsets(float left_offset, float right_offset)
   {
     left_offset_angle_  = left_offset;
