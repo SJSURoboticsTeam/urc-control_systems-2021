@@ -18,10 +18,10 @@ int main()
   sjsu::CanNetwork can_network(can, &memory_resource);
 
   // Need to use an address translator
-  sjsu::Mpu6050 rotunda_mpu(i2c, 0x68);
-  sjsu::Mpu6050 shoulder_mpu(i2c, 0x69);
-  sjsu::Mpu6050 elbow_mpu(i2c, 0x6A);
-  sjsu::Mpu6050 wrist_mpu(i2c, 0x6B);
+  sjsu::Mpu6050 rotunda_mpu(i2c, 0x66);
+  sjsu::Mpu6050 shoulder_mpu(i2c, 0x67);
+  sjsu::Mpu6050 elbow_mpu(i2c, 0x68);
+  sjsu::Mpu6050 wrist_mpu(i2c, 0x69);
 
   // RMD addresses 0x141 - 0x148 are available
   sjsu::RmdX rotunda_motor(can_network, 0x141);
@@ -46,15 +46,24 @@ int main()
   esp.Initialize();
   arm.Initialize();
 
+  // Arm control loop
+  // 1. Arm sys creates GET request parameters - returns endpoint+parameters
+  // 2. Make GET request using esp - returns response body as string
+  // 3. Arm sys parses GET response
+  // 4. Arm sys handles arm movement
+
   while (1)
   {
     try
     {
-      sjsu::LogInfo("Making new request...");
-      std::string endpoint = "arm?example=1&param=2";  // include status updates
+      sjsu::LogInfo("Making new request now...");
+      std::string endpoint = "arm" + arm.GETParameters();
       std::string response = esp.GET(endpoint);
       sjsu::TimeoutTimer serverTimeout(5s);  // server has 5s timeout
-      // Do stuff with arm here...
+      arm.ParseJSONResponse(response);
+      arm.HandleArmMovement();
+      arm.IncrementHeartbeatCount();
+      arm.PrintRoverData();
       sjsu::Delay(3s);
       if (serverTimeout.HasExpired())
       {
@@ -64,12 +73,19 @@ int main()
     }
     catch (const std::exception & e)
     {
-      sjsu::LogError("Uncaught error in main()!");
+      sjsu::LogError("Uncaught error in main() - Stopping Arm!");
+      // Stop arm
       if (!esp.IsConnected())
       {
         esp.ConnectToWifi();
         esp.ConnectToServer();
       }
     }
+    catch (const sjsu::arm::RoverArmSystem::ParseError &)
+    {
+      sjsu::LogError("Parsing Error: Arguments not equal");
+    }
   }
+
+  return 0;
 }

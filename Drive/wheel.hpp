@@ -21,85 +21,79 @@ class Wheel
 
   void Initialize()
   {
+    sjsu::LogInfo("Initializing %s wheel...", name_.c_str());
     hub_motor_.Initialize();
     steer_motor_.Initialize();
-    // homing_pin_.GetPin().settings.Floating();  // for real
-    homing_pin_.GetPin().settings.PullDown();  // for testing
     homing_pin_.Initialize();
     homing_pin_.SetAsInput();
   };
 
-  /// Gets the speed of the hub motor.
-  int GetSpeed()
+  void Print()
   {
-    return hub_speed_.to<int>();
-  };
-
-  /// Gets the angle/position of the steering motor.
-  int GetPosition()
-  {
-    return steer_angle_.to<int>();
-  };
-
-  /// Sets the speed of the hub motor. Will not surpass max/min value
-  /// @param hub_speed the new speed of the wheel
-  void SetHubSpeed(units::angular_velocity::revolutions_per_minute_t hub_speed)
-  {
-    hub_speed_ = hub_speed;
-    hub_motor_.SetSpeed(hub_speed_);
+    printf("%-10s%-10d%-10d\n", name_.c_str(), GetHubSpeed(), GetSteerAngle());
   }
 
-  /// Adjusts the steer motor by the provided rotation angle/degree.
-  /// @param rotation_angle positive angle (turn right), negative angle (left)
-  void SetSteeringAngle(units::angle::degree_t rotation_angle)
+  std::string GetName()
   {
-    steer_angle_ = rotation_angle + homing_offset_angle_;
-    steer_motor_.SetAngle(steer_angle_, kSteerSpeed);
+    return name_;
+  }
+
+  int GetHubSpeed()
+  {
+    return int(hub_speed_);
   };
 
-  /// Sets the wheel back in its homing position by finding mark in slip ring.
-  /// The mark is indicated by the GPIO being set to low
-  void HomeWheel()
+  int GetSteerAngle()
   {
-    // For testing homing procedure
-    sjsu::Button homing_button(homing_pin_);
-    homing_button.Initialize();
+    return int(steer_angle_);
+  };
 
-    sjsu::LogWarning("Homing %s wheel...", name_.c_str());
+  void SetHubSpeed(double speed)
+  {
+    hub_speed_ = float(std::clamp(speed, -kMaxSpeed, kMaxSpeed));
+    units::angular_velocity::revolutions_per_minute_t hub_speed_rpm(hub_speed_);
+    hub_motor_.SetSpeed(hub_speed_rpm);
+  }
 
-    // Increments through all possible angles (0-360)
-    // When the homing pin is high stop incrementing and update homing offset
-    bool home_level = sjsu::Gpio::kHigh;
-    for (units::angle::degree_t angle = 0_deg; angle < 360_deg; angle += 2_deg)
+  void SetSteerAngle(double angle)
+  {
+    steer_angle_ = float((int(angle) % kMaxRotation) + homing_offset_angle_);
+    units::angle::degree_t steer_angle_degree(steer_angle_);
+    steer_motor_.SetAngle(steer_angle_degree, kSteerSpeed);
+  };
+
+  int GetHomingOffset()
+  {
+    return homing_offset_angle_;
+  }
+
+  /// Checks if the steer wheel is aligned with slip ring
+  bool IsHomed()
+  {
+    // homing_pin_.GetPin().settings.Floating();
+    // if (homing_pin_.Read() == kHomeLevel) // w/ slip ring
+    if (GetSteerAngle() == 0)  // no slip ring - for testing purposes
     {
-      SetSteeringAngle(angle);
-      sjsu::Delay(50ms);  // Lets motor move into place
-      if (homing_pin_.Read() == home_level)
-      {
-        homing_offset_angle_ = angle;
-        break;
-      }
+      homing_offset_angle_ = int(steer_angle_);
+      return true;
     }
-    sjsu::LogInfo("Homing %s wheel done! Offset angle set to %d", name_.c_str(),
-                  homing_offset_angle_.to<int>());
-  };
+    return false;
+  }
 
-  std::string name_;          // Wheel name (i.e. left, right, back)
-  sjsu::RmdX & hub_motor_;    // Controls tire direction (fwd/rev) & speed
-  sjsu::RmdX & steer_motor_;  // Controls wheel alignment/angle
-  units::angle::degree_t homing_offset_angle_                         = 0_deg;
-  units::angle::degree_t steer_angle_                                 = 0_deg;
-  units::angular_velocity::revolutions_per_minute_t hub_speed_        = 0_rpm;
-  const units::angular_velocity::revolutions_per_minute_t kZeroSpeed  = 0_rpm;
-  const units::angular_velocity::revolutions_per_minute_t kSteerSpeed = 10_rpm;
+ private:
+  std::string name_        = "";
+  int homing_offset_angle_ = 0;
+  float steer_angle_       = 0;
+  float hub_speed_         = 0;
 
-  const units::angle::degree_t kMaxPosRotation = 360_deg;
-  const units::angle::degree_t kMaxNegRotation = -360_deg;
-
-  const units::angular_velocity::revolutions_per_minute_t kMaxPosSpeed =
-      100_rpm;
-  const units::angular_velocity::revolutions_per_minute_t kMaxNegSpeed =
-      -100_rpm;
+  sjsu::RmdX & hub_motor_;
+  sjsu::RmdX & steer_motor_;
   sjsu::Gpio & homing_pin_;
+
+  const bool kHomeLevel  = sjsu::Gpio::kHigh;
+  const int kMaxRotation = 360;
+  const double kMaxSpeed = 100;
+  const double kZero     = 0;
+  const units::angular_velocity::revolutions_per_minute_t kSteerSpeed = 10_rpm;
 };
 }  // namespace sjsu::drive

@@ -1,15 +1,11 @@
 #include "testing/testing_frameworks.hpp"
-#include "peripherals/lpc40xx/can.hpp"
 #include "devices/actuators/servo/rmd_x.hpp"
-#include "utility/log.hpp"
-#include "utility/math/units.hpp"
 
-#include "rover_drive_system.hpp"
 #include "wheel.hpp"
 
 namespace sjsu
 {
-TEST_CASE("Testing Wheel")
+TEST_CASE("Wheel testing")
 {
   Mock<Can> mock_can;
   Fake(Method(mock_can, Can::ModuleInitialize));
@@ -17,59 +13,83 @@ TEST_CASE("Testing Wheel")
   Fake(Method(mock_can, Can::Receive));
   Fake(Method(mock_can, Can::HasData));
 
-  StaticMemoryResource<1024> memory_resource;
-  CanNetwork network(mock_can.get(), &memory_resource);
+  StaticMemoryResource<1024> memory;
+  CanNetwork network(mock_can.get(), &memory);
+  RmdX hub_motor(network, 0x140);
+  RmdX steer_motor(network, 0x141);
 
-  sjsu::RmdX rmd_wheel_left(network, 0x140);
-  sjsu::RmdX rmd_steer_left(network, 0x141);
+  Mock<Gpio> mock_wheel_homing_pin;
+  InterruptCallback interrupt;
+  Fake(Method(mock_wheel_homing_pin, Gpio::Read));
+  Fake(Method(mock_wheel_homing_pin, Gpio::GetPin));
+  Fake(Method(mock_wheel_homing_pin, Gpio::SetDirection));
+  Fake(Method(mock_wheel_homing_pin, Gpio::ModuleInitialize));
+  Fake(Method(mock_wheel_homing_pin, Gpio::DetachInterrupt));
+  When(Method(mock_wheel_homing_pin, Gpio::AttachInterrupt))
+      .AlwaysDo([&interrupt](InterruptCallback callback, Gpio::Edge) -> void
+                { interrupt = callback; });
 
-  sjsu::drive::Wheel wheel(rmd_wheel_left, rmd_steer_left);
+  drive::Wheel wheel("wheel", hub_motor, steer_motor,
+                     mock_wheel_homing_pin.get());
 
-  SECTION("should initialize wheel")
+  SECTION("checking default values")
+  {
+    CHECK(wheel.GetName() == "wheel");
+    CHECK(wheel.GetHubSpeed() == 0);
+    CHECK(wheel.GetSteerAngle() == 0);
+    CHECK(wheel.GetHomingOffset() == 0);
+  }
+
+  SECTION("initializing wheel")
   {
     wheel.Initialize();
-    CHECK(wheel.GetSpeed() == doctest::Approx(0.0));
-    CHECK(wheel.GetPosition() == doctest::Approx(0.0));
-    CHECK(wheel.kMaxPosSpeed == 100_rpm);
-    CHECK(wheel.kMaxNegSpeed == -100_rpm);
+    Verify(Method(mock_can, ModuleInitialize)).Twice();
   }
 
-  SECTION("should set wheel speed and angle")
+  SECTION("setting hub speed to random normal speed")
   {
-    wheel.SetHubSpeed(50_rpm);
-    wheel.SetSteeringAngle(20_deg);
-    CHECK(wheel.GetSpeed() == doctest::Approx(50.0));
-    CHECK(wheel.GetPosition() == doctest::Approx(20.0));
+    int random_num = rand() % 100 + 1;
+    wheel.SetHubSpeed(random_num);
+    CHECK(wheel.GetHubSpeed() == random_num);
 
-    wheel.SetHubSpeed(10_rpm);
-    wheel.SetSteeringAngle(-20_deg);
-    CHECK(wheel.GetSpeed() == doctest::Approx(10.0));
-    CHECK(wheel.GetPosition() == doctest::Approx(0.0));
+    random_num = (rand() % 100 - 1) * -1;
+    wheel.SetHubSpeed(random_num);
+    CHECK(wheel.GetHubSpeed() == random_num);
+
+    wheel.SetHubSpeed(0);
+    CHECK(wheel.GetHubSpeed() == 0);
   }
 
-  SECTION("should set extreme wheel speeds")
+  SECTION("setting hub speed beyond maximum speed")
   {
-    wheel.SetHubSpeed(150_rpm);
-    CHECK(wheel.GetSpeed() == doctest::Approx(100.0));
+    wheel.SetHubSpeed(150);
+    CHECK(wheel.GetHubSpeed() == 100);
 
-    wheel.SetHubSpeed(-200_rpm);
-    CHECK(wheel.GetSpeed() == doctest::Approx(-100.0));
+    wheel.SetHubSpeed(-150);
+    CHECK(wheel.GetHubSpeed() == -100);
   }
 
-  SECTION("should set extreme wheel positions")
+  SECTION("setting steer angle to random normal angle")
   {
-    wheel.SetSteeringAngle(500_deg);
-    CHECK(wheel.GetPosition() == doctest::Approx(360.0));
+    int random_num = rand() % 360 + 1;
+    wheel.SetSteerAngle(random_num);
+    CHECK(wheel.GetSteerAngle() == random_num);
 
-    wheel.SetSteeringAngle(-360_deg);  // resets wheel to zero
-    wheel.SetSteeringAngle(-500_deg);
-    CHECK(wheel.GetPosition() == doctest::Approx(-360.0));
+    random_num = (rand() % 360 - 1) * -1;
+    wheel.SetSteerAngle(random_num);
+    CHECK(wheel.GetSteerAngle() == random_num);
+
+    wheel.SetSteerAngle(0);
+    CHECK(wheel.GetSteerAngle() == 0);
   }
 
-  SECTION("should home wheel positions")
+  SECTION("setting steer angle beyond maximum angle")
   {
-    wheel.HomeWheel();
-    CHECK(wheel.homing_offset_angle_ == 0_deg);
+    wheel.SetSteerAngle(400);
+    CHECK(wheel.GetSteerAngle() == 40);
+
+    wheel.SetSteerAngle(-400);
+    CHECK(wheel.GetSteerAngle() == -40);
   }
 }
 }  // namespace sjsu
