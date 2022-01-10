@@ -11,9 +11,9 @@ class Joint
  public:
   struct Acceleration
   {
-    double x;
-    double y;
-    double z;
+    double x = 0;
+    double y = 0;
+    double z = 0;
   };
   Joint(sjsu::RmdX & joint_motor, sjsu::Mpu6050 & accelerometer)
       : motor(joint_motor), mpu(accelerometer)
