@@ -61,7 +61,7 @@ TEST_CASE("Wrist joint system testing")
     wrist_joint.SetRollPosition(30);
     CHECK(wrist_joint.GetRollPosition() != 0);
   }
-/*
+
   SECTION("3.1 should return zero when setting pitch to zero")
   {
     wrist_joint.SetRollPosition(0);
