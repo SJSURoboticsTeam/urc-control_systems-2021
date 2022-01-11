@@ -10,9 +10,9 @@ class WristJoint
  public:
    struct Acceleration
   {
-    float x;
-    float y;
-    float z;
+    float x = 0;
+    float y = 0;
+    float z = 0;
   };
   
   WristJoint(sjsu::RmdX & left_joint_motor,
@@ -54,13 +54,8 @@ class WristJoint
   {
     units::angle::degree_t left_offset_to_degree(left_offset);
     units::angle::degree_t right_offset_to_degree(right_offset);
-<<<<<<< HEAD
-    left_zero_offset_angle  = left_offset;
-    right_zero_offset_angle = right_offset;
-=======
     left_zero_offset_angle  = left_offset_to_degree;
     right_zero_offset_angle = right_offset_to_degree;
->>>>>>> 3a0311f00ca2dabf3f6d7b6c602d9b2b2231005c
   }
 
   /// Return the acceleration values for the MPU6050 on the joint.
@@ -78,15 +73,6 @@ int GetRollPosition(){
   return 0;
 }
 private:
-<<<<<<< HEAD
-  struct Acceleration
-  {
-    float x;
-    float y;
-    float z;
-  }
-=======
->>>>>>> 3a0311f00ca2dabf3f6d7b6c602d9b2b2231005c
 
   const float kPitchMinimumAngle = 0;
   const float kPitchMaximumAngle = 180;

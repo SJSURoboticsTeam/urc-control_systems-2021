@@ -37,25 +37,6 @@ class RoverArmSystem : public sjsu::common::RoverSystem
     {
       kDefault = 'D',
     };
-<<<<<<< HEAD
-    Modes modes         = Modes::kDefault;
-    int is_operational  = 1;
-    int heartbeat_count = 0;
-    float arm_speed;
-    float rotunda_angle;
-    float shoulder_angle;
-    float elbow_angle;
-    float wrist_roll;
-    float wrist_pitch;
-
-    struct Finger
-    {
-      float pinky_angle;
-      float ring_angle;
-      float middle_angle;
-      float pointer_angle;
-      float thumb_angle;
-=======
     Modes modes           = Modes::kDefault;
     int is_operational    = 0;
     int heartbeat_count   = 0;
@@ -73,7 +54,6 @@ class RoverArmSystem : public sjsu::common::RoverSystem
       float middle_angle  = 0;
       float pointer_angle = 0;
       float thumb_angle   = 0;
->>>>>>> 3a0311f00ca2dabf3f6d7b6c602d9b2b2231005c
     };
     Finger finger;
   };
@@ -212,35 +192,17 @@ class RoverArmSystem : public sjsu::common::RoverSystem
 
   void HomeShoulder()
   {
-<<<<<<< HEAD
-    float home = 0;
-    // This checks to see if any of the
-    // acceleration values are 0, and if they are, it will change
-    // to something close to 0
-
-=======
     float home_angle = 0;
     // TODO: std might have solution for this e.g. std::clamp or std::max?
->>>>>>> 3a0311f00ca2dabf3f6d7b6c602d9b2b2231005c
     ChangeIfZero(accelerations_.rotunda.x);
     ChangeIfZero(accelerations_.rotunda.y);
     ChangeIfZero(accelerations_.shoulder.x);
     ChangeIfZero(accelerations_.shoulder.y);
 
-<<<<<<< HEAD
-    // cut this out into a helper function to clean up code
-    // float check logic: add the values together first then calculate the
-    // angle needed
-
-    float acceleration_x =
-        accelerations_.rotunda.x + accelerations_.shoulder.x;  // might need compliment value of shoulder
-    float acceleration_y = 
-=======
     // TODO:  Verify we don't need compliment value of shoulder
     float acceleration_x =
         accelerations_.rotunda.x + accelerations_.shoulder.x;
     float acceleration_y =
->>>>>>> 3a0311f00ca2dabf3f6d7b6c602d9b2b2231005c
         accelerations_.rotunda.y + accelerations_.shoulder.y;
 
     home_angle = atan(acceleration_y / acceleration_x);
@@ -251,28 +213,16 @@ class RoverArmSystem : public sjsu::common::RoverSystem
 
   void HomeElbow()
   {
-<<<<<<< HEAD
-    float home = 0;
-    // ChangeIfZero()
-=======
     float home_angle = 0;
     // TODO: std might have solution for this e.g. std::clamp or std::max?
->>>>>>> 3a0311f00ca2dabf3f6d7b6c602d9b2b2231005c
     ChangeIfZero(accelerations_.rotunda.x);
     ChangeIfZero(accelerations_.rotunda.y);
     ChangeIfZero(accelerations_.elbow.x);
     ChangeIfZero(accelerations_.elbow.y);
 
-<<<<<<< HEAD
-    float acceleration_x =
-        accelerations_.rotunda.x + accelerations_.elbow.x;  // might need compliment value of shoulder
-    float acceleration_y = 
-        accelerations_.rotunda.y + accelerations_.elbow.y;
-=======
     // TODO:  Verify we don't need compliment value of shoulder
     float acceleration_x = accelerations_.rotunda.x + accelerations_.elbow.x;
     float acceleration_y = accelerations_.rotunda.y + accelerations_.elbow.y;
->>>>>>> 3a0311f00ca2dabf3f6d7b6c602d9b2b2231005c
     float angle_without_correction = atan(acceleration_y / acceleration_x);
     // maybe make the following statements above the if's functions that return
     // a bool to give a better description/make it look nicer if the elbow is in
@@ -326,10 +276,7 @@ class RoverArmSystem : public sjsu::common::RoverSystem
   }
 
  private:
-<<<<<<< HEAD
-=======
   /// Checks if value is zero. If it's zero make it not zero
->>>>>>> 3a0311f00ca2dabf3f6d7b6c602d9b2b2231005c
   void ChangeIfZero(float & acceleration)
   {
     if (acceleration == 0)
@@ -337,10 +284,6 @@ class RoverArmSystem : public sjsu::common::RoverSystem
       acceleration = 0.0001;
     }
   }
-<<<<<<< HEAD
-  float FindComplimentValue(){};  // may or may not need, will decide after testing code
-  
-=======
 
   /// TODO: test if we even need this function
   float FindComplimentValue()
@@ -357,7 +300,6 @@ class RoverArmSystem : public sjsu::common::RoverSystem
  public:
   sjsu::arm::Hand hand_;
   MissionControlData mc_data_;
->>>>>>> 3a0311f00ca2dabf3f6d7b6c602d9b2b2231005c
   sjsu::arm::Joint & rotunda_;
   sjsu::arm::Joint & shoulder_;
   sjsu::arm::Joint & elbow_;
