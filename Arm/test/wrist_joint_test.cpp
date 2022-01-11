@@ -38,11 +38,40 @@ TEST_CASE("Wrist joint system testing")
 
   arm::WristJoint wrist_joint(left_motor, right_motor, spyed_mpu);
 
-  SECTION("should return default values")
+  SECTION("1.1 should return zero angle at rover startup")
   {
     wrist_joint.Initialize();
     CHECK_EQ(wrist_joint.GetPitchPosition(), 0);
+  }
+
+  SECTION("1.2 should return non zero angle after moving wrist once ")
+  {
+    wrist_joint.SetPitchPosition(30);
+    CHECK(wrist_joint.GetPitchPosition() != 0);
+  }
+
+  SECTION("2.1 should return zero angle at rover startup")
+  {
+    wrist_joint.Initialize();
     CHECK_EQ(wrist_joint.GetRollPosition(), 0);
   }
+
+  SECTION("2.2 should return non zero angle after moving wrist once ")
+  {
+    wrist_joint.SetRollPosition(30);
+    CHECK(wrist_joint.GetRollPosition() != 0);
+  }
+
+  SECTION("3.1 should return zero when setting pitch to zero") {}
+  SECTION("3.2 Should return 90 when setting pitch to 90") {}
+  SECTION("3.3 Should return 180 when setting pitch to 180") {}
+  SECTION("3.4 Should return 0 when setting pitch to -1") {}
+  SECTION("3.5 Should return 180 when setting pitch to 181") {}
+
+  SECTION("4.1 should return zero when setting roll to zero") {}
+  SECTION("4.2 Should return 90 when setting roll to 90") {}
+  SECTION("4.3 Should return 180 when setting roll to 180") {}
+  SECTION("4.4 Should return 0 when setting roll to -1") {}
+  SECTION("4.5 Should return 180 when setting roll to 181") {}
 }
 }  // namespace sjsu
