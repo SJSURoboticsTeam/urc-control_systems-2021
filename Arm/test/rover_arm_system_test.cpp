@@ -70,7 +70,9 @@ TEST_CASE("Arm system testing")
 
   SECTION("should initialize and return default values")
   {
-    // arm.Initialize();
+    arm.Initialize();
+    CHECK_EQ(arm.wrist_.GetPitchPosition(), 0);
+    CHECK_EQ(arm.wrist_.GetRollPosition(), 0);
   }
 
   SECTION("should return default GET parameters")
@@ -81,7 +83,8 @@ TEST_CASE("Arm system testing")
         "angle=0&wrist_roll=0&wrist_pitch=0&pinky_angle=0&"
         "ring_angle=0&middle_angle=0&pointer_angle=0&thumb_"
         "angle=0";
-    CHECK(expected_parameter == arm.GETParameters());
+    std::string actual_parameter = arm.GETParameters();
+    CHECK(expected_parameter == actual_parameter);
   }
 
   SECTION("should parse json response correctly")

@@ -11,9 +11,9 @@ class Joint
  public:
   struct Acceleration
   {
-    double x = 0;
-    double y = 0;
-    double z = 0;
+    float x = 0;
+    float y = 0;
+    float z = 0;
   };
   Joint(sjsu::RmdX & joint_motor, sjsu::Mpu6050 & accelerometer)
       : motor(joint_motor), mpu(accelerometer)
@@ -42,7 +42,7 @@ class Joint
   }
 
   /// Move the motor to the (calibrated) angle desired.
-  void SetPosition(double angle)
+  void SetPosition(float angle)
   {
     units::angle::degree_t angle_to_degrees(angle);
     units::angle::degree_t calibrated_angle =
@@ -55,28 +55,28 @@ class Joint
 
   /// Sets the zero_offset_angle value that the motor uses to know its true '0'
   /// position. Called by RoverArmSystem::Home
-  void SetZeroOffset(double offset)
+  void SetZeroOffset(float offset)
   {
     units::angle::degree_t offset_to_degrees(offset);
     zero_offset_angle = offset_to_degrees;
   }
 
   /// Return the acceleration values for the MPU6050 on the joint as a
-  /// JointAcceleration of doubles
+  /// JointAcceleration of floats
   Acceleration GetAccelerometerData()
   {
-    sjsu::Accelerometer::Acceleration_t acceleration_to_double(mpu.Read());
+    sjsu::Accelerometer::Acceleration_t acceleration_to_float(mpu.Read());
     Acceleration acceleration;
-    acceleration.x = static_cast<double>(acceleration_to_double.x);
-    acceleration.y = static_cast<double>(acceleration_to_double.y);
-    acceleration.z = static_cast<double>(acceleration_to_double.z);
+    acceleration.x = static_cast<float>(acceleration_to_float.x);
+    acceleration.y = static_cast<float>(acceleration_to_float.y);
+    acceleration.z = static_cast<float>(acceleration_to_float.z);
 
     return acceleration;
   }
 
-  void SetSpeed(double targetspeed)
+  void SetSpeed(float targetspeed)
   {
-    double current_speed = speed_.to<double>();
+    float current_speed = speed_.to<float>();
     units::angular_velocity::revolutions_per_minute_t speed(
         std::lerp(current_speed, targetspeed, kLerpStep));
 
@@ -95,15 +95,18 @@ class Joint
   }
 
  private:
+  sjsu::RmdX & motor;
+  sjsu::Mpu6050 & mpu;
+
   units::angle::degree_t minimum_angle     = 0_deg;
   units::angle::degree_t maximum_angle     = 180_deg;
   units::angle::degree_t rest_angle        = 0_deg;
   units::angle::degree_t zero_offset_angle = 0_deg;
-  const double kLerpStep                   = 0.5;
-  sjsu::RmdX & motor;
-  sjsu::Mpu6050 & mpu;
+
   units::angular_velocity::revolutions_per_minute_t speed_     = 0_rpm;
   units::angular_velocity::revolutions_per_minute_t max_speed_ = 100_rpm;
   units::angle::degree_t position_                             = 0_deg;
+
+  const float kLerpStep = .5;
 };
 }  // namespace sjsu::arm
