@@ -99,6 +99,7 @@ class Joint
   units::angle::degree_t maximum_angle     = 180_deg;
   units::angle::degree_t rest_angle        = 0_deg;
   units::angle::degree_t zero_offset_angle = 0_deg;
+  const float kLerpStep = .5;
   sjsu::RmdX & motor;
   sjsu::Mpu6050 & mpu;
   units::angular_velocity::revolutions_per_minute_t speed_     = 0_rpm;
