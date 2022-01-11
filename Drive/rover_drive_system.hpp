@@ -312,7 +312,7 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
     back_wheel_.SetSteerAngle(back_wheel_angle);
     current_mode_ = 'T';
   };
-
+  
   void SetSingleWheelMode()
   {
     current_mode_ = mc_data_.drive_mode;
