@@ -61,8 +61,13 @@ TEST_CASE("Wrist joint system testing")
     wrist_joint.SetRollPosition(30);
     CHECK(wrist_joint.GetRollPosition() != 0);
   }
-
-  SECTION("3.1 should return zero when setting pitch to zero") {}
+/*
+  SECTION("3.1 should return zero when setting pitch to zero")
+  {
+    wrist_joint.SetRollPosition(0);
+    CHECK(wrist_joint.GetRollPosition() == 0);
+  }
+ /* 
   SECTION("3.2 Should return 90 when setting pitch to 90") {}
   SECTION("3.3 Should return 180 when setting pitch to 180") {}
   SECTION("3.4 Should return 0 when setting pitch to -1") {}
@@ -73,5 +78,7 @@ TEST_CASE("Wrist joint system testing")
   SECTION("4.3 Should return 180 when setting roll to 180") {}
   SECTION("4.4 Should return 0 when setting roll to -1") {}
   SECTION("4.5 Should return 180 when setting roll to 181") {}
+*/
 }
+
 }  // namespace sjsu
