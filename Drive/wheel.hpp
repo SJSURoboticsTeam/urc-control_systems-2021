@@ -48,14 +48,14 @@ class Wheel
     return int(steer_angle_);
   };
 
-  void SetHubSpeed(double speed)
+  void SetHubSpeed(float speed)
   {
     hub_speed_ = float(std::clamp(speed, -kMaxSpeed, kMaxSpeed));
     units::angular_velocity::revolutions_per_minute_t hub_speed_rpm(hub_speed_);
     hub_motor_.SetSpeed(hub_speed_rpm);
   }
 
-  void SetSteerAngle(double angle)
+  void SetSteerAngle(float angle)
   {
     steer_angle_ = float((int(angle) % kMaxRotation) + homing_offset_angle_);
     units::angle::degree_t steer_angle_degree(steer_angle_);
@@ -92,8 +92,8 @@ class Wheel
 
   const bool kHomeLevel  = sjsu::Gpio::kHigh;
   const int kMaxRotation = 360;
-  const double kMaxSpeed = 100;
-  const double kZero     = 0;
+  const float kMaxSpeed = 100;
+  const float kZero     = 0;
   const units::angular_velocity::revolutions_per_minute_t kSteerSpeed = 10_rpm;
 };
 }  // namespace sjsu::drive
