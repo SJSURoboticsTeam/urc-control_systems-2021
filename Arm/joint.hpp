@@ -11,9 +11,9 @@ class Joint
  public:
   struct Acceleration
   {
-    float x;
-    float y;
-    float z;
+    float x=0;
+    float y=0;
+    float z=0;
   };
   Joint(sjsu::RmdX & joint_motor, sjsu::Mpu6050 & accelerometer)
       : motor(joint_motor), mpu(accelerometer)
@@ -47,9 +47,9 @@ class Joint
     units::angle::degree_t angle_to_degrees(angle);
     units::angle::degree_t calibrated_angle =
         angle_to_degrees - zero_offset_angle;
-    calibrated_angle = units::math::min(
-        units::math::max(calibrated_angle, minimum_angle), maximum_angle);
-    sjsu::LogInfo("%f", calibrated_angle.to<float>());
+    calibrated_angle =
+        std::clamp(calibrated_angle, minimum_angle, maximum_angle);
+    sjsu::LogInfo("%f", calibrated_angle.to<double>());
     motor.SetAngle(calibrated_angle);
   }
 
@@ -99,11 +99,10 @@ class Joint
   units::angle::degree_t maximum_angle     = 180_deg;
   units::angle::degree_t rest_angle        = 0_deg;
   units::angle::degree_t zero_offset_angle = 0_deg;
-  const float kLerpStep                   = 0.5;
   sjsu::RmdX & motor;
   sjsu::Mpu6050 & mpu;
-  const float kLerpStep = 0.5;
-  units::angular_velocity::revolutions_per_minute_t speed_ = 0_rpm;
-  units::angle::degree_t position_ = 0_deg;
+  units::angular_velocity::revolutions_per_minute_t speed_     = 0_rpm;
+  units::angular_velocity::revolutions_per_minute_t max_speed_ = 100_rpm;
+  units::angle::degree_t position_                             = 0_deg;
 };
 }  // namespace sjsu::arm
