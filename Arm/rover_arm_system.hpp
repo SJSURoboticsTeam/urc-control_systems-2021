@@ -37,9 +37,9 @@ class RoverArmSystem : public sjsu::common::RoverSystem
     {
       kDefault = 'D',
     };
-    Modes modes           = Modes::kDefault;
-    int is_operational    = 0;
-    int heartbeat_count   = 0;
+    Modes modes          = Modes::kDefault;
+    int is_operational   = 0;
+    int heartbeat_count  = 0;
     float arm_speed      = 0;
     float rotunda_angle  = 0;
     float shoulder_angle = 0;
@@ -200,16 +200,13 @@ class RoverArmSystem : public sjsu::common::RoverSystem
     ChangeIfZero(accelerations_.shoulder.y);
 
     // TODO:  Verify we don't need compliment value of shoulder
-    float acceleration_x =
-        accelerations_.rotunda.x + accelerations_.shoulder.x;
-    float acceleration_y =
-        accelerations_.rotunda.y + accelerations_.shoulder.y;
+    float acceleration_x = accelerations_.rotunda.x + accelerations_.shoulder.x;
+    float acceleration_y = accelerations_.rotunda.y + accelerations_.shoulder.y;
 
     home_angle = atan(acceleration_y / acceleration_x);
     shoulder_.SetZeroOffset(home_angle);
     MoveShoulder(home_angle);
   }
-  // logic needs checking.
 
   void HomeElbow()
   {
@@ -224,11 +221,11 @@ class RoverArmSystem : public sjsu::common::RoverSystem
     float acceleration_x = accelerations_.rotunda.x + accelerations_.elbow.x;
     float acceleration_y = accelerations_.rotunda.y + accelerations_.elbow.y;
     float angle_without_correction = atan(acceleration_y / acceleration_x);
-    // maybe make the following statements above the if's functions that return
-    // a bool to give a better description/make it look nicer if the elbow is in
-    // the second quadrant of a graph, add 90 to the angle
+
+    // TODO: Bool helper functions for checking which quadrant correction to use
     if (accelerations_.elbow.x >= 0 && accelerations_.elbow.y <= 0)
     {
+      // if the elbow is in the second quadrant of a graph, add 90 to the angle
       home_angle = 90 - angle_without_correction;
     }
     // if the elbow is in the third quadrant of a graph, add 180 to the angle
