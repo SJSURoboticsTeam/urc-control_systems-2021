@@ -56,19 +56,15 @@ int main(void)
   {
     try
     {
+      sjsu::TimeoutTimer serverTimeout(5s);  // server has 5s timeout
       sjsu::LogInfo("Making new request now...");
       std::string endpoint = "drive" + drive.GETParameters();
       std::string response = esp.GET(endpoint);
-      sjsu::TimeoutTimer serverTimeout(5s);  // server has 5s timeout
       drive.ParseJSONResponse(response);
       drive.HandleRoverMovement();
       drive.IncrementHeartbeatCount();
       drive.PrintRoverData();
-      if (serverTimeout.HasExpired())
-      {
-        sjsu::LogWarning("Server timed out! Reconnecting...");
-        esp.ConnectToServer();
-      }
+      esp.IsServerExpired(serverTimeout);
     }
     catch (const std::exception & e)
     {
