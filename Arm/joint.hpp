@@ -94,6 +94,37 @@ class Joint
     return int(position_);
   }
 
+
+// edits the min angle. Useful for specific robot modes where full traversal might not be a good idea.
+  void SetMinAngle(float newmin)
+  {
+    units::angle::degree_t minimum_angle(newmin);
+  }
+
+
+// edits the min angle. Useful for specific robot modes where full traversal might not be a good idea.
+void SetMaxAngle(float newmax)
+{
+    units::angle::degree_t maximum_angle(newmax);
+}
+  int getMinAngle()
+  {
+    return int(minimum_angle);
+  }
+
+  int GetMaxAngle()
+  {
+    return int(maximum_angle);
+  }
+
+//Changes bounds to what original values. Can be run on initialization to make sure there are no old configuartions in memory
+  void ResetDefaultBounds()
+  {
+    units::angle::degree_t minimum_angle(0);
+    units::angle::degree_t maximum_angle(180);
+
+  }
+
  private:
   sjsu::RmdX & motor;
   sjsu::Mpu6050 & mpu;
