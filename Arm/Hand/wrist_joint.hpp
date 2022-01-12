@@ -33,7 +33,7 @@ class WristJoint
 
   void SetPitchPosition(float pitch_angle)
   {
-    pitch_angle_ = pitch_angle;
+    pitch_angle_ = float(std::clamp(pitch_angle, kPitchMinimumAngle, kPitchMaximumAngle));
     units::angle::degree_t angle_to_degrees(pitch_angle);
     left_motor_.SetAngle(angle_to_degrees);
     right_motor_.SetAngle(angle_to_degrees);
@@ -41,7 +41,7 @@ class WristJoint
 
     void SetRollPosition(float roll_angle)
   {
-    roll_angle_ = roll_angle;
+    roll_angle_ = float(std::clamp(roll_angle, kRollMinimumAngle, kRollMaximumAngle));
     units::angle::degree_t angle_to_degrees(roll_angle);
     left_motor_.SetAngle(angle_to_degrees);
     right_motor_.SetAngle(angle_to_degrees);
