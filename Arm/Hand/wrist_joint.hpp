@@ -30,7 +30,8 @@ class WristJoint
     right_motor_.Initialize();
     mpu_.Initialize();
   }
-
+  
+  // Sets Pitch Position of the wrist joint
   void SetPitchPosition(float pitch_angle)
   {
     pitch_angle_ = float(std::clamp(pitch_angle, kPitchMinimumAngle, kPitchMaximumAngle));
@@ -39,6 +40,7 @@ class WristJoint
     right_motor_.SetAngle(angle_to_degrees);
   }
 
+  // Sets Roll Position of the wrist joint
     void SetRollPosition(float roll_angle)
   {
     roll_angle_ = float(std::clamp(roll_angle, kRollMinimumAngle, kRollMaximumAngle));
