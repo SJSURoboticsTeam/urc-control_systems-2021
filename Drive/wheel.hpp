@@ -6,7 +6,6 @@
 
 namespace sjsu::drive
 {
-/// Wheel class manages steering & hub motors for the rover.
 class Wheel
 {
  public:
