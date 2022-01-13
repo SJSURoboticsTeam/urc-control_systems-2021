@@ -20,10 +20,18 @@ const char response_body_format[] =
 class RoverDriveSystem : public sjsu::common::RoverSystem
 {
  public:
-  struct ParseError{};
-  struct HeartBeatError{};
-  struct DriveModeError{};
-  struct DriveModeHandlerError{};
+  struct ParseError
+  {
+  };
+  struct HeartBeatError
+  {
+  };
+  struct DriveModeError
+  {
+  };
+  struct DriveModeHandlerError
+  {
+  };
 
   struct MissionControlData
   {
@@ -126,8 +134,8 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
     if (GetHeartbeatCount() != mc_data_.heartbeat_count)
     {
       // TODO: Should throw error in an attempt to reconnect?
-      throw HeartBeatError{};
       heartbeat_count_ = 0;
+      throw HeartBeatError{};
       return false;
     }
     return true;
@@ -350,8 +358,8 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
   float GetOutterWheelDriveAngle(float inner_wheel_angle)
   {
     float outter_wheel_angle = 0.392 + 0.744 * abs(int(inner_wheel_angle)) +
-                                -0.0187 * pow(abs(int(inner_wheel_angle)), 2) +
-                                1.84E-04 * pow(abs(int(inner_wheel_angle)), 3);
+                               -0.0187 * pow(abs(int(inner_wheel_angle)), 2) +
+                               1.84E-04 * pow(abs(int(inner_wheel_angle)), 3);
     return (inner_wheel_angle > 0) ? outter_wheel_angle : -outter_wheel_angle;
   }
 
@@ -359,8 +367,8 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
   float GetBackWheelDriveAngle(float inner_wheel_angle)
   {
     float back_wheel_angle = -0.378 + -1.79 * abs(int(inner_wheel_angle)) +
-                              0.0366 * pow(abs(int(inner_wheel_angle)), 2) +
-                              -3.24E-04 * pow(abs(int(inner_wheel_angle)), 3);
+                             0.0366 * pow(abs(int(inner_wheel_angle)), 2) +
+                             -3.24E-04 * pow(abs(int(inner_wheel_angle)), 3);
     return (inner_wheel_angle > 0) ? back_wheel_angle : -back_wheel_angle;
   }
 
@@ -405,9 +413,9 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
   char current_mode_   = 'S';
 
   const int kExpectedArguments = 5;
-  const float kZeroSpeed      = 0;
-  const float kMaxTurnRadius  = 45;
-  const float kLerpStep       = 0.5;
+  const float kZeroSpeed       = 0;
+  const float kMaxTurnRadius   = 45;
+  const float kLerpStep        = 0.5;
 
  public:
   MissionControlData mc_data_;
