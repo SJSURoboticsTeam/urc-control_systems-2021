@@ -20,9 +20,10 @@ const char response_body_format[] =
 class RoverDriveSystem : public sjsu::common::RoverSystem
 {
  public:
-  struct ParseError
-  {
-  };
+  struct ParseError{};
+  struct HeartBeatError{};
+  struct DriveModeError{};
+  struct DriveModeHandlerError{};
 
   struct MissionControlData
   {
@@ -113,7 +114,7 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
       case 'R':
       case 'B': HandleSingularWheelMode(speed, angle); break;
       default:
-        sjsu::LogError("Unable to assign drive mode handler!");
+        throw DriveModeHandlerError{};
         StopWheels();
         break;
     }
@@ -125,7 +126,7 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
     if (GetHeartbeatCount() != mc_data_.heartbeat_count)
     {
       // TODO: Should throw error in an attempt to reconnect?
-      sjsu::LogError("Heartbeat out of sync - resetting!");
+      throw HeartBeatError{};
       heartbeat_count_ = 0;
       return false;
     }
@@ -267,7 +268,7 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
       case 'L':
       case 'R':
       case 'B': SetSingleWheelMode(); break;
-      default: sjsu::LogError("Unable to set drive mode!");
+      default: throw DriveModeError{};
     };
   };
 

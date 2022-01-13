@@ -80,6 +80,18 @@ int main(void)
     {
       sjsu::LogError("Parsing Error: Arguments not equal");
     }
+    catch (const sjsu::drive::RoverDriveSystem::HeartBeatError &)
+    {
+      sjsu::LogError("HeartBeatError: Heartbeat out of sync - resetting!");
+    }
+    catch (const sjsu::drive::RoverDriveSystem::DriveModeHandlerError &)
+    {
+      sjsu::LogError("DriveModeHandlerError: Unable to assign drive mode handler!");
+    }
+    catch (const sjsu::drive::RoverDriveSystem::DriveModeError &)
+    {
+      sjsu::LogError("DriveModeError: Unable to set drive mode!");
+    }
   }
 
   return 0;
