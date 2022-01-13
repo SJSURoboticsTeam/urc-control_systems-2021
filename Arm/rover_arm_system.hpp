@@ -67,8 +67,9 @@ class RoverArmSystem : public sjsu::common::RoverSystem
   RoverArmSystem(sjsu::arm::Joint & rotunda,
                  sjsu::arm::Joint & shoulder,
                  sjsu::arm::Joint & elbow,
+                 sjsu::arm::Hand & hand,
                  sjsu::arm::WristJoint & wrist)
-      : rotunda_(rotunda), shoulder_(shoulder), elbow_(elbow), wrist_(wrist)
+      : rotunda_(rotunda), shoulder_(shoulder), elbow_(elbow), hand_(hand), wrist_(wrist)
   {
   }
 
@@ -77,7 +78,7 @@ class RoverArmSystem : public sjsu::common::RoverSystem
     rotunda_.Initialize();
     shoulder_.Initialize();
     elbow_.Initialize();
-    wrist_.Initialize();
+    //hand_.initialize();
   }
 
   void PrintRoverData()
@@ -177,7 +178,6 @@ class RoverArmSystem : public sjsu::common::RoverSystem
 
   void MoveWrist()
   {
-    return;
   };
 
   void HomeArm()
@@ -187,7 +187,7 @@ class RoverArmSystem : public sjsu::common::RoverSystem
     HomeShoulder();
     UpdateElbowAcceleration();
     HomeElbow();
-    HomeWrist();
+    hand_.HomeWrist(rotunda_.GetOffsetAngle());
   }
 
   void HomeShoulder()
@@ -240,11 +240,6 @@ class RoverArmSystem : public sjsu::common::RoverSystem
     elbow_.SetZeroOffset(home_angle);
     MoveElbow(home_angle);
   }
-
-  void HomeWrist()
-  {
-    return;
-  };
 
   // TODO: need to work on valid movement durring in person work shop
   bool CheckValidMovement()
