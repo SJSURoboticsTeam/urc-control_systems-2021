@@ -24,10 +24,10 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
   {
   };
 
-  struct MissionControlData
+  struct MissionControlData: public RoverMissionControlData
   {
-    int heartbeat_count = 0;
-    int is_operational  = 0;
+    //int heartbeat_count = 0;
+    //int is_operational  = 0;
     char drive_mode     = 'S';
     int rotation_angle  = 0;
     int speed           = 0;
