@@ -38,8 +38,8 @@ class RoverArmSystem : public sjsu::common::RoverSystem
       kDefault = 'D',
     };
     Modes modes          = Modes::kDefault;
-    int is_operational   = 0;
-    int heartbeat_count  = 0;
+    //int is_operational   = 0;
+    //int heartbeat_count  = 0;
     float arm_speed      = 0;
     float rotunda_angle  = 0;
     float shoulder_angle = 0;

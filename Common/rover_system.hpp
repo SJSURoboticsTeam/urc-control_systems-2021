@@ -8,7 +8,7 @@ class RoverSystem
  public:
   struct RoverMissionControlData{
     int is_operational = 0;
-    int heartbeat_count;
+    int heartbeat_count = 0;
   };
   /// Initialize all the motors and sensors that are used in the system
   virtual void Initialize() = 0;
@@ -20,7 +20,8 @@ class RoverSystem
   virtual void ParseJSONResponse(std::string &response) = 0;
   /// Move the rover according to the data sent from mission control
   virtual void HandleRoverMovement() = 0;
-   /// Prints the mc data and all the current wheel data
+   /// Verifies that mission control is sending fresh commands to rover
+  virtual bool IsHeartbeatSynced() = 0;
 
 };
 }  // namespace sjsu::common
