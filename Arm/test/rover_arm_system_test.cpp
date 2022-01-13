@@ -66,7 +66,8 @@ TEST_CASE("Arm system testing")
   sjsu::arm::Joint rotunda(rotunda_motor, spyed_rotunda_mpu, 0_deg, 3600_deg,
                            1800_deg);
 
-  sjsu::arm::RoverArmSystem arm(rotunda, shoulder, elbow, wrist);
+  sjsu::arm::Hand hand(wrist);
+  sjsu::arm::RoverArmSystem arm(rotunda, shoulder, elbow, wrist, hand);
 
   SECTION("should initialize and return default values")
   {

@@ -94,6 +94,11 @@ class Joint
     return int(position_);
   }
 
+  int GetOffsetAngle()
+  {
+    return int(zero_offset_angle);
+  }
+
  private:
   sjsu::RmdX & motor;
   sjsu::Mpu6050 & mpu;
