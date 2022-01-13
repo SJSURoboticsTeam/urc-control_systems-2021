@@ -223,13 +223,13 @@ class RoverArmSystem : public sjsu::common::RoverSystem
     float angle_without_correction = atan(acceleration_y / acceleration_x);
 
     // TODO: Bool helper functions for checking which quadrant correction to use
-    if (accelerations_.elbow.x >= 0 && accelerations_.elbow.y <= 0)
+    if (accelerations_.elbow.x + accelerations_.rotunda.x >= 0 && accelerations_.elbow.y + accelerations_.rotunda.y <= 0)
     {
       // if the elbow is in the second quadrant of a graph, add 90 to the angle
       home_angle = 90 - angle_without_correction;
     }
     // if the elbow is in the third quadrant of a graph, add 180 to the angle
-    else if (accelerations_.elbow.x >= 0 && accelerations_.elbow.y >= 0)
+    else if (accelerations_.elbow.x + accelerations_.rotunda.x >= 0 && accelerations_.elbow.y + accelerations_.rotunda.y >= 0)
     {
       home_angle = 180 + angle_without_correction;
     }
@@ -288,13 +288,13 @@ class RoverArmSystem : public sjsu::common::RoverSystem
     return 0;
   };
 
-  Acceleration accelerations_;
   int heartbeat_count_                    = 0;
   int state_of_charge_                    = 90;
   const int kExpectedArguments            = 13;
   MissionControlData::Modes current_mode_ = MissionControlData::Modes::kDefault;
 
  public:
+  Acceleration accelerations_;
   sjsu::arm::Hand hand_;
   MissionControlData mc_data_;
   sjsu::arm::Joint & rotunda_;
