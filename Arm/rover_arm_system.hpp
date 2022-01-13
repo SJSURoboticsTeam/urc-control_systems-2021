@@ -67,8 +67,9 @@ class RoverArmSystem : public sjsu::common::RoverSystem
   RoverArmSystem(sjsu::arm::Joint & rotunda,
                  sjsu::arm::Joint & shoulder,
                  sjsu::arm::Joint & elbow,
-                 sjsu::arm::WristJoint & wrist)
-      : rotunda_(rotunda), shoulder_(shoulder), elbow_(elbow), wrist_(wrist)
+                 sjsu::arm::WristJoint & wrist,
+                 sjsu::arm::Hand & hand)
+      : rotunda_(rotunda), shoulder_(shoulder), elbow_(elbow), wrist_(wrist), hand_(hand)
   {
   }
 
@@ -77,7 +78,8 @@ class RoverArmSystem : public sjsu::common::RoverSystem
     rotunda_.Initialize();
     shoulder_.Initialize();
     elbow_.Initialize();
-    wrist_.Initialize();
+    wrist_.Initialize(); //will be moved to hand
+    //hand_.initialize();
   }
 
   void PrintRoverData()
@@ -177,7 +179,6 @@ class RoverArmSystem : public sjsu::common::RoverSystem
 
   void MoveWrist()
   {
-    return;
   };
 
   void HomeArm()
@@ -187,7 +188,7 @@ class RoverArmSystem : public sjsu::common::RoverSystem
     HomeShoulder();
     UpdateElbowAcceleration();
     HomeElbow();
-    HomeWrist();
+    hand_.HomeWrist(rotunda_.GetOffsetAngle());
   }
 
   void HomeShoulder()
@@ -223,13 +224,13 @@ class RoverArmSystem : public sjsu::common::RoverSystem
     float angle_without_correction = atan(acceleration_y / acceleration_x);
 
     // TODO: Bool helper functions for checking which quadrant correction to use
-    if (accelerations_.elbow.x >= 0 && accelerations_.elbow.y <= 0)
+    if (accelerations_.elbow.x + accelerations_.rotunda.x >= 0 && accelerations_.elbow.y + accelerations_.rotunda.y <= 0)
     {
       // if the elbow is in the second quadrant of a graph, add 90 to the angle
       home_angle = 90 - angle_without_correction;
     }
     // if the elbow is in the third quadrant of a graph, add 180 to the angle
-    else if (accelerations_.elbow.x >= 0 && accelerations_.elbow.y >= 0)
+    else if (accelerations_.elbow.x + accelerations_.rotunda.x >= 0 && accelerations_.elbow.y + accelerations_.rotunda.y >= 0)
     {
       home_angle = 180 + angle_without_correction;
     }
@@ -240,11 +241,6 @@ class RoverArmSystem : public sjsu::common::RoverSystem
     elbow_.SetZeroOffset(home_angle);
     MoveElbow(home_angle);
   }
-
-  void HomeWrist()
-  {
-    return;
-  };
 
   // TODO: need to work on valid movement durring in person work shop
   bool CheckValidMovement()
@@ -288,13 +284,13 @@ class RoverArmSystem : public sjsu::common::RoverSystem
     return 0;
   };
 
-  Acceleration accelerations_;
   int heartbeat_count_                    = 0;
   int state_of_charge_                    = 90;
   const int kExpectedArguments            = 13;
   MissionControlData::Modes current_mode_ = MissionControlData::Modes::kDefault;
 
  public:
+  Acceleration accelerations_;
   sjsu::arm::Hand hand_;
   MissionControlData mc_data_;
   sjsu::arm::Joint & rotunda_;

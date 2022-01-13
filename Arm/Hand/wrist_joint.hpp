@@ -14,7 +14,7 @@ class WristJoint
     float y=0;
     float z=0;
   };
-  
+
   WristJoint(sjsu::RmdX & left_joint_motor,
              sjsu::RmdX & right_joint_motor,
              sjsu::Mpu6050 & accelerometer)
@@ -30,18 +30,20 @@ class WristJoint
     right_motor_.Initialize();
     mpu_.Initialize();
   }
-
+  
+  // Sets Pitch Position of the wrist joint
   void SetPitchPosition(float pitch_angle)
   {
-    pitch_angle_ = pitch_angle;
+    pitch_angle_ = float(std::clamp(pitch_angle, kPitchMinimumAngle, kPitchMaximumAngle));
     units::angle::degree_t angle_to_degrees(pitch_angle);
     left_motor_.SetAngle(angle_to_degrees);
     right_motor_.SetAngle(angle_to_degrees);
   }
 
+  // Sets Roll Position of the wrist joint
     void SetRollPosition(float roll_angle)
   {
-    roll_angle_ = roll_angle;
+    roll_angle_ = float(std::clamp(roll_angle, kRollMinimumAngle, kRollMaximumAngle));
     units::angle::degree_t angle_to_degrees(roll_angle);
     left_motor_.SetAngle(angle_to_degrees);
     right_motor_.SetAngle(angle_to_degrees);
@@ -60,22 +62,34 @@ class WristJoint
   Acceleration GetAccelerometerData()
   {
     sjsu::Accelerometer::Acceleration_t acceleration_to_float(mpu_.Read());
-    Acceleration acceleration;
     acceleration.x = static_cast<float>(acceleration_to_float.x);
     acceleration.y = static_cast<float>(acceleration_to_float.y);
     acceleration.z = static_cast<float>(acceleration_to_float.z);
     return acceleration;
   }
 
-  int GetPitchPosition()
-  {
-    return int(pitch_angle_);
-  }
+int GetPitchPosition()
+{
+  return int(pitch_angle_);
+}
 
- int GetRollPosition()
-  {
-    return int(roll_angle_);
-  }
+int GetRollPosition()
+{
+  return int(roll_angle_);
+}
+
+int GetLeftOffsetAngle()
+{    
+  return int(left_offset_angle_);
+}
+
+int GetRightOffsetAngle()
+{
+  return int(right_offset_angle_);
+}
+
+Acceleration acceleration;
+
 private:
 
   sjsu::RmdX & left_motor_;
