@@ -41,7 +41,8 @@ int main()
   sjsu::arm::Joint shoulder(shoulder_motor, shoulder_mpu);
   sjsu::arm::Joint elbow(elbow_motor, elbow_mpu);
   sjsu::arm::WristJoint wrist(left_wrist_motor, right_wrist_motor, wrist_mpu);
-  sjsu::arm::RoverArmSystem arm(rotunda, shoulder, elbow, wrist);
+  sjsu::arm::Hand hand(wrist);
+  sjsu::arm::RoverArmSystem arm(rotunda, shoulder, elbow, wrist, hand);
 
   esp.Initialize();
   arm.Initialize();

@@ -67,9 +67,9 @@ class RoverArmSystem : public sjsu::common::RoverSystem
   RoverArmSystem(sjsu::arm::Joint & rotunda,
                  sjsu::arm::Joint & shoulder,
                  sjsu::arm::Joint & elbow,
-                 sjsu::arm::Hand & hand,
-                 sjsu::arm::WristJoint & wrist)
-      : rotunda_(rotunda), shoulder_(shoulder), elbow_(elbow), hand_(hand), wrist_(wrist)
+                 sjsu::arm::WristJoint & wrist,
+                 sjsu::arm::Hand & hand)
+      : rotunda_(rotunda), shoulder_(shoulder), elbow_(elbow), wrist_(wrist), hand_(hand)
   {
   }
 
@@ -78,6 +78,7 @@ class RoverArmSystem : public sjsu::common::RoverSystem
     rotunda_.Initialize();
     shoulder_.Initialize();
     elbow_.Initialize();
+    wrist_.Initialize(); //will be moved to hand
     //hand_.initialize();
   }
 
