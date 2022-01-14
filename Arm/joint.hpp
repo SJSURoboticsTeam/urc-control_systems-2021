@@ -15,30 +15,27 @@ class Joint
     float y = 0;
     float z = 0;
   };
+
   Joint(sjsu::RmdX & joint_motor, sjsu::Mpu6050 & accelerometer)
-      : motor(joint_motor), mpu(accelerometer)
-  {
-  }
+      : motor_(joint_motor), mpu_(accelerometer){};
 
   Joint(sjsu::RmdX & joint_motor,
         sjsu::Mpu6050 & accelerometer,
         units::angle::degree_t min_angle,
         units::angle::degree_t max_angle,
         units::angle::degree_t standby_angle)
-      : minimum_angle(min_angle),
+      : motor_(joint_motor),
+        mpu_(accelerometer),
+        minimum_angle(min_angle),
         maximum_angle(max_angle),
-        rest_angle(standby_angle),
-        motor(joint_motor),
-        mpu(accelerometer)
-  {
-  }
+        rest_angle(standby_angle){};
 
   /// Initialize the joint object, This must be called before any other
   /// function.
   void Initialize()
   {
-    motor.Initialize();
-    mpu.Initialize();
+    motor_.Initialize();
+    mpu_.Initialize();
   }
 
   /// Move the motor to the (calibrated) angle desired.
@@ -50,7 +47,7 @@ class Joint
     calibrated_angle =
         std::clamp(calibrated_angle, minimum_angle, maximum_angle);
     sjsu::LogInfo("%f", calibrated_angle.to<double>());
-    motor.SetAngle(calibrated_angle);
+    motor_.SetAngle(calibrated_angle);
   }
 
   /// Sets the zero_offset_angle value that the motor uses to know its true '0'
@@ -65,7 +62,7 @@ class Joint
   /// JointAcceleration of floats
   Acceleration GetAccelerometerData()
   {
-    sjsu::Accelerometer::Acceleration_t acceleration_to_float(mpu.Read());
+    sjsu::Accelerometer::Acceleration_t acceleration_to_float(mpu_.Read());
     Acceleration acceleration;
     acceleration.x = static_cast<float>(acceleration_to_float.x);
     acceleration.y = static_cast<float>(acceleration_to_float.y);
@@ -81,7 +78,7 @@ class Joint
         std::lerp(current_speed, targetspeed, kLerpStep));
 
     speed_ = speed;
-    motor.SetSpeed(speed_);
+    motor_.SetSpeed(speed_);
   }
 
   int GetSpeed()
@@ -100,12 +97,13 @@ class Joint
   }
 
  private:
-  sjsu::RmdX & motor;
-  sjsu::Mpu6050 & mpu;
+  sjsu::RmdX & motor_;
+  sjsu::Mpu6050 & mpu_;
 
-  units::angle::degree_t minimum_angle     = 0_deg;
-  units::angle::degree_t maximum_angle     = 180_deg;
-  units::angle::degree_t rest_angle        = 0_deg;
+  units::angle::degree_t minimum_angle = 0_deg;
+  units::angle::degree_t maximum_angle = 180_deg;
+  units::angle::degree_t rest_angle    = 0_deg;
+
   units::angle::degree_t zero_offset_angle = 0_deg;
 
   units::angular_velocity::revolutions_per_minute_t speed_     = 0_rpm;

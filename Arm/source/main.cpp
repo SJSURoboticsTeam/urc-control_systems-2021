@@ -62,7 +62,7 @@ int main()
       std::string response = esp.GET(endpoint);
       sjsu::TimeoutTimer serverTimeout(5s);  // server has 5s timeout
       arm.ParseJSONResponse(response);
-      arm.HandleArmMovement();
+      arm.HandleRoverMovement();
       arm.IncrementHeartbeatCount();
       arm.PrintRoverData();
       sjsu::Delay(3s);
