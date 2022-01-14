@@ -40,20 +40,20 @@ class RoverArmSystem : public sjsu::common::RoverSystem
     Modes modes          = Modes::kDefault;
     int is_operational   = 0;
     int heartbeat_count  = 0;
-    float arm_speed      = 0;
-    float rotunda_angle  = 0;
-    float shoulder_angle = 0;
-    float elbow_angle    = 0;
-    float wrist_roll     = 0;
-    float wrist_pitch    = 0;
+    int arm_speed      = 0;
+    int rotunda_angle  = 0;
+    int shoulder_angle = 0;
+    int elbow_angle    = 0;
+    int wrist_roll     = 0;
+    int wrist_pitch    = 0;
 
     struct Finger
     {
-      float pinky_angle   = 0;
-      float ring_angle    = 0;
-      float middle_angle  = 0;
-      float pointer_angle = 0;
-      float thumb_angle   = 0;
+      int pinky_angle   = 0;
+      int ring_angle    = 0;
+      int middle_angle  = 0;
+      int pointer_angle = 0;
+      int thumb_angle   = 0;
     };
     Finger finger;
   };
