@@ -51,11 +51,11 @@ TEST_CASE("Drive system testing")
 
   SECTION("1.1 should start with default values")
   {
-    CHECK(drive.mc_data_.heartbeat_count == 0);
-    CHECK(drive.mc_data_.is_operational == 0);
-    CHECK(drive.mc_data_.drive_mode == 'S');
-    CHECK(drive.mc_data_.rotation_angle == 0);
-    CHECK(drive.mc_data_.speed == 0);
+    CHECK_EQ(drive.mc_data_.heartbeat_count, 0);
+    CHECK_EQ(drive.mc_data_.is_operational, 0);
+    CHECK_EQ(drive.mc_data_.drive_mode, 'S');
+    CHECK_EQ(drive.mc_data_.rotation_angle, 0);
+    CHECK_EQ(drive.mc_data_.speed, 0);
   }
 
   SECTION("2.1 should return the starting defaults response")
@@ -65,7 +65,7 @@ TEST_CASE("Drive system testing")
         "&left_wheel_speed=0&left_wheel_angle=0&right_wheel_speed=0&right_"
         "wheel_angle=0&back_wheel_speed=0&back_wheel_angle=0";
     std::string actual_parameters = drive.GETParameters();
-    CHECK(actual_parameters == expected_parameters);
+    CHECK_EQ(actual_parameters, expected_parameters);
   }
 
   SECTION("3.1 should parse expected values")
@@ -79,211 +79,178 @@ TEST_CASE("Drive system testing")
         "  \"angle\": 15\n"
         "}";
     drive.ParseJSONResponse(example_response);
-    CHECK(drive.mc_data_.heartbeat_count == 0);
-    CHECK(drive.mc_data_.is_operational == 1);
-    CHECK(drive.mc_data_.drive_mode == 'S');
-    CHECK(drive.mc_data_.rotation_angle == 15);
-    CHECK(drive.mc_data_.speed == 15);
+    CHECK_EQ(drive.mc_data_.heartbeat_count, 0);
+    CHECK_EQ(drive.mc_data_.is_operational, 1);
+    CHECK_EQ(drive.mc_data_.drive_mode, 'S');
+    CHECK_EQ(drive.mc_data_.rotation_angle, 15);
+    CHECK_EQ(drive.mc_data_.speed, 15);
   }
 
-  SECTION("4.1 should return zero heartbeat count")
+  SECTION("4.1 should return false at start")
   {
-    CHECK(drive.GetHeartbeatCount() == 0);
+    CHECK_EQ(drive.mc_data_.is_operational, 0);
+    CHECK_FALSE(drive.IsOperational());
   }
 
-  SECTION("5.1 should increment heartbeat count one time")
-  {
-    drive.IncrementHeartbeatCount();
-    CHECK(drive.GetHeartbeatCount() == 1);
-  }
-
-  SECTION("6.1 should verify rover is synced at start")
-  {
-    CHECK(drive.mc_data_.heartbeat_count == 0);
-    CHECK(drive.IsHeartbeatSynced(drive.mc_data_.heartbeat_count) == true);
-  }
-
-  SECTION("6.2 should verify heartbeat not synced at start")
-  {
-    drive.mc_data_.heartbeat_count = kNonZero;
-    CHECK(drive.GetHeartbeatCount() == 0);
-    CHECK(drive.IsHeartbeatSynced(drive.mc_data_.heartbeat_count) == false);
-  }
-
-  SECTION("6.3 should verify heartbeat is reset when not synced")
-  {
-    drive.IncrementHeartbeatCount();
-    CHECK(drive.GetHeartbeatCount() == 1);
-
-    CHECK(drive.IsHeartbeatSynced(drive.mc_data_.heartbeat_count) == false);
-    CHECK(drive.GetHeartbeatCount() == 0);
-  }
-
-  SECTION("7.1 should return false at start")
-  {
-    CHECK(drive.mc_data_.is_operational == 0);
-    CHECK(drive.IsOperational() == false);
-  }
-
-  SECTION("7.2 should return true after setting is_operational")
+  SECTION("4.2 should return true after setting is_operational")
   {
     drive.mc_data_.is_operational = 1;
-    CHECK(drive.IsOperational() == true);
+    CHECK(drive.IsOperational());
   }
 
-  SECTION("8.1 should return starting drive mode 'S'")
+  SECTION("5.1 should return starting drive mode 'S'")
   {
-    CHECK(drive.GetCurrentMode() == 'S');
+    CHECK_EQ(drive.GetCurrentMode(), 'S');
   }
 
-  SECTION("9.1 should return false with same modes")
+  SECTION("6.1 should return false with same modes")
   {
-    CHECK(drive.mc_data_.drive_mode == 'S');
-    CHECK(drive.GetCurrentMode() == 'S');
-    CHECK(drive.IsNewMode() == false);
+    CHECK_EQ(drive.mc_data_.drive_mode, 'S');
+    CHECK_EQ(drive.GetCurrentMode(), 'S');
+    CHECK_FALSE(drive.IsNewMode());
   }
 
-  SECTION("9.2 should return true with different modes")
+  SECTION("6.2 should return true with different modes")
   {
     drive.mc_data_.drive_mode = 'D';
-    CHECK(drive.IsNewMode() == true);
+    CHECK(drive.IsNewMode());
   }
 
-  SECTION("10.1 should return true since rover is stopped at start")
+  SECTION("7.1 should return true since rover is stopped at start")
   {
-    CHECK(drive.IsStopped() == true);
+    CHECK(drive.IsStopped());
   }
 
-  SECTION("10.2 should return false after all hub wheels start moving")
+  SECTION("7.2 should return false after all hub wheels start moving")
   {
     drive.left_wheel_.SetHubSpeed(kNonZero);
     drive.right_wheel_.SetHubSpeed(kNonZero);
     drive.back_wheel_.SetHubSpeed(kNonZero);
-    CHECK(drive.IsStopped() == false);
+    CHECK_FALSE(drive.IsStopped());
   }
 
-  SECTION("10.3 should return false if at least one hub wheel is moving")
+  SECTION("7.3 should return false if at least one hub wheel is moving")
   {
     drive.left_wheel_.SetHubSpeed(kNonZero);
-    CHECK(drive.IsStopped() == false);
+    CHECK_FALSE(drive.IsStopped());
   }
 
-  SECTION("11.1 should stop all wheels after one call")
+  SECTION("8.1 should stop all wheels after one call")
   {
     drive.left_wheel_.SetHubSpeed(kNonZero);
     drive.right_wheel_.SetHubSpeed(kNonZero);
     drive.back_wheel_.SetHubSpeed(kNonZero);
     drive.StopWheels();
-    CHECK(drive.IsStopped() == true);
+    CHECK(drive.IsStopped());
   }
 
-  SECTION("12.1 should lerp to 4 by setting speed to 2 → 3 → 4")
+  SECTION("9.1 should lerp to 4 by setting speed to 2 → 3 → 4")
   {
     drive.SetWheelSpeed(4);
-    CHECK(drive.left_wheel_.GetHubSpeed() == 2);
-    CHECK(drive.right_wheel_.GetHubSpeed() == 2);
-    CHECK(drive.back_wheel_.GetHubSpeed() == 2);
+    CHECK_EQ(drive.left_wheel_.GetHubSpeed(), 2);
+    CHECK_EQ(drive.right_wheel_.GetHubSpeed(), 2);
+    CHECK_EQ(drive.back_wheel_.GetHubSpeed(), 2);
 
     drive.SetWheelSpeed(4);
-    CHECK(drive.left_wheel_.GetHubSpeed() == 3);
-    CHECK(drive.right_wheel_.GetHubSpeed() == 3);
-    CHECK(drive.back_wheel_.GetHubSpeed() == 3);
+    CHECK_EQ(drive.left_wheel_.GetHubSpeed(), 3);
+    CHECK_EQ(drive.right_wheel_.GetHubSpeed(), 3);
+    CHECK_EQ(drive.back_wheel_.GetHubSpeed(), 3);
 
     drive.SetWheelSpeed(4);
-    CHECK(drive.left_wheel_.GetHubSpeed() >= 3);
-    CHECK(drive.right_wheel_.GetHubSpeed() >= 3);
-    CHECK(drive.back_wheel_.GetHubSpeed() >= 3);
+    CHECK_GE(drive.left_wheel_.GetHubSpeed(), 3);
+    CHECK_GE(drive.right_wheel_.GetHubSpeed(), 3);
+    CHECK_GE(drive.back_wheel_.GetHubSpeed(), 3);
   }
 
-  SECTION("12.2 Should lerp from 4 to zero by setting speed to 2 → 1 → 0")
+  SECTION("9.2 Should lerp from 4 to zero by setting speed to 2 → 1 → 0")
   {
     drive.left_wheel_.SetHubSpeed(4);
     drive.right_wheel_.SetHubSpeed(4);
     drive.back_wheel_.SetHubSpeed(4);
 
     drive.SetWheelSpeed(0);
-    CHECK(drive.left_wheel_.GetHubSpeed() == 2);
-    CHECK(drive.right_wheel_.GetHubSpeed() == 2);
-    CHECK(drive.back_wheel_.GetHubSpeed() == 2);
+    CHECK_EQ(drive.left_wheel_.GetHubSpeed(), 2);
+    CHECK_EQ(drive.right_wheel_.GetHubSpeed(), 2);
+    CHECK_EQ(drive.back_wheel_.GetHubSpeed(), 2);
 
     drive.SetWheelSpeed(0);
-    CHECK(drive.left_wheel_.GetHubSpeed() == 1);
-    CHECK(drive.right_wheel_.GetHubSpeed() == 1);
-    CHECK(drive.back_wheel_.GetHubSpeed() == 1);
+    CHECK_EQ(drive.left_wheel_.GetHubSpeed(), 1);
+    CHECK_EQ(drive.right_wheel_.GetHubSpeed(), 1);
+    CHECK_EQ(drive.back_wheel_.GetHubSpeed(), 1);
 
     drive.SetWheelSpeed(0);
-    CHECK(drive.IsStopped() == true);
+    CHECK(drive.IsStopped());
   }
 
-  SECTION("12.3 should lerp to -4 by setting speed to -2 → -3 → -4")
+  SECTION("9.3 should lerp to -4 by setting speed to -2 → -3 → -4")
   {
     drive.SetWheelSpeed(-4);
-    CHECK(drive.left_wheel_.GetHubSpeed() == -2);
-    CHECK(drive.right_wheel_.GetHubSpeed() == -2);
-    CHECK(drive.back_wheel_.GetHubSpeed() == -2);
+    CHECK_EQ(drive.left_wheel_.GetHubSpeed(), -2);
+    CHECK_EQ(drive.right_wheel_.GetHubSpeed(), -2);
+    CHECK_EQ(drive.back_wheel_.GetHubSpeed(), -2);
 
     drive.SetWheelSpeed(-4);
-    CHECK(drive.left_wheel_.GetHubSpeed() == -3);
-    CHECK(drive.right_wheel_.GetHubSpeed() == -3);
-    CHECK(drive.back_wheel_.GetHubSpeed() == -3);
+    CHECK_EQ(drive.left_wheel_.GetHubSpeed(), -3);
+    CHECK_EQ(drive.right_wheel_.GetHubSpeed(), -3);
+    CHECK_EQ(drive.back_wheel_.GetHubSpeed(), -3);
 
     drive.SetWheelSpeed(-4);
-    CHECK(drive.left_wheel_.GetHubSpeed() >= -4);
-    CHECK(drive.right_wheel_.GetHubSpeed() >= -4);
-    CHECK(drive.back_wheel_.GetHubSpeed() >= -4);
+    CHECK_GE(drive.left_wheel_.GetHubSpeed(), -4);
+    CHECK_GE(drive.right_wheel_.GetHubSpeed(), -4);
+    CHECK_GE(drive.back_wheel_.GetHubSpeed(), -4);
   }
 
-  SECTION("12.4 Should lerp from -4 to zero by setting speed to -2 → -1 → -0")
+  SECTION("9.4 Should lerp from -4 to zero by setting speed to -2 → -1 → -0")
   {
     drive.left_wheel_.SetHubSpeed(-4);
     drive.right_wheel_.SetHubSpeed(-4);
     drive.back_wheel_.SetHubSpeed(-4);
 
     drive.SetWheelSpeed(0);
-    CHECK(drive.left_wheel_.GetHubSpeed() == -2);
-    CHECK(drive.right_wheel_.GetHubSpeed() == -2);
-    CHECK(drive.back_wheel_.GetHubSpeed() == -2);
+    CHECK_EQ(drive.left_wheel_.GetHubSpeed(), -2);
+    CHECK_EQ(drive.right_wheel_.GetHubSpeed(), -2);
+    CHECK_EQ(drive.back_wheel_.GetHubSpeed(), -2);
 
     drive.SetWheelSpeed(0);
-    CHECK(drive.left_wheel_.GetHubSpeed() == -1);
-    CHECK(drive.right_wheel_.GetHubSpeed() == -1);
-    CHECK(drive.back_wheel_.GetHubSpeed() == -1);
+    CHECK_EQ(drive.left_wheel_.GetHubSpeed(), -1);
+    CHECK_EQ(drive.right_wheel_.GetHubSpeed(), -1);
+    CHECK_EQ(drive.back_wheel_.GetHubSpeed(), -1);
 
     drive.SetWheelSpeed(0);
-    CHECK(drive.IsStopped() == true);
+    CHECK(drive.IsStopped());
   }
 
-  SECTION("13.1 should home wheels after moving")
+  SECTION("10.1 should home wheels after moving")
   {
     drive.left_wheel_.SetHubSpeed(kNonZero);
     drive.right_wheel_.SetHubSpeed(kNonZero);
     drive.back_wheel_.SetHubSpeed(kNonZero);
     drive.HomeWheels();
-    CHECK(drive.left_wheel_.GetSteerAngle() == 0);
-    CHECK(drive.right_wheel_.GetSteerAngle() == 0);
-    CHECK(drive.back_wheel_.GetSteerAngle() == 0);
+    CHECK_EQ(drive.left_wheel_.GetSteerAngle(), 0);
+    CHECK_EQ(drive.right_wheel_.GetSteerAngle(), 0);
+    CHECK_EQ(drive.back_wheel_.GetSteerAngle(), 0);
   }
 
-  SECTION("14.1 should return true when at start position")
+  SECTION("11.1 should return true when at start position")
   {
-    CHECK(drive.AllWheelsAreHomed() == true);
+    CHECK(drive.AllWheelsAreHomed());
   }
 
-  SECTION("14.2 should return false if all wheels are not homed")
+  SECTION("11.2 should return false if all wheels are not homed")
   {
     drive.left_wheel_.SetSteerAngle(kNonZero);
     drive.right_wheel_.SetSteerAngle(kNonZero);
     drive.back_wheel_.SetSteerAngle(kNonZero);
-    CHECK(drive.AllWheelsAreHomed() == false);
+    CHECK_FALSE(drive.AllWheelsAreHomed());
   }
 
-  SECTION("14.3 should return false if one wheel is not homed")
+  SECTION("11.3 should return false if one wheel is not homed")
   {
     drive.back_wheel_.SetSteerAngle(kNonZero);
-    CHECK(drive.AllWheelsAreHomed() == false);
+    CHECK_FALSE(drive.AllWheelsAreHomed());
   }
 
-  SECTION("15.1 should slow down when heartbeat is out of sync")
+  SECTION("12.1 should slow down when heartbeat is out of sync")
   {
     drive.mc_data_.heartbeat_count = kNonZero;
     drive.mc_data_.is_operational  = 1;
@@ -293,12 +260,12 @@ TEST_CASE("Drive system testing")
     drive.back_wheel_.SetHubSpeed(kNonZero);
     drive.HandleRoverMovement();
 
-    CHECK(drive.left_wheel_.GetHubSpeed() < kNonZero);
-    CHECK(drive.right_wheel_.GetHubSpeed() < kNonZero);
-    CHECK(drive.back_wheel_.GetHubSpeed() < kNonZero);
+    CHECK_LT(drive.left_wheel_.GetHubSpeed(), kNonZero);
+    CHECK_LT(drive.right_wheel_.GetHubSpeed(), kNonZero);
+    CHECK_LT(drive.back_wheel_.GetHubSpeed(), kNonZero);
   }
 
-  SECTION("15.2 should stop movement when rover is not operational")
+  SECTION("12.2 should stop movement when rover is not operational")
   {
     drive.mc_data_.is_operational = 0;
 
@@ -307,48 +274,48 @@ TEST_CASE("Drive system testing")
     drive.back_wheel_.SetHubSpeed(kNonZero);
     drive.HandleRoverMovement();
 
-    CHECK(drive.IsStopped() == true);
+    CHECK(drive.IsStopped());
   }
 
-  SECTION("15.3 should switch into all the valid drive modes")
+  SECTION("12.3 should switch into all the valid drive modes")
   {
     drive.mc_data_.is_operational = 1;
 
     drive.mc_data_.drive_mode = 'D';
     drive.HandleRoverMovement();
-    CHECK(drive.GetCurrentMode() == 'D');
+    CHECK_EQ(drive.GetCurrentMode(), 'D');
 
     drive.mc_data_.drive_mode = 'T';
     drive.HandleRoverMovement();
-    CHECK(drive.GetCurrentMode() == 'T');
+    CHECK_EQ(drive.GetCurrentMode(), 'T');
 
     drive.mc_data_.drive_mode = 'S';
     drive.HandleRoverMovement();
-    CHECK(drive.GetCurrentMode() == 'S');
+    CHECK_EQ(drive.GetCurrentMode(), 'S');
 
     drive.mc_data_.drive_mode = 'B';
     drive.HandleRoverMovement();
-    CHECK(drive.GetCurrentMode() == 'B');
+    CHECK_EQ(drive.GetCurrentMode(), 'B');
 
     drive.mc_data_.drive_mode = 'L';
     drive.HandleRoverMovement();
-    CHECK(drive.GetCurrentMode() == 'L');
+    CHECK_EQ(drive.GetCurrentMode(), 'L');
 
     drive.mc_data_.drive_mode = 'R';
     drive.HandleRoverMovement();
-    CHECK(drive.GetCurrentMode() == 'R');
+    CHECK_EQ(drive.GetCurrentMode(), 'R');
   }
 
-  SECTION("15.4 should stay in the current mode when passed invalid drive mode")
+  SECTION("12.4 should stay in the current mode when passed invalid drive mode")
   {
     drive.mc_data_.is_operational = 1;
 
     drive.mc_data_.drive_mode = 'Q';
     drive.HandleRoverMovement();
-    CHECK(drive.GetCurrentMode() == 'S');
+    CHECK_EQ(drive.GetCurrentMode(), 'S');
   }
 
-  SECTION("15.5 should stay in same mode when not operational but has new mode")
+  SECTION("12.5 should stay in same mode when not operational but has new mode")
   {
     drive.mc_data_.is_operational = 0;
     drive.mc_data_.drive_mode     = 'D';
@@ -358,10 +325,10 @@ TEST_CASE("Drive system testing")
     drive.back_wheel_.SetHubSpeed(kNonZero);
 
     drive.HandleRoverMovement();
-    CHECK(drive.GetCurrentMode() == 'S');
+    CHECK_EQ(drive.GetCurrentMode(), 'S');
   }
 
-  SECTION("15.6 should only slow down when heartbeat not synced")
+  SECTION("12.6 should only slow down when heartbeat not synced")
   {
     drive.mc_data_.heartbeat_count = kNonZero;
     drive.mc_data_.is_operational  = 0;
@@ -373,25 +340,25 @@ TEST_CASE("Drive system testing")
 
     drive.HandleRoverMovement();
 
-    CHECK(drive.left_wheel_.GetHubSpeed() < kNonZero);
-    CHECK(drive.right_wheel_.GetHubSpeed() < kNonZero);
-    CHECK(drive.back_wheel_.GetHubSpeed() < kNonZero);
-    CHECK(drive.IsStopped() == false);
-    CHECK(drive.GetCurrentMode() == 'S');
+    CHECK_LT(drive.left_wheel_.GetHubSpeed(), kNonZero);
+    CHECK_LT(drive.right_wheel_.GetHubSpeed(), kNonZero);
+    CHECK_LT(drive.back_wheel_.GetHubSpeed(), kNonZero);
+    CHECK_FALSE(drive.IsStopped());
+    CHECK_EQ(drive.GetCurrentMode(), 'S');
   }
 
-  SECTION("15.7.1 should have all steer motor angles at 90")
+  SECTION("12.7.1 should have all steer motor angles at 90")
   {
     drive.mc_data_.is_operational = 1;
     drive.Initialize();
     drive.HandleRoverMovement();
 
-    CHECK(drive.left_wheel_.GetSteerAngle() == 90);
-    CHECK(drive.right_wheel_.GetSteerAngle() == 90);
-    CHECK(drive.back_wheel_.GetSteerAngle() == 90);
+    CHECK_EQ(drive.left_wheel_.GetSteerAngle(), 90);
+    CHECK_EQ(drive.right_wheel_.GetSteerAngle(), 90);
+    CHECK_EQ(drive.back_wheel_.GetSteerAngle(), 90);
   }
 
-  SECTION("15.7.2 should have all hub motors at same non zero speed")
+  SECTION("12.7.2 should have all hub motors at same non zero speed")
   {
     drive.mc_data_.is_operational = 1;
     drive.mc_data_.drive_mode     = 'D';
@@ -400,12 +367,12 @@ TEST_CASE("Drive system testing")
     drive.HandleRoverMovement();
     drive.HandleRoverMovement();
 
-    CHECK(drive.left_wheel_.GetHubSpeed() == drive.right_wheel_.GetHubSpeed());
-    CHECK(drive.right_wheel_.GetHubSpeed() == drive.back_wheel_.GetHubSpeed());
-    CHECK(drive.IsStopped() == false);
+    CHECK_EQ(drive.left_wheel_.GetHubSpeed(), drive.right_wheel_.GetHubSpeed());
+    CHECK_EQ(drive.right_wheel_.GetHubSpeed(), drive.back_wheel_.GetHubSpeed());
+    CHECK_FALSE(drive.IsStopped());
   }
 
-  SECTION("15.8.1 should clamp steer angles when over 45")
+  SECTION("12.8.1 should clamp steer angles when over 45")
   {
     drive.mc_data_.is_operational = 1;
     drive.mc_data_.drive_mode     = 'D';
@@ -414,12 +381,12 @@ TEST_CASE("Drive system testing")
     drive.HandleRoverMovement();
     drive.HandleRoverMovement();
 
-    CHECK(drive.left_wheel_.GetSteerAngle() == 12);
-    CHECK(drive.right_wheel_.GetSteerAngle() == 45);
-    CHECK(drive.back_wheel_.GetSteerAngle() == -36);
+    CHECK_EQ(drive.left_wheel_.GetSteerAngle(), 12);
+    CHECK_EQ(drive.right_wheel_.GetSteerAngle(), 45);
+    CHECK_EQ(drive.back_wheel_.GetSteerAngle(), -36);
   }
 
-  SECTION("15.8.2 should clamp steer angles when under 45")
+  SECTION("12.8.2 should clamp steer angles when under 45")
   {
     drive.mc_data_.is_operational = 1;
     drive.mc_data_.drive_mode     = 'D';
@@ -428,12 +395,12 @@ TEST_CASE("Drive system testing")
     drive.HandleRoverMovement();
     drive.HandleRoverMovement();
 
-    CHECK(drive.left_wheel_.GetSteerAngle() == -45);
-    CHECK(drive.right_wheel_.GetSteerAngle() == -12);
-    CHECK(drive.back_wheel_.GetSteerAngle() == 36);
+    CHECK_EQ(drive.left_wheel_.GetSteerAngle(), -45);
+    CHECK_EQ(drive.right_wheel_.GetSteerAngle(), -12);
+    CHECK_EQ(drive.back_wheel_.GetSteerAngle(), 36);
   }
 
-  SECTION("15.8.3 should have correct angles when set 10: L=6, R=-10, B=-15")
+  SECTION("12.8.3 should have correct angles when set 10: L=6, R=-10, B=-12")
   {
     drive.mc_data_.is_operational = 1;
     drive.mc_data_.drive_mode     = 'D';
@@ -442,12 +409,12 @@ TEST_CASE("Drive system testing")
     drive.HandleRoverMovement();
     drive.HandleRoverMovement();
 
-    CHECK(drive.left_wheel_.GetSteerAngle() == 6);
-    CHECK(drive.right_wheel_.GetSteerAngle() == 10);
-    CHECK(drive.back_wheel_.GetSteerAngle() == -14);
+    CHECK_EQ(drive.left_wheel_.GetSteerAngle(), 6);
+    CHECK_EQ(drive.right_wheel_.GetSteerAngle(), 10);
+    CHECK_EQ(drive.back_wheel_.GetSteerAngle(), -14);
   }
 
-  SECTION("15.8.4 should have correct angles when set -10: L=-10, R=-6, B=15")
+  SECTION("12.8.4 should have correct angles when set -10: L=-10, R=-6, B=12")
   {
     drive.mc_data_.is_operational = 1;
     drive.mc_data_.drive_mode     = 'D';
@@ -456,12 +423,12 @@ TEST_CASE("Drive system testing")
     drive.HandleRoverMovement();
     drive.HandleRoverMovement();
 
-    CHECK(drive.left_wheel_.GetSteerAngle() == -10);
-    CHECK(drive.right_wheel_.GetSteerAngle() == -6);
-    CHECK(drive.back_wheel_.GetSteerAngle() == 14);
+    CHECK_EQ(drive.left_wheel_.GetSteerAngle(), -10);
+    CHECK_EQ(drive.right_wheel_.GetSteerAngle(), -6);
+    CHECK_EQ(drive.back_wheel_.GetSteerAngle(), 14);
   }
 
-  SECTION("15.8.5 should get correct speed")
+  SECTION("12.8.5 should get correct speed")
   {
     drive.mc_data_.is_operational = 1;
     drive.mc_data_.drive_mode     = 'D';
@@ -470,36 +437,36 @@ TEST_CASE("Drive system testing")
     drive.HandleRoverMovement();
     drive.HandleRoverMovement();
     // Currently the hub motors are all set to the same speed
-    CHECK(drive.left_wheel_.GetHubSpeed() == drive.right_wheel_.GetHubSpeed());
-    CHECK(drive.right_wheel_.GetHubSpeed() == drive.back_wheel_.GetHubSpeed());
-    CHECK(drive.IsStopped() == false);
+    CHECK_EQ(drive.left_wheel_.GetHubSpeed(), drive.right_wheel_.GetHubSpeed());
+    CHECK_EQ(drive.right_wheel_.GetHubSpeed(), drive.back_wheel_.GetHubSpeed());
+    CHECK_FALSE(drive.IsStopped());
   }
 
-  SECTION("15.8.6 should have correct starting angles L=-45, R=-135, B=90")
+  SECTION("12.8.6 should have correct starting angles L=-45, R=-135, B=90")
   {
     drive.mc_data_.is_operational = 1;
     drive.mc_data_.drive_mode     = 'D';
 
     drive.HandleRoverMovement();
 
-    CHECK(drive.left_wheel_.GetSteerAngle() == -45);
-    CHECK(drive.right_wheel_.GetSteerAngle() == -135);
-    CHECK(drive.back_wheel_.GetSteerAngle() == 90);
+    CHECK_EQ(drive.left_wheel_.GetSteerAngle(), -45);
+    CHECK_EQ(drive.right_wheel_.GetSteerAngle(), -135);
+    CHECK_EQ(drive.back_wheel_.GetSteerAngle(), 90);
   }
 
-  SECTION("15.9.1 should have correct starting angles")
+  SECTION("12.9.1 should have correct starting angles")
   {
     drive.mc_data_.is_operational = 1;
     drive.mc_data_.drive_mode     = 'T';
 
     drive.HandleRoverMovement();
 
-    CHECK(drive.left_wheel_.GetSteerAngle() == 0);
-    CHECK(drive.right_wheel_.GetSteerAngle() == 60);
-    CHECK(drive.back_wheel_.GetSteerAngle() == 110);
+    CHECK_EQ(drive.left_wheel_.GetSteerAngle(), 0);
+    CHECK_EQ(drive.right_wheel_.GetSteerAngle(), 60);
+    CHECK_EQ(drive.back_wheel_.GetSteerAngle(), 110);
   }
 
-  SECTION("15.9.2 should have all hub motors at same non zero speed")
+  SECTION("12.9.2 should have all hub motors at same non zero speed")
   {
     drive.mc_data_.is_operational = 1;
     drive.mc_data_.drive_mode     = 'T';
@@ -508,12 +475,12 @@ TEST_CASE("Drive system testing")
     drive.HandleRoverMovement();
     drive.HandleRoverMovement();
 
-    CHECK(drive.left_wheel_.GetHubSpeed() == drive.right_wheel_.GetHubSpeed());
-    CHECK(drive.right_wheel_.GetHubSpeed() == drive.back_wheel_.GetHubSpeed());
-    CHECK(drive.IsStopped() == false);
+    CHECK_EQ(drive.left_wheel_.GetHubSpeed(), drive.right_wheel_.GetHubSpeed());
+    CHECK_EQ(drive.right_wheel_.GetHubSpeed(), drive.back_wheel_.GetHubSpeed());
+    CHECK_FALSE(drive.IsStopped());
   }
 
-  SECTION("15.10.1 should adjust only the speed and angle of one wheel")
+  SECTION("12.10.1 should adjust only the speed and angle of one wheel")
   {
     drive.mc_data_.is_operational = 1;
     drive.mc_data_.drive_mode     = 'L';
@@ -523,13 +490,13 @@ TEST_CASE("Drive system testing")
     drive.HandleRoverMovement();
     drive.HandleRoverMovement();
 
-    CHECK(drive.left_wheel_.GetHubSpeed() != 0);
-    CHECK(drive.right_wheel_.GetHubSpeed() == 0);
-    CHECK(drive.back_wheel_.GetHubSpeed() == 0);
+    CHECK_NE(drive.left_wheel_.GetHubSpeed(), 0);
+    CHECK_EQ(drive.right_wheel_.GetHubSpeed(), 0);
+    CHECK_EQ(drive.back_wheel_.GetHubSpeed(), 0);
 
-    CHECK(drive.left_wheel_.GetSteerAngle() != 0);
-    CHECK(drive.right_wheel_.GetSteerAngle() == 0);
-    CHECK(drive.back_wheel_.GetSteerAngle() == 0);
+    CHECK_NE(drive.left_wheel_.GetSteerAngle(), 0);
+    CHECK_EQ(drive.right_wheel_.GetSteerAngle(), 0);
+    CHECK_EQ(drive.back_wheel_.GetSteerAngle(), 0);
   }
 }
 }  // namespace sjsu

@@ -1,0 +1,1 @@
+TESTS += test/rover_system.cpp
