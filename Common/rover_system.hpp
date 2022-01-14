@@ -1,24 +1,57 @@
 #pragma once
 #include <string>
 
+#include "../Common/heartbeat.hpp"
+
 namespace sjsu::common
 {
 class RoverSystem
 {
  public:
-  struct RoverMissionControlData{
-    int is_operational = 0;
-    int heartbeat_count;
+  struct RoverMissionControlData
+  {
+    int is_operational  = 0;
+    int heartbeat_count = 0;
   };
   /// Initialize all the motors and sensors that are used in the system
-  void Initialize();
+  virtual void Initialize() = 0;
   /// Prints the status of all the rover devices & motors
-  void PrintRoverData();
+  virtual void PrintRoverData() = 0;
   /// Creates the GET request parameters that contain the current rover status
-  std::string GETParameters();
+  virtual std::string GETParameters() = 0;
   /// Parses the JSON response retrieved from mission control
-  void ParseJSONResponse();
+  virtual void ParseJSONResponse(std::string & response) = 0;
   /// Move the rover according to the data sent from mission control
-  void HandleRoverMovement();
+  virtual void HandleRoverMovement() = 0;
+
+  bool IsHeartbeatSynced(int heartbeat_count)
+  {
+    if (heartbeat_count_ != heartbeat_count)
+    {
+      // TODO: Should throw error in an attempt to reconnect?
+      sjsu::LogError("Heartbeat out of sync - resetting!");
+      ResetHeartbeatCount();
+      return false;
+    }
+    return true;
+  }
+
+  int GetHeartbeatCount()
+  {
+    return heartbeat_count_;
+  }
+
+  void IncrementHeartbeatCount()
+  {
+    heartbeat_count_++;
+  }
+
+ private:
+  void ResetHeartbeatCount()
+  {
+    heartbeat_count_ = 0;
+  }
+
+  int heartbeat_count_ = 0;
 };
 }  // namespace sjsu::common

@@ -37,26 +37,25 @@ class RoverArmSystem : public sjsu::common::RoverSystem
     {
       kDefault = 'D',
     };
-    Modes modes          = Modes::kDefault;
-    int is_operational   = 0;
-    int heartbeat_count  = 0;
-    float arm_speed      = 0;
-    float rotunda_angle  = 0;
-    float shoulder_angle = 0;
-    float elbow_angle    = 0;
-    float wrist_roll     = 0;
-    float wrist_pitch    = 0;
+    Modes modes        = Modes::kDefault;
+    int arm_speed      = 0;
+    int rotunda_angle  = 0;
+    int shoulder_angle = 0;
+    int elbow_angle    = 0;
+    int wrist_roll     = 0;
+    int wrist_pitch    = 0;
 
     struct Finger
     {
-      float pinky_angle   = 0;
-      float ring_angle    = 0;
-      float middle_angle  = 0;
-      float pointer_angle = 0;
-      float thumb_angle   = 0;
+      int pinky_angle   = 0;
+      int ring_angle    = 0;
+      int middle_angle  = 0;
+      int pointer_angle = 0;
+      int thumb_angle   = 0;
     };
     Finger finger;
   };
+
   struct Acceleration
   {
     Joint::Acceleration rotunda;
@@ -67,25 +66,29 @@ class RoverArmSystem : public sjsu::common::RoverSystem
   RoverArmSystem(sjsu::arm::Joint & rotunda,
                  sjsu::arm::Joint & shoulder,
                  sjsu::arm::Joint & elbow,
-                 sjsu::arm::WristJoint & wrist)
-      : rotunda_(rotunda), shoulder_(shoulder), elbow_(elbow), wrist_(wrist)
-  {
-  }
+                 sjsu::arm::WristJoint & wrist,
+                 sjsu::arm::Hand & hand)
+      : rotunda_(rotunda),
+        shoulder_(shoulder),
+        elbow_(elbow),
+        wrist_(wrist),
+        hand_(hand){};
 
-  void Initialize()
+  void Initialize() override
   {
     rotunda_.Initialize();
     shoulder_.Initialize();
     elbow_.Initialize();
-    wrist_.Initialize();
+    wrist_.Initialize();  // TODO: Move to hand class
+    hand_.Initialize();
   }
 
-  void PrintRoverData()
+  void PrintRoverData() override
   {
     return;
-  };
+  }
 
-  std::string GETParameters()
+  std::string GETParameters() override
   {
     char request_parameter[300];
     snprintf(request_parameter, 300,
@@ -93,16 +96,17 @@ class RoverArmSystem : public sjsu::common::RoverSystem
              "rotunda_angle=%d&shoulder_angle=%d&elbow_angle=%d&wrist_roll=%d&"
              "wrist_pitch=%d&pinky_angle=%d&ring_angle=%d&middle_angle=%d&"
              "pointer_angle=%d&thumb_angle=%d",
-             heartbeat_count_, mc_data_.is_operational, int(mc_data_.arm_speed),
-             state_of_charge_, rotunda_.GetPosition(), shoulder_.GetPosition(),
-             elbow_.GetPosition(), wrist_.GetRollPosition(),
-             wrist_.GetPitchPosition(), hand_.GetPinkyPosition(),
-             hand_.GetRingPosition(), hand_.GetMiddlePosition(),
-             hand_.GetPointerPosition(), hand_.GetThumbPosition());
+             GetHeartbeatCount(), mc_data_.is_operational,
+             int(mc_data_.arm_speed), state_of_charge_, rotunda_.GetPosition(),
+             shoulder_.GetPosition(), elbow_.GetPosition(),
+             wrist_.GetRollPosition(), wrist_.GetPitchPosition(),
+             hand_.GetPinkyPosition(), hand_.GetRingPosition(),
+             hand_.GetMiddlePosition(), hand_.GetPointerPosition(),
+             hand_.GetThumbPosition());
     return request_parameter;
-  };
+  }
 
-  void ParseJSONResponse(std::string & response)
+  void ParseJSONResponse(std::string & response) override
   {
     int actual_arguments = sscanf(
         response.c_str(), response_body_format, &mc_data_.heartbeat_count,
@@ -118,7 +122,7 @@ class RoverArmSystem : public sjsu::common::RoverSystem
                      kExpectedArguments);
       throw ParseError{};
     }
-  };
+  }
 
   /// Checks that the rover is operational
   bool IsOperational()
@@ -129,24 +133,6 @@ class RoverArmSystem : public sjsu::common::RoverSystem
       return false;
     }
     return true;
-  }
-
-  /// Verifies that mission control is sending fresh commands to rover
-  bool IsHeartbeatSynced()
-  {
-    if (mc_data_.heartbeat_count != heartbeat_count_)
-    {
-      // TODO: Throw error if this is reached?
-      sjsu::LogError("Heartbeat out of sync - resetting!");
-      heartbeat_count_ = 0;
-      return false;
-    }
-    return true;
-  }
-
-  void IncrementHeartbeatCount()
-  {
-    heartbeat_count_++;
   }
 
   void MoveRotunda(float angle)
@@ -167,7 +153,7 @@ class RoverArmSystem : public sjsu::common::RoverSystem
     elbow_.SetPosition(angle);
   }
 
-  void HandleArmMovement()
+  void HandleRoverMovement() override
   {
     // TODO: implement different arm drive modes in this function
     MoveRotunda(mc_data_.rotunda_angle);
@@ -175,10 +161,7 @@ class RoverArmSystem : public sjsu::common::RoverSystem
     MoveElbow(mc_data_.elbow_angle);
   }
 
-  void MoveWrist()
-  {
-    return;
-  };
+  void MoveWrist(){};
 
   void HomeArm()
   {
@@ -187,7 +170,7 @@ class RoverArmSystem : public sjsu::common::RoverSystem
     HomeShoulder();
     UpdateElbowAcceleration();
     HomeElbow();
-    HomeWrist();
+    hand_.HomeWrist(float(rotunda_.GetOffsetAngle()));
   }
 
   void HomeShoulder()
@@ -203,7 +186,7 @@ class RoverArmSystem : public sjsu::common::RoverSystem
     float acceleration_x = accelerations_.rotunda.x + accelerations_.shoulder.x;
     float acceleration_y = accelerations_.rotunda.y + accelerations_.shoulder.y;
 
-    home_angle = atan(acceleration_y / acceleration_x);
+    home_angle = float(atan(acceleration_y / acceleration_x));
     shoulder_.SetZeroOffset(home_angle);
     MoveShoulder(home_angle);
   }
@@ -220,16 +203,19 @@ class RoverArmSystem : public sjsu::common::RoverSystem
     // TODO:  Verify we don't need compliment value of shoulder
     float acceleration_x = accelerations_.rotunda.x + accelerations_.elbow.x;
     float acceleration_y = accelerations_.rotunda.y + accelerations_.elbow.y;
-    float angle_without_correction = atan(acceleration_y / acceleration_x);
+    float angle_without_correction =
+        float(atan(acceleration_y / acceleration_x));
 
     // TODO: Bool helper functions for checking which quadrant correction to use
-    if (accelerations_.elbow.x >= 0 && accelerations_.elbow.y <= 0)
+    if (accelerations_.elbow.x + accelerations_.rotunda.x >= 0 &&
+        accelerations_.elbow.y + accelerations_.rotunda.y <= 0)
     {
       // if the elbow is in the second quadrant of a graph, add 90 to the angle
       home_angle = 90 - angle_without_correction;
     }
     // if the elbow is in the third quadrant of a graph, add 180 to the angle
-    else if (accelerations_.elbow.x >= 0 && accelerations_.elbow.y >= 0)
+    else if (accelerations_.elbow.x + accelerations_.rotunda.x >= 0 &&
+             accelerations_.elbow.y + accelerations_.rotunda.y >= 0)
     {
       home_angle = 180 + angle_without_correction;
     }
@@ -241,11 +227,6 @@ class RoverArmSystem : public sjsu::common::RoverSystem
     MoveElbow(home_angle);
   }
 
-  void HomeWrist()
-  {
-    return;
-  };
-
   // TODO: need to work on valid movement durring in person work shop
   bool CheckValidMovement()
   {
@@ -255,7 +236,7 @@ class RoverArmSystem : public sjsu::common::RoverSystem
   void Calibrate()
   {
     return;
-  };
+  }
 
   void UpdateRotundaAcceleration()
   {
@@ -286,20 +267,21 @@ class RoverArmSystem : public sjsu::common::RoverSystem
   float FindComplimentValue()
   {
     return 0;
-  };
+  }
 
-  Acceleration accelerations_;
-  int heartbeat_count_                    = 0;
   int state_of_charge_                    = 90;
-  const int kExpectedArguments            = 13;
   MissionControlData::Modes current_mode_ = MissionControlData::Modes::kDefault;
 
+  const int kExpectedArguments = 13;
+
  public:
-  sjsu::arm::Hand hand_;
+  Acceleration accelerations_;
   MissionControlData mc_data_;
+
   sjsu::arm::Joint & rotunda_;
   sjsu::arm::Joint & shoulder_;
   sjsu::arm::Joint & elbow_;
   sjsu::arm::WristJoint & wrist_;
+  sjsu::arm::Hand hand_;
 };
 }  // namespace sjsu::arm

@@ -63,10 +63,11 @@ TEST_CASE("Arm system testing")
   sjsu::arm::Joint elbow(elbow_motor, spyed_elbow_mpu);
   sjsu::arm::WristJoint wrist(left_wrist_motor, right_wrist_motor,
                               spyed_wrist_mpu);
-  sjsu::arm::Joint rotunda(rotunda_motor, spyed_rotunda_mpu, 0_deg, 3600_deg,
-                           1800_deg);
+  sjsu::arm::Joint rotunda(rotunda_motor, spyed_rotunda_mpu, 0, 3600,
+                           1800);
 
-  sjsu::arm::RoverArmSystem arm(rotunda, shoulder, elbow, wrist);
+  sjsu::arm::Hand hand(wrist);
+  sjsu::arm::RoverArmSystem arm(rotunda, shoulder, elbow, wrist, hand);
 
   SECTION("should initialize and return default values")
   {

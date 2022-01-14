@@ -4,6 +4,7 @@
 
 #include "../Common/state_of_charge.hpp"
 #include "../Common/rover_system.hpp"
+#include "../Common/heartbeat.hpp"
 #include "../Common/esp.hpp"
 #include "wheel.hpp"
 
@@ -23,9 +24,6 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
   struct ParseError
   {
   };
-  struct HeartBeatError
-  {
-  };
   struct DriveModeError
   {
   };
@@ -33,20 +31,19 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
   {
   };
 
-  struct MissionControlData
+  struct MissionControlData : public RoverMissionControlData
   {
-    int heartbeat_count = 0;
-    int is_operational  = 0;
-    char drive_mode     = 'S';
-    int rotation_angle  = 0;
-    int speed           = 0;
+    char drive_mode    = 'S';
+    int rotation_angle = 0;
+    int speed          = 0;
   };
+
   RoverDriveSystem(Wheel & left_wheel, Wheel & right_wheel, Wheel & back_wheel)
       : left_wheel_(left_wheel),
         right_wheel_(right_wheel),
         back_wheel_(back_wheel){};
 
-  virtual void Initialize()
+  virtual void Initialize() override
   {
     sjsu::LogInfo("Initializing drive system...");
     left_wheel_.Initialize();
@@ -54,11 +51,11 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
     back_wheel_.Initialize();
     SetSpinMode();
     sjsu::LogInfo("Drive system initialized!");
-  };
+  }
 
   /// Constructs parameters for an HTTP GET request
   /// @return ?heartbeat_count=0&is_operational=1&drive_mode=S ...
-  std::string GETParameters()
+  std::string GETParameters() override
   {
     char request_parameter[300];
     snprintf(
@@ -66,16 +63,16 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
         "?heartbeat_count=%d&is_operational=%d&drive_mode=%c&battery=%d"
         "&left_wheel_speed=%d&left_wheel_angle=%d&right_wheel_speed=%d&right_"
         "wheel_angle=%d&back_wheel_speed=%d&back_wheel_angle=%d",
-        heartbeat_count_, mc_data_.is_operational, current_mode_,
+        GetHeartbeatCount(), mc_data_.is_operational, current_mode_,
         state_of_charge_, left_wheel_.GetHubSpeed(),
         left_wheel_.GetSteerAngle(), right_wheel_.GetHubSpeed(),
         right_wheel_.GetSteerAngle(), back_wheel_.GetHubSpeed(),
         back_wheel_.GetSteerAngle());
     return request_parameter;
-  };
+  }
 
   /// Parses the GET requests response and updates the mission control variables
-  void ParseJSONResponse(std::string & response)
+  void ParseJSONResponse(std::string & response) override
   {
     int actual_arguments =
         sscanf(response.c_str(), response_body_format,
@@ -88,13 +85,13 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
                      kExpectedArguments);
       throw ParseError{};
     }
-  };
+  }
 
   /// Handles the rover movement depending on the mode.
   /// D = Drive, S = Spin, T = Translation, L/R/B = Left/Right/Back Wheel
-  void HandleRoverMovement()
+  void HandleRoverMovement() override
   {
-    if (!IsHeartbeatSynced())
+    if (!IsHeartbeatSynced(mc_data_.heartbeat_count))
     {
       SetWheelSpeed(kZeroSpeed);
       return;
@@ -110,8 +107,8 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
       return;
     }
 
-    float angle = mc_data_.rotation_angle;
-    float speed = mc_data_.speed;
+    float angle = float(mc_data_.rotation_angle);
+    float speed = float(mc_data_.speed);
 
     switch (current_mode_)
     {
@@ -122,33 +119,10 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
       case 'R':
       case 'B': HandleSingularWheelMode(speed, angle); break;
       default:
-        throw DriveModeHandlerError{};
         StopWheels();
+        // throw DriveModeHandlerError{};
         break;
     }
-  };
-
-  /// Checks if the mission control heartbeat matches rover heartbeat
-  bool IsHeartbeatSynced()
-  {
-    if (GetHeartbeatCount() != mc_data_.heartbeat_count)
-    {
-      // TODO: Should throw error in an attempt to reconnect?
-      heartbeat_count_ = 0;
-      throw HeartBeatError{};
-      return false;
-    }
-    return true;
-  }
-
-  int GetHeartbeatCount()
-  {
-    return heartbeat_count_;
-  }
-
-  void IncrementHeartbeatCount()
-  {
-    heartbeat_count_++;
   }
 
   /// Checks if the rover is operational
@@ -198,9 +172,9 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
   /// Slowly lerps the wheels toward the target speed
   void SetWheelSpeed(float target_speed)
   {
-    float left_wheel_speed  = left_wheel_.GetHubSpeed();
-    float right_wheel_speed = right_wheel_.GetHubSpeed();
-    float back_wheel_speed  = back_wheel_.GetHubSpeed();
+    float left_wheel_speed  = float(left_wheel_.GetHubSpeed());
+    float right_wheel_speed = float(right_wheel_.GetHubSpeed());
+    float back_wheel_speed  = float(back_wheel_.GetHubSpeed());
 
     left_wheel_speed  = std::lerp(left_wheel_speed, target_speed, kLerpStep);
     right_wheel_speed = std::lerp(right_wheel_speed, target_speed, kLerpStep);
@@ -209,7 +183,7 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
     left_wheel_.SetHubSpeed(left_wheel_speed);
     right_wheel_.SetHubSpeed(right_wheel_speed);
     back_wheel_.SetHubSpeed(back_wheel_speed);
-  };
+  }
 
   /// Locks thread until all wheels are homed
   void HomeWheels()
@@ -238,7 +212,7 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
       sjsu::Delay(50ms);
     }
     sjsu::LogInfo("Wheels homed!");
-  };
+  }
 
   bool AllWheelsAreHomed()
   {
@@ -247,7 +221,7 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
   }
 
   /// Prints the mc data and all the current wheel data
-  void PrintRoverData()
+  void PrintRoverData() override
   {
     printf("HEARTBEAT:\t%d\n", mc_data_.heartbeat_count);
     printf("OPERATIONAL:\t%d\n", mc_data_.is_operational);
@@ -260,7 +234,7 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
     right_wheel_.Print();
     back_wheel_.Print();
     printf("=========================\n");
-  };
+  }
 
  private:
   /// Stops the rover and sets a new mode.
@@ -276,9 +250,11 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
       case 'L':
       case 'R':
       case 'B': SetSingleWheelMode(); break;
-      default: throw DriveModeError{};
+      default:
+        // throw DriveModeError{};
+        break;
     };
-  };
+  }
 
   // ======================
   // = DRIVE MODE SETTERS =
@@ -294,7 +270,7 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
     right_wheel_.SetSteerAngle(right_wheel_angle);
     back_wheel_.SetSteerAngle(back_wheel_angle);
     current_mode_ = 'D';
-  };
+  }
 
   /// Aligns rover wheels perpendicular to their legs using homing slip ring
   void SetSpinMode()
@@ -306,7 +282,7 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
     right_wheel_.SetSteerAngle(right_wheel_angle);
     back_wheel_.SetSteerAngle(back_wheel_angle);
     current_mode_ = 'S';
-  };
+  }
 
   /// Aligns rover wheel all in the same direction, facing towards the right
   void SetTranslationMode()
@@ -319,7 +295,7 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
     right_wheel_.SetSteerAngle(right_wheel_angle);
     back_wheel_.SetSteerAngle(back_wheel_angle);
     current_mode_ = 'T';
-  };
+  }
 
   void SetSingleWheelMode()
   {
@@ -352,7 +328,7 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
     }
     // TODO: Need logic for controling wheel speed for each wheel
     SetWheelSpeed(speed);
-  };
+  }
 
   /// Calculates outer wheel angle based off inner wheel angle
   float GetOutterWheelDriveAngle(float inner_wheel_angle)
@@ -376,7 +352,7 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
   void HandleSpinMode(float speed)
   {
     SetWheelSpeed(speed);
-  };
+  }
 
   /// Adjusts all the wheels by keeping them in parallel
   void HandleTranslationMode(float speed, float angle)
@@ -386,7 +362,7 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
     right_wheel_.SetSteerAngle(angle);
     back_wheel_.SetSteerAngle(angle);
     SetWheelSpeed(speed);
-  };
+  }
 
   /// Adjusts the hub speed and steer angle of the specified wheel
   void HandleSingularWheelMode(float speed, float angle)
@@ -406,9 +382,8 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
         back_wheel_.SetHubSpeed(speed);
         break;
     }
-  };
+  }
 
-  int heartbeat_count_ = 0;
   int state_of_charge_ = 90;
   char current_mode_   = 'S';
 
