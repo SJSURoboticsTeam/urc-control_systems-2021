@@ -37,9 +37,7 @@ class RoverArmSystem : public sjsu::common::RoverSystem
     {
       kDefault = 'D',
     };
-    Modes modes = Modes::kDefault;
-    // int is_operational   = 0;
-    // int heartbeat_count  = 0;
+    Modes modes          = Modes::kDefault;
     float arm_speed      = 0;
     float rotunda_angle  = 0;
     float shoulder_angle = 0;
@@ -82,8 +80,8 @@ class RoverArmSystem : public sjsu::common::RoverSystem
     rotunda_.Initialize();
     shoulder_.Initialize();
     elbow_.Initialize();
-    wrist_.Initialize();  // will be moved to hand
-    // hand_.initialize();
+    wrist_.Initialize();  // TODO: Move to hand class
+    hand_.Initialize();
   }
 
   void PrintRoverData() override
