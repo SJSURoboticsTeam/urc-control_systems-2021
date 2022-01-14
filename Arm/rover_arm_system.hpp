@@ -55,6 +55,7 @@ class RoverArmSystem : public sjsu::common::RoverSystem
     };
     Finger finger;
   };
+
   struct Acceleration
   {
     Joint::Acceleration rotunda;
@@ -71,9 +72,7 @@ class RoverArmSystem : public sjsu::common::RoverSystem
         shoulder_(shoulder),
         elbow_(elbow),
         wrist_(wrist),
-        hand_(hand)
-  {
-  }
+        hand_(hand){};
 
   void Initialize() override
   {
@@ -87,7 +86,7 @@ class RoverArmSystem : public sjsu::common::RoverSystem
   void PrintRoverData() override
   {
     return;
-  };
+  }
 
   std::string GETParameters() override
   {
@@ -97,14 +96,15 @@ class RoverArmSystem : public sjsu::common::RoverSystem
              "rotunda_angle=%d&shoulder_angle=%d&elbow_angle=%d&wrist_roll=%d&"
              "wrist_pitch=%d&pinky_angle=%d&ring_angle=%d&middle_angle=%d&"
              "pointer_angle=%d&thumb_angle=%d",
-             heartbeat_count_, mc_data_.is_operational, int(mc_data_.arm_speed),
-             state_of_charge_, rotunda_.GetPosition(), shoulder_.GetPosition(),
-             elbow_.GetPosition(), wrist_.GetRollPosition(),
-             wrist_.GetPitchPosition(), hand_.GetPinkyPosition(),
-             hand_.GetRingPosition(), hand_.GetMiddlePosition(),
-             hand_.GetPointerPosition(), hand_.GetThumbPosition());
+             GetHeartbeatCount(), mc_data_.is_operational,
+             int(mc_data_.arm_speed), state_of_charge_, rotunda_.GetPosition(),
+             shoulder_.GetPosition(), elbow_.GetPosition(),
+             wrist_.GetRollPosition(), wrist_.GetPitchPosition(),
+             hand_.GetPinkyPosition(), hand_.GetRingPosition(),
+             hand_.GetMiddlePosition(), hand_.GetPointerPosition(),
+             hand_.GetThumbPosition());
     return request_parameter;
-  };
+  }
 
   void ParseJSONResponse(std::string & response) override
   {
@@ -122,7 +122,7 @@ class RoverArmSystem : public sjsu::common::RoverSystem
                      kExpectedArguments);
       throw ParseError{};
     }
-  };
+  }
 
   /// Checks that the rover is operational
   bool IsOperational()
@@ -133,24 +133,6 @@ class RoverArmSystem : public sjsu::common::RoverSystem
       return false;
     }
     return true;
-  }
-
-  /// Verifies that mission control is sending fresh commands to rover
-  bool IsHeartbeatSynced() override
-  {
-    if (mc_data_.heartbeat_count != heartbeat_count_)
-    {
-      // TODO: Throw error if this is reached?
-      sjsu::LogError("Heartbeat out of sync - resetting!");
-      heartbeat_count_ = 0;
-      return false;
-    }
-    return true;
-  }
-
-  void IncrementHeartbeatCount()
-  {
-    heartbeat_count_++;
   }
 
   void MoveRotunda(float angle)
@@ -254,7 +236,7 @@ class RoverArmSystem : public sjsu::common::RoverSystem
   void Calibrate()
   {
     return;
-  };
+  }
 
   void UpdateRotundaAcceleration()
   {
@@ -285,12 +267,12 @@ class RoverArmSystem : public sjsu::common::RoverSystem
   float FindComplimentValue()
   {
     return 0;
-  };
+  }
 
-  int heartbeat_count_                    = 0;
   int state_of_charge_                    = 90;
-  const int kExpectedArguments            = 13;
   MissionControlData::Modes current_mode_ = MissionControlData::Modes::kDefault;
+
+  const int kExpectedArguments = 13;
 
  public:
   Acceleration accelerations_;

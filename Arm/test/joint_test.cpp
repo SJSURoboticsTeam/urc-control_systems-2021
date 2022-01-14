@@ -68,9 +68,6 @@ TEST_CASE("Joint system testing")
 
   SECTION("should boundary test the max and min angles for SetPostion")
   {
-    int maxPosition = 180;
-    int minPosition = 0;
-
     joint.SetPosition(-10);
     // CHECK(joint.GetPosition() == minPosition);
 
