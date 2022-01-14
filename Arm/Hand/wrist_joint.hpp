@@ -8,11 +8,11 @@ namespace sjsu::arm
 class WristJoint
 {
  public:
-   struct Acceleration
+  struct Acceleration
   {
-    float x=0;
-    float y=0;
-    float z=0;
+    float x = 0;
+    float y = 0;
+    float z = 0;
   };
 
   WristJoint(sjsu::RmdX & left_joint_motor,
@@ -30,20 +30,22 @@ class WristJoint
     right_motor_.Initialize();
     mpu_.Initialize();
   }
-  
+
   // Sets Pitch Position of the wrist joint
   void SetPitchPosition(float pitch_angle)
   {
-    pitch_angle_ = float(std::clamp(pitch_angle, kPitchMinimumAngle, kPitchMaximumAngle));
+    pitch_angle_ =
+        float(std::clamp(pitch_angle, kPitchMinimumAngle, kPitchMaximumAngle));
     units::angle::degree_t angle_to_degrees(pitch_angle);
     left_motor_.SetAngle(angle_to_degrees);
     right_motor_.SetAngle(angle_to_degrees);
   }
 
   // Sets Roll Position of the wrist joint
-    void SetRollPosition(float roll_angle)
+  void SetRollPosition(float roll_angle)
   {
-    roll_angle_ = float(std::clamp(roll_angle, kRollMinimumAngle, kRollMaximumAngle));
+    roll_angle_ =
+        float(std::clamp(roll_angle, kRollMinimumAngle, kRollMaximumAngle));
     units::angle::degree_t angle_to_degrees(roll_angle);
     left_motor_.SetAngle(angle_to_degrees);
     right_motor_.SetAngle(angle_to_degrees);
@@ -51,8 +53,7 @@ class WristJoint
 
   /// Sets the zero_offset_angle value that the motors use to know its true '0'
   /// position. Called by RoverArmSystem::Home
-  void SetZeroOffsets(float left_offset,
-                      float right_offset)
+  void SetZeroOffsets(float left_offset, float right_offset)
   {
     left_offset_angle_  = left_offset;
     right_offset_angle_ = right_offset;
@@ -68,30 +69,29 @@ class WristJoint
     return acceleration;
   }
 
-int GetPitchPosition()
-{
-  return int(pitch_angle_);
-}
+  int GetPitchPosition()
+  {
+    return int(pitch_angle_);
+  }
 
-int GetRollPosition()
-{
-  return int(roll_angle_);
-}
+  int GetRollPosition()
+  {
+    return int(roll_angle_);
+  }
 
-int GetLeftOffsetAngle()
-{    
-  return int(left_offset_angle_);
-}
+  int GetLeftOffsetAngle()
+  {
+    return int(left_offset_angle_);
+  }
 
-int GetRightOffsetAngle()
-{
-  return int(right_offset_angle_);
-}
+  int GetRightOffsetAngle()
+  {
+    return int(right_offset_angle_);
+  }
 
-Acceleration acceleration;
+  Acceleration acceleration;
 
-private:
-
+ private:
   sjsu::RmdX & left_motor_;
   sjsu::RmdX & right_motor_;
   sjsu::Mpu6050 & mpu_;

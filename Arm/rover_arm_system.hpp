@@ -37,9 +37,7 @@ class RoverArmSystem : public sjsu::common::RoverSystem
     {
       kDefault = 'D',
     };
-    Modes modes          = Modes::kDefault;
-    int is_operational   = 0;
-    int heartbeat_count  = 0;
+    Modes modes        = Modes::kDefault;
     int arm_speed      = 0;
     int rotunda_angle  = 0;
     int shoulder_angle = 0;
@@ -69,25 +67,29 @@ class RoverArmSystem : public sjsu::common::RoverSystem
                  sjsu::arm::Joint & elbow,
                  sjsu::arm::WristJoint & wrist,
                  sjsu::arm::Hand & hand)
-      : rotunda_(rotunda), shoulder_(shoulder), elbow_(elbow), wrist_(wrist), hand_(hand)
+      : rotunda_(rotunda),
+        shoulder_(shoulder),
+        elbow_(elbow),
+        wrist_(wrist),
+        hand_(hand)
   {
   }
 
-  void Initialize()
+  void Initialize() override
   {
     rotunda_.Initialize();
     shoulder_.Initialize();
     elbow_.Initialize();
-    wrist_.Initialize(); //will be moved to hand
-    //hand_.initialize();
+    wrist_.Initialize();  // TODO: Move to hand class
+    hand_.Initialize();
   }
 
-  void PrintRoverData()
+  void PrintRoverData() override
   {
     return;
   };
 
-  std::string GETParameters()
+  std::string GETParameters() override
   {
     char request_parameter[300];
     snprintf(request_parameter, 300,
@@ -104,7 +106,7 @@ class RoverArmSystem : public sjsu::common::RoverSystem
     return request_parameter;
   };
 
-  void ParseJSONResponse(std::string & response)
+  void ParseJSONResponse(std::string & response) override
   {
     int actual_arguments = sscanf(
         response.c_str(), response_body_format, &mc_data_.heartbeat_count,
@@ -134,7 +136,7 @@ class RoverArmSystem : public sjsu::common::RoverSystem
   }
 
   /// Verifies that mission control is sending fresh commands to rover
-  bool IsHeartbeatSynced()
+  bool IsHeartbeatSynced() override
   {
     if (mc_data_.heartbeat_count != heartbeat_count_)
     {
@@ -169,7 +171,7 @@ class RoverArmSystem : public sjsu::common::RoverSystem
     elbow_.SetPosition(angle);
   }
 
-  void HandleArmMovement()
+  void HandleRoverMovement() override
   {
     // TODO: implement different arm drive modes in this function
     MoveRotunda(mc_data_.rotunda_angle);
@@ -177,9 +179,7 @@ class RoverArmSystem : public sjsu::common::RoverSystem
     MoveElbow(mc_data_.elbow_angle);
   }
 
-  void MoveWrist()
-  {
-  };
+  void MoveWrist(){};
 
   void HomeArm()
   {
@@ -188,7 +188,7 @@ class RoverArmSystem : public sjsu::common::RoverSystem
     HomeShoulder();
     UpdateElbowAcceleration();
     HomeElbow();
-    hand_.HomeWrist(rotunda_.GetOffsetAngle());
+    hand_.HomeWrist(float(rotunda_.GetOffsetAngle()));
   }
 
   void HomeShoulder()
@@ -204,7 +204,7 @@ class RoverArmSystem : public sjsu::common::RoverSystem
     float acceleration_x = accelerations_.rotunda.x + accelerations_.shoulder.x;
     float acceleration_y = accelerations_.rotunda.y + accelerations_.shoulder.y;
 
-    home_angle = atan(acceleration_y / acceleration_x);
+    home_angle = float(atan(acceleration_y / acceleration_x));
     shoulder_.SetZeroOffset(home_angle);
     MoveShoulder(home_angle);
   }
@@ -221,16 +221,19 @@ class RoverArmSystem : public sjsu::common::RoverSystem
     // TODO:  Verify we don't need compliment value of shoulder
     float acceleration_x = accelerations_.rotunda.x + accelerations_.elbow.x;
     float acceleration_y = accelerations_.rotunda.y + accelerations_.elbow.y;
-    float angle_without_correction = atan(acceleration_y / acceleration_x);
+    float angle_without_correction =
+        float(atan(acceleration_y / acceleration_x));
 
     // TODO: Bool helper functions for checking which quadrant correction to use
-    if (accelerations_.elbow.x + accelerations_.rotunda.x >= 0 && accelerations_.elbow.y + accelerations_.rotunda.y <= 0)
+    if (accelerations_.elbow.x + accelerations_.rotunda.x >= 0 &&
+        accelerations_.elbow.y + accelerations_.rotunda.y <= 0)
     {
       // if the elbow is in the second quadrant of a graph, add 90 to the angle
       home_angle = 90 - angle_without_correction;
     }
     // if the elbow is in the third quadrant of a graph, add 180 to the angle
-    else if (accelerations_.elbow.x + accelerations_.rotunda.x >= 0 && accelerations_.elbow.y + accelerations_.rotunda.y >= 0)
+    else if (accelerations_.elbow.x + accelerations_.rotunda.x >= 0 &&
+             accelerations_.elbow.y + accelerations_.rotunda.y >= 0)
     {
       home_angle = 180 + angle_without_correction;
     }
@@ -291,11 +294,12 @@ class RoverArmSystem : public sjsu::common::RoverSystem
 
  public:
   Acceleration accelerations_;
-  sjsu::arm::Hand hand_;
   MissionControlData mc_data_;
+
   sjsu::arm::Joint & rotunda_;
   sjsu::arm::Joint & shoulder_;
   sjsu::arm::Joint & elbow_;
   sjsu::arm::WristJoint & wrist_;
+  sjsu::arm::Hand hand_;
 };
 }  // namespace sjsu::arm
