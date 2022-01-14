@@ -31,6 +31,7 @@ class RoverArmSystem : public sjsu::common::RoverSystem
   struct ParseError
   {
   };
+
   struct MissionControlData : public RoverMissionControlData
   {
     enum class Modes : char
@@ -55,6 +56,7 @@ class RoverArmSystem : public sjsu::common::RoverSystem
     };
     Finger finger;
   };
+
   struct Acceleration
   {
     Joint::Acceleration rotunda;
@@ -71,9 +73,7 @@ class RoverArmSystem : public sjsu::common::RoverSystem
         shoulder_(shoulder),
         elbow_(elbow),
         wrist_(wrist),
-        hand_(hand)
-  {
-  }
+        hand_(hand){};
 
   void Initialize() override
   {
@@ -87,7 +87,7 @@ class RoverArmSystem : public sjsu::common::RoverSystem
   void PrintRoverData() override
   {
     return;
-  };
+  }
 
   std::string GETParameters() override
   {
@@ -104,7 +104,7 @@ class RoverArmSystem : public sjsu::common::RoverSystem
              hand_.GetRingPosition(), hand_.GetMiddlePosition(),
              hand_.GetPointerPosition(), hand_.GetThumbPosition());
     return request_parameter;
-  };
+  }
 
   void ParseJSONResponse(std::string & response) override
   {
@@ -122,7 +122,7 @@ class RoverArmSystem : public sjsu::common::RoverSystem
                      kExpectedArguments);
       throw ParseError{};
     }
-  };
+  }
 
   /// Checks that the rover is operational
   bool IsOperational()
@@ -254,7 +254,7 @@ class RoverArmSystem : public sjsu::common::RoverSystem
   void Calibrate()
   {
     return;
-  };
+  }
 
   void UpdateRotundaAcceleration()
   {
@@ -285,7 +285,7 @@ class RoverArmSystem : public sjsu::common::RoverSystem
   float FindComplimentValue()
   {
     return 0;
-  };
+  }
 
   int heartbeat_count_                    = 0;
   int state_of_charge_                    = 90;

@@ -17,6 +17,7 @@ class Esp
       : esp_(sjsu::lpc40xx::GetUart<3>()),
         wifi_(esp_.GetWiFi()),
         socket_(esp_.GetInternetSocket()){};
+
   /// Initializes the Wi-Fi module by connecting to WiFi
   void Initialize()
   {
@@ -24,7 +25,7 @@ class Esp
     esp_.Initialize();
     ConnectToWifi();
     ConnectToServer();
-  };
+  }
 
   /// Sends a GET request to the hardcoded URL
   /// @param endpoint i.e. /endpoint?example=parameter
@@ -56,7 +57,7 @@ class Esp
       sjsu::LogError("Error reading response from server!");
       return kErrorResponse;
     }
-  };
+  }
 
   /// Attempts to connect to the local WiFi network
   void ConnectToWifi()
@@ -98,11 +99,11 @@ class Esp
   }
 
   /// Verifies that the Wi-Fi module is still connected to the network
-  /// @return true if the module is still connected to the internet
   bool IsConnected()
   {
-    return wifi_.IsConnected();  // TODO: Always returns false
-  };
+    // TODO: Always returns false
+    return wifi_.IsConnected();
+  }
 
  private:
   /// Sends an HTTP request to the connected server
