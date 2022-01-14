@@ -21,17 +21,15 @@ class Joint
 
   Joint(sjsu::RmdX & joint_motor,
         sjsu::Mpu6050 & accelerometer,
-        units::angle::degree_t min_angle,
-        units::angle::degree_t max_angle,
-        units::angle::degree_t standby_angle)
+        float min_angle,
+        float max_angle,
+        float standby_angle)
       : motor_(joint_motor),
         mpu_(accelerometer),
-        minimum_angle(min_angle),
-        maximum_angle(max_angle),
-        rest_angle(standby_angle){};
+        kMinimumAngle(min_angle),
+        kMaximumAngle(max_angle),
+        kRestAngle(standby_angle){};
 
-  /// Initialize the joint object, This must be called before any other
-  /// function.
   void Initialize()
   {
     motor_.Initialize();
@@ -41,25 +39,19 @@ class Joint
   /// Move the motor to the (calibrated) angle desired.
   void SetPosition(float angle)
   {
-    units::angle::degree_t angle_to_degrees(angle);
-    units::angle::degree_t calibrated_angle =
-        angle_to_degrees - zero_offset_angle;
-    calibrated_angle =
-        std::clamp(calibrated_angle, minimum_angle, maximum_angle);
-    sjsu::LogInfo("%f", calibrated_angle.to<double>());
-    motor_.SetAngle(calibrated_angle);
+    angle += offset_angle_;
+    position_ = std::clamp(angle, kMinimumAngle, kMaximumAngle);
+    units::angle::degree_t angle_to_degrees(position_);
+    motor_.SetAngle(angle_to_degrees);
   }
 
-  /// Sets the zero_offset_angle value that the motor uses to know its true '0'
-  /// position. Called by RoverArmSystem::Home
+  /// Sets the offset angle so motor can find its true zero
   void SetZeroOffset(float offset)
   {
-    units::angle::degree_t offset_to_degrees(offset);
-    zero_offset_angle = offset_to_degrees;
+    offset_angle_ = offset;
   }
 
-  /// Return the acceleration values for the MPU6050 on the joint as a
-  /// JointAcceleration of floats
+  /// Return the acceleration values from the MPU6050
   Acceleration GetAccelerometerData()
   {
     sjsu::Accelerometer::Acceleration_t acceleration_to_float(mpu_.Read());
@@ -71,14 +63,11 @@ class Joint
     return acceleration;
   }
 
-  void SetSpeed(float targetspeed)
+  void SetSpeed(float target_speed)
   {
-    float current_speed = speed_.to<float>();
-    units::angular_velocity::revolutions_per_minute_t speed(
-        std::lerp(current_speed, targetspeed, kLerpStep));
-
-    speed_ = speed;
-    motor_.SetSpeed(speed_);
+    speed_ = std::lerp(speed_, target_speed, kLerpStep);
+    units::angular_velocity::revolutions_per_minute_t speed_to_rpm(speed_);
+    motor_.SetSpeed(speed_to_rpm);
   }
 
   int GetSpeed()
@@ -93,23 +82,21 @@ class Joint
 
   int GetOffsetAngle()
   {
-    return int(zero_offset_angle);
+    return int(offset_angle_);
   }
 
  private:
   sjsu::RmdX & motor_;
   sjsu::Mpu6050 & mpu_;
 
-  units::angle::degree_t minimum_angle = 0_deg;
-  units::angle::degree_t maximum_angle = 180_deg;
-  units::angle::degree_t rest_angle    = 0_deg;
+  float offset_angle_ = 0;
+  float speed_        = 0;
+  float position_     = 0;
 
-  units::angle::degree_t zero_offset_angle = 0_deg;
-
-  units::angular_velocity::revolutions_per_minute_t speed_     = 0_rpm;
-  units::angular_velocity::revolutions_per_minute_t max_speed_ = 100_rpm;
-  units::angle::degree_t position_                             = 0_deg;
-
-  const float kLerpStep = .5;
+  const float kLerpStep     = .5;
+  const float kMinimumAngle = 0;
+  const float kMaximumAngle = 180;
+  const float kRestAngle    = 0;
+  const float kMaxSpeed     = 100;
 };
 }  // namespace sjsu::arm
