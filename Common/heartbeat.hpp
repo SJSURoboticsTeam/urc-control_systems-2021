@@ -36,5 +36,5 @@ class Heartbeat
   }
 
   int heartbeat_count_ = 0;
-}
+};
 }  // namespace sjsu::common
