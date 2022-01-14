@@ -1,4 +1,5 @@
-// Reference Doc: https://docs.google.com/document/d/1GoI3ypr8xW_N2GrNbO3eNoYoz85498nix4rTv1WexoA/edit?usp=sharing
+// Reference Doc:
+// https://docs.google.com/document/d/1GoI3ypr8xW_N2GrNbO3eNoYoz85498nix4rTv1WexoA/edit?usp=sharing
 #include "testing/testing_frameworks.hpp"
 #include "devices/actuators/servo/rmd_x.hpp"
 
@@ -99,14 +100,14 @@ TEST_CASE("Drive system testing")
   SECTION("6.1 should verify rover is synced at start")
   {
     CHECK(drive.mc_data_.heartbeat_count == 0);
-    CHECK(drive.IsHeartbeatSynced() == true);
+    CHECK(drive.IsHeartbeatSynced(drive.mc_data_.heartbeat_count) == true);
   }
 
   SECTION("6.2 should verify heartbeat not synced at start")
   {
     drive.mc_data_.heartbeat_count = kNonZero;
     CHECK(drive.GetHeartbeatCount() == 0);
-    CHECK(drive.IsHeartbeatSynced() == false);
+    CHECK(drive.IsHeartbeatSynced(drive.mc_data_.heartbeat_count) == false);
   }
 
   SECTION("6.3 should verify heartbeat is reset when not synced")
@@ -114,7 +115,7 @@ TEST_CASE("Drive system testing")
     drive.IncrementHeartbeatCount();
     CHECK(drive.GetHeartbeatCount() == 1);
 
-    CHECK(drive.IsHeartbeatSynced() == false);
+    CHECK(drive.IsHeartbeatSynced(drive.mc_data_.heartbeat_count) == false);
     CHECK(drive.GetHeartbeatCount() == 0);
   }
 
