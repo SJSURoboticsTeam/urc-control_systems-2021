@@ -24,6 +24,12 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
   struct ParseError
   {
   };
+  struct DriveModeError
+  {
+  };
+  struct DriveModeHandlerError
+  {
+  };
 
   struct MissionControlData : public RoverMissionControlData
   {
@@ -113,8 +119,8 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
       case 'R':
       case 'B': HandleSingularWheelMode(speed, angle); break;
       default:
-        sjsu::LogError("Unable to assign drive mode handler!");
         StopWheels();
+        // throw DriveModeHandlerError{};
         break;
     }
   }
@@ -244,7 +250,9 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
       case 'L':
       case 'R':
       case 'B': SetSingleWheelMode(); break;
-      default: sjsu::LogError("Unable to set drive mode!");
+      default:
+        // throw DriveModeError{};
+        break;
     };
   }
 
@@ -325,20 +333,18 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
   /// Calculates outer wheel angle based off inner wheel angle
   float GetOutterWheelDriveAngle(float inner_wheel_angle)
   {
-    float outter_wheel_angle =
-        float(0.392 + 0.744 * abs(int(inner_wheel_angle)) +
-              -0.0187 * pow(abs(int(inner_wheel_angle)), 2) +
-              1.84E-04 * pow(abs(int(inner_wheel_angle)), 3));
+    float outter_wheel_angle = 0.392 + 0.744 * abs(int(inner_wheel_angle)) +
+                               -0.0187 * pow(abs(int(inner_wheel_angle)), 2) +
+                               1.84E-04 * pow(abs(int(inner_wheel_angle)), 3);
     return (inner_wheel_angle > 0) ? outter_wheel_angle : -outter_wheel_angle;
   }
 
   /// Calculates back wheel angle based off inner wheel angle
   float GetBackWheelDriveAngle(float inner_wheel_angle)
   {
-    float back_wheel_angle =
-        float(-0.378 + -1.79 * abs(int(inner_wheel_angle)) +
-              0.0366 * pow(abs(int(inner_wheel_angle)), 2) +
-              -3.24E-04 * pow(abs(int(inner_wheel_angle)), 3));
+    float back_wheel_angle = -0.378 + -1.79 * abs(int(inner_wheel_angle)) +
+                             0.0366 * pow(abs(int(inner_wheel_angle)), 2) +
+                             -3.24E-04 * pow(abs(int(inner_wheel_angle)), 3);
     return (inner_wheel_angle > 0) ? back_wheel_angle : -back_wheel_angle;
   }
 
