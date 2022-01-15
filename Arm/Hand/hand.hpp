@@ -48,31 +48,35 @@ class Hand
 
   int GetThumbPosition()
   {
-    return 0;
+    return fingers_.thumb_angle;
   };
 
   int GetMiddlePosition()
   {
-    return 0;
+    return fingers_.middle_angle;
   };
 
   int GetPinkyPosition()
   {
-    return 0;
+    return fingers_.pinky_angle;
   };
 
   int GetPointerPosition()
   {
-    return 0;
+    return fingers_.pointer_angle;
   };
 
   int GetRingPosition()
   {
-    return 0;
+    return fingers_.ring_angle;
   };
   sjsu::arm::WristJoint wrist_;
 
+
+
  private:
+ int max_angle = 180;
+ int min_angle = 0;
  Fingers fingers_;
   // Uart & uart_;
 };
