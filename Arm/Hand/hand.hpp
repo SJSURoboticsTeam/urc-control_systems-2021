@@ -12,11 +12,11 @@ class Hand
 
   struct Fingers
   {
-    float pinky_angle   = 0;
-    float ring_angle    = 0;
-    float middle_angle  = 0;
-    float pointer_angle = 0;
-    float thumb_angle   = 0;
+    float pinky_angle_   = 0;
+    float ring_angle_    = 0;
+    float middle_angle_  = 0;
+    float pointer_angle_ = 0;
+    float thumb_angle_   = 0;
   };
   struct accelerations
   {
@@ -42,17 +42,18 @@ class Hand
         rotunda_offset;
     wrist_.SetPitchPosition(wrist_offset);
   }
+  
   //Get finger position
   void SetThumbPosition(float thumb_angle)
   { 
-    thumb_angle_ = float(std::clamp(thumb_angle, max_angle, min_angle));
+    fingers_.thumb_angle_ = float(std::clamp(thumb_angle, max_angle, min_angle));
     units::angle::degree_t angle_to_degrees(thumb_angle);
     thumb_motor.SetAngle(angle_to_degrees);
   };
 
   void SetMiddlePosition(double middle_angle)
   {
-    middle_angle_ = float(std::clamp(thumb_angle, max_angle, min_angle));
+    fingers_.middle_angle_ = float(std::clamp(thumb_angle, max_angle, min_angle));
     units::angle::degree_t angle_to_degrees(middle_angle);
     middle_motor.SetAngle(angle_to_degrees);
   };
@@ -76,7 +77,7 @@ void SetRingPosition(float target_ring_position)
 
   int GetThumbPosition()
   {
-    return 0;
+    return int();
   };
 
   int GetMiddlePosition()
