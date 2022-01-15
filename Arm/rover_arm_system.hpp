@@ -116,7 +116,8 @@ class RoverArmSystem : public sjsu::common::RoverSystem
         &mc_data_.finger.ring_angle, &mc_data_.finger.middle_angle,
         &mc_data_.finger.pointer_angle, &mc_data_.finger.thumb_angle);
 
-  void SetLerpSpeed(float target_speed){
+  void SetLerpSpeed(float target_speed)
+  {
     std:lerp(mc_data_.arm_speed, target_speed, .5)
   }
 

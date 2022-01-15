@@ -64,7 +64,7 @@ class Joint
   }
 
   void SetJointSpeed(double targetspeed){
-    speed_ = SetLerpSpeed(targetspeed)
+    speed_ = rover_arm_system::SetLerpSpeed(targetspeed)
     motor.SetSpeed(speed_);
   }
 
