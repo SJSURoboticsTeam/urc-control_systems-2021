@@ -67,9 +67,9 @@ class Wheel
     return homing_offset_angle_;
   }
 
-  int GetEncoderPos(sjsu::RmdX motor)
+int GetSteerEncoderPos()
   {
-    return int(motor.RequestFeedbackFromMotor().GetFeedback().encoder_position);
+    return int(steer_motor_.RequestFeedbackFromMotor().GetFeedback().encoder_position);
   }
 
   /// Checks if the steer wheel is aligned with slip ring
