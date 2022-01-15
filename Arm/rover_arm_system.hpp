@@ -85,7 +85,42 @@ class RoverArmSystem : public sjsu::common::RoverSystem
 
   void PrintRoverData() override
   {
-    return;
+    printf("Arm data: \n");
+    printf("Mode: %c\n", mc_data_.modes);
+    printf("Arm speed: %d\n", mc_data_.arm_speed);
+    printf("Rotunda Angle: %d\n", mc_data_.rotunda_angle);
+    printf("Shoulder Angle: %d\n", mc_data_.shoulder_angle);
+    printf("Elbow Angle: %d\n", mc_data_.elbow_angle);
+    printf("Wrist Roll Angle: %d\n", mc_data_.wrist_roll);
+    printf("Wrist Pitch Angle: %d\n", mc_data_.wrist_pitch);
+    
+    printf("Hand Finger Angles: \n");
+    printf("Pinky Angle: %d\n",  mc_data_.finger.pinky_angle);
+    printf("Ring Angle: %d\n",  mc_data_.finger.ring_angle);
+    printf("Middle Angle: %d\n",  mc_data_.finger.middle_angle);
+    printf("Pointer Angle: %d\n",  mc_data_.finger.pointer_angle);
+    printf("Thumb Angle: %d\n",  mc_data_.finger.thumb_angle);
+
+    printf("Hand Finger Positions:\n");
+    printf("Pinky Angle: %d\n",  hand_.GetPinkyPosition());
+    printf("Ring Angle: %d\n",  hand_.GetRingPosition());
+    printf("Middle Angle: %d\n",  hand_.GetMiddlePosition());
+    printf("Pointer Angle: %d\n",  hand_.GetPointerPosition());
+    printf("Thumb Angle: %d\n",  hand_.GetThumbPosition());
+
+    printf("Joints Data:\n");
+    printf("Rotunda speed: %d\n", rotunda_.GetSpeed());
+    printf("Rotunda position: %d\n", rotunda_.GetPosition());
+
+    printf("Shoulder speed: %d\n", shoulder_.GetSpeed());
+    printf("Shoulder position: %d\n", shoulder_.GetPosition());
+
+    printf("Elbow speed: %d\n", elbow_.GetSpeed());
+    printf("Elbow position: %d\n", elbow_.GetPosition());
+
+    printf("Wrist pitch position: %d\n", wrist_.GetPitchPosition());
+    printf("Wrist roll position: %d\n", wrist_.GetRollPosition());    
+
   }
 
   std::string GETParameters() override
@@ -137,19 +172,19 @@ class RoverArmSystem : public sjsu::common::RoverSystem
 
   void MoveRotunda(float angle)
   {
-    rotunda_.SetSpeed(mc_data_.arm_speed);
+    rotunda_.SetJointSpeed(mc_data_.arm_speed);
     rotunda_.SetPosition(angle);
   }
 
   void MoveShoulder(float angle)
   {
-    shoulder_.SetSpeed(mc_data_.arm_speed);
+    shoulder_.SetJointSpeed(mc_data_.arm_speed);
     shoulder_.SetPosition(angle);
   }
 
   void MoveElbow(float angle)
   {
-    elbow_.SetSpeed(mc_data_.arm_speed);
+    elbow_.SetJointSpeed(mc_data_.arm_speed);
     elbow_.SetPosition(angle);
   }
 
