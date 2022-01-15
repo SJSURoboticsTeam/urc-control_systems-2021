@@ -84,6 +84,7 @@ class Joint
   }
 
  private:
+<<<<<<< HEAD
   units::angle::degree_t minimum_angle     = 0_deg;
   units::angle::degree_t maximum_angle     = 180_deg;
   units::angle::degree_t rest_angle        = 0_deg;
@@ -92,6 +93,8 @@ class Joint
   sjsu::Mpu6050 & mpu;
   const double kLerpStep = 0.5;
   units::angular_velocity::revolutions_per_minute_t speed_ = 0_rpm;
+=======
+>>>>>>> 0c3d13106d8a028df9475af0d283fd6ddadb8d0d
   sjsu::RmdX & motor_;
   sjsu::Mpu6050 & mpu_;
 

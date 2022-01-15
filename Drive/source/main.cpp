@@ -4,7 +4,7 @@
 #include "devices/actuators/servo/rmd_x.hpp"
 
 #include "wheel.hpp"
-#include "../../Common/esp.hpp"
+#include "../Common/esp.hpp"
 #include "rover_drive_system.hpp"
 
 int main(void)
@@ -31,15 +31,9 @@ int main(void)
   back_steer_motor.settings.gear_ratio  = 8;
   back_hub_motor.settings.gear_ratio    = 8;
 
-  // Slip ring GPIO pins
-  // sjsu::Gpio & left_wheel_homing_pin  = sjsu::lpc40xx::GetGpio<0, 15>();
-  // sjsu::Gpio & right_wheel_homing_pin = sjsu::lpc40xx::GetGpio<2, 9>();
-  // sjsu::Gpio & back_wheel_homing_pin  = sjsu::lpc40xx::GetGpio<0, 18>();
-
-  // Button GPIO pins
-  sjsu::Gpio & left_wheel_homing_pin  = sjsu::lpc40xx::GetGpio<1, 19>();
-  sjsu::Gpio & right_wheel_homing_pin = sjsu::lpc40xx::GetGpio<1, 15>();
-  sjsu::Gpio & back_wheel_homing_pin  = sjsu::lpc40xx::GetGpio<0, 30>();
+  sjsu::Gpio & left_wheel_homing_pin  = sjsu::lpc40xx::GetGpio<0, 15>();
+  sjsu::Gpio & right_wheel_homing_pin = sjsu::lpc40xx::GetGpio<2, 9>();
+  sjsu::Gpio & back_wheel_homing_pin  = sjsu::lpc40xx::GetGpio<0, 18>();
 
   sjsu::drive::Wheel left_wheel("left", left_hub_motor, left_steer_motor,
                                 left_wheel_homing_pin);
@@ -47,6 +41,7 @@ int main(void)
                                  right_wheel_homing_pin);
   sjsu::drive::Wheel back_wheel("back", back_hub_motor, back_steer_motor,
                                 back_wheel_homing_pin);
+
   sjsu::drive::RoverDriveSystem drive(left_wheel, right_wheel, back_wheel);
 
   esp.Initialize();
@@ -62,19 +57,15 @@ int main(void)
   {
     try
     {
+      sjsu::TimeoutTimer serverTimeout(5s);  // server has 5s timeout
       sjsu::LogInfo("Making new request now...");
       std::string endpoint = "drive" + drive.GETParameters();
       std::string response = esp.GET(endpoint);
-      sjsu::TimeoutTimer serverTimeout(5s);  // server has 5s timeout
       drive.ParseJSONResponse(response);
       drive.HandleRoverMovement();
       drive.IncrementHeartbeatCount();
       drive.PrintRoverData();
-      if (serverTimeout.HasExpired())
-      {
-        sjsu::LogWarning("Server timed out! Reconnecting...");
-        esp.ConnectToServer();
-      }
+      esp.IsServerExpired(serverTimeout);
     }
     catch (const std::exception & e)
     {
@@ -89,6 +80,14 @@ int main(void)
     catch (const sjsu::drive::RoverDriveSystem::ParseError &)
     {
       sjsu::LogError("Parsing Error: Arguments not equal");
+    }
+    catch (const sjsu::drive::RoverDriveSystem::DriveModeHandlerError &)
+    {
+      sjsu::LogError("DriveModeHandlerError: Unable to assign drive mode handler!");
+    }
+    catch (const sjsu::drive::RoverDriveSystem::DriveModeError &)
+    {
+      sjsu::LogError("DriveModeError: Unable to set drive mode!");
     }
   }
 

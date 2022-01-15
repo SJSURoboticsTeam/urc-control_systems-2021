@@ -17,8 +17,6 @@ class Esp
       : esp_(sjsu::lpc40xx::GetUart<3>()),
         wifi_(esp_.GetWiFi()),
         socket_(esp_.GetInternetSocket()){};
-        
-
   /// Initializes the Wi-Fi module by connecting to WiFi
   void Initialize()
   {
@@ -74,6 +72,15 @@ class Esp
     }
   }
 
+  void IsServerExpired(sjsu::TimeoutTimer & serverTimer)
+  {
+    if (serverTimer.HasExpired())
+    {
+      sjsu::LogWarning("Server timed out! Reconnecting...");
+      Initialize();
+    }
+  }
+
   /// Connects to the URL provided in member function
   void ConnectToServer()
   {
@@ -123,6 +130,6 @@ class Esp
   const uint16_t kPort                           = 5000;
   const char * kSsid                             = "kingdom2";
   const char * kPassword                         = "22039622";
-  const std::chrono::nanoseconds kDefaultTimeout = 5s;
+  const std::chrono::nanoseconds kDefaultTimeout = 10s;
 };
 }  // namespace sjsu::common

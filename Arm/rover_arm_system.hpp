@@ -121,6 +121,7 @@ class RoverArmSystem : public sjsu::common::RoverSystem
   }
 
   void MoveRotunda(double angle)
+
     if (actual_arguments != kExpectedArguments)
     {
       sjsu::LogError("Arguments# %d != expected# %d!", actual_arguments,
