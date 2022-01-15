@@ -63,29 +63,52 @@ TEST_CASE("Arm system testing")
   sjsu::arm::Joint elbow(elbow_motor, spyed_elbow_mpu);
   sjsu::arm::WristJoint wrist(left_wrist_motor, right_wrist_motor,
                               spyed_wrist_mpu);
-  sjsu::arm::Joint rotunda(rotunda_motor, spyed_rotunda_mpu, 0_deg, 3600_deg,
-                           1800_deg);
+  sjsu::arm::Joint rotunda(rotunda_motor, spyed_rotunda_mpu, 0, 3600,
+                           1800);
 
-  sjsu::arm::RoverArmSystem arm(rotunda, shoulder, elbow, wrist);
+  sjsu::arm::Hand hand(wrist);
+  sjsu::arm::RoverArmSystem arm(rotunda, shoulder, elbow, wrist, hand);
 
   SECTION("should initialize and return default values")
   {
-    // arm.Initialize();
+    arm.Initialize();
+    CHECK_EQ(arm.wrist_.GetPitchPosition(), 0);
+    CHECK_EQ(arm.wrist_.GetRollPosition(), 0);
   }
 
   SECTION("should return default GET parameters")
   {
     std::string expected_parameter =
-        "?heartbeat_count=0&is_operational=0&rotunda_speed=0&rotunda_angle=0&"
-        "shoulder_speed=0&shoulder_angle=0&elbow_angle=0&elbow_speed=0&wrist_"
-        "speed=0&wrist_roll=0&wrist_pitch=0&finger.pinky=0&finger.ring=0&"
-        "finger.middle=0&finger.pointer=0&finger.thumb=0&modes='D'";
-    CHECK(expected_parameter == arm.GETParameters());
+        "?heartbeat_count=0&is_operational=0&arm_speed=0&"
+        "battery=90&rotunda_angle=0&shoulder_angle=0&elbow_"
+        "angle=0&wrist_roll=0&wrist_pitch=0&pinky_angle=0&"
+        "ring_angle=0&middle_angle=0&pointer_angle=0&thumb_"
+        "angle=0";
+    std::string actual_parameter = arm.GETParameters();
+    CHECK(expected_parameter == actual_parameter);
   }
 
   SECTION("should parse json response correctly")
   {
-    CHECK(arm.ParseJSONResponse() == "Fill");
+    std::string example_response =
+        "\r\n\r\n{\n"
+        "  \"heartbeat_count\": 0,\n"
+        "  \"is_operational\": 1,\n"
+        "  \"arm_speed\": 5,\n"
+        "  \"rotunda_angle\": 5,\n"
+        "  \"shoulder_angle\": 5,\n"
+        "  \"elbow_angle\": 5,\n"
+        "  \"wrist_roll\": 5,\n"
+        "  \"wrist_pitch\": 5,\n"
+        "  \"pinky_angle\": 5,\n"
+        "  \"ring_angle\": 5,\n"
+        "  \"middle_angle\": 5,\n"
+        "  \"pointer_angle\": 5,\n"
+        "  \"thumb_angle\": 5\n"
+        "}";
+    arm.ParseJSONResponse(example_response);
+    CHECK(arm.mc_data_.heartbeat_count == 0);
+    CHECK(arm.mc_data_.is_operational == 1);
   }
 }
 }  // namespace sjsu

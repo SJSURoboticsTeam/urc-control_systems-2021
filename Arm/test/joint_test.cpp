@@ -3,17 +3,17 @@
 #include "devices/sensors/movement/accelerometer/mpu6050.hpp"
 
 #include "rover_arm_system.hpp"
-// #include "arm_helper.hpp"
 #include "joint.hpp"
 
 namespace sjsu
 {
-TEST_CASE("Drive system testing")
+TEST_CASE("Joint system testing")
 {
   auto accel_value = units::acceleration::meters_per_second_squared_t(5);
   Accelerometer::Acceleration_t example_acceleration = { accel_value,
                                                          accel_value,
                                                          accel_value };
+
   Mock<Can> mock_can;
   Fake(Method(mock_can, Can::ModuleInitialize));
   Fake(OverloadedMethod(mock_can, Can::Send, void(const Can::Message_t &)));
@@ -39,6 +39,7 @@ TEST_CASE("Drive system testing")
   {
     joint.Initialize();
     CHECK(joint.GetSpeed() == 0);
+    CHECK(joint.GetPosition() == 0);
   }
 
   SECTION("should boundary test setting the motor angle")
@@ -52,6 +53,7 @@ TEST_CASE("Drive system testing")
     // TODO: verify the motor was / was not set to the following values
   }
 
+<<<<<<< HEAD
   SECTION("Should set motor speed to 5, 10 , 45, 100")
   {
     joint.SetSpeed(5);
@@ -62,6 +64,28 @@ TEST_CASE("Drive system testing")
     CHECK(joint.GetSpeed() == 45);
     joint.SetSpeed(100);
     CHECK(joint.GetSpeed() == 100);
+=======
+  SECTION("Should lerp motor to 4 by going 2->3->3.5")
+  {
+    joint.SetJointSpeed(4);
+    CHECK(joint.GetSpeed() == 2);
+    joint.SetJointSpeed(4);
+    CHECK(joint.GetSpeed() == 3);
+    joint.SetJointSpeed(4);
+    CHECK(joint.GetSpeed() < 4);
+    joint.SetJointSpeed(0);
+    CHECK(joint.GetSpeed() > 0);
+    CHECK(joint.GetSpeed() < 2);
+  }
+
+  SECTION("should boundary test the max and min angles for SetPostion")
+  {
+    joint.SetPosition(-10);
+    // CHECK(joint.GetPosition() == minPosition);
+
+    joint.SetPosition(200);
+    // CHECK(joint.GetPosition() == maxPosition);
+>>>>>>> 0c3d13106d8a028df9475af0d283fd6ddadb8d0d
   }
 
   SECTION("should set zero offset to 25 degrees")

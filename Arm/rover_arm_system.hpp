@@ -2,37 +2,60 @@
 #include "utility/math/units.hpp"
 #include "joint.hpp"
 #include "Hand/wrist_joint.hpp"
+#include "Hand/hand.hpp"
 #include "../Common/rover_system.hpp"
 #include <cmath>
 
 namespace sjsu::arm
 {
+const char response_body_format[] =
+    "\r\n\r\n{\n"
+    "  \"heartbeat_count\": %d,\n"
+    "  \"is_operational\": %d,\n"
+    "  \"arm_speed\": %d,\n"
+    "  \"rotunda_angle\": %d,\n"
+    "  \"shoulder_angle\": %d,\n"
+    "  \"elbow_angle\": %d,\n"
+    "  \"wrist_roll\": %d,\n"
+    "  \"wrist_pitch\": %d,\n"
+    "  \"pinky_angle\": %d,\n"
+    "  \"ring_angle\": %d,\n"
+    "  \"middle_angle\": %d,\n"
+    "  \"pointer_angle\": %d,\n"
+    "  \"thumb_angle\": %d\n"
+    "}";
+
 class RoverArmSystem : public sjsu::common::RoverSystem
 {
  public:
+  struct ParseError
+  {
+  };
   struct MissionControlData : public RoverMissionControlData
   {
     enum class Modes : char
     {
       kDefault = 'D',
     };
-    Modes modes = Modes::kDefault;
-    double arm_speed;
-    double rotunda_angle;
-    double shoulder_angle;
-    double elbow_angle;
-    double wrist_roll;
-    double wrist_pitch;
+    Modes modes        = Modes::kDefault;
+    int arm_speed      = 0;
+    int rotunda_angle  = 0;
+    int shoulder_angle = 0;
+    int elbow_angle    = 0;
+    int wrist_roll     = 0;
+    int wrist_pitch    = 0;
+
     struct Finger
     {
-      double pinky_angle;
-      double ring_angle;
-      double middle_angle;
-      double pointer_angle;
-      double thumb_angle;
+      int pinky_angle   = 0;
+      int ring_angle    = 0;
+      int middle_angle  = 0;
+      int pointer_angle = 0;
+      int thumb_angle   = 0;
     };
     Finger finger;
   };
+
   struct Acceleration
   {
     Joint::Acceleration rotunda;
@@ -43,68 +66,101 @@ class RoverArmSystem : public sjsu::common::RoverSystem
   RoverArmSystem(sjsu::arm::Joint & rotunda,
                  sjsu::arm::Joint & shoulder,
                  sjsu::arm::Joint & elbow,
-                 sjsu::arm::WristJoint wrist)
-      : rotunda_(rotunda), shoulder_(shoulder), elbow_(elbow), wrist_(wrist)
+                 sjsu::arm::WristJoint & wrist,
+                 sjsu::arm::Hand & hand)
+      : rotunda_(rotunda),
+        shoulder_(shoulder),
+        elbow_(elbow),
+        wrist_(wrist),
+        hand_(hand){};
+
+  void Initialize() override
   {
-  }
-  void Initialize()
-  {
-    rotunda_.Initialize();  // returns
+    rotunda_.Initialize();
     shoulder_.Initialize();
     elbow_.Initialize();
-    wrist_.Initialize();
+    wrist_.Initialize();  // TODO: Move to hand class
+    hand_.Initialize();
   }
 
-  void PrintRoverData(){
-
-  };
-
-  std::string GETParameters()
+  void PrintRoverData() override
   {
-    std::string parameter =
-        "?is_operational=" + std::to_string(mc_data_.is_operational) +
-        "&heartbeat_count=" + std::to_string(heartbeat_count_);
-    return parameter;
-  };
+    return;
+  }
 
-  std::string ParseJSONResponse()
+  std::string GETParameters() override
   {
-    return "Fill";
-  };
+    char request_parameter[300];
+    snprintf(request_parameter, 300,
+             "?heartbeat_count=%d&is_operational=%d&arm_speed=%d&battery=%d&"
+             "rotunda_angle=%d&shoulder_angle=%d&elbow_angle=%d&wrist_roll=%d&"
+             "wrist_pitch=%d&pinky_angle=%d&ring_angle=%d&middle_angle=%d&"
+             "pointer_angle=%d&thumb_angle=%d",
+             GetHeartbeatCount(), mc_data_.is_operational,
+             int(mc_data_.arm_speed), state_of_charge_, rotunda_.GetPosition(),
+             shoulder_.GetPosition(), elbow_.GetPosition(),
+             wrist_.GetRollPosition(), wrist_.GetPitchPosition(),
+             hand_.GetPinkyPosition(), hand_.GetRingPosition(),
+             hand_.GetMiddlePosition(), hand_.GetPointerPosition(),
+             hand_.GetThumbPosition());
+    return request_parameter;
+  }
 
-  bool SyncedWithMissionControl()
+  void ParseJSONResponse(std::string & response) override
   {
-    bool fill;
-    return fill;
-  };
+    int actual_arguments = sscanf(
+        response.c_str(), response_body_format, &mc_data_.heartbeat_count,
+        &mc_data_.is_operational, &mc_data_.arm_speed, &mc_data_.rotunda_angle,
+        &mc_data_.shoulder_angle, &mc_data_.elbow_angle, &mc_data_.wrist_roll,
+        &mc_data_.wrist_pitch, &mc_data_.finger.pinky_angle,
+        &mc_data_.finger.ring_angle, &mc_data_.finger.middle_angle,
+        &mc_data_.finger.pointer_angle, &mc_data_.finger.thumb_angle);
 
   void SetLerpSpeed(float target_speed){
     std:lerp(mc_data_.arm_speed, target_speed, .5)
   }
 
   void MoveRotunda(double angle)
+    if (actual_arguments != kExpectedArguments)
+    {
+      sjsu::LogError("Arguments# %d != expected# %d!", actual_arguments,
+                     kExpectedArguments);
+      throw ParseError{};
+    }
+  }
+
+  /// Checks that the rover is operational
+  bool IsOperational()
   {
-    rotunda_.SetSpeed(mc_data_.arm_speed);
+    if (mc_data_.is_operational != 1)
+    {
+      sjsu::LogWarning("Drive mode is not operational!");
+      return false;
+    }
+    return true;
+  }
+
+  void MoveRotunda(float angle)
+  {
+    rotunda_.SetJointSpeed(mc_data_.arm_speed);
     rotunda_.SetPosition(angle);
   }
 
-  void MoveShoulder(double angle)
+  void MoveShoulder(float angle)
   {
-    shoulder_.SetSpeed(mc_data_.arm_speed);
+    shoulder_.SetJointSpeed(mc_data_.arm_speed);
     shoulder_.SetPosition(angle);
   }
 
-  void MoveElbow(double angle)
+  void MoveElbow(float angle)
   {
-    elbow_.SetSpeed(mc_data_.arm_speed);
+    elbow_.SetJointSpeed(mc_data_.arm_speed);
     elbow_.SetPosition(angle);
   }
 
-  void HandleArmMovement()
+  void HandleRoverMovement() override
   {
-    // TODO: implement different arm drive modes in this function.
-
-    // D drive mode
+    // TODO: implement different arm drive modes in this function
     MoveRotunda(mc_data_.rotunda_angle);
     MoveShoulder(mc_data_.shoulder_angle);
     MoveElbow(mc_data_.elbow_angle);
@@ -119,111 +175,92 @@ class RoverArmSystem : public sjsu::common::RoverSystem
     HomeShoulder();
     UpdateElbowAcceleration();
     HomeElbow();
-
-    HomeWrist();
+    hand_.HomeWrist(float(rotunda_.GetOffsetAngle()));
   }
 
   void HomeShoulder()
   {
-    double home = 0;
-    // This checks to see if any of the
-    // acceleration values are 0, and if they are, it will change
-    // to something close to 0
+    float home_angle = 0;
+    // TODO: std might have solution for this e.g. std::clamp or std::max?
+    ChangeIfZero(accelerations_.rotunda.x);
+    ChangeIfZero(accelerations_.rotunda.y);
+    ChangeIfZero(accelerations_.shoulder.x);
+    ChangeIfZero(accelerations_.shoulder.y);
 
-    VerifyNonZeroes(accelerations_.rotunda.x);
-    VerifyNonZeroes(accelerations_.rotunda.y);
-    VerifyNonZeroes(accelerations_.shoulder.x);
-    VerifyNonZeroes(accelerations_.shoulder.y);
+    // TODO:  Verify we don't need compliment value of shoulder
+    float acceleration_x = accelerations_.rotunda.x + accelerations_.shoulder.x;
+    float acceleration_y = accelerations_.rotunda.y + accelerations_.shoulder.y;
 
-    // cut this out into a helper function to clean up code
-    // double check logic: add the values together first then calculate the
-    // angle needed
-
-    double acceleration_x =
-        accelerations_.rotunda.x +
-        accelerations_.shoulder.x;  // might need compliment value of shoulder
-    double acceleration_y =
-        accelerations_.rotunda.y + accelerations_.shoulder.y;
-    // adding i and j vectors of acceleration
-    home = atan(acceleration_y / acceleration_x);
-    MoveShoulder(home);  // move shoulder at 10 rpm to home
+    home_angle = float(atan(acceleration_y / acceleration_x));
+    shoulder_.SetZeroOffset(home_angle);
+    MoveShoulder(home_angle);
   }
-  // logic needs checking.
 
   void HomeElbow()
   {
-    double home = 0;
-    // VerifyNonZeroes()
-    VerifyNonZeroes(accelerations_.rotunda.x);
-    VerifyNonZeroes(accelerations_.rotunda.y);
-    VerifyNonZeroes(accelerations_.elbow.x);
-    VerifyNonZeroes(accelerations_.elbow.y);
+    float home_angle = 0;
+    // TODO: std might have solution for this e.g. std::clamp or std::max?
+    ChangeIfZero(accelerations_.rotunda.x);
+    ChangeIfZero(accelerations_.rotunda.y);
+    ChangeIfZero(accelerations_.elbow.x);
+    ChangeIfZero(accelerations_.elbow.y);
 
-    double acceleration_x =
-        accelerations_.rotunda.x +
-        accelerations_.elbow.x;  // might need compliment value of shoulder
-    double acceleration_y = accelerations_.rotunda.y + accelerations_.elbow.y;
-    double angle_without_correction = atan(acceleration_y / acceleration_x);
-    // maybe make the following statements above the if's functions that return
-    // a bool to give a better description/make it look nicer if the elbow is in
-    // the second quadrant of a graph, add 90 to the angle
-    if (accelerations_.elbow.x >= 0 && accelerations_.elbow.y <= 0)
+    // TODO:  Verify we don't need compliment value of shoulder
+    float acceleration_x = accelerations_.rotunda.x + accelerations_.elbow.x;
+    float acceleration_y = accelerations_.rotunda.y + accelerations_.elbow.y;
+    float angle_without_correction =
+        float(atan(acceleration_y / acceleration_x));
+
+    // TODO: Bool helper functions for checking which quadrant correction to use
+    if (accelerations_.elbow.x + accelerations_.rotunda.x >= 0 &&
+        accelerations_.elbow.y + accelerations_.rotunda.y <= 0)
     {
-      home = 90 - angle_without_correction;
+      // if the elbow is in the second quadrant of a graph, add 90 to the angle
+      home_angle = 90 - angle_without_correction;
     }
     // if the elbow is in the third quadrant of a graph, add 180 to the angle
-    else if (accelerations_.elbow.x >= 0 && accelerations_.elbow.y >= 0)
+    else if (accelerations_.elbow.x + accelerations_.rotunda.x >= 0 &&
+             accelerations_.elbow.y + accelerations_.rotunda.y >= 0)
     {
-      home = 180 + angle_without_correction;
+      home_angle = 180 + angle_without_correction;
     }
     else
     {
-      home = angle_without_correction;
+      home_angle = angle_without_correction;
     }
-    MoveElbow(home);
+    elbow_.SetZeroOffset(home_angle);
+    MoveElbow(home_angle);
   }
-
-  void HomeWrist(){};
-
-  void Esp(){};
 
   // TODO: need to work on valid movement durring in person work shop
   bool CheckValidMovement()
   {
-    bool fill;
-    return fill;
+    return true;
   }
 
-  void Calibrate(){};
-
-  void SendUpdateToMC(){};
-
-  void PrintArmMode(){};
+  void Calibrate()
+  {
+    return;
+  }
 
   void UpdateRotundaAcceleration()
   {
     accelerations_.rotunda = rotunda_.GetAccelerometerData();
   }
+
   void UpdateShoulderAcceleration()
   {
     accelerations_.shoulder = shoulder_.GetAccelerometerData();
   }
+
   void UpdateElbowAcceleration()
   {
     accelerations_.elbow = elbow_.GetAccelerometerData();
   }
 
  private:
-  sjsu::arm::Joint & rotunda_;
-  sjsu::arm::Joint & shoulder_;
-  sjsu::arm::Joint & elbow_;
-  sjsu::arm::WristJoint & wrist_;
-  MissionControlData mc_data_;
-  Acceleration accelerations_;
-  int heartbeat_count_                    = 0;
-  MissionControlData::Modes current_mode_ = MissionControlData::Modes::kDefault;
-
-  void VerifyNonZeroes(double & acceleration)
+  /// Checks if value is zero. If it's zero make it not zero
+  void ChangeIfZero(float & acceleration)
   {
     if (acceleration == 0)
     {
@@ -231,8 +268,25 @@ class RoverArmSystem : public sjsu::common::RoverSystem
     }
   }
 
-  double FindComplimentValue(
-      double,
-      double){};  // may or may not need, will decide after testing code
+  /// TODO: test if we even need this function
+  float FindComplimentValue()
+  {
+    return 0;
+  }
+
+  int state_of_charge_                    = 90;
+  MissionControlData::Modes current_mode_ = MissionControlData::Modes::kDefault;
+
+  const int kExpectedArguments = 13;
+
+ public:
+  Acceleration accelerations_;
+  MissionControlData mc_data_;
+
+  sjsu::arm::Joint & rotunda_;
+  sjsu::arm::Joint & shoulder_;
+  sjsu::arm::Joint & elbow_;
+  sjsu::arm::WristJoint & wrist_;
+  sjsu::arm::Hand hand_;
 };
 }  // namespace sjsu::arm
