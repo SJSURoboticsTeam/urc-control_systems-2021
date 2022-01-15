@@ -53,19 +53,19 @@ void SetMiddlePosition()
   
 };
 
-void SetPinkyPosition()
+void SetPinkyPosition(float target_pinky_angle)
 {
-  
+  fingers_.pinky_angle = std:clamp(target_pinky_angle, min_angle, max_angle)
 };
 
-void SetPointerPosition()
+void SetPointerPosition(float target_pointer_angle)
 {
-  
+  fingers_.pointer_angle = std:clamp(target_pointer_angle, min_angle, max_angle)
 };
 
-void SetRingPosition()
+void SetRingPosition(float target_ring_position)
 {
-  
+  fingers_.ring_angle = std:clamp(target_ring_angle, min_angle, max_angle)
 };
   // can't home yet
   void HomeRoll(){};
