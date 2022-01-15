@@ -42,7 +42,31 @@ class Hand
         rotunda_offset;
     wrist_.SetPitchPosition(wrist_offset);
   }
+  //Get finger position
+void SetThumbPosition()
+{
+  
+};
 
+void SetMiddlePosition()
+{
+  
+};
+
+void SetPinkyPosition()
+{
+  
+};
+
+void SetPointerPosition()
+{
+  
+};
+
+void SetRingPosition()
+{
+  
+};
   // can't home yet
   void HomeRoll(){};
 
