@@ -88,11 +88,11 @@ class RoverArmSystem : public sjsu::common::RoverSystem
     printf("Arm data: \n");
     printf("Mode: %c\n", mc_data_.modes);
     printf("Arm speed: %d\n", mc_data_.arm_speed);
-    printf("Mode: %d\n", mc_data_.rotunda_angle);
-    printf("Mode: %d\n", mc_data_.shoulder_angle);
-    printf("Mode: %d\n", mc_data_.elbow_angle);
-    printf("Mode: %d\n", mc_data_.wrist_roll);
-    printf("Mode: %d\n", mc_data_.wrist_pitch);
+    printf("Rotunda Angle: %d\n", mc_data_.rotunda_angle);
+    printf("Shoulder Angle: %d\n", mc_data_.shoulder_angle);
+    printf("Elbow Angle: %d\n", mc_data_.elbow_angle);
+    printf("Wrist Roll Angle: %d\n", mc_data_.wrist_roll);
+    printf("Wrist Pitch Angle: %d\n", mc_data_.wrist_pitch);
     
     printf("Hand Finger Angles: \n");
     printf("Pinky Angle: %d\n",  mc_data_.finger.pinky_angle);
