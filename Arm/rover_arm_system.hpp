@@ -78,6 +78,10 @@ class RoverArmSystem : public sjsu::common::RoverSystem
     return fill;
   };
 
+  void SetLerpSpeed(float target_speed){
+    std:lerp(mc_data_.arm_speed, target_speed, .5)
+  }
+
   void MoveRotunda(double angle)
   {
     rotunda_.SetSpeed(mc_data_.arm_speed);

@@ -75,8 +75,7 @@ class Joint
   }
 
   void SetSpeed(double targetspeed){
-    double current_speed = speed_;
-    speed_ = std::lerp(current_speed, targetspeed, kLerpStep);
+    speed_ = SetLerpSpeed(targetspeed)
     motor.SetSpeed(speed_);
   }
 
