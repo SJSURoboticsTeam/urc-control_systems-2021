@@ -63,7 +63,7 @@ class Joint
     return acceleration;
   }
 
-  void SetSpeed(float target_speed)
+  void SetJointSpeed(float target_speed)
   {
     speed_ = std::lerp(speed_, target_speed, kLerpStep);
     units::angular_velocity::revolutions_per_minute_t speed_to_rpm(speed_);

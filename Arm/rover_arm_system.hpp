@@ -137,19 +137,19 @@ class RoverArmSystem : public sjsu::common::RoverSystem
 
   void MoveRotunda(float angle)
   {
-    rotunda_.SetSpeed(mc_data_.arm_speed);
+    rotunda_.SetJointSpeed(mc_data_.arm_speed);
     rotunda_.SetPosition(angle);
   }
 
   void MoveShoulder(float angle)
   {
-    shoulder_.SetSpeed(mc_data_.arm_speed);
+    shoulder_.SetJointSpeed(mc_data_.arm_speed);
     shoulder_.SetPosition(angle);
   }
 
   void MoveElbow(float angle)
   {
-    elbow_.SetSpeed(mc_data_.arm_speed);
+    elbow_.SetJointSpeed(mc_data_.arm_speed);
     elbow_.SetPosition(angle);
   }
 
