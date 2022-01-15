@@ -73,6 +73,7 @@ class Hand
   sjsu::arm::WristJoint wrist_;
 
  private:
+ Fingers fingers_;
   // Uart & uart_;
 };
 
