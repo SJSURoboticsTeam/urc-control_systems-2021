@@ -43,15 +43,19 @@ class Hand
     wrist_.SetPitchPosition(wrist_offset);
   }
   //Get finger position
-void SetThumbPosition()
-{
-  
-};
+  void SetThumbPosition(float thumb_angle)
+  { 
+    thumb_angle_ = float(std::clamp(thumb_angle, max_angle, min_angle));
+    units::angle::degree_t angle_to_degrees(thumb_angle);
+    thumb_motor.SetAngle(angle_to_degrees);
+  };
 
-void SetMiddlePosition()
-{
-  
-};
+  void SetMiddlePosition(double middle_angle)
+  {
+    middle_angle_ = float(std::clamp(thumb_angle, max_angle, min_angle));
+    units::angle::degree_t angle_to_degrees(middle_angle);
+    middle_motor.SetAngle(angle_to_degrees);
+  };
 
 void SetPinkyPosition(float target_pinky_angle)
 {
@@ -72,35 +76,39 @@ void SetRingPosition(float target_ring_position)
 
   int GetThumbPosition()
   {
-    return fingers_.thumb_angle;
+    return 0;
   };
 
   int GetMiddlePosition()
   {
-    return fingers_.middle_angle;
+    return 0;
   };
 
   int GetPinkyPosition()
   {
-    return fingers_.pinky_angle;
+    return 0;
   };
 
   int GetPointerPosition()
   {
-    return fingers_.pointer_angle;
+    return 0;
   };
 
   int GetRingPosition()
   {
-    return fingers_.ring_angle;
+    return 0;
   };
   sjsu::arm::WristJoint wrist_;
 
-
-
  private:
- int max_angle = 180;
- int min_angle = 0;
+  sjsu::RmdX & thumb_motor_;
+  sjsu::RmdX & middle_motor_;
+  sjsu::RmdX & pinky_motor_;
+  sjsu::RmdX & pointer_motor_;
+  sjsu::RmdX & ring_motor_;
+
+
+
  Fingers fingers_;
   // Uart & uart_;
 };
