@@ -55,22 +55,19 @@ TEST_CASE("Joint system testing")
 
   SECTION("Should lerp motor to 4 by going 2->3->3.5")
   {
-    joint.SetSpeed(4);
+    joint.SetJointSpeed(4);
     CHECK(joint.GetSpeed() == 2);
-    joint.SetSpeed(4);
+    joint.SetJointSpeed(4);
     CHECK(joint.GetSpeed() == 3);
-    joint.SetSpeed(4);
+    joint.SetJointSpeed(4);
     CHECK(joint.GetSpeed() < 4);
-    joint.SetSpeed(0);
+    joint.SetJointSpeed(0);
     CHECK(joint.GetSpeed() > 0);
     CHECK(joint.GetSpeed() < 2);
   }
 
   SECTION("should boundary test the max and min angles for SetPostion")
   {
-    int maxPosition = 180;
-    int minPosition = 0;
-
     joint.SetPosition(-10);
     // CHECK(joint.GetPosition() == minPosition);
 

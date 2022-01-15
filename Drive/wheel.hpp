@@ -67,6 +67,11 @@ class Wheel
     return homing_offset_angle_;
   }
 
+  int GetEncoderPos(sjsu::RmdX motor)
+  {
+    return int(motor.RequestFeedbackFromMotor().GetFeedback().encoder_position);
+  }
+
   /// Checks if the steer wheel is aligned with slip ring
   bool IsHomed()
   {
@@ -92,8 +97,8 @@ class Wheel
 
   const bool kHomeLevel  = sjsu::Gpio::kHigh;
   const int kMaxRotation = 360;
-  const float kMaxSpeed = 100;
-  const float kZero     = 0;
+  const float kMaxSpeed  = 100;
+  const float kZero      = 0;
   const units::angular_velocity::revolutions_per_minute_t kSteerSpeed = 10_rpm;
 };
 }  // namespace sjsu::drive

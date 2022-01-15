@@ -41,6 +41,7 @@ int main(void)
                                  right_wheel_homing_pin);
   sjsu::drive::Wheel back_wheel("back", back_hub_motor, back_steer_motor,
                                 back_wheel_homing_pin);
+
   sjsu::drive::RoverDriveSystem drive(left_wheel, right_wheel, back_wheel);
 
   esp.Initialize();
@@ -79,6 +80,14 @@ int main(void)
     catch (const sjsu::drive::RoverDriveSystem::ParseError &)
     {
       sjsu::LogError("Parsing Error: Arguments not equal");
+    }
+    catch (const sjsu::drive::RoverDriveSystem::DriveModeHandlerError &)
+    {
+      sjsu::LogError("DriveModeHandlerError: Unable to assign drive mode handler!");
+    }
+    catch (const sjsu::drive::RoverDriveSystem::DriveModeError &)
+    {
+      sjsu::LogError("DriveModeError: Unable to set drive mode!");
     }
   }
 
