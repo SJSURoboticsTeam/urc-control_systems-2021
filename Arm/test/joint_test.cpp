@@ -53,18 +53,6 @@ TEST_CASE("Joint system testing")
     // TODO: verify the motor was / was not set to the following values
   }
 
-<<<<<<< HEAD
-  SECTION("Should set motor speed to 5, 10 , 45, 100")
-  {
-    joint.SetSpeed(5);
-    CHECK(joint.GetSpeed() == 5);
-    joint.SetSpeed(10);
-    CHECK(joint.GetSpeed() == 10);
-    joint.SetSpeed(45);
-    CHECK(joint.GetSpeed() == 45);
-    joint.SetSpeed(100);
-    CHECK(joint.GetSpeed() == 100);
-=======
   SECTION("Should lerp motor to 4 by going 2->3->3.5")
   {
     joint.SetJointSpeed(4);
@@ -85,7 +73,6 @@ TEST_CASE("Joint system testing")
 
     joint.SetPosition(200);
     // CHECK(joint.GetPosition() == maxPosition);
->>>>>>> 0c3d13106d8a028df9475af0d283fd6ddadb8d0d
   }
 
   SECTION("should set zero offset to 25 degrees")
