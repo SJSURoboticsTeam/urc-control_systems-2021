@@ -17,7 +17,7 @@ class Hand
     float z;
   };
 
-  Hand(sjsu::arm::WristJoint wrist
+  Hand(sjsu::arm::WristJoint wrist,
        sjsu::arm::Finger pinky,
        sjsu::arm::Finger ring,
        sjsu::arm::Finger middle,
@@ -30,7 +30,7 @@ class Hand
     wrist_.Initialize();
     pinky_.initialize();
     ring_.initialize();
-    middle_.initiazlie();
+    middle_.initialize();
     pointer_.initialize();
     thumb_.initialize();
   }

@@ -6,8 +6,11 @@ namespace sjsu::arm
 class Finger
 {
 public:
- 
- Finger(sjsu::Servo & servo,
+
+Finger(sjsu::Servo & servo) : servo_(servo)
+{}
+
+Finger(sjsu::Servo & servo,
         float position,
         float speed,
         float max_angle,
@@ -17,7 +20,7 @@ public:
 
 void initialize()
 {
-    servo.ModuleInitialize();
+    servo_.ModuleInitialize();
 }
 
 void SetPosition(){};
@@ -37,6 +40,7 @@ int GetMaxAngle(){};
 int GetMinAngle(){};
 
 private:
+
  sjsu::Servo & servo_;
 
  float position_  = 0;
