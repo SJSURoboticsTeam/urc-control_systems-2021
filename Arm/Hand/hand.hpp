@@ -8,7 +8,7 @@ class Hand
   /// The hand has its own MCU that communicates with the arm via UART.
  public:
   // Hand(Uart & uart) : uart_(uart) {}
-  void Initialize(){};
+    void Initialize(){};
 
   struct Fingers
   {
@@ -27,7 +27,7 @@ class Hand
 
   Hand(sjsu::arm::WristJoint wrist) : wrist_(wrist) {}
 
-  void HomeWrist(float rotunda_offset)
+    void HomeWrist(float rotunda_offset)
   {
     wrist_.GetAccelerometerData();
     HomePitch(rotunda_offset);
@@ -35,70 +35,79 @@ class Hand
   };
 
   // TODO: find a way to set the ZeroOffsets
-  void HomePitch(float rotunda_offset)
+    void HomePitch(float rotunda_offset)
   {
     float wrist_offset =
         float(atan(wrist_.acceleration.y / wrist_.acceleration.z)) +
         rotunda_offset;
     wrist_.SetPitchPosition(wrist_offset);
   }
+
+   // can't home yet
+  void HomeRoll(){};
   
   //Get finger position
-  void SetThumbPosition(float thumb_angle)
+    void SetThumbPosition(float target_thumb_angle)
   { 
-    fingers_.thumb_angle_ = float(std::clamp(thumb_angle, max_angle, min_angle));
-    units::angle::degree_t angle_to_degrees(thumb_angle);
-    thumb_motor.SetAngle(angle_to_degrees);
+    fingers_.thumb_angle_ = float(std::clamp(target_thumb_angle, min_angle, max_angle));
+    units::angle::degree_t angle_to_degrees(target_thumb_angle);
+    thumb_motor_.SetAngle(angle_to_degrees);
   };
 
-  void SetMiddlePosition(double middle_angle)
+    void SetMiddlePosition(float target_middle_angle)
   {
-    fingers_.middle_angle_ = float(std::clamp(thumb_angle, max_angle, min_angle));
-    units::angle::degree_t angle_to_degrees(middle_angle);
-    middle_motor.SetAngle(angle_to_degrees);
+    fingers_.middle_angle_ = float(std::clamp(target_middle_angle, min_angle, max_angle));
+    units::angle::degree_t angle_to_degrees(target_middle_angle);
+    middle_motor_.SetAngle(angle_to_degrees);
   };
 
-void SetPinkyPosition(float target_pinky_angle)
-{
-  fingers_.pinky_angle = std:clamp(target_pinky_angle, min_angle, max_angle)
-};
+  void SetPinkyPosition(float target_pinky_angle)
+  {
+    fingers_.pinky_angle_ = float(std::clamp(target_pinky_angle, min_angle, max_angle));
+    units::angle::degree_t angle_to_degrees(target_pinky_angle);
+    pinky_motor_.SetAngle(angle_to_degrees);
+  };
 
-void SetPointerPosition(float target_pointer_angle)
-{
-  fingers_.pointer_angle = std:clamp(target_pointer_angle, min_angle, max_angle)
-};
+  void SetPointerPosition(float target_pointer_angle)
+  {
+    fingers_.pointer_angle_ = float(std::clamp(target_pointer_angle, min_angle, max_angle));
+    units::angle::degree_t angle_to_degrees(target_pointer_angle);
+    pointer_motor_.SetAngle(angle_to_degrees);
+  } ;
 
-void SetRingPosition(float target_ring_position)
-{
-  fingers_.ring_angle = std:clamp(target_ring_angle, min_angle, max_angle)
-};
-  // can't home yet
-  void HomeRoll(){};
-
+  void SetRingPosition(float target_ring_angle)
+  {
+    fingers_.ring_angle_ = float(std::clamp(target_ring_angle, min_angle, max_angle));
+    units::angle::degree_t angle_to_degrees(target_ring_angle);
+    ring_motor_.SetAngle(angle_to_degrees);
+  };
+ 
+  //Set Finger Position
   int GetThumbPosition()
   {
-    return int();
+    return int(fingers_.thumb_angle_);
   };
 
   int GetMiddlePosition()
   {
-    return 0;
+    return int(fingers_.middle_angle_);
   };
 
   int GetPinkyPosition()
   {
-    return 0;
+    return int(fingers_.pinky_angle_);
   };
 
   int GetPointerPosition()
   {
-    return 0;
+    return int(fingers_.pointer_angle_);
   };
 
   int GetRingPosition()
   {
-    return 0;
+    return int(fingers_.ring_angle_);
   };
+
   sjsu::arm::WristJoint wrist_;
 
  private:
@@ -108,7 +117,9 @@ void SetRingPosition(float target_ring_position)
   sjsu::RmdX & pointer_motor_;
   sjsu::RmdX & ring_motor_;
 
-
+  const float min_angle  = 0;
+  const float max_angle  = 180;
+  const float rest_angle = 90;
 
  Fingers fingers_;
   // Uart & uart_;
