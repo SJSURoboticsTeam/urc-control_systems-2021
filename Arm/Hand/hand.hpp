@@ -1,23 +1,15 @@
 #pragma once
 #include "peripherals/uart.hpp"
 #include "wrist_joint.hpp"
+#include "finger.hpp"
 namespace sjsu::arm
 {
 class Hand
 {
   /// The hand has its own MCU that communicates with the arm via UART.
  public:
-  // Hand(Uart & uart) : uart_(uart) {}
-  void Initialize(){};
+  //Hand(Uart & uart) : uart_(uart) {}
 
-  struct Fingers
-  {
-    float pinky_angle   = 0;
-    float ring_angle    = 0;
-    float middle_angle  = 0;
-    float pointer_angle = 0;
-    float thumb_angle   = 0;
-  };
   struct accelerations
   {
     float x;
@@ -25,7 +17,23 @@ class Hand
     float z;
   };
 
-  Hand(sjsu::arm::WristJoint wrist) : wrist_(wrist) {}
+  Hand(sjsu::arm::WristJoint & wrist,
+       sjsu::arm::Finger & pinky,
+       sjsu::arm::Finger & ring,
+       sjsu::arm::Finger & middle,
+       sjsu::arm::Finger & pointer,
+       sjsu::arm::Finger & thumb
+      ) : wrist_(wrist), pinky_(pinky), ring_(ring), middle_(middle), pointer_(pointer), thumb_(thumb) {}
+
+  void Initialize()
+  {
+    wrist_.Initialize();
+    pinky_.Initialize();
+    ring_.Initialize();
+    middle_.Initialize();
+    pointer_.Initialize();
+    thumb_.Initialize();
+  }
 
   void HomeWrist(float rotunda_offset)
   {
@@ -70,9 +78,13 @@ class Hand
   {
     return 0;
   };
-  sjsu::arm::WristJoint wrist_;
-
- private:
+  sjsu::arm::WristJoint & wrist_;
+  sjsu::arm::Finger & pinky_;
+  sjsu::arm::Finger & ring_;
+  sjsu::arm::Finger & middle_;
+  sjsu::arm::Finger & pointer_;
+  sjsu::arm::Finger & thumb_;
+  private:
   // Uart & uart_;
 };
 
