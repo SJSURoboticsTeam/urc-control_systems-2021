@@ -1,6 +1,10 @@
 #pragma once
 #include "peripherals/uart.hpp"
 #include "wrist_joint.hpp"
+#include "utility/math/units.hpp"
+#include "devices/actuators/servo/rmd_x.hpp"
+#include "devices/actuators/servo/servo.hpp"
+
 namespace sjsu::arm
 {
 class Hand
@@ -8,31 +12,52 @@ class Hand
   /// The hand has its own MCU that communicates with the arm via UART.
  public:
   // Hand(Uart & uart) : uart_(uart) {}
-    void Initialize(){};
-
-  struct Fingers
+    struct Fingers
+    {
+      float pinky_angle_   = 0;
+      float ring_angle_    = 0;
+      float middle_angle_  = 0;
+      float pointer_angle_ = 0;
+      float thumb_angle_   = 0;
+    };
+    struct accelerations
+    {
+      float x;
+      float y;
+      float z;
+    };
+    
+  Hand(sjsu::arm::WristJoint & wrist,
+       sjsu::Servo & thumb_motor,
+       sjsu::Servo & middle_motor,
+       sjsu::Servo & pinky_motor,
+       sjsu::Servo & pointer_motor,
+       sjsu::Servo & ring_motor) 
+    :  wrist_(wrist),
+       thumb_motor_(thumb_motor),
+       middle_motor_(middle_motor),
+       pinky_motor_(pinky_motor),
+       pointer_motor_(pointer_motor),
+       ring_motor_(ring_motor){}
+       
+  void Initialize()
   {
-    float pinky_angle_   = 0;
-    float ring_angle_    = 0;
-    float middle_angle_  = 0;
-    float pointer_angle_ = 0;
-    float thumb_angle_   = 0;
-  };
-  struct accelerations
-  {
-    float x;
-    float y;
-    float z;
+    thumb_motor_.Initialize();
+    middle_motor_.Initialize();
+    pinky_motor_.Initialize();
+    pointer_motor_.Initialize();
+    ring_motor_.Initialize();
   };
 
-  Hand(sjsu::arm::WristJoint wrist) : wrist_(wrist) {}
 
-    void HomeWrist(float rotunda_offset)
+  void HomeWrist(float rotunda_offset)
   {
     wrist_.GetAccelerometerData();
     HomePitch(rotunda_offset);
     HomeRoll();
   };
+
+ 
 
   // TODO: find a way to set the ZeroOffsets
     void HomePitch(float rotunda_offset)
@@ -41,7 +66,7 @@ class Hand
         float(atan(wrist_.acceleration.y / wrist_.acceleration.z)) +
         rotunda_offset;
     wrist_.SetPitchPosition(wrist_offset);
-  }
+  };
 
    // can't home yet
   void HomeRoll(){};
@@ -108,14 +133,16 @@ class Hand
     return int(fingers_.ring_angle_);
   };
 
-  sjsu::arm::WristJoint wrist_;
+  
 
  private:
-  sjsu::RmdX & thumb_motor_;
-  sjsu::RmdX & middle_motor_;
-  sjsu::RmdX & pinky_motor_;
-  sjsu::RmdX & pointer_motor_;
-  sjsu::RmdX & ring_motor_;
+  sjsu::arm::WristJoint & wrist_;
+
+  sjsu::Servo & thumb_motor_;
+  sjsu::Servo & middle_motor_;
+  sjsu::Servo & pinky_motor_;
+  sjsu::Servo & pointer_motor_;
+  sjsu::Servo & ring_motor_;
 
   const float min_angle  = 0;
   const float max_angle  = 180;
