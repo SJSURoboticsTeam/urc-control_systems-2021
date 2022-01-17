@@ -18,7 +18,7 @@ Finger(sjsu::Servo & servo,
        ) : servo_(servo), position_(position), speed_(speed), max_angle_(max_angle), min_angle_(min_angle)
        {}
 
-void initialize()
+void Initialize()
 {
     servo_.ModuleInitialize();
 }
@@ -31,13 +31,21 @@ void SetMaxAngle(){};
 
 void SetMinAngle(){};
 
-int GetPosition(){};
+int GetPosition(){
+    return 0;
+};
 
-int GetSpeed(){};
+int GetSpeed(){
+    return 0;
+};
 
-int GetMaxAngle(){};
+int GetMaxAngle(){
+    return 0;
+};
 
-int GetMinAngle(){};
+int GetMinAngle(){
+    return 0;
+};
 
 private:
 
