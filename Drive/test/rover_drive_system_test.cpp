@@ -20,12 +20,7 @@ TEST_CASE("Drive system testing")
   StaticMemoryResource<1024> memory_resource;
   CanNetwork network(mock_can.get(), &memory_resource);
 
-  RmdX left_steer_motor(network, 0x141);
-  RmdX left_hub_motor(network, 0x142);
-  RmdX right_steer_motor(network, 0x143);
-  RmdX right_hub_motor(network, 0x144);
-  RmdX back_steer_motor(network, 0x145);
-  RmdX back_hub_motor(network, 0x146);
+  RmdX motor(network, 0x141);
 
   Mock<Gpio> mock_wheel_homing_pin;
   InterruptCallback interrupt;
@@ -38,11 +33,11 @@ TEST_CASE("Drive system testing")
       .AlwaysDo([&interrupt](InterruptCallback callback, Gpio::Edge) -> void
                 { interrupt = callback; });
 
-  drive::Wheel left_wheel("left", left_hub_motor, left_steer_motor,
+  drive::Wheel left_wheel("left", motor, motor,
                           mock_wheel_homing_pin.get());
-  drive::Wheel right_wheel("right", right_hub_motor, right_steer_motor,
+  drive::Wheel right_wheel("right", motor, motor,
                            mock_wheel_homing_pin.get());
-  drive::Wheel back_wheel("back", back_hub_motor, back_steer_motor,
+  drive::Wheel back_wheel("back", motor, motor,
                           mock_wheel_homing_pin.get());
 
   drive::RoverDriveSystem drive(left_wheel, right_wheel, back_wheel);
