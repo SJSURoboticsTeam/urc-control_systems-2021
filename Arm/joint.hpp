@@ -65,7 +65,7 @@ class Joint
 
   void SetJointSpeed(float target_speed)
   {
-    speed_ = std::lerp(speed_, target_speed, kLerpStep);
+    speed_ = std::clamp(target_speed, -kMaxSpeed, kMaxSpeed);
     units::angular_velocity::revolutions_per_minute_t speed_to_rpm(speed_);
     motor_.SetSpeed(speed_to_rpm);
   }
