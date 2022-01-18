@@ -34,6 +34,10 @@ class Hand
     pointer_.Initialize();
     thumb_.Initialize();
   }
+  void HandleHandMovement()
+  {
+    //TODO: should handle movement for hand
+  }
 
   void HomeWrist(float rotunda_offset)
   {
@@ -45,10 +49,11 @@ class Hand
   // TODO: find a way to set the ZeroOffsets
   void HomePitch(float rotunda_offset)
   {
-    float wrist_offset =
+    float wrist_pitch_offset =
         float(atan(wrist_.acceleration.y / wrist_.acceleration.z)) +
         rotunda_offset;
-    wrist_.SetPitchPosition(wrist_offset);
+    wrist_.SetPitchPosition(wrist_pitch_offset);
+    wrist_.SetZeroPitchOffsets(wrist_pitch_offset);
   }
 
   // can't home yet
