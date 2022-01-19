@@ -35,9 +35,16 @@ class RoverArmSystem : public sjsu::common::RoverSystem
   {
     enum class Modes : char
     {
-      kDefault = 'D',
+      kHomeArm    = 'A',
+      kHomeHand   = 'H',
+      kConcurrent = 'C',
+      kRotunda    = 'R',
+      kShoulder   = 'S',
+      kElbow      = 'E',
+      kWrist      = 'W'
+
     };
-    Modes modes        = Modes::kDefault;
+    Modes modes        = Modes::kConcurrent;
     int arm_speed      = 0;
     int rotunda_angle  = 0;
     int shoulder_angle = 0;
@@ -93,20 +100,20 @@ class RoverArmSystem : public sjsu::common::RoverSystem
     printf("Elbow Angle: %d\n", mc_data_.elbow_angle);
     printf("Wrist Roll Angle: %d\n", mc_data_.wrist_roll);
     printf("Wrist Pitch Angle: %d\n", mc_data_.wrist_pitch);
-    
+
     printf("Hand Finger Angles: \n");
-    printf("Pinky Angle: %d\n",  mc_data_.finger.pinky_angle);
-    printf("Ring Angle: %d\n",  mc_data_.finger.ring_angle);
-    printf("Middle Angle: %d\n",  mc_data_.finger.middle_angle);
-    printf("Pointer Angle: %d\n",  mc_data_.finger.pointer_angle);
-    printf("Thumb Angle: %d\n",  mc_data_.finger.thumb_angle);
+    printf("Pinky Angle: %d\n", mc_data_.finger.pinky_angle);
+    printf("Ring Angle: %d\n", mc_data_.finger.ring_angle);
+    printf("Middle Angle: %d\n", mc_data_.finger.middle_angle);
+    printf("Pointer Angle: %d\n", mc_data_.finger.pointer_angle);
+    printf("Thumb Angle: %d\n", mc_data_.finger.thumb_angle);
 
     printf("Hand Finger Positions:\n");
-    printf("Pinky Angle: %d\n",  hand_.GetPinkyPosition());
-    printf("Ring Angle: %d\n",  hand_.GetRingPosition());
-    printf("Middle Angle: %d\n",  hand_.GetMiddlePosition());
-    printf("Pointer Angle: %d\n",  hand_.GetPointerPosition());
-    printf("Thumb Angle: %d\n",  hand_.GetThumbPosition());
+    printf("Pinky Angle: %d\n", hand_.GetPinkyPosition());
+    printf("Ring Angle: %d\n", hand_.GetRingPosition());
+    printf("Middle Angle: %d\n", hand_.GetMiddlePosition());
+    printf("Pointer Angle: %d\n", hand_.GetPointerPosition());
+    printf("Thumb Angle: %d\n", hand_.GetThumbPosition());
 
     printf("Joints Data:\n");
     printf("Rotunda speed: %d\n", rotunda_.GetSpeed());
@@ -119,8 +126,7 @@ class RoverArmSystem : public sjsu::common::RoverSystem
     printf("Elbow position: %d\n", elbow_.GetPosition());
 
     printf("Wrist pitch position: %d\n", wrist_.GetPitchPosition());
-    printf("Wrist roll position: %d\n", wrist_.GetRollPosition());    
-
+    printf("Wrist roll position: %d\n", wrist_.GetRollPosition());
   }
 
   std::string GETParameters() override
@@ -190,13 +196,13 @@ class RoverArmSystem : public sjsu::common::RoverSystem
 
   void HandleRoverMovement() override
   {
-    // TODO: implement different arm drive modes in this function
+    // TODO: implement different arm drive modes in this function with switch
+    // statements
     MoveRotunda(mc_data_.rotunda_angle);
     MoveShoulder(mc_data_.shoulder_angle);
     MoveElbow(mc_data_.elbow_angle);
+    hand_.HandleHandMovement();
   }
-
-  void MoveWrist(){};
 
   void HomeArm()
   {
@@ -205,7 +211,8 @@ class RoverArmSystem : public sjsu::common::RoverSystem
     HomeShoulder();
     UpdateElbowAcceleration();
     HomeElbow();
-    hand_.HomeWrist(float(rotunda_.GetOffsetAngle()));
+    hand_.HomeWrist(float(rotunda_.GetOffsetAngle()));  // move all other homing
+                                                        // functions to private
   }
 
   void HomeShoulder()
@@ -217,7 +224,6 @@ class RoverArmSystem : public sjsu::common::RoverSystem
     ChangeIfZero(accelerations_.shoulder.x);
     ChangeIfZero(accelerations_.shoulder.y);
 
-    // TODO:  Verify we don't need compliment value of shoulder
     float acceleration_x = accelerations_.rotunda.x + accelerations_.shoulder.x;
     float acceleration_y = accelerations_.rotunda.y + accelerations_.shoulder.y;
 
@@ -225,7 +231,7 @@ class RoverArmSystem : public sjsu::common::RoverSystem
     shoulder_.SetZeroOffset(home_angle);
     MoveShoulder(home_angle);
   }
-
+  // TODO: clean up homing functions with more descriptive functions
   void HomeElbow()
   {
     float home_angle = 0;
@@ -235,7 +241,6 @@ class RoverArmSystem : public sjsu::common::RoverSystem
     ChangeIfZero(accelerations_.elbow.x);
     ChangeIfZero(accelerations_.elbow.y);
 
-    // TODO:  Verify we don't need compliment value of shoulder
     float acceleration_x = accelerations_.rotunda.x + accelerations_.elbow.x;
     float acceleration_y = accelerations_.rotunda.y + accelerations_.elbow.y;
     float angle_without_correction =
@@ -262,17 +267,8 @@ class RoverArmSystem : public sjsu::common::RoverSystem
     MoveElbow(home_angle);
   }
 
-  // TODO: need to work on valid movement durring in person work shop
-  bool CheckValidMovement()
-  {
-    return true;
-  }
-
-  void Calibrate()
-  {
-    return;
-  }
-
+ private:
+  // TODO: change into one function
   void UpdateRotundaAcceleration()
   {
     accelerations_.rotunda = rotunda_.GetAccelerometerData();
@@ -288,7 +284,6 @@ class RoverArmSystem : public sjsu::common::RoverSystem
     accelerations_.elbow = elbow_.GetAccelerometerData();
   }
 
- private:
   /// Checks if value is zero. If it's zero make it not zero
   void ChangeIfZero(float & acceleration)
   {
@@ -296,16 +291,10 @@ class RoverArmSystem : public sjsu::common::RoverSystem
     {
       acceleration = 0.0001;
     }
-  }
-
-  /// TODO: test if we even need this function
-  float FindComplimentValue()
-  {
-    return 0;
-  }
+  }  // TODO: move this function to joint class, and the logic in the home
 
   int state_of_charge_                    = 90;
-  MissionControlData::Modes current_mode_ = MissionControlData::Modes::kDefault;
+  MissionControlData::Modes current_mode_ = MissionControlData::Modes::kConcurrent;
 
   const int kExpectedArguments = 13;
 
