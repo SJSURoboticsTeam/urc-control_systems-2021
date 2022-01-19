@@ -1,7 +1,5 @@
 #pragma once
 
-#include <chrono>
-
 #include "devices/actuators/servo/servo.hpp"
 
 namespace sjsu::arm
