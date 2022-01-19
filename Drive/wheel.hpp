@@ -30,7 +30,7 @@ class Wheel
 
   void Print()
   {
-    printf("%-10s%-10d%-10d\n", name_.c_str(), GetHubSpeed(), GetSteerAngle());
+    printf("%-10s%-10d%-10d%-10f\n", name_.c_str(), GetHubSpeed(), GetSteerAngle(), GetSteerEncoderPosition());
   }
 
   std::string GetName()
