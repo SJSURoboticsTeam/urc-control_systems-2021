@@ -67,7 +67,7 @@ class Wheel
     return homing_offset_angle_;
   }
 
-int GetSteerEncoderPos()
+int GetSteerEncoderPosition()
   {
     return int(steer_motor_.RequestFeedbackFromMotor().GetFeedback().encoder_position);
   }
