@@ -52,6 +52,7 @@ class Joint
   }
 
   /// Return the acceleration values from the MPU6050
+  //TODO: use CheckAccelerationForZeroFunction here
   Acceleration GetAccelerometerData()
   {
     sjsu::Accelerometer::Acceleration_t acceleration_to_float(mpu_.Read());
@@ -63,9 +64,11 @@ class Joint
     return acceleration;
   }
 
+  void CheckAccelerationsForZero(Acceleration & acceleration){};
+
   void SetJointSpeed(float target_speed)
   {
-    speed_ = std::lerp(speed_, target_speed, kLerpStep);
+    speed_ = std::clamp(target_speed, -kMaxSpeed, kMaxSpeed);
     units::angular_velocity::revolutions_per_minute_t speed_to_rpm(speed_);
     motor_.SetSpeed(speed_to_rpm);
   }
