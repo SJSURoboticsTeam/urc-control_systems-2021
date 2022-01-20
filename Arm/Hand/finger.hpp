@@ -1,4 +1,5 @@
 #pragma once
+
 #include "devices/actuators/servo/servo.hpp"
 
 namespace sjsu::arm
@@ -23,29 +24,28 @@ void Initialize()
     servo_.ModuleInitialize();
 }
 
-void SetPosition(){};
-
-void SetSpeed(){};
-
-void SetMaxAngle(){};
-
-void SetMinAngle(){};
-
-int GetPosition(){
-    return 0;
+void SetPosition(float angle)
+{
+    position_ = std::clamp(angle, min_angle_, max_angle_);
+    units::angle::degree_t angle_to_degrees(position_);
+    servo_.SetAngle(angle_to_degrees);
 };
 
-int GetSpeed(){
-    return 0;
+void SetSpeed(float target_speed)
+{
+    speed_ = target_speed;
 };
 
-int GetMaxAngle(){
-    return 0;
+int GetPosition()
+{
+    return int(position_);
 };
 
-int GetMinAngle(){
-    return 0;
+int GetSpeed()
+{
+    return int(speed_);
 };
+
 
 private:
 

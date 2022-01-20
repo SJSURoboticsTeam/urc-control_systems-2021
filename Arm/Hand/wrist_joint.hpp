@@ -35,28 +35,32 @@ class WristJoint
   void SetPitchPosition(float pitch_angle)
   {
     pitch_angle_ =
-        float(std::clamp(pitch_angle, kPitchMinimumAngle, kPitchMaximumAngle));
+        float(std::clamp(pitch_angle + pitch_offset_angle_, kPitchMinimumAngle, kPitchMaximumAngle));
     units::angle::degree_t angle_to_degrees(pitch_angle);
-    left_motor_.SetAngle(angle_to_degrees);
-    right_motor_.SetAngle(angle_to_degrees);
-  }
-
-  // Sets Roll Position of the wrist joint
-  void SetRollPosition(float roll_angle)
-  {
-    roll_angle_ =
-        float(std::clamp(roll_angle, kRollMinimumAngle, kRollMaximumAngle));
-    units::angle::degree_t angle_to_degrees(roll_angle);
     left_motor_.SetAngle(angle_to_degrees);
     right_motor_.SetAngle(angle_to_degrees);
   }
 
   /// Sets the zero_offset_angle value that the motors use to know its true '0'
   /// position. Called by RoverArmSystem::Home
-  void SetZeroOffsets(float left_offset, float right_offset)
+  void SetZeroPitchOffsets(float pitch_offset)
   {
-    left_offset_angle_  = left_offset;
-    right_offset_angle_ = right_offset;
+    pitch_offset_angle_  = pitch_offset;
+  }
+
+  // Sets Roll Position of the wrist joint
+  void SetRollPosition(float roll_angle)
+  {
+    roll_angle_ =
+        float(std::clamp(roll_angle + roll_offset_angle_, kRollMinimumAngle, kRollMaximumAngle));
+    units::angle::degree_t angle_to_degrees(roll_angle);
+    left_motor_.SetAngle(angle_to_degrees);
+    right_motor_.SetAngle(angle_to_degrees);
+  }
+
+    void SetZeroRollOffsets(float roll_offset)
+  {
+    roll_offset_angle_ = roll_offset;
   }
 
   /// Return the acceleration values for the MPU6050 on the joint.
@@ -79,27 +83,28 @@ class WristJoint
     return int(roll_angle_);
   }
 
-  int GetLeftOffsetAngle()
+  int GetPitchOffsetAngle()
   {
-    return int(left_offset_angle_);
+    return int(pitch_offset_angle_);
   }
 
-  int GetRightOffsetAngle()
+   int GetRollOffsetAngle()
   {
-    return int(right_offset_angle_);
+    return int(roll_offset_angle_);
   }
 
   Acceleration acceleration;
 
  private:
+
   sjsu::RmdX & left_motor_;
   sjsu::RmdX & right_motor_;
   sjsu::Mpu6050 & mpu_;
 
   float pitch_angle_        = 0;
   float roll_angle_         = 0;
-  float left_offset_angle_  = 0;
-  float right_offset_angle_ = 0;
+  float pitch_offset_angle_ = 0;
+  float roll_offset_angle_  = 0;
 
   const float kPitchMinimumAngle = 0;
   const float kPitchMaximumAngle = 180;

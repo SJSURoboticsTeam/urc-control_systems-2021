@@ -228,12 +228,12 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
     printf("DRIVE MODE:\t%d\n", current_mode_);
     printf("MC SPEED:\t%d\n", mc_data_.speed);
     printf("MC ANGLE:\t%d\n", mc_data_.rotation_angle);
-    printf("WHEEL     SPEED     ANGLE\n");
-    printf("=========================\n");
+    printf("WHEEL     SPEED     ANGLE     ENCODER-POS\n");
+    printf("=========================================\n");
     left_wheel_.Print();
     right_wheel_.Print();
     back_wheel_.Print();
-    printf("=========================\n");
+    printf("=========================================\n");
   }
 
  private:

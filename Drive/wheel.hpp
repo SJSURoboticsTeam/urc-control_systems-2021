@@ -30,7 +30,7 @@ class Wheel
 
   void Print()
   {
-    printf("%-10s%-10d%-10d\n", name_.c_str(), GetHubSpeed(), GetSteerAngle());
+    printf("%-10s%-10d%-10d%-10f\n", name_.c_str(), GetHubSpeed(), GetSteerAngle(), GetSteerEncoderPosition());
   }
 
   std::string GetName()
@@ -67,9 +67,9 @@ class Wheel
     return homing_offset_angle_;
   }
 
-  int GetEncoderPos(sjsu::RmdX motor)
+int GetSteerEncoderPosition()
   {
-    return int(motor.RequestFeedbackFromMotor().GetFeedback().encoder_position);
+    return int(steer_motor_.RequestFeedbackFromMotor().GetFeedback().encoder_position);
   }
 
   /// Checks if the steer wheel is aligned with slip ring

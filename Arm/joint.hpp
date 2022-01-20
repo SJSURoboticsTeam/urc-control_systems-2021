@@ -52,6 +52,7 @@ class Joint
   }
 
   /// Return the acceleration values from the MPU6050
+  //TODO: use CheckAccelerationForZeroFunction here
   Acceleration GetAccelerometerData()
   {
     sjsu::Accelerometer::Acceleration_t acceleration_to_float(mpu_.Read());
@@ -62,6 +63,8 @@ class Joint
 
     return acceleration;
   }
+
+  void CheckAccelerationsForZero(Acceleration & acceleration){};
 
   void SetJointSpeed(float target_speed)
   {
