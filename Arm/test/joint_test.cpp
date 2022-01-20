@@ -41,12 +41,13 @@ TEST_CASE("Joint system testing")
     CHECK(joint.GetPosition() == 0);
   }
 
-  SECTION("4.1  Mock MPU return 0 for X,Y, Z")
+  SECTION("4.1  Mock MPU return .001 for X,Y, Z")
   {
     auto data = joint.GetAccelerometerData();
-    CHECK_EQ(data.x, 0.0);
-    CHECK_EQ(data.y, 0.0);
-    CHECK_EQ(data.z, 0.0);
+    float mpu_correction = .001;
+    CHECK_EQ(data.x, mpu_correction);
+    CHECK_EQ(data.y, mpu_correction);
+    CHECK_EQ(data.z, mpu_correction);
   }
 
   SECTION("4.2  Mock MPU return 90 for X,Y, Z")

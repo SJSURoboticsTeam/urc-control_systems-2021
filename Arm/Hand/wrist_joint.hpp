@@ -63,14 +63,14 @@ class WristJoint
     roll_offset_angle_ = roll_offset;
   }
 
-  /// Return the acceleration values for the MPU6050 on the joint.
+  //return is only used for testing
   Acceleration GetAccelerometerData()
   {
     sjsu::Accelerometer::Acceleration_t acceleration_to_float(mpu_.Read());
-    acceleration.x = static_cast<float>(acceleration_to_float.x);
-    acceleration.y = static_cast<float>(acceleration_to_float.y);
-    acceleration.z = static_cast<float>(acceleration_to_float.z);
-    return acceleration;
+    acceleration_.x = ReturnChangedIfZero(static_cast<float>(acceleration_to_float.x));
+    acceleration_.y = ReturnChangedIfZero(static_cast<float>(acceleration_to_float.y));
+    acceleration_.z = ReturnChangedIfZero(static_cast<float>(acceleration_to_float.z));
+    return acceleration_;
   }
 
   int GetPitchPosition()
@@ -93,9 +93,18 @@ class WristJoint
     return int(roll_offset_angle_);
   }
 
-  Acceleration acceleration;
-
  private:
+
+  /// Checks if value is zero. If it's zero make it not zero
+  float ReturnChangedIfZero(float acceleration)
+  {
+    if (acceleration == 0)
+    {
+      acceleration = 0.001;
+    }
+    return acceleration;
+  }
+
 
   sjsu::RmdX & left_motor_;
   sjsu::RmdX & right_motor_;
@@ -112,5 +121,7 @@ class WristJoint
   const float kRollMinimumAngle  = 0;
   const float kRollMaximumAngle  = 180;
   const float kRollRestAngle     = 90;
+public:
+  Acceleration acceleration_;
 };
 }  // namespace sjsu::arm
