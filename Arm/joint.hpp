@@ -50,21 +50,15 @@ class Joint
   {
     offset_angle_ = offset;
   }
-
-  /// Return the acceleration values from the MPU6050
-  //TODO: use CheckAccelerationForZeroFunction here
+  //return is only used for testing
   Acceleration GetAccelerometerData()
   {
     sjsu::Accelerometer::Acceleration_t acceleration_to_float(mpu_.Read());
-    Acceleration acceleration;
-    acceleration.x = static_cast<float>(acceleration_to_float.x);
-    acceleration.y = static_cast<float>(acceleration_to_float.y);
-    acceleration.z = static_cast<float>(acceleration_to_float.z);
-
-    return acceleration;
+    acceleration_.x = ReturnChangedIfZero(static_cast<float>(acceleration_to_float.x));
+    acceleration_.y = ReturnChangedIfZero(static_cast<float>(acceleration_to_float.y));
+    acceleration_.z = ReturnChangedIfZero(static_cast<float>(acceleration_to_float.z));
+    return acceleration_;
   }
-
-  void CheckAccelerationsForZero(Acceleration & acceleration){};
 
   void SetJointSpeed(float target_speed)
   {
@@ -89,6 +83,16 @@ class Joint
   }
 
  private:
+ 
+  float ReturnChangedIfZero(float acceleration)
+  {
+    if (acceleration == 0)
+    {
+      acceleration = 0.001;
+    }
+    return acceleration;
+  }
+
   sjsu::RmdX & motor_;
   sjsu::Mpu6050 & mpu_;
 
@@ -101,5 +105,7 @@ class Joint
   const float kMaximumAngle = 180;
   const float kRestAngle    = 0;
   const float kMaxSpeed     = 100;
+public:
+  Acceleration acceleration_;
 };
 }  // namespace sjsu::arm

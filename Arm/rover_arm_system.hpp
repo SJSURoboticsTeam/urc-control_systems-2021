@@ -63,13 +63,6 @@ class RoverArmSystem : public sjsu::common::RoverSystem
     Finger finger;
   };
 
-  struct Acceleration
-  {
-    Joint::Acceleration rotunda;
-    Joint::Acceleration shoulder;
-    Joint::Acceleration elbow;
-  };
-
   RoverArmSystem(sjsu::arm::Joint & rotunda,
                  sjsu::arm::Joint & shoulder,
                  sjsu::arm::Joint & elbow,
@@ -165,7 +158,6 @@ class RoverArmSystem : public sjsu::common::RoverSystem
     }
   }
 
-  /// Checks that the rover is operational
   bool IsOperational()
   {
     if (mc_data_.is_operational != 1)
@@ -194,68 +186,100 @@ class RoverArmSystem : public sjsu::common::RoverSystem
     elbow_.SetPosition(angle);
   }
 
+  void MoveHand()
+  {
+    hand_.HandleHandMovement();
+  }
+
+  // TODO: implement different arm drive modes in this function with switch
+  // statements
   void HandleRoverMovement() override
   {
-    // TODO: implement different arm drive modes in this function with switch
-    // statements
     MoveRotunda(mc_data_.rotunda_angle);
     MoveShoulder(mc_data_.shoulder_angle);
     MoveElbow(mc_data_.elbow_angle);
-    hand_.HandleHandMovement();
+    MoveHand();
   }
 
   void HomeArm()
   {
-    UpdateRotundaAcceleration();
-    UpdateShoulderAcceleration();
+    UpdateAccelerations();
     HomeShoulder();
-    UpdateElbowAcceleration();
+    UpdateAccelerations();
     HomeElbow();
-    hand_.HomeWrist(float(rotunda_.GetOffsetAngle()));  // move all other homing
-                                                        // functions to private
+    UpdateAccelerations();
+    HomeHand();
+  }
+
+ private:
+ //TODO: change the joint class to have its own acceleration member variable to remove duplications in code like this
+  void UpdateAccelerations()
+  {
+    rotunda_.GetAccelerometerData();
+    shoulder_.GetAccelerometerData();
+    elbow_.GetAccelerometerData();
+    wrist_.GetAccelerometerData();
+  }
+
+  float CalculateShoulderHomeAngle()
+  {
+    float home_angle = 0;
+
+    float acceleration_x = rotunda_.acceleration_.x + shoulder_.acceleration_.x;
+    float acceleration_y = rotunda_.acceleration_.y + shoulder_.acceleration_.y;
+
+    home_angle = float(atan(acceleration_y / acceleration_x));
+    return home_angle;
+  }
+
+  float CalculateUncorrectedElbowHomeAngle()
+  {
+    float acceleration_x = rotunda_.acceleration_.x + elbow_.acceleration_.x;
+    float acceleration_y = rotunda_.acceleration_.y + elbow_.acceleration_.y;
+    float angle_without_correction =
+        float(atan(acceleration_y / acceleration_x));
+    return angle_without_correction;
+  }
+
+  bool InSecondQuadrantOfGraph()
+  {
+    if (elbow_.acceleration_.x + rotunda_.acceleration_.x >= 0 &&
+        elbow_.acceleration_.y + rotunda_.acceleration_.y <= 0)
+        {
+          return true;
+        }
+    return false;
+  }
+
+  bool InThirdQuandrantOfGraph()
+  {
+  if (elbow_.acceleration_.x + rotunda_.acceleration_.x >= 0 &&
+             elbow_.acceleration_.y + rotunda_.acceleration_.y >= 0)
+      {
+        return true;
+      }
+  return false;
   }
 
   void HomeShoulder()
   {
     float home_angle = 0;
-    // TODO: std might have solution for this e.g. std::clamp or std::max?
-    ChangeIfZero(accelerations_.rotunda.x);
-    ChangeIfZero(accelerations_.rotunda.y);
-    ChangeIfZero(accelerations_.shoulder.x);
-    ChangeIfZero(accelerations_.shoulder.y);
 
-    float acceleration_x = accelerations_.rotunda.x + accelerations_.shoulder.x;
-    float acceleration_y = accelerations_.rotunda.y + accelerations_.shoulder.y;
-
-    home_angle = float(atan(acceleration_y / acceleration_x));
+    home_angle = CalculateShoulderHomeAngle();
     shoulder_.SetZeroOffset(home_angle);
     MoveShoulder(home_angle);
   }
-  // TODO: clean up homing functions with more descriptive functions
+
   void HomeElbow()
   {
-    float home_angle = 0;
-    // TODO: std might have solution for this e.g. std::clamp or std::max?
-    ChangeIfZero(accelerations_.rotunda.x);
-    ChangeIfZero(accelerations_.rotunda.y);
-    ChangeIfZero(accelerations_.elbow.x);
-    ChangeIfZero(accelerations_.elbow.y);
+    float home_angle;
 
-    float acceleration_x = accelerations_.rotunda.x + accelerations_.elbow.x;
-    float acceleration_y = accelerations_.rotunda.y + accelerations_.elbow.y;
-    float angle_without_correction =
-        float(atan(acceleration_y / acceleration_x));
-
-    // TODO: Bool helper functions for checking which quadrant correction to use
-    if (accelerations_.elbow.x + accelerations_.rotunda.x >= 0 &&
-        accelerations_.elbow.y + accelerations_.rotunda.y <= 0)
+    float angle_without_correction = CalculateUncorrectedElbowHomeAngle();
+    if (InSecondQuadrantOfGraph())
     {
-      // if the elbow is in the second quadrant of a graph, add 90 to the angle
       home_angle = 90 - angle_without_correction;
     }
-    // if the elbow is in the third quadrant of a graph, add 180 to the angle
-    else if (accelerations_.elbow.x + accelerations_.rotunda.x >= 0 &&
-             accelerations_.elbow.y + accelerations_.rotunda.y >= 0)
+    else if (InThirdQuandrantOfGraph())
     {
       home_angle = 180 + angle_without_correction;
     }
@@ -267,31 +291,11 @@ class RoverArmSystem : public sjsu::common::RoverSystem
     MoveElbow(home_angle);
   }
 
- private:
-  // TODO: change into one function
-  void UpdateRotundaAcceleration()
+  void HomeHand()
   {
-    accelerations_.rotunda = rotunda_.GetAccelerometerData();
+    //finger homing here
+    hand_.HomeWrist(float(rotunda_.GetOffsetAngle()));
   }
-
-  void UpdateShoulderAcceleration()
-  {
-    accelerations_.shoulder = shoulder_.GetAccelerometerData();
-  }
-
-  void UpdateElbowAcceleration()
-  {
-    accelerations_.elbow = elbow_.GetAccelerometerData();
-  }
-
-  /// Checks if value is zero. If it's zero make it not zero
-  void ChangeIfZero(float & acceleration)
-  {
-    if (acceleration == 0)
-    {
-      acceleration = 0.0001;
-    }
-  }  // TODO: move this function to joint class, and the logic in the home
 
   int state_of_charge_                    = 90;
   MissionControlData::Modes current_mode_ = MissionControlData::Modes::kConcurrent;
@@ -299,7 +303,6 @@ class RoverArmSystem : public sjsu::common::RoverSystem
   const int kExpectedArguments = 13;
 
  public:
-  Acceleration accelerations_;
   MissionControlData mc_data_;
 
   sjsu::arm::Joint & rotunda_;
