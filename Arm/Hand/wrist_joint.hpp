@@ -96,7 +96,7 @@ class WristJoint
   /// Checks if value is zero. If it's zero make it not zero
   float ReturnChangedIfZero(float acceleration)
   {
-    return (acceleration == 0 ? .001);
+    return (acceleration == 0 ? .001 : acceleration);
   }
 
 
