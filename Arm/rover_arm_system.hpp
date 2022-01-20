@@ -1,6 +1,7 @@
 #pragma once
 #include "utility/math/units.hpp"
 #include "joint.hpp"
+#include "arm_joint.hpp"
 #include "Hand/wrist_joint.hpp"
 #include "Hand/hand.hpp"
 #include "../Common/rover_system.hpp"
@@ -63,9 +64,9 @@ class RoverArmSystem : public sjsu::common::RoverSystem
     Finger finger;
   };
 
-  RoverArmSystem(sjsu::arm::Joint & rotunda,
-                 sjsu::arm::Joint & shoulder,
-                 sjsu::arm::Joint & elbow,
+  RoverArmSystem(sjsu::arm::ArmJoint & rotunda,
+                 sjsu::arm::ArmJoint & shoulder,
+                 sjsu::arm::ArmJoint & elbow,
                  sjsu::arm::WristJoint & wrist,
                  sjsu::arm::Hand & hand)
       : rotunda_(rotunda),
@@ -306,9 +307,9 @@ class RoverArmSystem : public sjsu::common::RoverSystem
  public:
   MissionControlData mc_data_;
 
-  sjsu::arm::Joint & rotunda_;
-  sjsu::arm::Joint & shoulder_;
-  sjsu::arm::Joint & elbow_;
+  sjsu::arm::ArmJoint & rotunda_;
+  sjsu::arm::ArmJoint & shoulder_;
+  sjsu::arm::ArmJoint & elbow_;
   sjsu::arm::WristJoint & wrist_;
   sjsu::arm::Hand hand_;
 };

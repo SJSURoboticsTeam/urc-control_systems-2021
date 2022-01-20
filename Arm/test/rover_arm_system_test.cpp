@@ -34,23 +34,22 @@ TEST_CASE("Arm system testing")
 
   Fake(Method(mock_mpu, Mpu6050::ModuleInitialize));
 
-  When(Method(mock_mpu, Mpu6050::Read))
-      .AlwaysReturn(example_acceleration);
+  When(Method(mock_mpu, Mpu6050::Read)).AlwaysReturn(example_acceleration);
 
-  Mpu6050 & spyed_mpu  = mock_mpu.get();
+  Mpu6050 & spyed_mpu = mock_mpu.get();
 
-  arm::Joint shoulder(motor, spyed_mpu);
-  arm::Joint elbow(motor, spyed_mpu);
-  arm::WristJoint wrist(motor, motor,
-                              spyed_mpu);
-  arm::Joint rotunda(motor, spyed_mpu, 0, 3600,
-                           1800);
+  arm::ArmJoint shoulder(motor, spyed_mpu);
+  arm::ArmJoint elbow(motor, spyed_mpu);
+  arm::ArmJoint rotunda(motor, spyed_mpu, 0, 3600, 1800);
+
   arm::Finger pinky(mock_servo.get());
   arm::Finger ring(mock_servo.get());
   arm::Finger middle(mock_servo.get());
   arm::Finger pointer(mock_servo.get());
   arm::Finger thumb(mock_servo.get());
+  arm::WristJoint wrist(motor, motor, spyed_mpu);
   arm::Hand hand(wrist, pinky, ring, middle, pointer, thumb);
+
   arm::RoverArmSystem arm(rotunda, shoulder, elbow, wrist, hand);
 
   SECTION("should initialize and return default values")

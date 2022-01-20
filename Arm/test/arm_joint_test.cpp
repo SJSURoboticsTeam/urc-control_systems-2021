@@ -3,11 +3,12 @@
 #include "devices/sensors/movement/accelerometer/mpu6050.hpp"
 
 #include "rover_arm_system.hpp"
+#include "arm_joint.hpp"
 #include "joint.hpp"
 
 namespace sjsu
 {
-TEST_CASE("Joint system testing")
+TEST_CASE("ArmJoint system testing")
 {
   auto accel_value = units::acceleration::meters_per_second_squared_t(0);
   Accelerometer::Acceleration_t example_acceleration = { accel_value,
@@ -32,7 +33,7 @@ TEST_CASE("Joint system testing")
   When(Method(mock_mpu, Mpu6050::Read)).AlwaysReturn(example_acceleration);
   Mpu6050 & spyed_mpu = mock_mpu.get();
 
-  arm::Joint joint(motor, spyed_mpu);
+  arm::ArmJoint joint(motor, spyed_mpu);
 
   SECTION("1.1 - 3.1 should initialize and return default values")
   {
