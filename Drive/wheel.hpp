@@ -28,6 +28,18 @@ class Wheel
     homing_pin_.SetAsInput();
   };
 
+  Wheel& operator =(Wheel & w)
+  {
+      homing_offset_angle_ = w.homing_offset_angle_;
+      homing_pin_ = w.homing_pin_;
+      hub_motor_ = w.hub_motor_;
+      hub_speed_ = w.hub_speed_;
+      name_ = w.name_;
+      steer_angle_ = w.steer_angle_;
+      steer_motor_ = w.steer_motor_;
+      return *this;
+  }
+
   void Print()
   {
     printf("%-10s%-10d%-10d\n", name_.c_str(), GetHubSpeed(), GetSteerAngle());
