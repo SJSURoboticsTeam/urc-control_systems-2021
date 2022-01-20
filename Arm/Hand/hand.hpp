@@ -49,7 +49,7 @@ class Hand
   void HomePitch(float rotunda_offset)
   {
     float wrist_pitch_offset =
-        float(atan(wrist_.acceleration.y / wrist_.acceleration.z)) +
+        float(atan(wrist_.acceleration_.y / wrist_.acceleration_.z)) +
         rotunda_offset;
     wrist_.SetPitchPosition(wrist_pitch_offset);
     wrist_.SetZeroPitchOffsets(wrist_pitch_offset);

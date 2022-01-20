@@ -63,14 +63,6 @@ class RoverArmSystem : public sjsu::common::RoverSystem
     Finger finger;
   };
 
-  struct Acceleration
-  {
-    Joint::Acceleration rotunda;
-    Joint::Acceleration shoulder;
-    Joint::Acceleration elbow;
-    WristJoint::Acceleration wrist;
-  };
-
   RoverArmSystem(sjsu::arm::Joint & rotunda,
                  sjsu::arm::Joint & shoulder,
                  sjsu::arm::Joint & elbow,
@@ -216,23 +208,25 @@ class RoverArmSystem : public sjsu::common::RoverSystem
     UpdateAccelerations();
     HomeElbow();
     UpdateAccelerations();
-    hand_.HomeWrist(float(rotunda_.GetOffsetAngle()));
+    HomeHand();
   }
 
  private:
+ //TODO: change the joint class to have its own acceleration member variable to remove duplications in code like this
   void UpdateAccelerations()
   {
-    accelerations_.rotunda = ChangeJointAccelerationIfZero(rotunda.GetAccelerometerData());
-    accelerations_.shoulder = ChangeJointAccelerationIfZero(shoulder.GetAccelerometerData());
-    accelerations_.elbow = ChangeJointAccelerationIfZero(elbow.GetAccelerometerData());
-    accelerations_.wrist = ChangeWristJointAccelerationIfZero(wrist.GetAccelerometerData());
+    rotunda_.GetAccelerometerData();
+    shoulder_.GetAccelerometerData();
+    elbow_.GetAccelerometerData();
+    wrist_.GetAccelerometerData();
   }
+
   float CalculateShoulderHomeAngle()
   {
     float home_angle = 0;
 
-    float acceleration_x = accelerations_.rotunda.x + accelerations_.shoulder.x;
-    float acceleration_y = accelerations_.rotunda.y + accelerations_.shoulder.y;
+    float acceleration_x = rotunda_.acceleration_.x + shoulder_.acceleration_.x;
+    float acceleration_y = rotunda_.acceleration_.y + shoulder_.acceleration_.y;
 
     home_angle = float(atan(acceleration_y / acceleration_x));
     return home_angle;
@@ -240,8 +234,8 @@ class RoverArmSystem : public sjsu::common::RoverSystem
 
   float CalculateUncorrectedElbowHomeAngle()
   {
-    float acceleration_x = accelerations_.rotunda.x + accelerations_.elbow.x;
-    float acceleration_y = accelerations_.rotunda.y + accelerations_.elbow.y;
+    float acceleration_x = rotunda_.acceleration_.x + elbow_.acceleration_.x;
+    float acceleration_y = rotunda_.acceleration_.y + elbow_.acceleration_.y;
     float angle_without_correction =
         float(atan(acceleration_y / acceleration_x));
     return angle_without_correction;
@@ -249,8 +243,8 @@ class RoverArmSystem : public sjsu::common::RoverSystem
 
   bool InSecondQuadrantOfGraph()
   {
-    if (accelerations_.elbow.x + accelerations_.rotunda.x >= 0 &&
-        accelerations_.elbow.y + accelerations_.rotunda.y <= 0)
+    if (elbow_.acceleration_.x + rotunda_.acceleration_.x >= 0 &&
+        elbow_.acceleration_.y + rotunda_.acceleration_.y <= 0)
         {
           return true;
         }
@@ -258,12 +252,23 @@ class RoverArmSystem : public sjsu::common::RoverSystem
   }
 
   bool InThirdQuandrantOfGraph()
-  if (accelerations_.elbow.x + accelerations_.rotunda.x >= 0 &&
-             accelerations_.elbow.y + accelerations_.rotunda.y >= 0)
+  {
+  if (elbow_.acceleration_.x + rotunda_.acceleration_.x >= 0 &&
+             elbow_.acceleration_.y + rotunda_.acceleration_.y >= 0)
       {
         return true;
       }
   return false;
+  }
+
+  void HomeShoulder()
+  {
+    float home_angle = 0;
+
+    home_angle = CalculateShoulderHomeAngle();
+    shoulder_.SetZeroOffset(home_angle);
+    MoveShoulder(home_angle);
+  }
 
   void HomeElbow()
   {
@@ -286,13 +291,10 @@ class RoverArmSystem : public sjsu::common::RoverSystem
     MoveElbow(home_angle);
   }
 
-  void HomeShoulder()
+  void HomeHand()
   {
-    float home_angle = 0;
-
-    home_angle = CalculateShoulderHomeAngle();
-    shoulder_.SetZeroOffset(home_angle);
-    MoveShoulder(home_angle);
+    //finger homing here
+    hand_.HomeWrist(float(rotunda_.GetOffsetAngle()));
   }
 
   int state_of_charge_                    = 90;
@@ -301,7 +303,6 @@ class RoverArmSystem : public sjsu::common::RoverSystem
   const int kExpectedArguments = 13;
 
  public:
-  Acceleration accelerations_;
   MissionControlData mc_data_;
 
   sjsu::arm::Joint & rotunda_;
