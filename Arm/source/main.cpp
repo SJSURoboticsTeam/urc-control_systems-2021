@@ -51,10 +51,10 @@ int main()
   left_wrist_motor.settings.gear_ratio  = 8;
   right_wrist_motor.settings.gear_ratio = 8;
 
-  sjsu::arm::Joint rotunda(rotunda_motor, rotunda_mpu, 0, 3600,
+  sjsu::arm::ArmJoint rotunda(rotunda_motor, rotunda_mpu, 0, 3600,
                            1800);
-  sjsu::arm::Joint shoulder(shoulder_motor, shoulder_mpu);
-  sjsu::arm::Joint elbow(elbow_motor, elbow_mpu);
+  sjsu::arm::ArmJoint shoulder(shoulder_motor, shoulder_mpu);
+  sjsu::arm::ArmJoint elbow(elbow_motor, elbow_mpu);
   sjsu::arm::WristJoint wrist(left_wrist_motor, right_wrist_motor, wrist_mpu);
   sjsu::arm::Finger pinky(pinky_servo);
   sjsu::arm::Finger ring(ring_servo);

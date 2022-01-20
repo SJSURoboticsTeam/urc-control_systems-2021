@@ -1,6 +1,7 @@
 #pragma once
 #include "utility/math/units.hpp"
 #include "joint.hpp"
+#include "arm_joint.hpp"
 #include "Hand/wrist_joint.hpp"
 #include "Hand/hand.hpp"
 #include "../Common/rover_system.hpp"
@@ -63,9 +64,9 @@ class RoverArmSystem : public sjsu::common::RoverSystem
     Finger finger;
   };
 
-  RoverArmSystem(sjsu::arm::Joint & rotunda,
-                 sjsu::arm::Joint & shoulder,
-                 sjsu::arm::Joint & elbow,
+  RoverArmSystem(sjsu::arm::ArmJoint & rotunda,
+                 sjsu::arm::ArmJoint & shoulder,
+                 sjsu::arm::ArmJoint & elbow,
                  sjsu::arm::WristJoint & wrist,
                  sjsu::arm::Hand & hand)
       : rotunda_(rotunda),
@@ -241,7 +242,7 @@ class RoverArmSystem : public sjsu::common::RoverSystem
     return angle_without_correction;
   }
 
-  bool InSecondQuadrantOfGraph()
+  bool ShoulderIsInSecondQuadrantOfGraph()
   {
     if (elbow_.acceleration_.x + rotunda_.acceleration_.x >= 0 &&
         elbow_.acceleration_.y + rotunda_.acceleration_.y <= 0)
@@ -251,7 +252,7 @@ class RoverArmSystem : public sjsu::common::RoverSystem
     return false;
   }
 
-  bool InThirdQuandrantOfGraph()
+  bool ShoulderIsInThirdQuandrantOfGraph()
   {
   if (elbow_.acceleration_.x + rotunda_.acceleration_.x >= 0 &&
              elbow_.acceleration_.y + rotunda_.acceleration_.y >= 0)
@@ -275,11 +276,12 @@ class RoverArmSystem : public sjsu::common::RoverSystem
     float home_angle;
 
     float angle_without_correction = CalculateUncorrectedElbowHomeAngle();
-    if (InSecondQuadrantOfGraph())
+
+    if (ShoulderIsInSecondQuadrantOfGraph())
     {
       home_angle = 90 - angle_without_correction;
     }
-    else if (InThirdQuandrantOfGraph())
+    else if (ShoulderIsInThirdQuandrantOfGraph())
     {
       home_angle = 180 + angle_without_correction;
     }
@@ -305,9 +307,9 @@ class RoverArmSystem : public sjsu::common::RoverSystem
  public:
   MissionControlData mc_data_;
 
-  sjsu::arm::Joint & rotunda_;
-  sjsu::arm::Joint & shoulder_;
-  sjsu::arm::Joint & elbow_;
+  sjsu::arm::ArmJoint & rotunda_;
+  sjsu::arm::ArmJoint & shoulder_;
+  sjsu::arm::ArmJoint & elbow_;
   sjsu::arm::WristJoint & wrist_;
   sjsu::arm::Hand hand_;
 };
