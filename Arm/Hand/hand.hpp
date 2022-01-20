@@ -46,7 +46,6 @@ class Hand
     HomeRoll();
   };
 
-  // TODO: find a way to set the ZeroOffsets
   void HomePitch(float rotunda_offset)
   {
     float wrist_pitch_offset =

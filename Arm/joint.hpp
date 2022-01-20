@@ -64,7 +64,12 @@ class Joint
     return acceleration;
   }
 
-  void CheckAccelerationsForZero(Acceleration & acceleration){};
+  void ChangeJointAccelerationIfZero(Acceleration & acceleration)
+  {
+    ChangeIfZero(acceleration.x);
+    ChangeIfZero(acceleration.y);
+    ChangeIfZero(acceleration.z);
+  };
 
   void SetJointSpeed(float target_speed)
   {
@@ -89,6 +94,16 @@ class Joint
   }
 
  private:
+
+   /// Checks if value is zero. If it's zero make it not zero
+  void ChangeIfZero(float & acceleration)
+  {
+    if (acceleration == 0)
+    {
+      acceleration = 0.001;
+    }
+  }
+
   sjsu::RmdX & motor_;
   sjsu::Mpu6050 & mpu_;
 

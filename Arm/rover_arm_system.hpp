@@ -68,6 +68,7 @@ class RoverArmSystem : public sjsu::common::RoverSystem
     Joint::Acceleration rotunda;
     Joint::Acceleration shoulder;
     Joint::Acceleration elbow;
+    WristJoint::Acceleration wrist;
   };
 
   RoverArmSystem(sjsu::arm::Joint & rotunda,
@@ -165,7 +166,6 @@ class RoverArmSystem : public sjsu::common::RoverSystem
     }
   }
 
-  /// Checks that the rover is operational
   bool IsOperational()
   {
     if (mc_data_.is_operational != 1)
@@ -194,68 +194,87 @@ class RoverArmSystem : public sjsu::common::RoverSystem
     elbow_.SetPosition(angle);
   }
 
+  void MoveHand()
+  {
+    hand_.HandleHandMovement();
+  }
+
+  // TODO: implement different arm drive modes in this function with switch
+  // statements
   void HandleRoverMovement() override
   {
-    // TODO: implement different arm drive modes in this function with switch
-    // statements
     MoveRotunda(mc_data_.rotunda_angle);
     MoveShoulder(mc_data_.shoulder_angle);
     MoveElbow(mc_data_.elbow_angle);
-    hand_.HandleHandMovement();
+    MoveHand();
   }
 
   void HomeArm()
   {
-    UpdateRotundaAcceleration();
-    UpdateShoulderAcceleration();
+    UpdateAccelerations();
     HomeShoulder();
-    UpdateElbowAcceleration();
+    UpdateAccelerations();
     HomeElbow();
-    hand_.HomeWrist(float(rotunda_.GetOffsetAngle()));  // move all other homing
-                                                        // functions to private
+    UpdateAccelerations();
+    hand_.HomeWrist(float(rotunda_.GetOffsetAngle()));
   }
 
-  void HomeShoulder()
+ private:
+  void UpdateAccelerations()
+  {
+    accelerations_.rotunda = ChangeJointAccelerationIfZero(rotunda.GetAccelerometerData());
+    accelerations_.shoulder = ChangeJointAccelerationIfZero(shoulder.GetAccelerometerData());
+    accelerations_.elbow = ChangeJointAccelerationIfZero(elbow.GetAccelerometerData());
+    accelerations_.wrist = ChangeWristJointAccelerationIfZero(wrist.GetAccelerometerData());
+  }
+  float CalculateShoulderHomeAngle()
   {
     float home_angle = 0;
-    // TODO: std might have solution for this e.g. std::clamp or std::max?
-    ChangeIfZero(accelerations_.rotunda.x);
-    ChangeIfZero(accelerations_.rotunda.y);
-    ChangeIfZero(accelerations_.shoulder.x);
-    ChangeIfZero(accelerations_.shoulder.y);
 
     float acceleration_x = accelerations_.rotunda.x + accelerations_.shoulder.x;
     float acceleration_y = accelerations_.rotunda.y + accelerations_.shoulder.y;
 
     home_angle = float(atan(acceleration_y / acceleration_x));
-    shoulder_.SetZeroOffset(home_angle);
-    MoveShoulder(home_angle);
+    return home_angle;
   }
-  // TODO: clean up homing functions with more descriptive functions
-  void HomeElbow()
-  {
-    float home_angle = 0;
-    // TODO: std might have solution for this e.g. std::clamp or std::max?
-    ChangeIfZero(accelerations_.rotunda.x);
-    ChangeIfZero(accelerations_.rotunda.y);
-    ChangeIfZero(accelerations_.elbow.x);
-    ChangeIfZero(accelerations_.elbow.y);
 
+  float CalculateUncorrectedElbowHomeAngle()
+  {
     float acceleration_x = accelerations_.rotunda.x + accelerations_.elbow.x;
     float acceleration_y = accelerations_.rotunda.y + accelerations_.elbow.y;
     float angle_without_correction =
         float(atan(acceleration_y / acceleration_x));
+    return angle_without_correction;
+  }
 
-    // TODO: Bool helper functions for checking which quadrant correction to use
+  bool InSecondQuadrantOfGraph()
+  {
     if (accelerations_.elbow.x + accelerations_.rotunda.x >= 0 &&
         accelerations_.elbow.y + accelerations_.rotunda.y <= 0)
+        {
+          return true;
+        }
+    return false;
+  }
+
+  bool InThirdQuandrantOfGraph()
+  if (accelerations_.elbow.x + accelerations_.rotunda.x >= 0 &&
+             accelerations_.elbow.y + accelerations_.rotunda.y >= 0)
+      {
+        return true;
+      }
+  return false;
+
+  void HomeElbow()
+  {
+    float home_angle;
+
+    float angle_without_correction = CalculateUncorrectedElbowHomeAngle();
+    if (InSecondQuadrantOfGraph())
     {
-      // if the elbow is in the second quadrant of a graph, add 90 to the angle
       home_angle = 90 - angle_without_correction;
     }
-    // if the elbow is in the third quadrant of a graph, add 180 to the angle
-    else if (accelerations_.elbow.x + accelerations_.rotunda.x >= 0 &&
-             accelerations_.elbow.y + accelerations_.rotunda.y >= 0)
+    else if (InThirdQuandrantOfGraph())
     {
       home_angle = 180 + angle_without_correction;
     }
@@ -267,31 +286,14 @@ class RoverArmSystem : public sjsu::common::RoverSystem
     MoveElbow(home_angle);
   }
 
- private:
-  // TODO: change into one function
-  void UpdateRotundaAcceleration()
+  void HomeShoulder()
   {
-    accelerations_.rotunda = rotunda_.GetAccelerometerData();
-  }
+    float home_angle = 0;
 
-  void UpdateShoulderAcceleration()
-  {
-    accelerations_.shoulder = shoulder_.GetAccelerometerData();
+    home_angle = CalculateShoulderHomeAngle();
+    shoulder_.SetZeroOffset(home_angle);
+    MoveShoulder(home_angle);
   }
-
-  void UpdateElbowAcceleration()
-  {
-    accelerations_.elbow = elbow_.GetAccelerometerData();
-  }
-
-  /// Checks if value is zero. If it's zero make it not zero
-  void ChangeIfZero(float & acceleration)
-  {
-    if (acceleration == 0)
-    {
-      acceleration = 0.0001;
-    }
-  }  // TODO: move this function to joint class, and the logic in the home
 
   int state_of_charge_                    = 90;
   MissionControlData::Modes current_mode_ = MissionControlData::Modes::kConcurrent;

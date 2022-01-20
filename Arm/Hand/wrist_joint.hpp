@@ -72,6 +72,12 @@ class WristJoint
     acceleration.z = static_cast<float>(acceleration_to_float.z);
     return acceleration;
   }
+    void ChangeWristJointAccelerationIfZero(Acceleration & acceleration)
+  {
+    ChangeIfZero(acceleration.x);
+    ChangeIfZero(acceleration.y);
+    ChangeIfZero(acceleration.z);
+  };
 
   int GetPitchPosition()
   {
@@ -96,6 +102,16 @@ class WristJoint
   Acceleration acceleration;
 
  private:
+
+  /// Checks if value is zero. If it's zero make it not zero
+  void ChangeIfZero(float & acceleration)
+  {
+    if (acceleration == 0)
+    {
+      acceleration = 0.001;
+    }
+  }
+
 
   sjsu::RmdX & left_motor_;
   sjsu::RmdX & right_motor_;
