@@ -241,7 +241,7 @@ class RoverArmSystem : public sjsu::common::RoverSystem
     return angle_without_correction;
   }
 
-  bool InSecondQuadrantOfGraph()
+  bool ShoulderIsInSecondQuadrantOfGraph()
   {
     if (elbow_.acceleration_.x + rotunda_.acceleration_.x >= 0 &&
         elbow_.acceleration_.y + rotunda_.acceleration_.y <= 0)
@@ -251,7 +251,7 @@ class RoverArmSystem : public sjsu::common::RoverSystem
     return false;
   }
 
-  bool InThirdQuandrantOfGraph()
+  bool ShoulderIsInThirdQuandrantOfGraph()
   {
   if (elbow_.acceleration_.x + rotunda_.acceleration_.x >= 0 &&
              elbow_.acceleration_.y + rotunda_.acceleration_.y >= 0)
@@ -275,11 +275,12 @@ class RoverArmSystem : public sjsu::common::RoverSystem
     float home_angle;
 
     float angle_without_correction = CalculateUncorrectedElbowHomeAngle();
-    if (InSecondQuadrantOfGraph())
+
+    if (ShoulderIsInSecondQuadrantOfGraph())
     {
       home_angle = 90 - angle_without_correction;
     }
-    else if (InThirdQuandrantOfGraph())
+    else if (ShoulderIsInThirdQuandrantOfGraph())
     {
       home_angle = 180 + angle_without_correction;
     }

@@ -63,14 +63,12 @@ class WristJoint
     roll_offset_angle_ = roll_offset;
   }
 
-  //return is only used for testing
-  Acceleration GetAccelerometerData()
+  void GetAccelerometerData()
   {
     sjsu::Accelerometer::Acceleration_t acceleration_to_float(mpu_.Read());
     acceleration_.x = ReturnChangedIfZero(static_cast<float>(acceleration_to_float.x));
     acceleration_.y = ReturnChangedIfZero(static_cast<float>(acceleration_to_float.y));
     acceleration_.z = ReturnChangedIfZero(static_cast<float>(acceleration_to_float.z));
-    return acceleration_;
   }
 
   int GetPitchPosition()
@@ -98,11 +96,7 @@ class WristJoint
   /// Checks if value is zero. If it's zero make it not zero
   float ReturnChangedIfZero(float acceleration)
   {
-    if (acceleration == 0)
-    {
-      acceleration = 0.001;
-    }
-    return acceleration;
+    return (acceleration == 0 ? .001);
   }
 
 

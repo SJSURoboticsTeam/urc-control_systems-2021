@@ -51,13 +51,12 @@ class Joint
     offset_angle_ = offset;
   }
   //return is only used for testing
-  Acceleration GetAccelerometerData()
+  void GetAccelerometerData()
   {
     sjsu::Accelerometer::Acceleration_t acceleration_to_float(mpu_.Read());
     acceleration_.x = ReturnChangedIfZero(static_cast<float>(acceleration_to_float.x));
     acceleration_.y = ReturnChangedIfZero(static_cast<float>(acceleration_to_float.y));
     acceleration_.z = ReturnChangedIfZero(static_cast<float>(acceleration_to_float.z));
-    return acceleration_;
   }
 
   void SetJointSpeed(float target_speed)
