@@ -44,8 +44,6 @@ int main(void)
                                 
   sjsu::drive::RoverDriveSystem drive(left_wheel, right_wheel, back_wheel);
 
-  drive.switchLegOrientation(drive, back_wheel, right_wheel, left_wheel);
-
   esp.Initialize();
   drive.Initialize();
 
