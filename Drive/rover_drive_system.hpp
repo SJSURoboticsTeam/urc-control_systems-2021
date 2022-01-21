@@ -49,7 +49,7 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
     sjsu::LogInfo("Drive system initialized!");
   };
 
-  // example Call: drive = drive.switchLegOrientation(drive, back_wheel, right_wheel, back_wheel)
+  // example Call: drive.switchLegOrientation(drive, back_wheel, right_wheel, back_wheel)
   void switchLegOrientation(RoverDriveSystem &drive, Wheel &left, Wheel &right, Wheel &back)
   {
     drive.left_wheel_ = left;
@@ -426,7 +426,6 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
   Wheel & left_wheel_;
   Wheel & right_wheel_;
   Wheel & back_wheel_;
-  Wheel arrays[3] = {left_wheel_, right_wheel_, back_wheel_};
   // TODO: Implement this logic once SOC is tested
   // sjsu::common::StateOfCharge & battery_;
 };
