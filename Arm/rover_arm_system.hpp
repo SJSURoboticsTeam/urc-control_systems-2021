@@ -187,9 +187,9 @@ class RoverArmSystem : public sjsu::common::RoverSystem
     elbow_.SetPosition(angle);
   }
 
-  void MoveHand()
+  void MoveHand(float thumb, float pointer, float middle, float ring, float pinky)
   {
-    hand_.HandleHandMovement();
+    hand_.HandleHandMovement(thumb, pointer, middle, ring, pinky);
   }
 
   // TODO: implement different arm drive modes in this function with switch
@@ -199,7 +199,11 @@ class RoverArmSystem : public sjsu::common::RoverSystem
     MoveRotunda(mc_data_.rotunda_angle);
     MoveShoulder(mc_data_.shoulder_angle);
     MoveElbow(mc_data_.elbow_angle);
-    MoveHand();
+    MoveHand(mc_data_.finger.thumb_angle, 
+             mc_data_.finger.pointer_angle,
+             mc_data_.finger.middle_angle, 
+             mc_data_.finger.ring_angle, 
+             mc_data_.finger.pinky_angle);
   }
 
   void HomeArm()
