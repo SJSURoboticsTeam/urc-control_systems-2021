@@ -390,7 +390,7 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
   int state_of_charge_ = 90;
   char current_mode_   = 'S';
 
-  const int kExpectedArguments = 5;
+  const int kExpectedArguments = 6;
   const float kZeroSpeed       = 0;
   const float kMaxTurnRadius   = 45;
   const float kLerpStep        = 0.5;
