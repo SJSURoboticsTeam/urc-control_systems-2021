@@ -65,7 +65,7 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
         "?heartbeat_count=%d&is_operational=%d&wheel_shift=%d&drive_mode=%c&battery=%d"
         "&left_wheel_speed=%d&left_wheel_angle=%d&right_wheel_speed=%d&right_"
         "wheel_angle=%d&back_wheel_speed=%d&back_wheel_angle=%d",
-        GetHeartbeatCount(), mc_data_.is_operational, mc_data.wheel_shift, current_mode_,
+        GetHeartbeatCount(), mc_data_.is_operational, mc_data_.wheel_shift, current_mode_,
         state_of_charge_, left_wheel_.GetHubSpeed(),
         left_wheel_.GetSteerAngle(), right_wheel_.GetHubSpeed(),
         right_wheel_.GetSteerAngle(), back_wheel_.GetHubSpeed(),
@@ -227,6 +227,7 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
   {
     printf("HEARTBEAT:\t%d\n", mc_data_.heartbeat_count);
     printf("OPERATIONAL:\t%d\n", mc_data_.is_operational);
+    printf("WHEEL SHIFT:\t%d\n", mc_data_.wheel_shift);
     printf("DRIVE MODE:\t%d\n", current_mode_);
     printf("MC SPEED:\t%d\n", mc_data_.speed);
     printf("MC ANGLE:\t%d\n", mc_data_.rotation_angle);
