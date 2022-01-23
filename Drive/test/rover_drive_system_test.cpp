@@ -33,12 +33,9 @@ TEST_CASE("Drive system testing")
       .AlwaysDo([&interrupt](InterruptCallback callback, Gpio::Edge) -> void
                 { interrupt = callback; });
 
-  drive::Wheel left_wheel("left", motor, motor,
-                          mock_wheel_homing_pin.get());
-  drive::Wheel right_wheel("right", motor, motor,
-                           mock_wheel_homing_pin.get());
-  drive::Wheel back_wheel("back", motor, motor,
-                          mock_wheel_homing_pin.get());
+  drive::Wheel left_wheel("left", motor, motor, mock_wheel_homing_pin.get());
+  drive::Wheel right_wheel("right", motor, motor, mock_wheel_homing_pin.get());
+  drive::Wheel back_wheel("back", motor, motor, mock_wheel_homing_pin.get());
 
   drive::RoverDriveSystem drive(left_wheel, right_wheel, back_wheel);
 
@@ -79,6 +76,32 @@ TEST_CASE("Drive system testing")
     CHECK_EQ(drive.mc_data_.drive_mode, 'S');
     CHECK_EQ(drive.mc_data_.rotation_angle, 15);
     CHECK_EQ(drive.mc_data_.speed, 15);
+  }
+
+  SECTION("3.2 should throw exception when given less than expected args")
+  {
+    std::string example_response =
+        "\r\n\r\n{\n"
+        "  \"heartbeat_count\": 0,\n"
+        "  \"is_operational\": 1,\n"
+        "  \"drive_mode\": \"S\",\n"
+        "  \"speed\": 15,\n"
+        "}";
+    CHECK_THROWS(drive.ParseJSONResponse(example_response));
+  }
+
+  SECTION("3.3 should not throw exception when given more than expected args")
+  {
+    std::string example_response =
+        "\r\n\r\n{\n"
+        "  \"heartbeat_count\": 0,\n"
+        "  \"is_operational\": 1,\n"
+        "  \"drive_mode\": \"S\",\n"
+        "  \"speed\": 15,\n"
+        "  \"angle\": 15\n"
+        "  \"misc\": 15\n"
+        "}";
+    CHECK_NOTHROW(drive.ParseJSONResponse(example_response));
   }
 
   SECTION("4.1 should return false at start")
