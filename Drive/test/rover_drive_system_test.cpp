@@ -45,6 +45,7 @@ TEST_CASE("Drive system testing")
   {
     CHECK_EQ(drive.mc_data_.heartbeat_count, 0);
     CHECK_EQ(drive.mc_data_.is_operational, 0);
+    CHECK_EQ(drive.mc_data_.wheel_shift, 0);
     CHECK_EQ(drive.mc_data_.drive_mode, 'S');
     CHECK_EQ(drive.mc_data_.rotation_angle, 0);
     CHECK_EQ(drive.mc_data_.speed, 0);
@@ -53,7 +54,7 @@ TEST_CASE("Drive system testing")
   SECTION("2.1 should return the starting defaults response")
   {
     std::string expected_parameters =
-        "?heartbeat_count=0&is_operational=0&drive_mode=S&battery=90"
+        "?heartbeat_count=0&is_operational=0&wheel_shift=0&drive_mode=S&battery=90"
         "&left_wheel_speed=0&left_wheel_angle=0&right_wheel_speed=0&right_"
         "wheel_angle=0&back_wheel_speed=0&back_wheel_angle=0";
     std::string actual_parameters = drive.GETParameters();
@@ -66,6 +67,7 @@ TEST_CASE("Drive system testing")
         "\r\n\r\n{\n"
         "  \"heartbeat_count\": 0,\n"
         "  \"is_operational\": 1,\n"
+        "  \"wheel_shift\": 0,\n"
         "  \"drive_mode\": \"S\",\n"
         "  \"speed\": 15,\n"
         "  \"angle\": 15\n"
@@ -73,6 +75,7 @@ TEST_CASE("Drive system testing")
     drive.ParseJSONResponse(example_response);
     CHECK_EQ(drive.mc_data_.heartbeat_count, 0);
     CHECK_EQ(drive.mc_data_.is_operational, 1);
+    CHECK_EQ(drive.mc_data_.wheel_shift, 0);
     CHECK_EQ(drive.mc_data_.drive_mode, 'S');
     CHECK_EQ(drive.mc_data_.rotation_angle, 15);
     CHECK_EQ(drive.mc_data_.speed, 15);
