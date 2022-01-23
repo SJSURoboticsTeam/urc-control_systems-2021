@@ -8,7 +8,7 @@ class Hand
 {
   /// The hand has its own MCU that communicates with the arm via UART.
  public:
-  //Hand(Uart & uart) : uart_(uart) {}
+  // Hand(Uart & uart) : uart_(uart) {}
 
   struct accelerations
   {
@@ -22,8 +22,15 @@ class Hand
        sjsu::arm::Finger & ring,
        sjsu::arm::Finger & middle,
        sjsu::arm::Finger & pointer,
-       sjsu::arm::Finger & thumb
-      ) : wrist_(wrist), pinky_(pinky), ring_(ring), middle_(middle), pointer_(pointer), thumb_(thumb) {}
+       sjsu::arm::Finger & thumb)
+      : wrist_(wrist),
+        pinky_(pinky),
+        ring_(ring),
+        middle_(middle),
+        pointer_(pointer),
+        thumb_(thumb)
+  {
+  }
 
   void Initialize()
   {
@@ -91,8 +98,7 @@ class Hand
   // can't home yet
   void HomeRoll(){};
 
-  
-  private:
+ private:
   // Uart & uart_;
   sjsu::arm::WristJoint & wrist_;
   sjsu::arm::Finger & pinky_;
