@@ -238,7 +238,6 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
 
  private:
 
-  // S, D, T, L, R, B = Spin, Drive, Translate, Left, Right, Back.
   enum class Modes : char
     {
       DriveMode= 'D',
