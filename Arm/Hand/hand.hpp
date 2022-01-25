@@ -8,7 +8,7 @@ class Hand
 {
   /// The hand has its own MCU that communicates with the arm via UART.
  public:
-  //Hand(Uart & uart) : uart_(uart) {}
+  // Hand(Uart & uart) : uart_(uart) {}
 
   struct accelerations
   {
@@ -22,8 +22,15 @@ class Hand
        sjsu::arm::Finger & ring,
        sjsu::arm::Finger & middle,
        sjsu::arm::Finger & pointer,
-       sjsu::arm::Finger & thumb
-      ) : wrist_(wrist), pinky_(pinky), ring_(ring), middle_(middle), pointer_(pointer), thumb_(thumb) {}
+       sjsu::arm::Finger & thumb)
+      : wrist_(wrist),
+        pinky_(pinky),
+        ring_(ring),
+        middle_(middle),
+        pointer_(pointer),
+        thumb_(thumb)
+  {
+  }
 
   void Initialize()
   {
@@ -34,10 +41,43 @@ class Hand
     pointer_.Initialize();
     thumb_.Initialize();
   }
-  void HandleHandMovement()
+  void HandleHandMovement(float thumb_position,
+                          float pointer_position,
+                          float middle_position,
+                          float ring_position,
+                          float pinky_position)
   {
-    //TODO: should handle movement for hand
+    thumb_.SetPosition(thumb_position);
+    pointer_.SetPosition(pointer_position);
+    middle_.SetPosition(middle_position);
+    ring_.SetPosition(ring_position);
+    pinky_.SetPosition(pinky_position);
   }
+
+  int GetThumbPosition()
+  {
+    return thumb_.GetPosition();
+  };
+
+  int GetPointerPosition()
+  {
+    return pointer_.GetPosition();
+  };
+
+  int GetMiddlePosition()
+  {
+    return middle_.GetPosition();
+  };
+
+  int GetRingPosition()
+  {
+    return ring_.GetPosition();
+  };
+
+  int GetPinkyPosition()
+  {
+    return pinky_.GetPosition();
+  };
 
   void HomeWrist(float rotunda_offset)
   {
@@ -58,38 +98,14 @@ class Hand
   // can't home yet
   void HomeRoll(){};
 
-  int GetThumbPosition()
-  {
-    return 0;
-  };
-
-  int GetMiddlePosition()
-  {
-    return 0;
-  };
-
-  int GetPinkyPosition()
-  {
-    return 0;
-  };
-
-  int GetPointerPosition()
-  {
-    return 0;
-  };
-
-  int GetRingPosition()
-  {
-    return 0;
-  };
+ private:
+  // Uart & uart_;
   sjsu::arm::WristJoint & wrist_;
   sjsu::arm::Finger & pinky_;
   sjsu::arm::Finger & ring_;
   sjsu::arm::Finger & middle_;
   sjsu::arm::Finger & pointer_;
   sjsu::arm::Finger & thumb_;
-  private:
-  // Uart & uart_;
 };
 
 }  // namespace sjsu::arm

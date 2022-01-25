@@ -187,9 +187,13 @@ class RoverArmSystem : public sjsu::common::RoverSystem
     elbow_.SetPosition(angle);
   }
 
-  void MoveHand()
+  void MoveHand(float thumb,
+                float pointer,
+                float middle,
+                float ring,
+                float pinky)
   {
-    hand_.HandleHandMovement();
+    hand_.HandleHandMovement(thumb, pointer, middle, ring, pinky);
   }
 
   // TODO: implement different arm drive modes in this function with switch
@@ -199,7 +203,9 @@ class RoverArmSystem : public sjsu::common::RoverSystem
     MoveRotunda(mc_data_.rotunda_angle);
     MoveShoulder(mc_data_.shoulder_angle);
     MoveElbow(mc_data_.elbow_angle);
-    MoveHand();
+    MoveHand(mc_data_.finger.thumb_angle, mc_data_.finger.pointer_angle,
+             mc_data_.finger.middle_angle, mc_data_.finger.ring_angle,
+             mc_data_.finger.pinky_angle);
   }
 
   void HomeArm()
@@ -213,7 +219,8 @@ class RoverArmSystem : public sjsu::common::RoverSystem
   }
 
  private:
- //TODO: change the joint class to have its own acceleration member variable to remove duplications in code like this
+  // TODO: change the joint class to have its own acceleration member variable
+  // to remove duplications in code like this
   void UpdateAccelerations()
   {
     rotunda_.GetAccelerometerData();
@@ -246,20 +253,20 @@ class RoverArmSystem : public sjsu::common::RoverSystem
   {
     if (elbow_.acceleration_.x + rotunda_.acceleration_.x >= 0 &&
         elbow_.acceleration_.y + rotunda_.acceleration_.y <= 0)
-        {
-          return true;
-        }
+    {
+      return true;
+    }
     return false;
   }
 
   bool ShoulderIsInThirdQuandrantOfGraph()
   {
-  if (elbow_.acceleration_.x + rotunda_.acceleration_.x >= 0 &&
-             elbow_.acceleration_.y + rotunda_.acceleration_.y >= 0)
-      {
-        return true;
-      }
-  return false;
+    if (elbow_.acceleration_.x + rotunda_.acceleration_.x >= 0 &&
+        elbow_.acceleration_.y + rotunda_.acceleration_.y >= 0)
+    {
+      return true;
+    }
+    return false;
   }
 
   void HomeShoulder()
@@ -295,12 +302,13 @@ class RoverArmSystem : public sjsu::common::RoverSystem
 
   void HomeHand()
   {
-    //finger homing here
+    // finger homing here
     hand_.HomeWrist(float(rotunda_.GetOffsetAngle()));
   }
 
-  int state_of_charge_                    = 90;
-  MissionControlData::Modes current_mode_ = MissionControlData::Modes::kConcurrent;
+  int state_of_charge_ = 90;
+  MissionControlData::Modes current_mode_ =
+      MissionControlData::Modes::kConcurrent;
 
   const int kExpectedArguments = 13;
 
