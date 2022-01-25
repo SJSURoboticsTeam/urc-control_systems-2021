@@ -32,8 +32,8 @@ TEST_CASE("Finger Testing Case...")
 
   SECTION("Boundry testing the angles")
   {
-    max_angle_ = 180;
-    min_angle_ = 0;
+    int max_angle_ = 180;
+    int min_angle_ = 0;
     CHECK_EQ(finger.GetPosition(), 0);
     finger.SetPosition(-1);
     CHECK_EQ(finger.GetPosition(), 0);
