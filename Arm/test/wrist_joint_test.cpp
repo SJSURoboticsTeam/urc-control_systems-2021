@@ -4,6 +4,7 @@
 
 #include "rover_arm_system.hpp"
 #include "Hand/wrist_joint.hpp"
+#include "joint.hpp"
 
 namespace sjsu
 {

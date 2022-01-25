@@ -31,7 +31,7 @@ class Wheel
 
   void Print()
   {
-    printf("%-10s%-10d%-10d\n", name_.c_str(), GetHubSpeed(), GetSteerAngle());
+    printf("%-10s%-10d%-10d%-10f\n", name_.c_str(), GetHubSpeed(), GetSteerAngle(), GetSteerEncoderPosition());
   }
 
   std::string GetName()
@@ -68,6 +68,11 @@ class Wheel
     return homing_offset_angle_;
   }
 
+int GetSteerEncoderPosition()
+  {
+    return int(steer_motor_.RequestFeedbackFromMotor().GetFeedback().encoder_position);
+  }
+
   /// Checks if the steer wheel is aligned with slip ring
   bool IsHomed()
   {
@@ -93,8 +98,8 @@ class Wheel
 
   const bool kHomeLevel  = sjsu::Gpio::kHigh;
   const int kMaxRotation = 360;
-  const float kMaxSpeed = 100;
-  const float kZero     = 0;
+  const float kMaxSpeed  = 100;
+  const float kZero      = 0;
   const units::angular_velocity::revolutions_per_minute_t kSteerSpeed = 10_rpm;
 };
 }  // namespace sjsu::drive
