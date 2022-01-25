@@ -6,6 +6,7 @@
 #include "../Common/rover_system.hpp"
 #include "../Common/esp.hpp"
 #include "wheel.hpp"
+#include <array>
 
 namespace sjsu::drive
 {
@@ -33,16 +34,16 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
     int speed           = 0;
   };
   RoverDriveSystem(Wheel & left_wheel, Wheel & right_wheel, Wheel & back_wheel)
-      : left_wheel_(left_wheel),
-        right_wheel_(right_wheel),
-        back_wheel_(back_wheel){};
+      : left_wheel_(&left_wheel),
+        right_wheel_(&right_wheel),
+        back_wheel_(&back_wheel){};
 
   virtual void Initialize()
   {
     sjsu::LogInfo("Initializing drive system...");
-    left_wheel_.Initialize();
-    right_wheel_.Initialize();
-    back_wheel_.Initialize();
+    left_wheel_->Initialize();
+    right_wheel_->Initialize();
+    back_wheel_->Initialize();
     
 
     SetSpinMode();
@@ -50,13 +51,19 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
   };
 
   // example Call: drive.switchLegOrientation(drive, back_wheel, right_wheel, back_wheel)
-  void switchLegOrientation(RoverDriveSystem &drive, Wheel &left, Wheel &right, Wheel &back)
+  void switchLegOrientation(RoverDriveSystem &drive, int position)
   {
-    if(left_wheel_.GetHubSpeed() == 0 && right_wheel_.GetHubSpeed() == 0 && back_wheel_.GetHubSpeed() == 0)
+    /*
+    [0] = left right back
+    [1] = right back left
+    [2] = back left right
+    */
+
+    if(left_wheel_->GetHubSpeed() == 0 && right_wheel_->GetHubSpeed() == 0 && back_wheel_->GetHubSpeed() == 0)
     {
-        drive.left_wheel_ = left;
-        drive.right_wheel_ = right;
-        drive.back_wheel_ = back;
+        left_wheel_= wheels[(position + 0) % 3];
+        right_wheel_ = wheels[(position + 1) % 3];
+        back_wheel_ = wheels[(position + 2) % 3];
     }
     else
     {
@@ -76,10 +83,10 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
         "&left_wheel_speed=%d&left_wheel_angle=%d&right_wheel_speed=%d&right_"
         "wheel_angle=%d&back_wheel_speed=%d&back_wheel_angle=%d",
         heartbeat_count_, mc_data_.is_operational, current_mode_,
-        state_of_charge_, left_wheel_.GetHubSpeed(),
-        left_wheel_.GetSteerAngle(), right_wheel_.GetHubSpeed(),
-        right_wheel_.GetSteerAngle(), back_wheel_.GetHubSpeed(),
-        back_wheel_.GetSteerAngle());
+        state_of_charge_, left_wheel_->GetHubSpeed(),
+        left_wheel_->GetSteerAngle(), right_wheel_->GetHubSpeed(),
+        right_wheel_->GetSteerAngle(), back_wheel_->GetHubSpeed(),
+        back_wheel_->GetSteerAngle());
     return request_parameter;
   };
 
@@ -201,24 +208,24 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
   /// Checks if the rover wheels are all stopped
   bool IsStopped()
   {
-    return (left_wheel_.GetHubSpeed() == 0 && right_wheel_.GetHubSpeed() == 0 &&
-            back_wheel_.GetHubSpeed() == 0);
+    return (left_wheel_->GetHubSpeed() == 0 && right_wheel_->GetHubSpeed() == 0 &&
+            back_wheel_->GetHubSpeed() == 0);
   }
 
   /// Slowly lerps the wheels toward the target speed
   void SetWheelSpeed(float target_speed)
   {
-    float left_wheel_speed  = left_wheel_.GetHubSpeed();
-    float right_wheel_speed = right_wheel_.GetHubSpeed();
-    float back_wheel_speed  = back_wheel_.GetHubSpeed();
+    float left_wheel_speed  = left_wheel_->GetHubSpeed();
+    float right_wheel_speed = right_wheel_->GetHubSpeed();
+    float back_wheel_speed  = back_wheel_->GetHubSpeed();
 
     left_wheel_speed  = std::lerp(left_wheel_speed, target_speed, kLerpStep);
     right_wheel_speed = std::lerp(right_wheel_speed, target_speed, kLerpStep);
     back_wheel_speed  = std::lerp(back_wheel_speed, target_speed, kLerpStep);
 
-    left_wheel_.SetHubSpeed(left_wheel_speed);
-    right_wheel_.SetHubSpeed(right_wheel_speed);
-    back_wheel_.SetHubSpeed(back_wheel_speed);
+    left_wheel_->SetHubSpeed(left_wheel_speed);
+    right_wheel_->SetHubSpeed(right_wheel_speed);
+    back_wheel_->SetHubSpeed(back_wheel_speed);
   };
 
   /// Locks thread until all wheels are homed
@@ -233,17 +240,17 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
       {
         break;
       }
-      if (!left_wheel_.IsHomed())
+      if (!left_wheel_->IsHomed())
       {
-        left_wheel_.SetSteerAngle(0);
+        left_wheel_->SetSteerAngle(0);
       }
-      if (!right_wheel_.IsHomed())
+      if (!right_wheel_->IsHomed())
       {
-        right_wheel_.SetSteerAngle(0);
+        right_wheel_->SetSteerAngle(0);
       }
-      if (!back_wheel_.IsHomed())
+      if (!back_wheel_->IsHomed())
       {
-        back_wheel_.SetSteerAngle(0);
+        back_wheel_->SetSteerAngle(0);
       }
       sjsu::Delay(50ms);
     }
@@ -252,8 +259,8 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
 
   bool AllWheelsAreHomed()
   {
-    return (left_wheel_.IsHomed() && right_wheel_.IsHomed() &&
-            back_wheel_.IsHomed());
+    return (left_wheel_->IsHomed() && right_wheel_->IsHomed() &&
+            back_wheel_->IsHomed());
   }
 
   /// Prints the mc data and all the current wheel data
@@ -266,9 +273,9 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
     printf("MC ANGLE:\t%d\n", mc_data_.rotation_angle);
     printf("WHEEL     SPEED     ANGLE\n");
     printf("=========================\n");
-    left_wheel_.Print();
-    right_wheel_.Print();
-    back_wheel_.Print();
+    left_wheel_->Print();
+    right_wheel_->Print();
+    back_wheel_->Print();
     printf("=========================\n");
   };
 
@@ -300,9 +307,9 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
     const int left_wheel_angle  = -45;
     const int right_wheel_angle = -135;
     const int back_wheel_angle  = 90;
-    left_wheel_.SetSteerAngle(left_wheel_angle);
-    right_wheel_.SetSteerAngle(right_wheel_angle);
-    back_wheel_.SetSteerAngle(back_wheel_angle);
+    left_wheel_->SetSteerAngle(left_wheel_angle);
+    right_wheel_->SetSteerAngle(right_wheel_angle);
+    back_wheel_->SetSteerAngle(back_wheel_angle);
     current_mode_ = 'D';
   };
 
@@ -312,9 +319,9 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
     const float left_wheel_angle  = 90;
     const float right_wheel_angle = 90;
     const float back_wheel_angle  = 90;
-    left_wheel_.SetSteerAngle(left_wheel_angle);
-    right_wheel_.SetSteerAngle(right_wheel_angle);
-    back_wheel_.SetSteerAngle(back_wheel_angle);
+    left_wheel_->SetSteerAngle(left_wheel_angle);
+    right_wheel_->SetSteerAngle(right_wheel_angle);
+    back_wheel_->SetSteerAngle(back_wheel_angle);
     current_mode_ = 'S';
   };
 
@@ -325,9 +332,9 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
     const float left_wheel_angle  = 0;
     const float right_wheel_angle = 60;
     const float back_wheel_angle  = 110;
-    left_wheel_.SetSteerAngle(left_wheel_angle);
-    right_wheel_.SetSteerAngle(right_wheel_angle);
-    back_wheel_.SetSteerAngle(back_wheel_angle);
+    left_wheel_->SetSteerAngle(left_wheel_angle);
+    right_wheel_->SetSteerAngle(right_wheel_angle);
+    back_wheel_->SetSteerAngle(back_wheel_angle);
     current_mode_ = 'T';
   };
   
@@ -350,15 +357,15 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
 
     if (inner_wheel_angle > 0)
     {
-      right_wheel_.SetSteerAngle(inner_wheel_angle);
-      left_wheel_.SetSteerAngle(outter_wheel_angle);
-      back_wheel_.SetSteerAngle(back_wheel_angle);
+      right_wheel_->SetSteerAngle(inner_wheel_angle);
+      left_wheel_->SetSteerAngle(outter_wheel_angle);
+      back_wheel_->SetSteerAngle(back_wheel_angle);
     }
     else
     {
-      right_wheel_.SetSteerAngle(outter_wheel_angle);
-      left_wheel_.SetSteerAngle(inner_wheel_angle);
-      back_wheel_.SetSteerAngle(back_wheel_angle);
+      right_wheel_->SetSteerAngle(outter_wheel_angle);
+      left_wheel_->SetSteerAngle(inner_wheel_angle);
+      back_wheel_->SetSteerAngle(back_wheel_angle);
     }
     // TODO: Need logic for controling wheel speed for each wheel
     SetWheelSpeed(speed);
@@ -392,9 +399,9 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
   void HandleTranslationMode(float speed, float angle)
   {
     // TODO: Need to find correct angles
-    left_wheel_.SetSteerAngle(angle);
-    right_wheel_.SetSteerAngle(angle);
-    back_wheel_.SetSteerAngle(angle);
+    left_wheel_->SetSteerAngle(angle);
+    right_wheel_->SetSteerAngle(angle);
+    back_wheel_->SetSteerAngle(angle);
     SetWheelSpeed(speed);
   };
 
@@ -404,16 +411,16 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
     switch (current_mode_)
     {
       case 'L':
-        left_wheel_.SetSteerAngle(angle);
-        left_wheel_.SetHubSpeed(speed);
+        left_wheel_->SetSteerAngle(angle);
+        left_wheel_->SetHubSpeed(speed);
         break;
       case 'R':
-        right_wheel_.SetSteerAngle(angle);
-        right_wheel_.SetHubSpeed(speed);
+        right_wheel_->SetSteerAngle(angle);
+        right_wheel_->SetHubSpeed(speed);
         break;
       case 'B':
-        back_wheel_.SetSteerAngle(angle);
-        back_wheel_.SetHubSpeed(speed);
+        back_wheel_->SetSteerAngle(angle);
+        back_wheel_->SetHubSpeed(speed);
         break;
     }
   };
@@ -431,9 +438,10 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
 
  public:
   MissionControlData mc_data_;
-  Wheel & left_wheel_;
-  Wheel & right_wheel_;
-  Wheel & back_wheel_;
+  Wheel * left_wheel_;
+  Wheel * right_wheel_;
+  Wheel * back_wheel_;
+  std::array<Wheel*, 3> wheels{left_wheel_, right_wheel_, back_wheel_};
   // TODO: Implement this logic once SOC is tested
   // sjsu::common::StateOfCharge & battery_;
 };
