@@ -150,7 +150,6 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
         // throw DriveModeHandlerError{};
         break;
     }
-    switchLegOrientation(mc_data_.wheel_shift);
   }
 
   /// Checks if the rover is operational
