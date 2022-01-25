@@ -125,7 +125,7 @@ class Esp
   sjsu::WiFi & wifi_;
   sjsu::InternetSocket & socket_;
   std::string request_;
-  std::string url_                               = "192.168.50.243";
+  std::string url_                               = "192.168.113.50";
   std::string kErrorResponse                     = "ERROR";
   const uint16_t kPort                           = 5000;
   const char * kSsid                             = "kingdom2";
