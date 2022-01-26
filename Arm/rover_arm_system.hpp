@@ -44,7 +44,6 @@ class RoverArmSystem : public sjsu::common::RoverSystem
       kElbow      = 'E',
       kHand       = 'D'
     };
-    ArmModes ArmMode = ArmModes::kConcurrent;
     enum class HandModes : char
     {
       kPitch      = 'P',
@@ -53,6 +52,7 @@ class RoverArmSystem : public sjsu::common::RoverSystem
       kOpen       = 'O',
       kConcurrent = 'C'
     };
+    ArmModes ArmMode = ArmModes::kConcurrent;
     HandModes HandMode = HandModes::kConcurrent;
     int arm_speed      = 0;
     int rotunda_angle  = 0;
