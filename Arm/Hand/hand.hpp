@@ -6,10 +6,7 @@ namespace sjsu::arm
 {
 class Hand
 {
-  /// The hand has its own MCU that communicates with the arm via UART.
  public:
-  // Hand(Uart & uart) : uart_(uart) {}
-
   struct accelerations
   {
     float x;
@@ -41,16 +38,22 @@ class Hand
     pointer_.Initialize();
     thumb_.Initialize();
   }
-  void HandleHandMovement(float thumb_position,
+  void HandleHandMovement(float speed,
+                          float thumb_position,
                           float pointer_position,
                           float middle_position,
                           float ring_position,
                           float pinky_position)
   {
+    thumb_.SetSpeed(speed);
     thumb_.SetPosition(thumb_position);
+    pointer_.SetSpeed(speed);
     pointer_.SetPosition(pointer_position);
+    middle_.SetSpeed(speed);
     middle_.SetPosition(middle_position);
+    ring_.SetSpeed(speed);
     ring_.SetPosition(ring_position);
+    pinky_.SetSpeed(speed);
     pinky_.SetPosition(pinky_position);
   }
 
@@ -93,6 +96,20 @@ class Hand
         rotunda_offset;
     wrist_.SetPitchPosition(wrist_pitch_offset);
     wrist_.SetZeroPitchOffsets(wrist_pitch_offset);
+  }
+
+  void CloseHand(float speed)
+  {
+    HandleHandMovement(speed, thumb_.GetMaxAngle(), pointer_.GetMaxAngle(),
+                       middle_.GetMaxAngle(), ring_.GetMaxAngle(),
+                       pinky_.GetMaxAngle());
+  }
+
+  void OpenHand(float speed)
+  {
+    HandleHandMovement(speed, thumb_.GetMinAngle(), pointer_.GetMinAngle(),
+                       middle_.GetMinAngle(), ring_.GetMinAngle(),
+                       pinky_.GetMinAngle());
   }
 
   // can't home yet
