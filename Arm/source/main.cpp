@@ -85,7 +85,6 @@ int main()
       arm.HandleRoverMovement();
       arm.IncrementHeartbeatCount();
       arm.PrintRoverData();
-      sjsu::Delay(3s);
       if (serverTimeout.HasExpired())
       {
         sjsu::LogWarning("Server timed out! Reconnecting...");

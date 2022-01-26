@@ -4,6 +4,7 @@
 #include "arm_joint.hpp"
 #include "Hand/wrist_joint.hpp"
 #include "Hand/hand.hpp"
+#include "../Common/heartbeat.hpp"
 #include "../Common/rover_system.hpp"
 #include <cmath>
 
@@ -13,6 +14,8 @@ const char response_body_format[] =
     "\r\n\r\n{\n"
     "  \"heartbeat_count\": %d,\n"
     "  \"is_operational\": %d,\n"
+    "  \"arm_mode\": \"%c\",\n"
+    "  \"hand_mode\": \"%c\",\n"
     "  \"arm_speed\": %d,\n"
     "  \"rotunda_angle\": %d,\n"
     "  \"shoulder_angle\": %d,\n"
@@ -310,7 +313,7 @@ class RoverArmSystem : public sjsu::common::RoverSystem
   MissionControlData::Modes current_mode_ =
       MissionControlData::Modes::kConcurrent;
 
-  const int kExpectedArguments = 13;
+  const int kExpectedArguments = 15;
 
  public:
   MissionControlData mc_data_;
