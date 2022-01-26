@@ -59,24 +59,19 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
   }
 
   // example Call: drive.switchLegOrientation(drive, back_wheel, right_wheel, back_wheel)
-  void switchLegOrientation(int position)
+  void SwitchLegOrientation(int position)
   {
     /*
     [0] = left right back
-    [1] = right back left
-    [2] = back left right
+    [1] = back left right
+    [2] = right back left
     */
-    if(left_wheel_->GetHubSpeed() == 0 && right_wheel_->GetHubSpeed() == 0 && back_wheel_->GetHubSpeed() == 0)
+    if(IsStopped())
     {
         left_wheel_= wheels[(position + 0) % 3];
         right_wheel_ = wheels[(position + 1) % 3];
         back_wheel_ = wheels[(position + 2) % 3];
     }
-    else
-    {
-      sjsu::LogError("Cannot change leg orientation while wheels are moving!");
-    }
-    
   };
 
   /// Constructs parameters for an HTTP GET request
