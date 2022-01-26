@@ -32,22 +32,32 @@ class Finger
     position_ = std::clamp(angle, min_angle_, max_angle_);
     units::angle::degree_t angle_to_degrees(position_);
     servo_.SetAngle(angle_to_degrees);
-  };
+  }
 
   void SetSpeed(float target_speed)
   {
     speed_ = target_speed;
-  };
+  }
 
   int GetPosition()
   {
     return int(position_);
-  };
+  }
 
   int GetSpeed()
   {
     return int(speed_);
-  };
+  }
+
+  int GetMaxAngle()
+  {
+    return max_angle_;
+  }
+
+  int GetMinAngle()
+  {
+    return min_angle_;
+  }
 
  private:
   sjsu::Servo & servo_;
