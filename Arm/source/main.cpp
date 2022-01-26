@@ -19,10 +19,16 @@ int main()
   sjsu::CanNetwork can_network(can, &memory_resource);
 
   // Need to use an address translator
-  sjsu::Mpu6050 rotunda_mpu(i2c, 0x66);
-  sjsu::Mpu6050 shoulder_mpu(i2c, 0x67);
-  sjsu::Mpu6050 elbow_mpu(i2c, 0x68);
-  sjsu::Mpu6050 wrist_mpu(i2c, 0x69);
+  // sjsu::Mpu6050 rotunda_mpu(i2c, 0x66);
+  // sjsu::Mpu6050 shoulder_mpu(i2c, 0x67);
+  // sjsu::Mpu6050 elbow_mpu(i2c, 0x68);
+  // sjsu::Mpu6050 wrist_mpu(i2c, 0x69);
+
+//Testing Purposes
+  sjsu::Mpu6050 rotunda_mpu(i2c);
+  sjsu::Mpu6050 shoulder_mpu(i2c);
+  sjsu::Mpu6050 elbow_mpu(i2c);
+  sjsu::Mpu6050 wrist_mpu(i2c);
 
   // RMD addresses 0x141 - 0x148 are available
   sjsu::RmdX rotunda_motor(can_network, 0x141);

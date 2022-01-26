@@ -55,7 +55,7 @@ class RoverArmSystem : public sjsu::common::RoverSystem
       kOpen       = 'O',
       kConcurrent = 'C'
     };
-    ArmModes ArmMode = ArmModes::kConcurrent;
+    ArmModes ArmMode   = ArmModes::kConcurrent;
     HandModes HandMode = HandModes::kConcurrent;
     int arm_speed      = 0;
     int rotunda_angle  = 0;
@@ -107,6 +107,7 @@ class RoverArmSystem : public sjsu::common::RoverSystem
     printf("Wrist Pitch Angle: %d\n", mc_data_.wrist_pitch);
 
     printf("Hand Finger Angles: \n");
+    printf("Hand Mode: %c\n", mc_data_.HandMode);
     printf("Pinky Angle: %d\n", mc_data_.finger.pinky_angle);
     printf("Ring Angle: %d\n", mc_data_.finger.ring_angle);
     printf("Middle Angle: %d\n", mc_data_.finger.middle_angle);
@@ -138,17 +139,18 @@ class RoverArmSystem : public sjsu::common::RoverSystem
   {
     char request_parameter[300];
     snprintf(request_parameter, 300,
-             "?heartbeat_count=%d&is_operational=%d&arm_speed=%d&battery=%d&"
+             "?heartbeat_count=%d&is_operational=%d&arm_mode=%c&hand_mode=%c&"
+             "arm_speed=%d&battery=%d&"
              "rotunda_angle=%d&shoulder_angle=%d&elbow_angle=%d&wrist_roll=%d&"
              "wrist_pitch=%d&pinky_angle=%d&ring_angle=%d&middle_angle=%d&"
              "pointer_angle=%d&thumb_angle=%d",
              GetHeartbeatCount(), mc_data_.is_operational,
-             int(mc_data_.arm_speed), state_of_charge_, rotunda_.GetPosition(),
-             shoulder_.GetPosition(), elbow_.GetPosition(),
-             wrist_.GetRollPosition(), wrist_.GetPitchPosition(),
-             hand_.GetPinkyPosition(), hand_.GetRingPosition(),
-             hand_.GetMiddlePosition(), hand_.GetPointerPosition(),
-             hand_.GetThumbPosition());
+             int(mc_data_.arm_speed), mc_data_.ArmMode, mc_data_.HandMode,
+             state_of_charge_, rotunda_.GetPosition(), shoulder_.GetPosition(),
+             elbow_.GetPosition(), wrist_.GetRollPosition(),
+             wrist_.GetPitchPosition(), hand_.GetPinkyPosition(),
+             hand_.GetRingPosition(), hand_.GetMiddlePosition(),
+             hand_.GetPointerPosition(), hand_.GetThumbPosition());
     return request_parameter;
   }
 
@@ -156,11 +158,12 @@ class RoverArmSystem : public sjsu::common::RoverSystem
   {
     int actual_arguments = sscanf(
         response.c_str(), response_body_format, &mc_data_.heartbeat_count,
-        &mc_data_.is_operational, &mc_data_.arm_speed, &mc_data_.rotunda_angle,
-        &mc_data_.shoulder_angle, &mc_data_.elbow_angle, &mc_data_.wrist_roll,
-        &mc_data_.wrist_pitch, &mc_data_.finger.pinky_angle,
-        &mc_data_.finger.ring_angle, &mc_data_.finger.middle_angle,
-        &mc_data_.finger.pointer_angle, &mc_data_.finger.thumb_angle);
+        &mc_data_.is_operational, &mc_data_.ArmMode, &mc_data_.HandMode,
+        &mc_data_.arm_speed, &mc_data_.rotunda_angle, &mc_data_.shoulder_angle,
+        &mc_data_.elbow_angle, &mc_data_.wrist_roll, &mc_data_.wrist_pitch,
+        &mc_data_.finger.pinky_angle, &mc_data_.finger.ring_angle,
+        &mc_data_.finger.middle_angle, &mc_data_.finger.pointer_angle,
+        &mc_data_.finger.thumb_angle);
 
     if (actual_arguments != kExpectedArguments)
     {
