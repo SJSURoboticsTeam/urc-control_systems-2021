@@ -97,6 +97,13 @@ class RoverArmSystem : public sjsu::common::RoverSystem
 
   void PrintRoverData() override
   {
+
+    printf("SERVER-DATA");
+    printf("=========================================\n");
+    printf("Operational: %d\n", mc_data_.heartbeat_count);
+    printf("Operational: %d\n", mc_data_.is_operational);
+    printf("=========================================\n");
+
     printf("ARM-DATA\n");
     printf("=========================================\n");
     printf("Mode: %c\n", mc_data_.ArmMode);
@@ -109,7 +116,7 @@ class RoverArmSystem : public sjsu::common::RoverSystem
     printf("=========================================\n");
 
 
-    printf("Hand Finger Angles: \n");
+    printf("HAND-FINGER-ANGLES \n");
     printf("=========================================\n");
     printf("Hand Mode: %c\n", mc_data_.HandMode);
     printf("Pinky Angle: %d\n", mc_data_.finger.pinky_angle);
@@ -120,7 +127,7 @@ class RoverArmSystem : public sjsu::common::RoverSystem
     printf("=========================================\n");
 
 
-    printf("Hand Finger Positions:\n");
+    printf("HAND-FINGER-POSITIONS:\n");
     printf("=========================================\n");
     printf("Pinky Angle: %d\n", hand_.GetPinkyPosition());
     printf("Ring Angle: %d\n", hand_.GetRingPosition());
@@ -129,7 +136,7 @@ class RoverArmSystem : public sjsu::common::RoverSystem
     printf("Thumb Angle: %d\n", hand_.GetThumbPosition());
     printf("=========================================\n");
 
-    printf("Joints Data:\n");
+    printf("JOINTS-DATA:\n");
     printf("=========================================\n");
     printf("Rotunda speed: %d\n", rotunda_.GetSpeed());
     printf("Rotunda position: %d\n", rotunda_.GetPosition());
