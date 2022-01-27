@@ -145,12 +145,13 @@ class RoverArmSystem : public sjsu::common::RoverSystem
              "wrist_pitch=%d&pinky_angle=%d&ring_angle=%d&middle_angle=%d&"
              "pointer_angle=%d&thumb_angle=%d",
              GetHeartbeatCount(), mc_data_.is_operational,
-             int(mc_data_.arm_speed), mc_data_.ArmMode, mc_data_.HandMode,
-             state_of_charge_, rotunda_.GetPosition(), shoulder_.GetPosition(),
-             elbow_.GetPosition(), wrist_.GetRollPosition(),
-             wrist_.GetPitchPosition(), hand_.GetPinkyPosition(),
-             hand_.GetRingPosition(), hand_.GetMiddlePosition(),
-             hand_.GetPointerPosition(), hand_.GetThumbPosition());
+             char(mc_data_.ArmMode), char(mc_data_.HandMode),
+             int(mc_data_.arm_speed), state_of_charge_, rotunda_.GetPosition(),
+             shoulder_.GetPosition(), elbow_.GetPosition(),
+             wrist_.GetRollPosition(), wrist_.GetPitchPosition(),
+             hand_.GetPinkyPosition(), hand_.GetRingPosition(),
+             hand_.GetMiddlePosition(), hand_.GetPointerPosition(),
+             hand_.GetThumbPosition());
     return request_parameter;
   }
 
