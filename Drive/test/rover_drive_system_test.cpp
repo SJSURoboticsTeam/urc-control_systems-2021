@@ -522,9 +522,13 @@ TEST_CASE("Drive system testing")
 
   SECTION("13.1 left wheel should become right wheel")
   {
-    drive::Wheel left = left_wheel;
+    drive::Wheel *left = &left_wheel;
+    drive::Wheel *right = &right_wheel;
+    drive::Wheel *back = &back_wheel;
     drive.SwitchLegOrientation(2);
-    CHECK_EQ(left, right_wheel);
+    CHECK_EQ(left, &right_wheel);
+    CHECK_EQ(right, &back_wheel);
+    CHECK_EQ(back, &left_wheel);
   }
 }
 }  // namespace sjsu
