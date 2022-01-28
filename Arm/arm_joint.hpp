@@ -30,7 +30,7 @@ class ArmJoint : public Joint
     mpu_.Initialize();
   }
 
-  /// Move the motor to the (calibrated) angle desired.
+  // Move the motor to the (calibrated) angle desired.
   void SetPosition(float angle)
   {
     angle += offset_angle_;
@@ -39,23 +39,12 @@ class ArmJoint : public Joint
     motor_.SetAngle(angle_to_degrees);
   }
 
-  /// Sets the offset angle so motor can find its true zero
+  // Sets the offset angle so motor can find its true zero
   void SetZeroOffset(float offset)
   {
     offset_angle_ = offset;
   }
-  // return is only used for testing
-  void GetAccelerometerData()
-  {
-    sjsu::Accelerometer::Acceleration_t acceleration_to_float(mpu_.Read());
-    acceleration_.x =
-        ReturnChangedIfZero(static_cast<float>(acceleration_to_float.x));
-    acceleration_.y =
-        ReturnChangedIfZero(static_cast<float>(acceleration_to_float.y));
-    acceleration_.z =
-        ReturnChangedIfZero(static_cast<float>(acceleration_to_float.z));
-  }
-
+  // Sets the speed of the motor
   void SetJointSpeed(float target_speed)
   {
     speed_ = std::clamp(target_speed, -kMaxSpeed, kMaxSpeed);
