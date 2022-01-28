@@ -35,8 +35,8 @@ class WristJoint : public Joint
     right_motor_.SetAngle(angle_to_degrees);
   }
 
-  /// Sets the zero_offset_angle value that the motors use to know its true '0'
-  /// position. Called by RoverArmSystem::Home
+  // Sets the zero_offset_angle value for pitch that the motors use to know its
+  // true '0' position. Called by RoverArmSystem::Home
   void SetZeroPitchOffsets(float pitch_offset)
   {
     pitch_offset_angle_ = pitch_offset;
@@ -52,6 +52,8 @@ class WristJoint : public Joint
     right_motor_.SetAngle(angle_to_degrees);
   }
 
+  // Sets the zero_offset_angle value for roll that the motors use to know its
+  // true '0' position. Called by RoverArmSystem::Home
   void SetZeroRollOffsets(float roll_offset)
   {
     roll_offset_angle_ = roll_offset;
@@ -64,18 +66,6 @@ class WristJoint : public Joint
     units::angular_velocity::revolutions_per_minute_t speed_to_rpm(speed_);
     left_motor_.SetSpeed(speed_to_rpm);
     right_motor_.SetSpeed(speed_to_rpm);
-  }
-
-  // Gets Accelerometer data from the wrist mpu
-  void GetAccelerometerData()
-  {
-    sjsu::Accelerometer::Acceleration_t acceleration_to_float(mpu_.Read());
-    acceleration_.x =
-        ReturnChangedIfZero(static_cast<float>(acceleration_to_float.x));
-    acceleration_.y =
-        ReturnChangedIfZero(static_cast<float>(acceleration_to_float.y));
-    acceleration_.z =
-        ReturnChangedIfZero(static_cast<float>(acceleration_to_float.z));
   }
 
   int GetPitchPosition()
