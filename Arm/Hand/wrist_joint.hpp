@@ -35,8 +35,8 @@ class WristJoint : public Joint
     right_motor_.SetAngle(angle_to_degrees);
   }
 
-  /// Sets the zero_offset_angle value that the motors use to know its true '0'
-  /// position. Called by RoverArmSystem::Home
+  // Sets the zero_offset_angle value for pitch that the motors use to know its
+  // true '0' position. Called by RoverArmSystem::Home
   void SetZeroPitchOffsets(float pitch_offset)
   {
     pitch_offset_angle_ = pitch_offset;
@@ -52,9 +52,20 @@ class WristJoint : public Joint
     right_motor_.SetAngle(angle_to_degrees);
   }
 
+  // Sets the zero_offset_angle value for roll that the motors use to know its
+  // true '0' position. Called by RoverArmSystem::Home
   void SetZeroRollOffsets(float roll_offset)
   {
     roll_offset_angle_ = roll_offset;
+  }
+
+  // Sets speed of the wrist joints
+  void SetSpeed(float target_speed)
+  {
+    speed_ = std::clamp(target_speed, -kMaxSpeed, kMaxSpeed);
+    units::angular_velocity::revolutions_per_minute_t speed_to_rpm(speed_);
+    left_motor_.SetSpeed(speed_to_rpm);
+    right_motor_.SetSpeed(speed_to_rpm);
   }
 
   int GetPitchPosition()
@@ -77,6 +88,11 @@ class WristJoint : public Joint
     return int(roll_offset_angle_);
   }
 
+  int GetSpeed()
+  {
+    return int(speed_);
+  }
+
  private:
   sjsu::RmdX & left_motor_;
   sjsu::RmdX & right_motor_;
@@ -85,6 +101,7 @@ class WristJoint : public Joint
   float roll_angle_         = 0;
   float pitch_offset_angle_ = 0;
   float roll_offset_angle_  = 0;
+  float speed_              = 0;
 
   const float kPitchMinimumAngle = 0;
   const float kPitchMaximumAngle = 180;
@@ -92,5 +109,6 @@ class WristJoint : public Joint
   const float kRollMinimumAngle  = 0;
   const float kRollMaximumAngle  = 180;
   const float kRollRestAngle     = 90;
+  const float kMaxSpeed          = 100;
 };
 }  // namespace sjsu::arm
