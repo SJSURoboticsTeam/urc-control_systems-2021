@@ -97,7 +97,15 @@ class RoverArmSystem : public sjsu::common::RoverSystem
 
   void PrintRoverData() override
   {
-    printf("Arm data: \n");
+
+    printf("SERVER-DATA");
+    printf("=========================================\n");
+    printf("Operational: %d\n", mc_data_.heartbeat_count);
+    printf("Operational: %d\n", mc_data_.is_operational);
+    printf("=========================================\n");
+
+    printf("ARM-DATA\n");
+    printf("=========================================\n");
     printf("Mode: %c\n", mc_data_.ArmMode);
     printf("Arm speed: %d\n", mc_data_.arm_speed);
     printf("Rotunda Angle: %d\n", mc_data_.rotunda_angle);
@@ -105,23 +113,31 @@ class RoverArmSystem : public sjsu::common::RoverSystem
     printf("Elbow Angle: %d\n", mc_data_.elbow_angle);
     printf("Wrist Roll Angle: %d\n", mc_data_.wrist_roll);
     printf("Wrist Pitch Angle: %d\n", mc_data_.wrist_pitch);
+    printf("=========================================\n");
 
-    printf("Hand Finger Angles: \n");
+
+    printf("HAND-FINGER-ANGLES \n");
+    printf("=========================================\n");
     printf("Hand Mode: %c\n", mc_data_.HandMode);
     printf("Pinky Angle: %d\n", mc_data_.finger.pinky_angle);
     printf("Ring Angle: %d\n", mc_data_.finger.ring_angle);
     printf("Middle Angle: %d\n", mc_data_.finger.middle_angle);
     printf("Pointer Angle: %d\n", mc_data_.finger.pointer_angle);
     printf("Thumb Angle: %d\n", mc_data_.finger.thumb_angle);
+    printf("=========================================\n");
 
-    printf("Hand Finger Positions:\n");
+
+    printf("HAND-FINGER-POSITIONS:\n");
+    printf("=========================================\n");
     printf("Pinky Angle: %d\n", hand_.GetPinkyPosition());
     printf("Ring Angle: %d\n", hand_.GetRingPosition());
     printf("Middle Angle: %d\n", hand_.GetMiddlePosition());
     printf("Pointer Angle: %d\n", hand_.GetPointerPosition());
     printf("Thumb Angle: %d\n", hand_.GetThumbPosition());
+    printf("=========================================\n");
 
-    printf("Joints Data:\n");
+    printf("JOINTS-DATA:\n");
+    printf("=========================================\n");
     printf("Rotunda speed: %d\n", rotunda_.GetSpeed());
     printf("Rotunda position: %d\n", rotunda_.GetPosition());
 
@@ -133,6 +149,7 @@ class RoverArmSystem : public sjsu::common::RoverSystem
 
     printf("Wrist pitch position: %d\n", wrist_.GetPitchPosition());
     printf("Wrist roll position: %d\n", wrist_.GetRollPosition());
+    printf("=========================================\n");
   }
 
   std::string GETParameters() override
