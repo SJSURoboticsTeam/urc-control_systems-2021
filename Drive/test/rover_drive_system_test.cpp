@@ -20,12 +20,7 @@ TEST_CASE("Drive system testing")
   StaticMemoryResource<1024> memory_resource;
   CanNetwork network(mock_can.get(), &memory_resource);
 
-  RmdX left_steer_motor(network, 0x141);
-  RmdX left_hub_motor(network, 0x142);
-  RmdX right_steer_motor(network, 0x143);
-  RmdX right_hub_motor(network, 0x144);
-  RmdX back_steer_motor(network, 0x145);
-  RmdX back_hub_motor(network, 0x146);
+  RmdX motor(network, 0x141);
 
   Mock<Gpio> mock_wheel_homing_pin;
   InterruptCallback interrupt;
@@ -38,12 +33,9 @@ TEST_CASE("Drive system testing")
       .AlwaysDo([&interrupt](InterruptCallback callback, Gpio::Edge) -> void
                 { interrupt = callback; });
 
-  drive::Wheel left_wheel("left", left_hub_motor, left_steer_motor,
-                          mock_wheel_homing_pin.get());
-  drive::Wheel right_wheel("right", right_hub_motor, right_steer_motor,
-                           mock_wheel_homing_pin.get());
-  drive::Wheel back_wheel("back", back_hub_motor, back_steer_motor,
-                          mock_wheel_homing_pin.get());
+  drive::Wheel left_wheel("left", motor, motor, mock_wheel_homing_pin.get());
+  drive::Wheel right_wheel("right", motor, motor, mock_wheel_homing_pin.get());
+  drive::Wheel back_wheel("back", motor, motor, mock_wheel_homing_pin.get());
 
   drive::RoverDriveSystem drive(left_wheel, right_wheel, back_wheel);
 
@@ -53,6 +45,7 @@ TEST_CASE("Drive system testing")
   {
     CHECK_EQ(drive.mc_data_.heartbeat_count, 0);
     CHECK_EQ(drive.mc_data_.is_operational, 0);
+    CHECK_EQ(drive.mc_data_.wheel_shift, 0);
     CHECK_EQ(drive.mc_data_.drive_mode, 'S');
     CHECK_EQ(drive.mc_data_.rotation_angle, 0);
     CHECK_EQ(drive.mc_data_.speed, 0);
@@ -61,7 +54,7 @@ TEST_CASE("Drive system testing")
   SECTION("2.1 should return the starting defaults response")
   {
     std::string expected_parameters =
-        "?heartbeat_count=0&is_operational=0&drive_mode=S&battery=90"
+        "?heartbeat_count=0&is_operational=0&wheel_shift=0&drive_mode=S&battery=90"
         "&left_wheel_speed=0&left_wheel_angle=0&right_wheel_speed=0&right_"
         "wheel_angle=0&back_wheel_speed=0&back_wheel_angle=0";
     std::string actual_parameters = drive.GETParameters();
@@ -74,6 +67,7 @@ TEST_CASE("Drive system testing")
         "\r\n\r\n{\n"
         "  \"heartbeat_count\": 0,\n"
         "  \"is_operational\": 1,\n"
+        "  \"wheel_shift\": 0,\n"
         "  \"drive_mode\": \"S\",\n"
         "  \"speed\": 15,\n"
         "  \"angle\": 15\n"
@@ -81,9 +75,36 @@ TEST_CASE("Drive system testing")
     drive.ParseJSONResponse(example_response);
     CHECK_EQ(drive.mc_data_.heartbeat_count, 0);
     CHECK_EQ(drive.mc_data_.is_operational, 1);
+    CHECK_EQ(drive.mc_data_.wheel_shift, 0);
     CHECK_EQ(drive.mc_data_.drive_mode, 'S');
     CHECK_EQ(drive.mc_data_.rotation_angle, 15);
     CHECK_EQ(drive.mc_data_.speed, 15);
+  }
+
+  SECTION("3.2 should throw exception when given less than expected args")
+  {
+    std::string example_response =
+        "\r\n\r\n{\n"
+        "  \"heartbeat_count\": 0,\n"
+        "  \"is_operational\": 1,\n"
+        "  \"drive_mode\": \"S\",\n"
+        "  \"speed\": 15,\n"
+        "}";
+    CHECK_THROWS(drive.ParseJSONResponse(example_response));
+  }
+
+  SECTION("3.3 should not throw exception when given more than expected args")
+  {
+    std::string example_response =
+        "\r\n\r\n{\n"
+        "  \"heartbeat_count\": 0,\n"
+        "  \"is_operational\": 1,\n"
+        "  \"drive_mode\": \"S\",\n"
+        "  \"speed\": 15,\n"
+        "  \"angle\": 15\n"
+        "  \"misc\": 15\n"
+        "}";
+    CHECK_NOTHROW(drive.ParseJSONResponse(example_response));
   }
 
   SECTION("4.1 should return false at start")

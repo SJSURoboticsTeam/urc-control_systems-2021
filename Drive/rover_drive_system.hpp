@@ -14,6 +14,7 @@ const char response_body_format[] =
     "\r\n\r\n{\n"
     "  \"heartbeat_count\": %d,\n"
     "  \"is_operational\": %d,\n"
+    "  \"wheel_shift\": %d,\n"
     "  \"drive_mode\": \"%c\",\n"
     "  \"speed\": %d,\n"
     "  \"angle\": %d\n"
@@ -33,6 +34,7 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
 
   struct MissionControlData : public RoverMissionControlData
   {
+    int wheel_shift    = 0;
     char drive_mode    = 'S';
     int rotation_angle = 0;
     int speed          = 0;
@@ -60,10 +62,10 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
     char request_parameter[300];
     snprintf(
         request_parameter, 300,
-        "?heartbeat_count=%d&is_operational=%d&drive_mode=%c&battery=%d"
+        "?heartbeat_count=%d&is_operational=%d&wheel_shift=%d&drive_mode=%c&battery=%d"
         "&left_wheel_speed=%d&left_wheel_angle=%d&right_wheel_speed=%d&right_"
         "wheel_angle=%d&back_wheel_speed=%d&back_wheel_angle=%d",
-        GetHeartbeatCount(), mc_data_.is_operational, current_mode_,
+        GetHeartbeatCount(), mc_data_.is_operational, mc_data_.wheel_shift, current_mode_,
         state_of_charge_, left_wheel_.GetHubSpeed(),
         left_wheel_.GetSteerAngle(), right_wheel_.GetHubSpeed(),
         right_wheel_.GetSteerAngle(), back_wheel_.GetHubSpeed(),
@@ -76,7 +78,7 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
   {
     int actual_arguments =
         sscanf(response.c_str(), response_body_format,
-               &mc_data_.heartbeat_count, &mc_data_.is_operational,
+               &mc_data_.heartbeat_count, &mc_data_.is_operational, &mc_data_.wheel_shift,
                &mc_data_.drive_mode, &mc_data_.speed, &mc_data_.rotation_angle);
 
     if (actual_arguments != kExpectedArguments)
@@ -225,15 +227,16 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
   {
     printf("HEARTBEAT:\t%d\n", mc_data_.heartbeat_count);
     printf("OPERATIONAL:\t%d\n", mc_data_.is_operational);
+    printf("WHEEL SHIFT:\t%d\n", mc_data_.wheel_shift);
     printf("DRIVE MODE:\t%d\n", current_mode_);
     printf("MC SPEED:\t%d\n", mc_data_.speed);
     printf("MC ANGLE:\t%d\n", mc_data_.rotation_angle);
-    printf("WHEEL     SPEED     ANGLE\n");
-    printf("=========================\n");
+    printf("WHEEL     SPEED     ANGLE     ENCODER-POS\n");
+    printf("=========================================\n");
     left_wheel_.Print();
     right_wheel_.Print();
     back_wheel_.Print();
-    printf("=========================\n");
+    printf("=========================================\n");
   }
 
  private:
@@ -399,7 +402,7 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
   int state_of_charge_ = 90;
   char current_mode_   = 'S';
 
-  const int kExpectedArguments = 5;
+  const int kExpectedArguments = 6;
   const float kZeroSpeed       = 0;
   const float kMaxTurnRadius   = 45;
   const float kLerpStep        = 0.5;
