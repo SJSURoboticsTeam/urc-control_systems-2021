@@ -35,7 +35,6 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
   struct MissionControlData : public RoverMissionControlData
   {
     int wheel_shift    = 0;
-    char drive_mode    = 'S';
     int rotation_angle = 0;
     int speed          = 0;
   };
@@ -65,7 +64,7 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
         "?heartbeat_count=%d&is_operational=%d&wheel_shift=%d&drive_mode=%c&battery=%d"
         "&left_wheel_speed=%d&left_wheel_angle=%d&right_wheel_speed=%d&right_"
         "wheel_angle=%d&back_wheel_speed=%d&back_wheel_angle=%d",
-        GetHeartbeatCount(), mc_data_.is_operational, mc_data_.wheel_shift, current_mode_,
+        GetHeartbeatCount(), mc_data_.is_operational, mc_data_.wheel_shift, current_drive_mode_,
         state_of_charge_, left_wheel_.GetHubSpeed(),
         left_wheel_.GetSteerAngle(), right_wheel_.GetHubSpeed(),
         right_wheel_.GetSteerAngle(), back_wheel_.GetHubSpeed(),
@@ -79,7 +78,7 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
     int actual_arguments =
         sscanf(response.c_str(), response_body_format,
                &mc_data_.heartbeat_count, &mc_data_.is_operational, &mc_data_.wheel_shift,
-               &mc_data_.drive_mode, &mc_data_.speed, &mc_data_.rotation_angle);
+               &current_drive_mode_, &mc_data_.speed, &mc_data_.rotation_angle);
 
     if (actual_arguments != kExpectedArguments)
     {
@@ -112,14 +111,14 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
     float angle = float(mc_data_.rotation_angle);
     float speed = float(mc_data_.speed);
 
-    switch (current_mode_)
+    switch (current_drive_mode_)
     {
-      case 'D': HandleDriveMode(speed, angle); break;
-      case 'S': HandleSpinMode(speed); break;
-      case 'T': HandleTranslationMode(speed, angle); break;
-      case 'L':
-      case 'R':
-      case 'B': HandleSingularWheelMode(speed, angle); break;
+      case Modes::DriveMode: HandleDriveMode(speed, angle); break;
+      case Modes::SpinMode: HandleSpinMode(speed); break;
+      case Modes::TranslateMode: HandleTranslationMode(speed, angle); break;
+      case Modes::LeftWheelMode:
+      case Modes::RightWheelMode:
+      case Modes::BackWheelMode: HandleSingularWheelMode(speed, angle); break;
       default:
         StopWheels();
         // throw DriveModeHandlerError{};
@@ -141,7 +140,7 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
   /// Checks if the rover got a new drive mode command
   bool IsNewMode()
   {
-    if (current_mode_ != mc_data_.drive_mode)
+    if (current_drive_mode_ != current_drive_mode_)
     {
       sjsu::LogWarning("Rover was assigned new drive mode!");
       return true;
@@ -151,7 +150,7 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
 
   char GetCurrentMode()
   {
-    return current_mode_;
+    return char(current_drive_mode_);
   }
 
   /// Locks the thread until all wheels are stopped
@@ -228,7 +227,7 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
     printf("HEARTBEAT:\t%d\n", mc_data_.heartbeat_count);
     printf("OPERATIONAL:\t%d\n", mc_data_.is_operational);
     printf("WHEEL SHIFT:\t%d\n", mc_data_.wheel_shift);
-    printf("DRIVE MODE:\t%d\n", current_mode_);
+    printf("DRIVE MODE:\t%d\n", current_drive_mode_);
     printf("MC SPEED:\t%d\n", mc_data_.speed);
     printf("MC ANGLE:\t%d\n", mc_data_.rotation_angle);
     printf("WHEEL     SPEED     ANGLE     ENCODER-POS\n");
@@ -244,27 +243,26 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
   enum class Modes : char
     {
       DriveMode= 'D',
-      SpinMode = 'S'
-      TranslateMode = 'T'
-      LeftWheelMode = 'L'
-      RightWheelMode = 'R'
+      SpinMode = 'S',
+      TranslateMode = 'T',
+      LeftWheelMode = 'L',
+      RightWheelMode = 'R',
       BackWheelMode = 'B'
-      
     };
 
   /// Stops the rover and sets a new mode.
   void SetMode()
   {
-    sjsu::LogWarning("Switching rover into %c mode...", mc_data_.drive_mode);
+    sjsu::LogWarning("Switching rover into %c mode...", current_drive_mode_);
     StopWheels();
-    switch (mc_data_.drive_mode)
+    switch (current_drive_mode_)
     {
-      case 'D': SetDriveMode(); break;
-      case 'S': SetSpinMode(); break;
-      case 'T': SetTranslationMode(); break;
-      case 'L':
-      case 'R':
-      case 'B': SetSingleWheelMode(); break;
+      case Modes::DriveMode: SetDriveMode(); break;
+      case Modes::SpinMode: SetSpinMode(); break;
+      case Modes::TranslateMode: SetTranslationMode(); break;
+      case Modes::LeftWheelMode:
+      case Modes::RightWheelMode:
+      case Modes::BackWheelMode: SetSingleWheelMode(); break;
       default:
         // throw DriveModeError{};
         break;
@@ -284,7 +282,7 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
     left_wheel_.SetSteerAngle(left_wheel_angle);
     right_wheel_.SetSteerAngle(right_wheel_angle);
     back_wheel_.SetSteerAngle(back_wheel_angle);
-    current_mode_ = 'D';
+    current_drive_mode_ = Modes::DriveMode;
   }
 
   /// Aligns rover wheels perpendicular to their legs using homing slip ring
@@ -296,7 +294,7 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
     left_wheel_.SetSteerAngle(left_wheel_angle);
     right_wheel_.SetSteerAngle(right_wheel_angle);
     back_wheel_.SetSteerAngle(back_wheel_angle);
-    current_mode_ = 'S';
+    current_drive_mode_ = Modes::SpinMode;
   }
 
   /// Aligns rover wheel all in the same direction, facing towards the right
@@ -309,12 +307,13 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
     left_wheel_.SetSteerAngle(left_wheel_angle);
     right_wheel_.SetSteerAngle(right_wheel_angle);
     back_wheel_.SetSteerAngle(back_wheel_angle);
-    current_mode_ = 'T';
+    current_drive_mode_ = Modes::TranslateMode;
   }
 
   void SetSingleWheelMode()
   {
-    current_mode_ = mc_data_.drive_mode;
+    return;
+    //current_drive_mode_ = mc_data_.drive_mode;
   }
 
   // =======================
@@ -382,17 +381,17 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
   /// Adjusts the hub speed and steer angle of the specified wheel
   void HandleSingularWheelMode(float speed, float angle)
   {
-    switch (current_mode_)
+    switch (current_drive_mode_)
     {
-      case 'L':
+      case Modes::LeftWheelMode:
         left_wheel_.SetSteerAngle(angle);
         left_wheel_.SetHubSpeed(speed);
         break;
-      case 'R':
+      case Modes::RightWheelMode:
         right_wheel_.SetSteerAngle(angle);
         right_wheel_.SetHubSpeed(speed);
         break;
-      case 'B':
+      case Modes::BackWheelMode:
         back_wheel_.SetSteerAngle(angle);
         back_wheel_.SetHubSpeed(speed);
         break;
@@ -400,7 +399,6 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
   }
 
   int state_of_charge_ = 90;
-  char current_mode_   = 'S';
 
   const int kExpectedArguments = 6;
   const float kZeroSpeed       = 0;
@@ -408,6 +406,7 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
   const float kLerpStep        = 0.5;
 
  public:
+ Modes current_drive_mode_ = Modes::SpinMode;
   MissionControlData mc_data_;
   Wheel & left_wheel_;
   Wheel & right_wheel_;
