@@ -6,7 +6,7 @@
 #include "rover_drive_system.hpp"
 #include "wheel.hpp"
 
-namespace sjsu
+namespace sjsu::drive
 {
 
 TEST_CASE("Drive system testing")
@@ -46,7 +46,7 @@ TEST_CASE("Drive system testing")
     CHECK_EQ(drive.mc_data_.heartbeat_count, 0);
     CHECK_EQ(drive.mc_data_.is_operational, 0);
     CHECK_EQ(drive.mc_data_.wheel_shift, 0);
-    CHECK_EQ(drive.mc_data_.drive_mode, 'S');
+    //CHECK_EQ(drive.mc_data_.drive_mode, 'S');
     CHECK_EQ(drive.mc_data_.rotation_angle, 0);
     CHECK_EQ(drive.mc_data_.speed, 0);
   }
@@ -76,7 +76,7 @@ TEST_CASE("Drive system testing")
     CHECK_EQ(drive.mc_data_.heartbeat_count, 0);
     CHECK_EQ(drive.mc_data_.is_operational, 1);
     CHECK_EQ(drive.mc_data_.wheel_shift, 0);
-    CHECK_EQ(drive.mc_data_.drive_mode, 'S');
+    //CHECK_EQ(drive.mc_data_.drive_mode, 'S');
     CHECK_EQ(drive.mc_data_.rotation_angle, 15);
     CHECK_EQ(drive.mc_data_.speed, 15);
   }
@@ -121,19 +121,19 @@ TEST_CASE("Drive system testing")
 
   SECTION("5.1 should return starting drive mode 'S'")
   {
-    CHECK_EQ(drive.GetCurrentMode(), 'S');
+    CHECK_EQ(drive.GetCurrentMode(), RoverDriveSystem::Modes::SpinMode);
   }
 
   SECTION("6.1 should return false with same modes")
   {
-    CHECK_EQ(drive.mc_data_.drive_mode, 'S');
-    CHECK_EQ(drive.GetCurrentMode(), 'S');
+    //CHECK_EQ(drive.mc_data_.drive_mode, 'S');
+    CHECK_EQ(drive.GetCurrentMode(), RoverDriveSystem::Modes::SpinMode);
     CHECK_FALSE(drive.IsNewMode());
   }
 
   SECTION("6.2 should return true with different modes")
   {
-    drive.mc_data_.drive_mode = 'D';
+    drive.mc_data_.drive_mode = RoverDriveSystem::Modes::DriveMode;
     CHECK(drive.IsNewMode());
   }
 
@@ -302,58 +302,58 @@ TEST_CASE("Drive system testing")
   {
     drive.mc_data_.is_operational = 1;
 
-    drive.mc_data_.drive_mode = 'D';
+    drive.mc_data_.drive_mode = RoverDriveSystem::Modes::DriveMode;
     drive.HandleRoverMovement();
-    CHECK_EQ(drive.GetCurrentMode(), 'D');
+    CHECK_EQ(drive.GetCurrentMode(), RoverDriveSystem::Modes::DriveMode);
 
-    drive.mc_data_.drive_mode = 'T';
+    drive.mc_data_.drive_mode = RoverDriveSystem::Modes::TranslateMode;
     drive.HandleRoverMovement();
-    CHECK_EQ(drive.GetCurrentMode(), 'T');
+    CHECK_EQ(drive.GetCurrentMode(), RoverDriveSystem::Modes::TranslateMode);
 
-    drive.mc_data_.drive_mode = 'S';
+    drive.mc_data_.drive_mode = RoverDriveSystem::Modes::SpinMode;
     drive.HandleRoverMovement();
-    CHECK_EQ(drive.GetCurrentMode(), 'S');
+    CHECK_EQ(drive.GetCurrentMode(), RoverDriveSystem::Modes::SpinMode);
 
-    drive.mc_data_.drive_mode = 'B';
+    drive.mc_data_.drive_mode = RoverDriveSystem::Modes::BackWheelMode;
     drive.HandleRoverMovement();
-    CHECK_EQ(drive.GetCurrentMode(), 'B');
+    CHECK_EQ(drive.GetCurrentMode(), RoverDriveSystem::Modes::BackWheelMode);
 
-    drive.mc_data_.drive_mode = 'L';
+    drive.mc_data_.drive_mode = RoverDriveSystem::Modes::LeftWheelMode;
     drive.HandleRoverMovement();
-    CHECK_EQ(drive.GetCurrentMode(), 'L');
+    CHECK_EQ(drive.GetCurrentMode(), RoverDriveSystem::Modes::LeftWheelMode);
 
-    drive.mc_data_.drive_mode = 'R';
+    drive.mc_data_.drive_mode = RoverDriveSystem::Modes::RightWheelMode;
     drive.HandleRoverMovement();
-    CHECK_EQ(drive.GetCurrentMode(), 'R');
+    CHECK_EQ(drive.GetCurrentMode(), RoverDriveSystem::Modes::RightWheelMode);
   }
 
   SECTION("12.4 should stay in the current mode when passed invalid drive mode")
   {
     drive.mc_data_.is_operational = 1;
 
-    drive.mc_data_.drive_mode = 'Q';
+    drive.mc_data_.drive_mode = RoverDriveSystem::Modes::SpinMode;
     drive.HandleRoverMovement();
-    CHECK_EQ(drive.GetCurrentMode(), 'S');
+    CHECK_EQ(drive.GetCurrentMode(), RoverDriveSystem::Modes::SpinMode);
   }
 
   SECTION("12.5 should stay in same mode when not operational but has new mode")
   {
     drive.mc_data_.is_operational = 0;
-    drive.mc_data_.drive_mode     = 'D';
+    drive.mc_data_.drive_mode     = RoverDriveSystem::Modes::DriveMode;
 
     drive.left_wheel_.SetHubSpeed(kNonZero);
     drive.right_wheel_.SetHubSpeed(kNonZero);
     drive.back_wheel_.SetHubSpeed(kNonZero);
 
     drive.HandleRoverMovement();
-    CHECK_EQ(drive.GetCurrentMode(), 'S');
+    CHECK_EQ(drive.GetCurrentMode(), RoverDriveSystem::Modes::SpinMode);
   }
 
   SECTION("12.6 should only slow down when heartbeat not synced")
   {
     drive.mc_data_.heartbeat_count = kNonZero;
     drive.mc_data_.is_operational  = 0;
-    drive.mc_data_.drive_mode      = 'D';
+    drive.mc_data_.drive_mode      = RoverDriveSystem::Modes::DriveMode;
 
     drive.left_wheel_.SetHubSpeed(kNonZero);
     drive.right_wheel_.SetHubSpeed(kNonZero);
@@ -365,7 +365,7 @@ TEST_CASE("Drive system testing")
     CHECK_LT(drive.right_wheel_.GetHubSpeed(), kNonZero);
     CHECK_LT(drive.back_wheel_.GetHubSpeed(), kNonZero);
     CHECK_FALSE(drive.IsStopped());
-    CHECK_EQ(drive.GetCurrentMode(), 'S');
+    CHECK_EQ(drive.GetCurrentMode(), RoverDriveSystem::Modes::SpinMode);
   }
 
   SECTION("12.7.1 should have all steer motor angles at 90")
@@ -382,7 +382,7 @@ TEST_CASE("Drive system testing")
   SECTION("12.7.2 should have all hub motors at same non zero speed")
   {
     drive.mc_data_.is_operational = 1;
-    drive.mc_data_.drive_mode     = 'D';
+    drive.mc_data_.drive_mode     = RoverDriveSystem::Modes::DriveMode;
     drive.mc_data_.speed          = kNonZero;
 
     drive.HandleRoverMovement();
@@ -396,7 +396,7 @@ TEST_CASE("Drive system testing")
   SECTION("12.8.1 should clamp steer angles when over 45")
   {
     drive.mc_data_.is_operational = 1;
-    drive.mc_data_.drive_mode     = 'D';
+    drive.mc_data_.drive_mode     = RoverDriveSystem::Modes::DriveMode;
     drive.mc_data_.rotation_angle = 1000;
 
     drive.HandleRoverMovement();
@@ -410,7 +410,7 @@ TEST_CASE("Drive system testing")
   SECTION("12.8.2 should clamp steer angles when under 45")
   {
     drive.mc_data_.is_operational = 1;
-    drive.mc_data_.drive_mode     = 'D';
+    drive.mc_data_.drive_mode     = RoverDriveSystem::Modes::DriveMode;
     drive.mc_data_.rotation_angle = -1000;
 
     drive.HandleRoverMovement();
@@ -424,7 +424,7 @@ TEST_CASE("Drive system testing")
   SECTION("12.8.3 should have correct angles when set 10: L=6, R=-10, B=-12")
   {
     drive.mc_data_.is_operational = 1;
-    drive.mc_data_.drive_mode     = 'D';
+    drive.mc_data_.drive_mode     = RoverDriveSystem::Modes::DriveMode;
     drive.mc_data_.rotation_angle = 10;
 
     drive.HandleRoverMovement();
@@ -438,7 +438,7 @@ TEST_CASE("Drive system testing")
   SECTION("12.8.4 should have correct angles when set -10: L=-10, R=-6, B=12")
   {
     drive.mc_data_.is_operational = 1;
-    drive.mc_data_.drive_mode     = 'D';
+    drive.mc_data_.drive_mode     = RoverDriveSystem::Modes::DriveMode;
     drive.mc_data_.rotation_angle = -10;
 
     drive.HandleRoverMovement();
@@ -452,7 +452,7 @@ TEST_CASE("Drive system testing")
   SECTION("12.8.5 should get correct speed")
   {
     drive.mc_data_.is_operational = 1;
-    drive.mc_data_.drive_mode     = 'D';
+    drive.mc_data_.drive_mode     = RoverDriveSystem::Modes::DriveMode;
     drive.mc_data_.speed          = kNonZero;
 
     drive.HandleRoverMovement();
@@ -466,7 +466,7 @@ TEST_CASE("Drive system testing")
   SECTION("12.8.6 should have correct starting angles L=-45, R=-135, B=90")
   {
     drive.mc_data_.is_operational = 1;
-    drive.mc_data_.drive_mode     = 'D';
+    drive.mc_data_.drive_mode     = RoverDriveSystem::Modes::DriveMode;
 
     drive.HandleRoverMovement();
 
@@ -478,7 +478,7 @@ TEST_CASE("Drive system testing")
   SECTION("12.9.1 should have correct starting angles")
   {
     drive.mc_data_.is_operational = 1;
-    drive.mc_data_.drive_mode     = 'T';
+    drive.mc_data_.drive_mode     = RoverDriveSystem::Modes::TranslateMode;
 
     drive.HandleRoverMovement();
 
@@ -490,7 +490,7 @@ TEST_CASE("Drive system testing")
   SECTION("12.9.2 should have all hub motors at same non zero speed")
   {
     drive.mc_data_.is_operational = 1;
-    drive.mc_data_.drive_mode     = 'T';
+    drive.mc_data_.drive_mode     = RoverDriveSystem::Modes::TranslateMode;
     drive.mc_data_.speed          = kNonZero;
 
     drive.HandleRoverMovement();
@@ -504,7 +504,7 @@ TEST_CASE("Drive system testing")
   SECTION("12.10.1 should adjust only the speed and angle of one wheel")
   {
     drive.mc_data_.is_operational = 1;
-    drive.mc_data_.drive_mode     = 'L';
+    drive.mc_data_.drive_mode     = RoverDriveSystem::Modes::LeftWheelMode;
     drive.mc_data_.speed          = kNonZero;
     drive.mc_data_.rotation_angle = kNonZero;
 
