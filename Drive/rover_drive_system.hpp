@@ -313,8 +313,7 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
 
   void SetSingleWheelMode()
   {
-    return;
-    // current_drive_mode_ = mc_data_.drive_mode;
+    current_drive_mode_ = mc_data_.drive_mode;
   }
 
   // =======================

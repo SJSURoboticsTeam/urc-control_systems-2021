@@ -99,6 +99,7 @@ TEST_CASE("Drive system testing")
         "\r\n\r\n{\n"
         "  \"heartbeat_count\": 0,\n"
         "  \"is_operational\": 1,\n"
+        "  \"wheel_shift\": 0,\n"
         "  \"drive_mode\": \"S\",\n"
         "  \"speed\": 15,\n"
         "  \"angle\": 15\n"
