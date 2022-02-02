@@ -46,7 +46,7 @@ TEST_CASE("Drive system testing")
     CHECK_EQ(drive.mc_data_.heartbeat_count, 0);
     CHECK_EQ(drive.mc_data_.is_operational, 0);
     CHECK_EQ(drive.mc_data_.wheel_shift, 0);
-    //CHECK_EQ(drive.mc_data_.drive_mode, 'S');
+    CHECK_EQ(drive.mc_data_.drive_mode, RoverDriveSystem::Modes::SpinMode);
     CHECK_EQ(drive.mc_data_.rotation_angle, 0);
     CHECK_EQ(drive.mc_data_.speed, 0);
   }
@@ -76,7 +76,7 @@ TEST_CASE("Drive system testing")
     CHECK_EQ(drive.mc_data_.heartbeat_count, 0);
     CHECK_EQ(drive.mc_data_.is_operational, 1);
     CHECK_EQ(drive.mc_data_.wheel_shift, 0);
-    //CHECK_EQ(drive.mc_data_.drive_mode, 'S');
+    CHECK_EQ(drive.mc_data_.drive_mode, RoverDriveSystem::Modes::SpinMode);
     CHECK_EQ(drive.mc_data_.rotation_angle, 15);
     CHECK_EQ(drive.mc_data_.speed, 15);
   }
@@ -127,7 +127,7 @@ TEST_CASE("Drive system testing")
 
   SECTION("6.1 should return false with same modes")
   {
-    //CHECK_EQ(drive.mc_data_.drive_mode, 'S');
+    CHECK_EQ(drive.mc_data_.drive_mode, RoverDriveSystem::Modes::SpinMode);
     CHECK_EQ(drive.GetCurrentMode(), RoverDriveSystem::Modes::SpinMode);
     CHECK_FALSE(drive.IsNewMode());
   }
