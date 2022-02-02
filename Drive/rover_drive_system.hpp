@@ -416,13 +416,12 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
   const float kLerpStep        = 0.5;
 
 
- private:
+ public:
   MissionControlData mc_data_;
   Wheel * left_wheel_;
   Wheel * right_wheel_;
   Wheel * back_wheel_;
   std::array<Wheel*, 3> wheels{left_wheel_, right_wheel_, back_wheel_};
-  
   // TODO: Implement this logic once SOC is tested
   // sjsu::common::StateOfCharge & battery_;
 };
