@@ -149,7 +149,7 @@ TEST_CASE("Drive system testing")
     drive.back_wheel_->SetHubSpeed(kNonZero);
     CHECK_FALSE(drive.IsStopped());
   }
-
+  
   SECTION("7.3 should return false if at least one hub wheel is moving")
   {
     drive.left_wheel_->SetHubSpeed(kNonZero);
