@@ -16,6 +16,11 @@ class Joint
 
   Joint(sjsu::Mpu6050 & accelerometer) : mpu_(accelerometer){};
 
+  void Initialize()
+  {
+    mpu_.Initialize();
+  }
+
   void GetAccelerometerData()
   {
     sjsu::Accelerometer::Acceleration_t acceleration_to_float(mpu_.Read());

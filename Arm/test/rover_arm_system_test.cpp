@@ -50,13 +50,13 @@ TEST_CASE("Arm system testing")
   arm::WristJoint wrist(motor, motor, spyed_mpu);
   arm::Hand hand(wrist, pinky, ring, middle, pointer, thumb);
 
-  arm::RoverArmSystem arm(rotunda, shoulder, elbow, wrist, hand);
+  arm::RoverArmSystem arm(rotunda, shoulder, elbow, hand);
 
   SECTION("should initialize and return default values")
   {
     // arm.Initialize();
-    CHECK_EQ(arm.wrist_.GetPitchPosition(), 0);
-    CHECK_EQ(arm.wrist_.GetRollPosition(), 0);
+    CHECK_EQ(hand.GetWristRoll(), 0);
+    CHECK_EQ(hand.GetWristPitch(), 0);
   }
 
   SECTION("should return default GET parameters")

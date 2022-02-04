@@ -3,6 +3,7 @@
 #include "devices/actuators/servo/rmd_x.hpp"
 #include "devices/sensors/movement/accelerometer/mpu6050.hpp"
 #include "joint.hpp"
+#include <cmath>
 
 namespace sjsu::arm
 {
@@ -22,17 +23,41 @@ class WristJoint : public Joint
   {
     left_motor_.Initialize();
     right_motor_.Initialize();
-    mpu_.Initialize();
+    Joint::Initialize();
+  }
+  void PrintWristData()
+  {
+    printf("Wrist Positions:\n");
+    printf("Wrist pitch position: %d\n", pitch_angle_);
+    printf("Wrist roll position: %d\n", roll_angle_);
+  }
+
+  // Sets Roll Position of the wrist joint
+  void SetRollPosition(float speed, float roll_angle)
+  {
+    SetSpeed(speed);
+    roll_angle_ = float(std::clamp(roll_angle + roll_offset_angle_,
+                                       kRollMinimumAngle, kRollMaximumAngle));
+    units::angle::degree_t angle_to_degrees(roll_angle);
+    left_motor_.SetAngle(angle_to_degrees);
+    right_motor_.SetAngle(angle_to_degrees);
   }
 
   // Sets Pitch Position of the wrist joint
-  void SetPitchPosition(float pitch_angle)
+  void SetPitchPosition(float speed, float pitch_angle)
   {
+    SetSpeed(speed);
     pitch_angle_ = float(std::clamp(pitch_angle + pitch_offset_angle_,
                                     kPitchMinimumAngle, kPitchMaximumAngle));
     units::angle::degree_t angle_to_degrees(pitch_angle);
     left_motor_.SetAngle(angle_to_degrees);
     right_motor_.SetAngle(angle_to_degrees);
+  }
+
+  void HandleWristMovement(float speed, float roll, float pitch)
+  {
+    SetRollPosition(speed, roll);
+    SetPitchPosition(speed, pitch);
   }
 
   /// Sets the zero_offset_angle value that the motors use to know its true '0'
@@ -42,19 +67,17 @@ class WristJoint : public Joint
     pitch_offset_angle_ = pitch_offset;
   }
 
-  // Sets Roll Position of the wrist joint
-  void SetRollPosition(float roll_angle)
-  {
-    roll_angle_ = float(std::clamp(roll_angle + roll_offset_angle_,
-                                   kRollMinimumAngle, kRollMaximumAngle));
-    units::angle::degree_t angle_to_degrees(roll_angle);
-    left_motor_.SetAngle(angle_to_degrees);
-    right_motor_.SetAngle(angle_to_degrees);
-  }
-
   void SetZeroRollOffsets(float roll_offset)
   {
     roll_offset_angle_ = roll_offset;
+  }
+
+  void SetSpeed(float speed)
+  {
+    speed_ = std::clamp(speed, -kSpeedMaximum, kSpeedMaximum);
+    units::angular_velocity::revolutions_per_minute_t speed_to_rpm(speed_);
+    left_motor_.SetSpeed(speed_to_rpm);
+    right_motor_.SetSpeed(speed_to_rpm);
   }
 
   int GetPitchPosition()
@@ -77,6 +100,29 @@ class WristJoint : public Joint
     return int(roll_offset_angle_);
   }
 
+  int GetSpeed()
+  {
+    return speed_;
+  }
+
+  void Home(float speed, float rotunda_offset)
+  {
+    GetAccelerometerData();
+    HomePitch(speed, rotunda_offset);
+    HomeRoll();
+  };
+
+  void HomePitch(float speed, float rotunda_offset)
+  {
+    float wrist_pitch_offset =
+        float(atan(acceleration_.y / acceleration_.z)) + rotunda_offset;
+    SetPitchPosition(speed, wrist_pitch_offset);
+    SetZeroPitchOffsets(wrist_pitch_offset);
+  }
+
+  // can't home yet
+  void HomeRoll(){};
+
  private:
   sjsu::RmdX & left_motor_;
   sjsu::RmdX & right_motor_;
@@ -86,11 +132,14 @@ class WristJoint : public Joint
   float pitch_offset_angle_ = 0;
   float roll_offset_angle_  = 0;
 
+  float speed_ = 0;
+
   const float kPitchMinimumAngle = 0;
   const float kPitchMaximumAngle = 180;
   const float kPitchRestAngle    = 90;
   const float kRollMinimumAngle  = 0;
   const float kRollMaximumAngle  = 180;
   const float kRollRestAngle     = 90;
+  const float kSpeedMaximum      = 100;
 };
 }  // namespace sjsu::arm

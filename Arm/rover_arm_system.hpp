@@ -2,7 +2,6 @@
 #include "utility/math/units.hpp"
 #include "joint.hpp"
 #include "arm_joint.hpp"
-#include "Hand/wrist_joint.hpp"
 #include "Hand/hand.hpp"
 #include "../Common/rover_system.hpp"
 #include <cmath>
@@ -75,12 +74,10 @@ class RoverArmSystem : public sjsu::common::RoverSystem
   RoverArmSystem(sjsu::arm::ArmJoint & rotunda,
                  sjsu::arm::ArmJoint & shoulder,
                  sjsu::arm::ArmJoint & elbow,
-                 sjsu::arm::WristJoint & wrist,
                  sjsu::arm::Hand & hand)
       : rotunda_(rotunda),
         shoulder_(shoulder),
         elbow_(elbow),
-        wrist_(wrist),
         hand_(hand){};
 
   void Initialize() override
@@ -88,7 +85,6 @@ class RoverArmSystem : public sjsu::common::RoverSystem
     rotunda_.Initialize();
     shoulder_.Initialize();
     elbow_.Initialize();
-    wrist_.Initialize();  // TODO: Move to hand class
     hand_.Initialize();
   }
 
@@ -110,12 +106,7 @@ class RoverArmSystem : public sjsu::common::RoverSystem
     printf("Pointer Angle: %d\n", mc_data_.finger.pointer_angle);
     printf("Thumb Angle: %d\n", mc_data_.finger.thumb_angle);
 
-    printf("Hand Finger Positions:\n");
-    printf("Pinky Angle: %d\n", hand_.GetPinkyPosition());
-    printf("Ring Angle: %d\n", hand_.GetRingPosition());
-    printf("Middle Angle: %d\n", hand_.GetMiddlePosition());
-    printf("Pointer Angle: %d\n", hand_.GetPointerPosition());
-    printf("Thumb Angle: %d\n", hand_.GetThumbPosition());
+    hand_.PrintHandData();
 
     printf("Joints Data:\n");
     printf("Rotunda speed: %d\n", rotunda_.GetSpeed());
@@ -126,9 +117,6 @@ class RoverArmSystem : public sjsu::common::RoverSystem
 
     printf("Elbow speed: %d\n", elbow_.GetSpeed());
     printf("Elbow position: %d\n", elbow_.GetPosition());
-
-    printf("Wrist pitch position: %d\n", wrist_.GetPitchPosition());
-    printf("Wrist roll position: %d\n", wrist_.GetRollPosition());
   }
 
   std::string GETParameters() override
@@ -142,7 +130,7 @@ class RoverArmSystem : public sjsu::common::RoverSystem
              GetHeartbeatCount(), mc_data_.is_operational,
              int(mc_data_.arm_speed), state_of_charge_, rotunda_.GetPosition(),
              shoulder_.GetPosition(), elbow_.GetPosition(),
-             wrist_.GetRollPosition(), wrist_.GetPitchPosition(),
+             hand_.GetWristRoll(), hand_.GetWristPitch(),
              hand_.GetPinkyPosition(), hand_.GetRingPosition(),
              hand_.GetMiddlePosition(), hand_.GetPointerPosition(),
              hand_.GetThumbPosition());
@@ -199,17 +187,19 @@ class RoverArmSystem : public sjsu::common::RoverSystem
                 float pointer,
                 float middle,
                 float ring,
-                float pinky)
+                float pinky,
+                float pitch,
+                float roll)
   {
     hand_.HandleHandMovement(mc_data_.arm_speed, thumb, pointer, middle, ring,
-                             pinky);
+                             pinky, pitch, roll);
   }
 
   void HomeArm()
   {
     HomeShoulder();
     HomeElbow();
-    HomeHand();
+    hand_.HomeHand(mc_data_.arm_speed, rotunda_.GetOffsetAngle());
   }
 
   // TODO: implement different arm drive modes in this function with switch
@@ -228,7 +218,7 @@ class RoverArmSystem : public sjsu::common::RoverSystem
     switch (current_arm_mode_)
     {
       case MissionControlData::ArmModes::kHomeArm: HomeArm(); break;
-      case MissionControlData::ArmModes::kHomeHand: HomeHand(); break;
+      case MissionControlData::ArmModes::kHomeHand: hand_.HomeHand(mc_data_.arm_speed, rotunda_.GetOffsetAngle()); break;
       case MissionControlData::ArmModes::kConcurrent:
         HandleConcurrentMode();
         break;
@@ -253,7 +243,7 @@ class RoverArmSystem : public sjsu::common::RoverSystem
     MoveElbow(mc_data_.elbow_angle);
     MoveHand(mc_data_.finger.thumb_angle, mc_data_.finger.pointer_angle,
              mc_data_.finger.middle_angle, mc_data_.finger.ring_angle,
-             mc_data_.finger.pinky_angle);
+             mc_data_.finger.pinky_angle, mc_data_.wrist_roll, mc_data_.wrist_pitch);
   }
 
   void HandleHandModes()
@@ -261,10 +251,10 @@ class RoverArmSystem : public sjsu::common::RoverSystem
     switch (current_hand_mode_)
     {
       case MissionControlData::HandModes::kPitch:
-        wrist_.SetPitchPosition(mc_data_.wrist_pitch);
+        hand_.SetWristPitchPosition(mc_data_.arm_speed, mc_data_.wrist_pitch);
         break;
       case MissionControlData::HandModes::kRoll:
-        wrist_.SetRollPosition(mc_data_.wrist_roll);
+        hand_.SetWristRollPosition(mc_data_.arm_speed, mc_data_.wrist_roll);
         break;
       case MissionControlData::HandModes::kClose:
         hand_.CloseHand(mc_data_.arm_speed);
@@ -275,7 +265,7 @@ class RoverArmSystem : public sjsu::common::RoverSystem
       case MissionControlData::HandModes::kConcurrent:
         MoveHand(mc_data_.finger.thumb_angle, mc_data_.finger.pointer_angle,
                  mc_data_.finger.middle_angle, mc_data_.finger.ring_angle,
-                 mc_data_.finger.pinky_angle);
+                 mc_data_.finger.pinky_angle, mc_data_.wrist_roll, mc_data_.wrist_pitch);
         break;
     }
   }
@@ -287,7 +277,6 @@ class RoverArmSystem : public sjsu::common::RoverSystem
     rotunda_.GetAccelerometerData();
     shoulder_.GetAccelerometerData();
     elbow_.GetAccelerometerData();
-    wrist_.GetAccelerometerData();
   }
 
   float CalculateShoulderHomeAngle()
@@ -363,13 +352,6 @@ class RoverArmSystem : public sjsu::common::RoverSystem
     MoveElbow(home_angle);
   }
 
-  void HomeHand()
-  {
-    UpdateAccelerations();
-    // TODO: implement finger homing and put the function call here
-    hand_.HomeWrist(float(rotunda_.GetOffsetAngle()));
-  }
-
   int state_of_charge_ = 90;
   MissionControlData::ArmModes current_arm_mode_ =
       MissionControlData::ArmModes::kConcurrent;
@@ -384,7 +366,6 @@ class RoverArmSystem : public sjsu::common::RoverSystem
   sjsu::arm::ArmJoint & rotunda_;
   sjsu::arm::ArmJoint & shoulder_;
   sjsu::arm::ArmJoint & elbow_;
-  sjsu::arm::WristJoint & wrist_;
   sjsu::arm::Hand hand_;
 };
 }  // namespace sjsu::arm
