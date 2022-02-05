@@ -1,16 +1,16 @@
 #pragma once
-#include "arm.hpp"
-#include "arm_joint.hpp"
+
+#include "../arm_joint.hpp"
 
 namespace sjsu::arm
 {
-class Arm2022 : public Arm
+class HumanArm
 {
-  void Initalize() override 
+  void Initialize() override
   {
-      rotunda_.Initialize();
-      shoulder_.Initialize();
-      elbow_.Initialize();
+    rotunda_.Initialize();
+    shoulder_.Initialize();
+    elbow_.Initialize();
   }
 
   void UpdateAccelerations()
@@ -77,7 +77,9 @@ class Arm2022 : public Arm
     elbow_.SetPosition(angle);
   }
 
-  void HandleConcurrentMode(float rotunda_angle, float shoulder_angle, float elbow_angle)
+  void HandleConcurrentMode(float rotunda_angle,
+                            float shoulder_angle,
+                            float elbow_angle)
   {
     MoveRotunda(rotunda_angle);
     MoveShoulder(shoulder_angle);
@@ -104,9 +106,7 @@ class Arm2022 : public Arm
     }
   }
 
-
-  private:
-
+ private:
   float CalculateShoulderHomeAngle()
   {
     float home_angle = 0;
@@ -150,6 +150,5 @@ class Arm2022 : public Arm
   ArmJoint rotunda_;
   ArmJoint shoulder_;
   ArmJoint elbow_;
-
 };
-} //namespace sjsu::arm
+}  // namespace sjsu::arm
