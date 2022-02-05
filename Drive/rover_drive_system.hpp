@@ -416,7 +416,7 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
   const float kLerpStep        = 0.5;
 
 
- private:
+ public:
   MissionControlData mc_data_;
   Wheel * left_wheel_;
   Wheel * right_wheel_;
