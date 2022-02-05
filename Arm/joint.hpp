@@ -14,7 +14,7 @@ class Joint
     float z = 0;
   };
 
-  Joint(sjsu::Mpu6050 & accelerometer) : mpu_(accelerometer){};
+  Joint(sjsu::Accelerometer & accelerometer) : mpu_(accelerometer){};
 
   void Initialize()
   {
