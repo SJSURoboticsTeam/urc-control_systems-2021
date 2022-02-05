@@ -72,9 +72,10 @@ class WristJoint : public Joint
     roll_offset_angle_ = roll_offset;
   }
 
-  void SetSpeed(float speed)
+  // Sets speed of the wrist joints
+  void SetSpeed(float target_speed)
   {
-    speed_ = std::clamp(speed, -kSpeedMaximum, kSpeedMaximum);
+    speed_ = std::clamp(target_speed, -kMaxSpeed, kMaxSpeed);
     units::angular_velocity::revolutions_per_minute_t speed_to_rpm(speed_);
     left_motor_.SetSpeed(speed_to_rpm);
     right_motor_.SetSpeed(speed_to_rpm);
@@ -140,6 +141,6 @@ class WristJoint : public Joint
   const float kRollMinimumAngle  = 0;
   const float kRollMaximumAngle  = 180;
   const float kRollRestAngle     = 90;
-  const float kSpeedMaximum      = 100;
+  const float kMaxSpeed          = 100;
 };
 }  // namespace sjsu::arm

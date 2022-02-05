@@ -3,6 +3,7 @@
 #include "joint.hpp"
 #include "arm_joint.hpp"
 #include "Hand/hand.hpp"
+#include "../Common/heartbeat.hpp"
 #include "../Common/rover_system.hpp"
 #include <cmath>
 
@@ -12,6 +13,8 @@ const char response_body_format[] =
     "\r\n\r\n{\n"
     "  \"heartbeat_count\": %d,\n"
     "  \"is_operational\": %d,\n"
+    "  \"arm_mode\": \"%c\",\n"
+    "  \"hand_mode\": \"%c\",\n"
     "  \"arm_speed\": %d,\n"
     "  \"rotunda_angle\": %d,\n"
     "  \"shoulder_angle\": %d,\n"
@@ -90,7 +93,15 @@ class RoverArmSystem : public sjsu::common::RoverSystem
 
   void PrintRoverData() override
   {
-    printf("Arm data: \n");
+
+    printf("SERVER-DATA");
+    printf("=========================================\n");
+    printf("Operational: %d\n", mc_data_.heartbeat_count);
+    printf("Operational: %d\n", mc_data_.is_operational);
+    printf("=========================================\n");
+
+    printf("ARM-DATA\n");
+    printf("=========================================\n");
     printf("Mode: %c\n", mc_data_.ArmMode);
     printf("Arm speed: %d\n", mc_data_.arm_speed);
     printf("Rotunda Angle: %d\n", mc_data_.rotunda_angle);
@@ -98,17 +109,24 @@ class RoverArmSystem : public sjsu::common::RoverSystem
     printf("Elbow Angle: %d\n", mc_data_.elbow_angle);
     printf("Wrist Roll Angle: %d\n", mc_data_.wrist_roll);
     printf("Wrist Pitch Angle: %d\n", mc_data_.wrist_pitch);
+    printf("=========================================\n");
 
-    printf("Hand Finger Angles: \n");
+
+    printf("HAND-FINGER-ANGLES \n");
+    printf("=========================================\n");
+    printf("Hand Mode: %c\n", mc_data_.HandMode);
     printf("Pinky Angle: %d\n", mc_data_.finger.pinky_angle);
     printf("Ring Angle: %d\n", mc_data_.finger.ring_angle);
     printf("Middle Angle: %d\n", mc_data_.finger.middle_angle);
     printf("Pointer Angle: %d\n", mc_data_.finger.pointer_angle);
     printf("Thumb Angle: %d\n", mc_data_.finger.thumb_angle);
+    printf("=========================================\n");
+
 
     hand_.PrintHandData();
 
-    printf("Joints Data:\n");
+    printf("JOINTS-DATA:\n");
+    printf("=========================================\n");
     printf("Rotunda speed: %d\n", rotunda_.GetSpeed());
     printf("Rotunda position: %d\n", rotunda_.GetPosition());
 
@@ -123,11 +141,13 @@ class RoverArmSystem : public sjsu::common::RoverSystem
   {
     char request_parameter[300];
     snprintf(request_parameter, 300,
-             "?heartbeat_count=%d&is_operational=%d&arm_speed=%d&battery=%d&"
+             "?heartbeat_count=%d&is_operational=%d&arm_mode=%c&hand_mode=%c&"
+             "arm_speed=%d&battery=%d&"
              "rotunda_angle=%d&shoulder_angle=%d&elbow_angle=%d&wrist_roll=%d&"
              "wrist_pitch=%d&pinky_angle=%d&ring_angle=%d&middle_angle=%d&"
              "pointer_angle=%d&thumb_angle=%d",
              GetHeartbeatCount(), mc_data_.is_operational,
+             char(mc_data_.ArmMode), char(mc_data_.HandMode),
              int(mc_data_.arm_speed), state_of_charge_, rotunda_.GetPosition(),
              shoulder_.GetPosition(), elbow_.GetPosition(),
              hand_.GetWristRoll(), hand_.GetWristPitch(),
@@ -141,11 +161,12 @@ class RoverArmSystem : public sjsu::common::RoverSystem
   {
     int actual_arguments = sscanf(
         response.c_str(), response_body_format, &mc_data_.heartbeat_count,
-        &mc_data_.is_operational, &mc_data_.arm_speed, &mc_data_.rotunda_angle,
-        &mc_data_.shoulder_angle, &mc_data_.elbow_angle, &mc_data_.wrist_roll,
-        &mc_data_.wrist_pitch, &mc_data_.finger.pinky_angle,
-        &mc_data_.finger.ring_angle, &mc_data_.finger.middle_angle,
-        &mc_data_.finger.pointer_angle, &mc_data_.finger.thumb_angle);
+        &mc_data_.is_operational, &mc_data_.ArmMode, &mc_data_.HandMode,
+        &mc_data_.arm_speed, &mc_data_.rotunda_angle, &mc_data_.shoulder_angle,
+        &mc_data_.elbow_angle, &mc_data_.wrist_roll, &mc_data_.wrist_pitch,
+        &mc_data_.finger.pinky_angle, &mc_data_.finger.ring_angle,
+        &mc_data_.finger.middle_angle, &mc_data_.finger.pointer_angle,
+        &mc_data_.finger.thumb_angle);
 
     if (actual_arguments != kExpectedArguments)
     {
@@ -358,7 +379,7 @@ class RoverArmSystem : public sjsu::common::RoverSystem
   MissionControlData::HandModes current_hand_mode_ =
       MissionControlData::HandModes::kConcurrent;
 
-  const int kExpectedArguments = 13;
+  const int kExpectedArguments = 15;
 
  public:
   MissionControlData mc_data_;

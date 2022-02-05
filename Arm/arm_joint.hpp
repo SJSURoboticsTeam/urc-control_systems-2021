@@ -30,7 +30,7 @@ class ArmJoint : public Joint
     Joint::Initialize();
   }
 
-  /// Move the motor to the (calibrated) angle desired.
+  // Move the motor to the (calibrated) angle desired.
   void SetPosition(float angle)
   {
     angle += offset_angle_;
@@ -39,12 +39,11 @@ class ArmJoint : public Joint
     motor_.SetAngle(angle_to_degrees);
   }
 
-  /// Sets the offset angle so motor can find its true zero
+  // Sets the offset angle so motor can find its true zero
   void SetZeroOffset(float offset)
   {
     offset_angle_ = offset;
   }
-
   void SetJointSpeed(float target_speed)
   {
     speed_ = std::clamp(target_speed, -kMaxSpeed, kMaxSpeed);
