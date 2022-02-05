@@ -5,6 +5,7 @@
 #include "Hand/hand.hpp"
 #include "../Common/heartbeat.hpp"
 #include "../Common/rover_system.hpp"
+#include "Arm/Arm/arm_2022.hpp"
 #include <cmath>
 
 namespace sjsu::arm
@@ -85,9 +86,7 @@ class RoverArmSystem : public sjsu::common::RoverSystem
 
   void Initialize() override
   {
-    rotunda_.Initialize();
-    shoulder_.Initialize();
-    elbow_.Initialize();
+    arm_.Initialize();
     hand_.Initialize();
   }
 
@@ -186,24 +185,6 @@ class RoverArmSystem : public sjsu::common::RoverSystem
     return true;
   }
 
-  void MoveRotunda(float angle)
-  {
-    rotunda_.SetJointSpeed(mc_data_.arm_speed);
-    rotunda_.SetPosition(angle);
-  }
-
-  void MoveShoulder(float angle)
-  {
-    shoulder_.SetJointSpeed(mc_data_.arm_speed);
-    shoulder_.SetPosition(angle);
-  }
-
-  void MoveElbow(float angle)
-  {
-    elbow_.SetJointSpeed(mc_data_.arm_speed);
-    elbow_.SetPosition(angle);
-  }
-
   void MoveHand(float thumb,
                 float pointer,
                 float middle,
@@ -216,10 +197,9 @@ class RoverArmSystem : public sjsu::common::RoverSystem
                              pinky, pitch, roll);
   }
 
-  void HomeArm()
+  void HomeArmSystem()
   {
-    HomeShoulder();
-    HomeElbow();
+    //HomeArm();
     hand_.HomeHand(mc_data_.arm_speed, rotunda_.GetOffsetAngle());
   }
 
@@ -235,8 +215,8 @@ class RoverArmSystem : public sjsu::common::RoverSystem
     {
       current_hand_mode_ = mc_data_.HandMode;
     }
-
-    switch (current_arm_mode_)
+    arm_.HandleMovement();
+    /*switch (current_arm_mode_)
     {
       case MissionControlData::ArmModes::kHomeArm: HomeArm(); break;
       case MissionControlData::ArmModes::kHomeHand: hand_.HomeHand(mc_data_.arm_speed, rotunda_.GetOffsetAngle()); break;
@@ -254,14 +234,13 @@ class RoverArmSystem : public sjsu::common::RoverSystem
         break;
       case MissionControlData::ArmModes::kHand: HandleHandModes(); break;
     }
+    */
   }
 
  private:
   void HandleConcurrentMode()
   {
-    MoveRotunda(mc_data_.rotunda_angle);
-    MoveShoulder(mc_data_.shoulder_angle);
-    MoveElbow(mc_data_.elbow_angle);
+    arm_.HandleConcurrentMode();
     MoveHand(mc_data_.finger.thumb_angle, mc_data_.finger.pointer_angle,
              mc_data_.finger.middle_angle, mc_data_.finger.ring_angle,
              mc_data_.finger.pinky_angle, mc_data_.wrist_roll, mc_data_.wrist_pitch);
@@ -291,88 +270,6 @@ class RoverArmSystem : public sjsu::common::RoverSystem
     }
   }
 
-  // TODO: change the joint class to have its own acceleration member variable
-  // to remove duplications in code like this
-  void UpdateAccelerations()
-  {
-    rotunda_.GetAccelerometerData();
-    shoulder_.GetAccelerometerData();
-    elbow_.GetAccelerometerData();
-  }
-
-  float CalculateShoulderHomeAngle()
-  {
-    float home_angle = 0;
-
-    float acceleration_x = rotunda_.acceleration_.x + shoulder_.acceleration_.x;
-    float acceleration_y = rotunda_.acceleration_.y + shoulder_.acceleration_.y;
-
-    home_angle = float(atan(acceleration_y / acceleration_x));
-    return home_angle;
-  }
-
-  float CalculateUncorrectedElbowHomeAngle()
-  {
-    float acceleration_x = rotunda_.acceleration_.x + elbow_.acceleration_.x;
-    float acceleration_y = rotunda_.acceleration_.y + elbow_.acceleration_.y;
-    float angle_without_correction =
-        float(atan(acceleration_y / acceleration_x));
-    return angle_without_correction;
-  }
-
-  bool ShoulderIsInSecondQuadrantOfGraph()
-  {
-    if (elbow_.acceleration_.x + rotunda_.acceleration_.x >= 0 &&
-        elbow_.acceleration_.y + rotunda_.acceleration_.y <= 0)
-    {
-      return true;
-    }
-    return false;
-  }
-
-  bool ShoulderIsInThirdQuandrantOfGraph()
-  {
-    if (elbow_.acceleration_.x + rotunda_.acceleration_.x >= 0 &&
-        elbow_.acceleration_.y + rotunda_.acceleration_.y >= 0)
-    {
-      return true;
-    }
-    return false;
-  }
-
-  void HomeShoulder()
-  {
-    UpdateAccelerations();
-    float home_angle = 0;
-
-    home_angle = CalculateShoulderHomeAngle();
-    shoulder_.SetZeroOffset(home_angle);
-    MoveShoulder(home_angle);
-  }
-
-  void HomeElbow()
-  {
-    UpdateAccelerations();
-    float home_angle = 0;
-
-    float angle_without_correction = CalculateUncorrectedElbowHomeAngle();
-
-    if (ShoulderIsInSecondQuadrantOfGraph())
-    {
-      home_angle = 90 - angle_without_correction;
-    }
-    else if (ShoulderIsInThirdQuandrantOfGraph())
-    {
-      home_angle = 180 + angle_without_correction;
-    }
-    else
-    {
-      home_angle = angle_without_correction;
-    }
-    elbow_.SetZeroOffset(home_angle);
-    MoveElbow(home_angle);
-  }
-
   int state_of_charge_ = 90;
   MissionControlData::ArmModes current_arm_mode_ =
       MissionControlData::ArmModes::kConcurrent;
@@ -381,12 +278,11 @@ class RoverArmSystem : public sjsu::common::RoverSystem
 
   const int kExpectedArguments = 15;
 
+ //change this to private at some point (harder then it looks)
  public:
   MissionControlData mc_data_;
 
-  sjsu::arm::ArmJoint & rotunda_;
-  sjsu::arm::ArmJoint & shoulder_;
-  sjsu::arm::ArmJoint & elbow_;
-  sjsu::arm::Hand hand_;
+  Hand hand_;
+  Arm arm_;
 };
 }  // namespace sjsu::arm
