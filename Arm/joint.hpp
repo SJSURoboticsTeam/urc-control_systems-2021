@@ -14,11 +14,16 @@ class Joint
     float z = 0;
   };
 
-  Joint(sjsu::Mpu6050 & accelerometer) : mpu_(accelerometer){};
+  Joint(sjsu::Accelerometer & accelerometer) : accelerometer_(accelerometer){};
+
+  void Initialize()
+  {
+    accelerometer_.Initialize();
+  }
 
   void GetAccelerometerData()
   {
-    sjsu::Accelerometer::Acceleration_t acceleration_to_float(mpu_.Read());
+    sjsu::Accelerometer::Acceleration_t acceleration_to_float(accelerometer_.Read());
     acceleration_.x =
         ReturnChangedIfZero(static_cast<float>(acceleration_to_float.x));
     acceleration_.y =
@@ -33,7 +38,7 @@ class Joint
     return (acceleration == 0 ? .001 : acceleration);
   }
 
-  sjsu::Mpu6050 & mpu_;
+  sjsu::Accelerometer & accelerometer_;
   Acceleration acceleration_;
 };
 }  // namespace sjsu::arm
