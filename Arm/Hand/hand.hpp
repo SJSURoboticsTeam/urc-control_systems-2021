@@ -132,14 +132,7 @@ class Hand
                        middle_.GetMaxAngle(), ring_.GetMaxAngle(),
                        pinky_.GetMaxAngle(), wrist_.GetRollPosition(), wrist_.GetPitchPosition());
   }
-
-  void CloseHand(float speed)
-  {
-    HandleHandMovement(speed, thumb_.GetMaxAngle(), pointer_.GetMaxAngle(),
-                       middle_.GetMaxAngle(), ring_.GetMaxAngle(),
-                       pinky_.GetMaxAngle());
-  }
-
+  
   void OpenHand(float speed)
   {
     HandleHandMovement(speed, thumb_.GetMinAngle(), pointer_.GetMinAngle(),
