@@ -47,7 +47,7 @@ class HumanArm
     {
       home_angle = 90 - angle_without_correction;
     }
-    else if (ShoulderIsInThirdQuandrantOfGraph())
+    else if (ShoulderIsInThirdQuadrantOfGraph())
     {
       home_angle = 180 + angle_without_correction;
     }
@@ -137,7 +137,7 @@ class HumanArm
     return false;
   }
 
-  bool ShoulderIsInThirdQuandrantOfGraph()
+  bool ShoulderIsInThirdQuadrantOfGraph()
   {
     if (elbow_.acceleration_.x + rotunda_.acceleration_.x >= 0 &&
         elbow_.acceleration_.y + rotunda_.acceleration_.y >= 0)
