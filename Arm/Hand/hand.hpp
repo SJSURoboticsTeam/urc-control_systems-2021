@@ -7,13 +7,6 @@ namespace sjsu::arm
 class Hand
 {
  public:
-  struct accelerations
-  {
-    float x;
-    float y;
-    float z;
-  };
-
   Hand(sjsu::arm::WristJoint & wrist,
        sjsu::arm::Finger & pinky,
        sjsu::arm::Finger & ring,
@@ -38,12 +31,28 @@ class Hand
     pointer_.Initialize();
     thumb_.Initialize();
   }
-  void HandleHandMovement(float speed,
-                          float thumb_position,
-                          float pointer_position,
-                          float middle_position,
-                          float ring_position,
-                          float pinky_position)
+
+  void PrintHandData()
+  {
+    printf("Hand Finger Positions:\n");
+    printf("Pinky Angle: %d\n", pinky_.GetPosition());
+    printf("Ring Angle: %d\n", ring_.GetPosition());
+    printf("Middle Angle: %d\n", middle_.GetPosition());
+    printf("Pointer Angle: %d\n", pointer_.GetPosition());
+    printf("Thumb Angle: %d\n", thumb_.GetPosition());
+
+    wrist_.PrintWristData();
+  }
+
+  void HandleHandMovement(
+      float speed,
+      float thumb_position,
+      float pointer_position,
+      float middle_position,
+      float ring_position,
+      float pinky_position, 
+      float roll_position, 
+      float pitch_position)
   {
     thumb_.SetSpeed(speed);
     thumb_.SetPosition(thumb_position);
@@ -55,6 +64,31 @@ class Hand
     ring_.SetPosition(ring_position);
     pinky_.SetSpeed(speed);
     pinky_.SetPosition(pinky_position);
+    wrist_.HandleWristMovement(speed, roll_position, pitch_position);
+  }
+
+  // The following two functions are here to allow the rover arm system to
+  // directly control the roll and the pitch of the wrist this is mainly for
+  // testing due to the different hand drive modes, when the drive modes are
+  // removed this may be removed as well
+  void SetWristRollPosition(float speed, float roll_position)
+  {
+    wrist_.SetRollPosition(speed, roll_position);
+  }
+
+  void SetWristPitchPosition(float speed, float pitch_position)
+  {
+    wrist_.SetRollPosition(speed, pitch_position);
+  }
+
+  int GetWristPitch()
+  {
+    return wrist_.GetPitchPosition();
+  }
+
+  int GetWristRoll()
+  {
+    return wrist_.GetRollPosition();
   }
 
   int GetThumbPosition()
@@ -82,38 +116,29 @@ class Hand
     return pinky_.GetPosition();
   };
 
-  void HomeWrist(float rotunda_offset)
+  void HomeHand(float speed, float rotunda_offset_angle)
   {
-    wrist_.GetAccelerometerData();
-    HomePitch(rotunda_offset);
-    HomeRoll();
-  };
-
-  void HomePitch(float rotunda_offset)
-  {
-    float wrist_pitch_offset =
-        float(atan(wrist_.acceleration_.y / wrist_.acceleration_.z)) +
-        rotunda_offset;
-    wrist_.SetPitchPosition(wrist_pitch_offset);
-    wrist_.SetZeroPitchOffsets(wrist_pitch_offset);
+    pinky_.Home();
+    ring_.Home();
+    middle_.Home();
+    pointer_.Home();
+    thumb_.Home();
+    wrist_.Home(speed, float(rotunda_offset_angle));
   }
 
   void CloseHand(float speed)
   {
     HandleHandMovement(speed, thumb_.GetMaxAngle(), pointer_.GetMaxAngle(),
                        middle_.GetMaxAngle(), ring_.GetMaxAngle(),
-                       pinky_.GetMaxAngle());
+                       pinky_.GetMaxAngle(), wrist_.GetRollPosition(), wrist_.GetPitchPosition());
   }
-
+  
   void OpenHand(float speed)
   {
     HandleHandMovement(speed, thumb_.GetMinAngle(), pointer_.GetMinAngle(),
                        middle_.GetMinAngle(), ring_.GetMinAngle(),
-                       pinky_.GetMinAngle());
+                       pinky_.GetMinAngle(), wrist_.GetRollPosition(), wrist_.GetPitchPosition());
   }
-
-  // can't home yet
-  void HomeRoll(){};
 
  private:
   // Uart & uart_;
