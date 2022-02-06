@@ -96,7 +96,7 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
         "&left_wheel_speed=%d&left_wheel_angle=%d&right_wheel_speed=%d&right_"
         "wheel_angle=%d&back_wheel_speed=%d&back_wheel_angle=%d",
         GetHeartbeatCount(), mc_data_.is_operational, mc_data_.wheel_shift,
-        current_mode_, state_of_charge_, left_wheel_->GetHubSpeed(),
+        current_drive_mode_, state_of_charge_, left_wheel_->GetHubSpeed(),
         left_wheel_->GetSteerAngle(), right_wheel_->GetHubSpeed(),
         right_wheel_->GetSteerAngle(), back_wheel_->GetHubSpeed(),
         back_wheel_->GetSteerAngle());
