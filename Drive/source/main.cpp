@@ -3,7 +3,7 @@
 #include "utility/time/timeout_timer.hpp"
 #include "devices/actuators/servo/rmd_x.hpp"
 
-#include "wheel.hpp"
+#include "rmd_wheel.hpp"
 #include "../Common/esp.hpp"
 #include "rover_drive_system.hpp"
 
@@ -31,16 +31,16 @@ int main(void)
   back_steer_motor.settings.gear_ratio  = 8;
   back_hub_motor.settings.gear_ratio    = 8;
 
-  sjsu::Gpio & left_wheel_homing_pin  = sjsu::lpc40xx::GetGpio<0, 15>();
-  sjsu::Gpio & right_wheel_homing_pin = sjsu::lpc40xx::GetGpio<2, 9>();
-  sjsu::Gpio & back_wheel_homing_pin  = sjsu::lpc40xx::GetGpio<0, 18>();
+  sjsu::Gpio & left_homing_pin  = sjsu::lpc40xx::GetGpio<0, 15>();
+  sjsu::Gpio & right_homing_pin = sjsu::lpc40xx::GetGpio<2, 9>();
+  sjsu::Gpio & back_homing_pin  = sjsu::lpc40xx::GetGpio<0, 18>();
 
-  sjsu::drive::Wheel left_wheel("left", left_hub_motor, left_steer_motor,
-                                left_wheel_homing_pin);
-  sjsu::drive::Wheel right_wheel("right", right_hub_motor, right_steer_motor,
-                                 right_wheel_homing_pin);
-  sjsu::drive::Wheel back_wheel("back", back_hub_motor, back_steer_motor,
-                                back_wheel_homing_pin);
+  sjsu::drive::RMDWheel left_wheel("left", left_hub_motor, left_steer_motor,
+                                   left_homing_pin);
+  sjsu::drive::RMDWheel right_wheel("right", right_hub_motor, right_steer_motor,
+                                    right_homing_pin);
+  sjsu::drive::RMDWheel back_wheel("back", back_hub_motor, back_steer_motor,
+                                   back_homing_pin);
   sjsu::drive::RoverDriveSystem drive(left_wheel, right_wheel, back_wheel);
 
   esp.Initialize();
@@ -82,7 +82,8 @@ int main(void)
     }
     catch (const sjsu::drive::RoverDriveSystem::DriveModeHandlerError &)
     {
-      sjsu::LogError("DriveModeHandlerError: Unable to assign drive mode handler!");
+      sjsu::LogError(
+          "DriveModeHandlerError: Unable to assign drive mode handler!");
     }
     catch (const sjsu::drive::RoverDriveSystem::DriveModeError &)
     {

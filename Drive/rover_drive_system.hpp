@@ -2,11 +2,12 @@
 
 #include "utility/log.hpp"
 
+#include "Interface/wheel.hpp"
 #include "../Common/state_of_charge.hpp"
 #include "../Common/rover_system.hpp"
 #include "../Common/heartbeat.hpp"
 #include "../Common/esp.hpp"
-#include "wheel.hpp"
+
 #include <array>
 
 namespace sjsu::drive
@@ -78,9 +79,9 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
     */
     if (IsStopped())
     {
-      left_wheel_  = wheels[(position + 0) % 3];
-      right_wheel_ = wheels[(position + 1) % 3];
-      back_wheel_  = wheels[(position + 2) % 3];
+      left_wheel_  = wheels_[(position + 0) % 3];
+      right_wheel_ = wheels_[(position + 1) % 3];
+      back_wheel_  = wheels_[(position + 2) % 3];
     }
   };
 
@@ -96,7 +97,7 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
         "&left_wheel_speed=%d&left_wheel_angle=%d&right_wheel_speed=%d&right_"
         "wheel_angle=%d&back_wheel_speed=%d&back_wheel_angle=%d",
         GetHeartbeatCount(), mc_data_.is_operational, mc_data_.wheel_shift,
-        current_drive_mode_, state_of_charge_, left_wheel_->GetHubSpeed(),
+        char(GetCurrentMode()), state_of_charge_, left_wheel_->GetHubSpeed(),
         left_wheel_->GetSteerAngle(), right_wheel_->GetHubSpeed(),
         right_wheel_->GetSteerAngle(), back_wheel_->GetHubSpeed(),
         back_wheel_->GetSteerAngle());
@@ -150,10 +151,7 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
       case Modes::LeftWheelMode:
       case Modes::RightWheelMode:
       case Modes::BackWheelMode: HandleSingularWheelMode(speed, angle); break;
-      default:
-        StopWheels();
-        // throw DriveModeHandlerError{};
-        break;
+      default: StopWheels(); break;  // throw DriveModeHandlerError{};
     }
   }
 
@@ -259,7 +257,7 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
     printf("HEARTBEAT:\t%d\n", mc_data_.heartbeat_count);
     printf("OPERATIONAL:\t%d\n", mc_data_.is_operational);
     printf("WHEEL SHIFT:\t%d\n", mc_data_.wheel_shift);
-    printf("DRIVE MODE:\t%d\n", current_drive_mode_);
+    printf("DRIVE MODE:\t%c\n", char(GetCurrentMode()));
     printf("MC SPEED:\t%d\n", mc_data_.speed);
     printf("MC ANGLE:\t%d\n", mc_data_.rotation_angle);
     printf("WHEEL     SPEED     ANGLE     ENCODER-POS\n");
@@ -415,6 +413,7 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
         back_wheel_->SetSteerAngle(angle);
         back_wheel_->SetHubSpeed(speed);
         break;
+      default: sjsu::LogWarning("Should be unreachable"); break;
     }
   }
 
@@ -431,7 +430,7 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
   Wheel * left_wheel_;
   Wheel * right_wheel_;
   Wheel * back_wheel_;
-  std::array<Wheel *, 3> wheels{ left_wheel_, right_wheel_, back_wheel_ };
+  std::array<Wheel *, 3> wheels_{ left_wheel_, right_wheel_, back_wheel_ };
   // TODO: Implement this logic once SOC is tested
   // sjsu::common::StateOfCharge & battery_;
 };

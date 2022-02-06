@@ -2,25 +2,26 @@
 
 #include "devices/actuators/servo/rmd_x.hpp"
 #include "peripherals/lpc40xx/gpio.hpp"
-//#include "../Common/gpio.hpp"
 #include "devices/switches/button.hpp"
+
+#include "Interface/wheel.hpp"
 
 namespace sjsu::drive
 {
 /// Wheel class manages steering & hub motors for the rover.
-class Wheel
+class RMDWheel : public Wheel
 {
  public:
-  Wheel(std::string name,
-        sjsu::RmdX & hub_motor,
-        sjsu::RmdX & steer_motor,
-        sjsu::Gpio & homing_pin)
+  RMDWheel(std::string name,
+           sjsu::RmdX & hub_motor,
+           sjsu::RmdX & steer_motor,
+           sjsu::Gpio & homing_pin)
       : name_(name),
         hub_motor_(hub_motor),
         steer_motor_(steer_motor),
         homing_pin_(homing_pin){};
 
-  void Initialize()
+  void Initialize() override
   {
     sjsu::LogInfo("Initializing %s wheel...", name_.c_str());
     hub_motor_.Initialize();
@@ -29,34 +30,34 @@ class Wheel
     homing_pin_.SetAsInput();
   };
 
-  void Print()
+  void Print() override
   {
-    printf("%-10s%-10d%-10d%-10f\n", name_.c_str(), GetHubSpeed(), GetSteerAngle(), GetSteerEncoderPosition());
+    printf("%-10s%-10d%-10d\n", name_.c_str(), GetHubSpeed(), GetSteerAngle());
   }
 
-  std::string GetName()
+  std::string GetName() override
   {
     return name_;
   }
 
-  int GetHubSpeed()
+  int GetHubSpeed() override
   {
     return int(hub_speed_);
   };
 
-  int GetSteerAngle()
+  int GetSteerAngle() override
   {
     return int(steer_angle_);
   };
 
-  void SetHubSpeed(float speed)
+  void SetHubSpeed(float speed) override
   {
     hub_speed_ = float(std::clamp(speed, -kMaxSpeed, kMaxSpeed));
     units::angular_velocity::revolutions_per_minute_t hub_speed_rpm(hub_speed_);
     hub_motor_.SetSpeed(hub_speed_rpm);
   }
 
-  void SetSteerAngle(float angle)
+  void SetSteerAngle(float angle) override
   {
     steer_angle_ = float((int(angle) % kMaxRotation) + homing_offset_angle_);
     units::angle::degree_t steer_angle_degree(steer_angle_);
@@ -68,13 +69,8 @@ class Wheel
     return homing_offset_angle_;
   }
 
-int GetSteerEncoderPosition()
-  {
-    return int(steer_motor_.RequestFeedbackFromMotor().GetFeedback().encoder_position);
-  }
-
   /// Checks if the steer wheel is aligned with slip ring
-  bool IsHomed()
+  bool IsHomed() override
   {
     // homing_pin_.GetPin().settings.Floating();
     // if (homing_pin_.Read() == kHomeLevel) // w/ slip ring

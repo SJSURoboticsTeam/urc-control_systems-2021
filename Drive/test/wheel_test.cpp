@@ -1,7 +1,7 @@
 #include "testing/testing_frameworks.hpp"
 #include "devices/actuators/servo/rmd_x.hpp"
 
-#include "wheel.hpp"
+#include "rmd_wheel.hpp"
 
 namespace sjsu
 {
@@ -18,19 +18,18 @@ TEST_CASE("Wheel testing")
   RmdX hub_motor(network, 0x140);
   RmdX steer_motor(network, 0x141);
 
-  Mock<Gpio> mock_wheel_homing_pin;
+  Mock<Gpio> mock_homing_pin;
   InterruptCallback interrupt;
-  Fake(Method(mock_wheel_homing_pin, Gpio::Read));
-  Fake(Method(mock_wheel_homing_pin, Gpio::GetPin));
-  Fake(Method(mock_wheel_homing_pin, Gpio::SetDirection));
-  Fake(Method(mock_wheel_homing_pin, Gpio::ModuleInitialize));
-  Fake(Method(mock_wheel_homing_pin, Gpio::DetachInterrupt));
-  When(Method(mock_wheel_homing_pin, Gpio::AttachInterrupt))
+  Fake(Method(mock_homing_pin, Gpio::Read));
+  Fake(Method(mock_homing_pin, Gpio::GetPin));
+  Fake(Method(mock_homing_pin, Gpio::SetDirection));
+  Fake(Method(mock_homing_pin, Gpio::ModuleInitialize));
+  Fake(Method(mock_homing_pin, Gpio::DetachInterrupt));
+  When(Method(mock_homing_pin, Gpio::AttachInterrupt))
       .AlwaysDo([&interrupt](InterruptCallback callback, Gpio::Edge) -> void
                 { interrupt = callback; });
 
-  drive::Wheel wheel("wheel", hub_motor, steer_motor,
-                     mock_wheel_homing_pin.get());
+  drive::RMDWheel wheel("wheel", hub_motor, steer_motor, mock_homing_pin.get());
 
   SECTION("checking default values")
   {
