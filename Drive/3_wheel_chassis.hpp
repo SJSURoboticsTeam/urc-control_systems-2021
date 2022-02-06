@@ -1,29 +1,16 @@
 #pragma once
 
+#include <array>
+
 #include "utility/log.hpp"
 
+#include "Interface/chassis.hpp"
 #include "Interface/wheel.hpp"
-#include "../Common/state_of_charge.hpp"
-#include "../Common/rover_system.hpp"
-#include "../Common/heartbeat.hpp"
-#include "../Common/esp.hpp"
-
-#include <array>
 
 namespace sjsu::drive
 {
-const char response_body_format[] =
-    "\r\n\r\n{\n"
-    "  \"heartbeat_count\": %d,\n"
-    "  \"is_operational\": %d,\n"
-    "  \"wheel_shift\": %d,\n"
-    "  \"drive_mode\": \"%c\",\n"
-    "  \"speed\": %d,\n"
-    "  \"angle\": %d\n"
-    "}";
-class RoverDriveSystem : public sjsu::common::RoverSystem
+class ThreeWheeledChassis : public Chassis
 {
- public:
   struct ParseError
   {
   };
@@ -44,27 +31,19 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
     BackWheelMode  = 'B'
   };
 
-  struct MissionControlData : public RoverMissionControlData
-  {
-    int wheel_shift    = 0;
-    Modes drive_mode   = Modes::SpinMode;
-    int rotation_angle = 0;
-    int speed          = 0;
-  };
-
-  RoverDriveSystem(Wheel & left_wheel, Wheel & right_wheel, Wheel & back_wheel)
+  ThreeWheeledChassis(Wheel & left_wheel,
+                      Wheel & right_wheel,
+                      Wheel & back_wheel)
       : left_wheel_(&left_wheel),
         right_wheel_(&right_wheel),
         back_wheel_(&back_wheel){};
 
-  virtual void Initialize() override
+  void Initialize() override
   {
-    sjsu::LogInfo("Initializing drive system...");
     left_wheel_->Initialize();
     right_wheel_->Initialize();
     back_wheel_->Initialize();
     SetSpinMode();
-    sjsu::LogInfo("Drive system initialized!");
   }
 
   /// 0 = Left/Right/Back, 1 = Back/Left/Right, 2 = Right/Back/Left
@@ -78,64 +57,9 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
     }
   };
 
-  /// Constructs parameters for an HTTP GET request
-  /// @return ?heartbeat_count=0&is_operational=1&drive_mode=S ...
-  std::string GETParameters() override
+  void HandleMovement(Modes drive_mode_, float angle, float speed)
   {
-    char request_parameter[300];
-    snprintf(
-        request_parameter, 300,
-        "?heartbeat_count=%d&is_operational=%d&wheel_shift=%d&drive_mode=%c&"
-        "battery=%d&left_wheel_speed=%d&left_wheel_angle=%d&right_wheel_speed=%"
-        "d&right_wheel_angle=%d&back_wheel_speed=%d&back_wheel_angle=%d",
-        GetHeartbeatCount(), mc_data_.is_operational, mc_data_.wheel_shift,
-        char(GetCurrentMode()), state_of_charge_, left_wheel_->GetHubSpeed(),
-        left_wheel_->GetSteerAngle(), right_wheel_->GetHubSpeed(),
-        right_wheel_->GetSteerAngle(), back_wheel_->GetHubSpeed(),
-        back_wheel_->GetSteerAngle());
-    return request_parameter;
-  }
-
-  /// Parses the GET requests response and updates the mission control variables
-  void ParseJSONResponse(std::string & response) override
-  {
-    int actual_arguments = sscanf(
-        response.c_str(), response_body_format, &mc_data_.heartbeat_count,
-        &mc_data_.is_operational, &mc_data_.wheel_shift, &mc_data_.drive_mode,
-        &mc_data_.speed, &mc_data_.rotation_angle);
-
-    if (actual_arguments != kExpectedArguments)
-    {
-      sjsu::LogError("Arguments# %d != expected# %d!", actual_arguments,
-                     kExpectedArguments);
-      throw ParseError{};
-    }
-  }
-
-  /// Handles the rover movement depending on the mode.
-  /// D = Drive, S = Spin, T = Translation, L/R/B = Left/Right/Back Wheel
-  void HandleRoverMovement() override
-  {
-    if (!IsHeartbeatSynced(mc_data_.heartbeat_count))
-    {
-      SetWheelSpeed(kZeroSpeed);
-      return;
-    }
-    if (!IsOperational())
-    {
-      StopWheels();
-      return;
-    }
-    if (IsNewMode())
-    {
-      SetMode();
-      return;
-    }
-
-    float angle = float(mc_data_.rotation_angle);
-    float speed = float(mc_data_.speed);
-
-    switch (current_drive_mode_)
+    switch (drive_mode_)
     {
       case Modes::DriveMode: HandleDriveMode(speed, angle); break;
       case Modes::SpinMode: HandleSpinMode(speed); break;
@@ -145,28 +69,6 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
       case Modes::BackWheelMode: HandleSingularWheelMode(speed, angle); break;
       default: StopWheels(); break;  // throw DriveModeHandlerError{};
     }
-  }
-
-  /// Checks if the rover is operational
-  bool IsOperational()
-  {
-    if (mc_data_.is_operational != 1)
-    {
-      sjsu::LogWarning("Drive mode is not operational!");
-      return false;
-    }
-    return true;
-  }
-
-  /// Checks if the rover got a new drive mode command
-  bool IsNewMode()
-  {
-    if (mc_data_.drive_mode != current_drive_mode_)
-    {
-      sjsu::LogWarning("Rover was assigned new drive mode!");
-      return true;
-    }
-    return false;
   }
 
   Modes GetCurrentMode()
@@ -241,23 +143,6 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
   {
     return (left_wheel_->IsHomed() && right_wheel_->IsHomed() &&
             back_wheel_->IsHomed());
-  }
-
-  /// Prints the mc data and all the current wheel data
-  void PrintRoverData() override
-  {
-    printf("HEARTBEAT:\t%d\n", mc_data_.heartbeat_count);
-    printf("OPERATIONAL:\t%d\n", mc_data_.is_operational);
-    printf("WHEEL SHIFT:\t%d\n", mc_data_.wheel_shift);
-    printf("DRIVE MODE:\t%c\n", char(GetCurrentMode()));
-    printf("MC SPEED:\t%d\n", mc_data_.speed);
-    printf("MC ANGLE:\t%d\n", mc_data_.rotation_angle);
-    printf("WHEEL     SPEED     ANGLE     ENCODER-POS\n");
-    printf("=========================================\n");
-    left_wheel_->Print();
-    right_wheel_->Print();
-    back_wheel_->Print();
-    printf("=========================================\n");
   }
 
  private:
@@ -399,21 +284,9 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
     }
   }
 
-  int state_of_charge_ = 90;
-
-  const int kExpectedArguments = 6;
-  const float kZeroSpeed       = 0;
-  const float kMaxTurnRadius   = 45;
-  const float kLerpStep        = 0.5;
-
- public:
-  Modes current_drive_mode_ = Modes::SpinMode;
-  MissionControlData mc_data_;
   Wheel * left_wheel_;
   Wheel * right_wheel_;
   Wheel * back_wheel_;
   std::array<Wheel *, 3> wheels_{ left_wheel_, right_wheel_, back_wheel_ };
-  // TODO: Implement this logic once SOC is tested
-  // sjsu::common::StateOfCharge & battery_;
 };
 }  // namespace sjsu::drive
