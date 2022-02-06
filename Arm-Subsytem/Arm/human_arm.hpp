@@ -6,11 +6,68 @@ namespace sjsu::arm
 {
 class HumanArm
 {
-  void Initialize() override
+ public:
+  struct MissionControlArmData
+  {
+    enum class ArmModes : char
+    {
+      kConcurrent = 'C',
+      kRotunda    = 'R',
+      kShoulder   = 'S',
+      kElbow      = 'E',
+      kHand       = 'D'
+    };
+    ArmModes arm_mode = ArmModes::kConcurrent;
+
+    struct ArmAngles
+    {
+      int rotunda  = 0;
+      int shoulder = 0;
+      int elbow    = 0;
+    };
+    ArmAngles arm_angles;
+  };
+
+  HumanArm(ArmJoint & rotunda, ArmJoint & shoulder, ArmJoint & elbow)
+      : rotunda_(rotunda), shoulder_(shoulder), elbow_(elbow){};
+
+  void Initialize()
   {
     rotunda_.Initialize();
     shoulder_.Initialize();
     elbow_.Initialize();
+  }
+
+  void PrintArmData()
+  {
+    printf("JOINTS-DATA:\n");
+    printf("=========================================\n");
+    printf("Rotunda speed: %d\n", rotunda_.GetSpeed());
+    printf("Rotunda position: %d\n", rotunda_.GetPosition());
+
+    printf("Shoulder speed: %d\n", shoulder_.GetSpeed());
+    printf("Shoulder position: %d\n", shoulder_.GetPosition());
+
+    printf("Elbow speed: %d\n", elbow_.GetSpeed());
+    printf("Elbow position: %d\n", elbow_.GetPosition());
+  }
+
+  void MoveRotunda(float angle, float speed)
+  {
+    rotunda_.SetJointSpeed(speed);
+    rotunda_.SetPosition(angle);
+  }
+
+  void MoveShoulder(float angle, float speed)
+  {
+    shoulder_.SetJointSpeed(speed);
+    shoulder_.SetPosition(angle);
+  }
+
+  void MoveElbow(float angle, float speed)
+  {
+    elbow_.SetJointSpeed(speed);
+    elbow_.SetPosition(angle);
   }
 
   void UpdateAccelerations()
@@ -20,7 +77,8 @@ class HumanArm
     elbow_.GetAccelerometerData();
   }
 
-  void HomeArm(float speed) override
+
+  void HomeArm(float speed)
   {
     HomeShoulder(speed);
     HomeElbow(speed);
@@ -59,52 +117,83 @@ class HumanArm
     MoveElbow(home_angle, speed);
   }
 
-  void MoveRotunda(float angle, float speed)
-  {
-    rotunda_.SetJointSpeed(speed);
-    rotunda_.SetPosition(angle);
-  }
-
-  void MoveShoulder(float angle, float speed)
-  {
-    shoulder_.SetJointSpeed(speed);
-    shoulder_.SetPosition(angle);
-  }
-
-  void MoveElbow(float angle, float speed)
-  {
-    elbow_.SetJointSpeed(speed);
-    elbow_.SetPosition(angle);
-  }
-
   void HandleConcurrentMode(float rotunda_angle,
                             float shoulder_angle,
-                            float elbow_angle)
+                            float elbow_angle,
+                            float speed)
   {
-    MoveRotunda(rotunda_angle);
-    MoveShoulder(shoulder_angle);
-    MoveElbow(elbow_angle);
+    MoveRotunda(rotunda_angle, speed);
+    MoveShoulder(shoulder_angle, speed);
+    MoveElbow(elbow_angle, speed);
   }
 
-  void HandleMovement(current_arm_mode_) override
-  {
-    switch (current_arm_mode_)
+
+  void HandleMovement(float rotunda, float shoulder, float elbow, float speed)
+  { 
+      switch (current_arm_mode_)
     {
-      case MissionControlData::ArmModes::kHomeArm: HomeArm(); break;
-      case MissionControlData::ArmModes::kConcurrent:
-        HandleConcurrentMode();
+      case MissionControlArmData::ArmModes::kConcurrent:
+        HandleConcurrentMode(rotunda, shoulder, elbow, speed);
         break;
-      case MissionControlData::ArmModes::kRotunda:
-        MoveRotunda(mc_data_.rotunda_angle);
+      case MissionControlArmData::ArmModes::kRotunda:
+        MoveRotunda(rotunda, speed);
         break;
-      case MissionControlData::ArmModes::kShoulder:
-        MoveShoulder(mc_data_.shoulder_angle);
+      case MissionControlArmData::ArmModes::kShoulder:
+        MoveShoulder(shoulder, speed);
         break;
-      case MissionControlData::ArmModes::kElbow:
-        MoveElbow(mc_data_.elbow_angle);
+      case MissionControlArmData::ArmModes::kElbow:
+        MoveElbow(elbow, speed);
+        break;
+      case MissionControlArmData::ArmModes::kHand:
         break;
     }
   }
+
+  MissionControlArmData::ArmModes GetCurrentArmMode()
+  {
+    return current_arm_mode_;
+  }
+
+  void SetCurrentArmMode(MissionControlArmData::ArmModes current_arm_mode)
+  {
+    current_arm_mode_ = current_arm_mode;
+  }
+
+  int GetRotundaPosition()
+  {
+    return rotunda_.GetPosition();
+  }
+
+  int GetRotundaSpeed()
+  {
+    return rotunda_.GetSpeed();
+  }
+
+  int GetShoulderPosition()
+  {
+    return shoulder_.GetPosition();
+  }
+
+  int GetShoulderSpeed()
+  {
+    return shoulder_.GetSpeed();
+  }
+
+  int GetElbowPosition()
+  {
+    return elbow_.GetPosition();
+  }
+
+  int GetElbowSpeed()
+  {
+    return elbow_.GetSpeed();
+  }
+
+  int GetRotundaOffsetAngle()
+  {
+    return rotunda_.GetOffsetAngle();
+  }
+
 
  private:
   float CalculateShoulderHomeAngle()
@@ -147,8 +236,11 @@ class HumanArm
     return false;
   }
 
-  ArmJoint rotunda_;
-  ArmJoint shoulder_;
-  ArmJoint elbow_;
+  ArmJoint & rotunda_;
+  ArmJoint & shoulder_;
+  ArmJoint & elbow_;
+  
+  MissionControlArmData::ArmModes current_arm_mode_ =
+      MissionControlArmData::ArmModes::kConcurrent;
 };
 }  // namespace sjsu::arm
