@@ -52,32 +52,6 @@ class HumanArm
     printf("Elbow position: %d\n", elbow_.GetPosition());
   }
 
-  void MoveRotunda(float angle, float speed)
-  {
-    rotunda_.SetJointSpeed(speed);
-    rotunda_.SetPosition(angle);
-  }
-
-  void MoveShoulder(float angle, float speed)
-  {
-    shoulder_.SetJointSpeed(speed);
-    shoulder_.SetPosition(angle);
-  }
-
-  void MoveElbow(float angle, float speed)
-  {
-    elbow_.SetJointSpeed(speed);
-    elbow_.SetPosition(angle);
-  }
-
-  void UpdateAccelerations()
-  {
-    rotunda_.GetAccelerometerData();
-    shoulder_.GetAccelerometerData();
-    elbow_.GetAccelerometerData();
-  }
-
-
   void HomeArm(float speed)
   {
     HomeShoulder(speed);
@@ -194,8 +168,8 @@ class HumanArm
     return rotunda_.GetOffsetAngle();
   }
 
-
  private:
+
   float CalculateShoulderHomeAngle()
   {
     float home_angle = 0;
@@ -236,10 +210,35 @@ class HumanArm
     return false;
   }
 
+  void MoveRotunda(float angle, float speed)
+  {
+    rotunda_.SetJointSpeed(speed);
+    rotunda_.SetPosition(angle);
+  }
+
+  void MoveShoulder(float angle, float speed)
+  {
+    shoulder_.SetJointSpeed(speed);
+    shoulder_.SetPosition(angle);
+  }
+
+  void MoveElbow(float angle, float speed)
+  {
+    elbow_.SetJointSpeed(speed);
+    elbow_.SetPosition(angle);
+  }
+
+  void UpdateAccelerations()
+  {
+    rotunda_.GetAccelerometerData();
+    shoulder_.GetAccelerometerData();
+    elbow_.GetAccelerometerData();
+  }
+
   ArmJoint & rotunda_;
   ArmJoint & shoulder_;
   ArmJoint & elbow_;
-  
+
   MissionControlArmData::ArmModes current_arm_mode_ =
       MissionControlArmData::ArmModes::kConcurrent;
 };
