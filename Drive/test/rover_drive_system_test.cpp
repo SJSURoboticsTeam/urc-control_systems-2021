@@ -54,7 +54,8 @@ TEST_CASE("Drive system testing")
   SECTION("2.1 should return the starting defaults response")
   {
     std::string expected_parameters =
-        "?heartbeat_count=0&is_operational=0&wheel_shift=0&drive_mode=S&battery=90"
+        "?heartbeat_count=0&is_operational=0&wheel_shift=0&drive_mode=S&"
+        "battery=90"
         "&left_wheel_speed=0&left_wheel_angle=0&right_wheel_speed=0&right_"
         "wheel_angle=0&back_wheel_speed=0&back_wheel_angle=0";
     std::string actual_parameters = drive.GETParameters();
@@ -99,6 +100,7 @@ TEST_CASE("Drive system testing")
         "\r\n\r\n{\n"
         "  \"heartbeat_count\": 0,\n"
         "  \"is_operational\": 1,\n"
+        "  \"wheel_shift\": 0,\n"
         "  \"drive_mode\": \"S\",\n"
         "  \"speed\": 15,\n"
         "  \"angle\": 15\n"
@@ -388,8 +390,10 @@ TEST_CASE("Drive system testing")
     drive.HandleRoverMovement();
     drive.HandleRoverMovement();
 
-    CHECK_EQ(drive.left_wheel_->GetHubSpeed(), drive.right_wheel_->GetHubSpeed());
-    CHECK_EQ(drive.right_wheel_->GetHubSpeed(), drive.back_wheel_->GetHubSpeed());
+    CHECK_EQ(drive.left_wheel_->GetHubSpeed(),
+             drive.right_wheel_->GetHubSpeed());
+    CHECK_EQ(drive.right_wheel_->GetHubSpeed(),
+             drive.back_wheel_->GetHubSpeed());
     CHECK_FALSE(drive.IsStopped());
   }
 
@@ -458,8 +462,10 @@ TEST_CASE("Drive system testing")
     drive.HandleRoverMovement();
     drive.HandleRoverMovement();
     // Currently the hub motors are all set to the same speed
-    CHECK_EQ(drive.left_wheel_->GetHubSpeed(), drive.right_wheel_->GetHubSpeed());
-    CHECK_EQ(drive.right_wheel_->GetHubSpeed(), drive.back_wheel_->GetHubSpeed());
+    CHECK_EQ(drive.left_wheel_->GetHubSpeed(),
+             drive.right_wheel_->GetHubSpeed());
+    CHECK_EQ(drive.right_wheel_->GetHubSpeed(),
+             drive.back_wheel_->GetHubSpeed());
     CHECK_FALSE(drive.IsStopped());
   }
 
@@ -496,8 +502,10 @@ TEST_CASE("Drive system testing")
     drive.HandleRoverMovement();
     drive.HandleRoverMovement();
 
-    CHECK_EQ(drive.left_wheel_->GetHubSpeed(), drive.right_wheel_->GetHubSpeed());
-    CHECK_EQ(drive.right_wheel_->GetHubSpeed(), drive.back_wheel_->GetHubSpeed());
+    CHECK_EQ(drive.left_wheel_->GetHubSpeed(),
+             drive.right_wheel_->GetHubSpeed());
+    CHECK_EQ(drive.right_wheel_->GetHubSpeed(),
+             drive.back_wheel_->GetHubSpeed());
     CHECK_FALSE(drive.IsStopped());
   }
 
@@ -522,9 +530,9 @@ TEST_CASE("Drive system testing")
 
   SECTION("13.1 left wheel should become right wheel")
   {
-    drive::Wheel *left = drive.left_wheel_;
-    drive::Wheel *right = drive.right_wheel_;
-    drive::Wheel *back = drive.back_wheel_;
+    drive::Wheel * left  = drive.left_wheel_;
+    drive::Wheel * right = drive.right_wheel_;
+    drive::Wheel * back  = drive.back_wheel_;
     drive.SwitchLegOrientation(2);
     CHECK_EQ(left, drive.right_wheel_);
     CHECK_EQ(right, drive.back_wheel_);
