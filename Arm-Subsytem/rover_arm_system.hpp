@@ -154,7 +154,6 @@ class RoverArmSystem : public sjsu::common::RoverSystem
   int state_of_charge_         = 90;
   const int kExpectedArguments = 15;
 
- public:
   GeneralMissionControlData mc_data_;
   HumanArm::MissionControlArmData arm_mc_data_;
   Hand::MissionControlHandData hand_mc_data_;
