@@ -10,7 +10,6 @@ namespace sjsu::arm
 class WristJoint : public Joint
 {
  public:
-
   WristJoint(sjsu::RmdX & left_joint_motor,
              sjsu::RmdX & right_joint_motor,
              sjsu::Mpu6050 & accelerometer)

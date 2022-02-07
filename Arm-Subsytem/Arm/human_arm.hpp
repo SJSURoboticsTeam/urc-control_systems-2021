@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../arm_joint.hpp"
+#include "arm_joint.hpp"
 
 namespace sjsu::arm
 {
