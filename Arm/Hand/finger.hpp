@@ -34,6 +34,11 @@ class Finger
     servo_.SetAngle(angle_to_degrees);
   }
 
+  void Home()
+  {
+    return;
+  }
+
   void SetSpeed(float target_speed)
   {
     speed_ = target_speed;
@@ -51,12 +56,12 @@ class Finger
 
   int GetMaxAngle()
   {
-    return max_angle_;
+    return int(max_angle_);
   }
 
   int GetMinAngle()
   {
-    return min_angle_;
+    return int(min_angle_);
   }
 
  private:

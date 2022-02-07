@@ -68,7 +68,7 @@ int main()
   sjsu::arm::Finger pointer(pointer_servo);
   sjsu::arm::Finger thumb(thumb_servo);
   sjsu::arm::Hand hand(wrist, pinky, ring, middle, pointer, thumb);
-  sjsu::arm::RoverArmSystem arm(rotunda, shoulder, elbow, wrist, hand);
+  sjsu::arm::RoverArmSystem arm(rotunda, shoulder, elbow, hand);
 
   esp.Initialize();
   arm.Initialize();
