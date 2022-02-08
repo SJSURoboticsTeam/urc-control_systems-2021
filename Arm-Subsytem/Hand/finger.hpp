@@ -7,7 +7,6 @@ namespace sjsu::arm
 class Finger
 {
  public:
-
   Finger(sjsu::Servo & servo) : servo_(servo) {}
 
   Finger(sjsu::Servo & servo,

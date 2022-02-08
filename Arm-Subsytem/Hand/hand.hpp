@@ -9,7 +9,6 @@ class Hand
  public:
   struct MissionControlData
   {
-
     enum class HandModes : char
     {
       kPitch      = 'P',
@@ -30,8 +29,8 @@ class Hand
 
     struct Wrist
     {
-    int roll  = 0;
-    int pitch = 0;
+      int roll  = 0;
+      int pitch = 0;
     };
     Wrist wrist_data;
   };
@@ -73,10 +72,9 @@ class Hand
     wrist_.PrintWristData();
   }
 
-  void HandleConcurrentMovement(
-                          MissionControlData::Finger finger_data,
-                          MissionControlData::Wrist wrist_data,
-                          float speed)
+  void HandleConcurrentMovement(MissionControlData::Finger finger_data,
+                                MissionControlData::Wrist wrist_data,
+                                float speed)
   {
     thumb_.SetSpeed(speed);
     thumb_.SetPosition(finger_data.thumb_angle);
@@ -105,13 +103,13 @@ class Hand
     wrist_.SetRollPosition(wrist_pitch, speed);
   }
 
-  void HandleMovement(
-                      MissionControlData hand_data, float speed)
+  void HandleMovement(MissionControlData hand_data, float speed)
   {
     switch (current_hand_mode_)
     {
-        case MissionControlData::HandModes::kConcurrent:
-        HandleConcurrentMovement(hand_data.fingers, hand_data.wrist_data, speed);
+      case MissionControlData::HandModes::kConcurrent:
+        HandleConcurrentMovement(hand_data.fingers, hand_data.wrist_data,
+                                 speed);
         break;
       case MissionControlData::HandModes::kPitch:
         SetWristPitchPosition(hand_data.wrist_data.pitch, speed);
@@ -123,19 +121,20 @@ class Hand
   }
 
   void HandleMovement(float speed,
-                       float thumb_angle,
-                       float pointer_angle,
-                       float middle_angle,
-                       float ring_angle,
-                       float pinky_angle,
-                       float roll,
-                       float pitch)
+                      float thumb_angle,
+                      float pointer_angle,
+                      float middle_angle,
+                      float ring_angle,
+                      float pinky_angle,
+                      float roll,
+                      float pitch)
   {
     switch (current_hand_mode_)
     {
-        case MissionControlHandData::HandModes::kConcurrent:
-        HandleConcurrentMovement(speed, thumb_angle, pointer_angle, middle_angle, ring_angle,
-                           pinky_angle, roll, pitch);
+      case MissionControlHandData::HandModes::kConcurrent:
+        HandleConcurrentMovement(speed, thumb_angle, pointer_angle,
+                                 middle_angle, ring_angle, pinky_angle, roll,
+                                 pitch);
         break;
       case MissionControlHandData::HandModes::kPitch:
         SetWristPitchPosition(speed, pitch);

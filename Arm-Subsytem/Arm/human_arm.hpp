@@ -99,11 +99,9 @@ class HumanArm
     MoveElbow(arm_angles.elbow, speed);
   }
 
-
-  void HandleMovement(MissionControlData::ArmAngles arm_angles,
-                      float speed)
-  { 
-      switch (current_arm_mode_)
+  void HandleMovement(MissionControlData::ArmAngles arm_angles, float speed)
+  {
+    switch (current_arm_mode_)
     {
       case MissionControlData::ArmModes::kConcurrent:
         HandleConcurrentMode(arm_angles, speed);
@@ -117,8 +115,7 @@ class HumanArm
       case MissionControlData::ArmModes::kElbow:
         MoveElbow(arm_angles.elbow, speed);
         break;
-      case MissionControlData::ArmModes::kHand:
-        break;
+      case MissionControlData::ArmModes::kHand: break;
     }
   }
 
@@ -168,7 +165,6 @@ class HumanArm
   }
 
  private:
-
   float CalculateShoulderHomeAngle()
   {
     float home_angle = 0;
