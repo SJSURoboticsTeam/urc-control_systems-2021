@@ -64,8 +64,8 @@ class RoverArmSystem : public sjsu::common::RoverSystem
     printf("Rotunda Angle: %d\n", arm_mc_data_.arm_angles.rotunda);
     printf("Shoulder Angle: %d\n", arm_mc_data_.arm_angles.shoulder);
     printf("Elbow Angle: %d\n", arm_mc_data_.arm_angles.elbow);
-    printf("Wrist Roll Angle: %d\n", hand_mc_data_.wrist_roll);
-    printf("Wrist Pitch Angle: %d\n", hand_mc_data_.wrist_pitch);
+    printf("Wrist Roll Angle: %d\n", hand_mc_data_.wrist_data.roll);
+    printf("Wrist Pitch Angle: %d\n", hand_mc_data_.wrist_data.pitch);
     printf("=========================================\n");
 
     printf("FINGER-DATA \n");
@@ -109,10 +109,11 @@ class RoverArmSystem : public sjsu::common::RoverSystem
         &mc_data_.is_operational, &arm_mc_data_.arm_mode,
         &hand_mc_data_.hand_mode, &mc_data_.arm_speed,
         &arm_mc_data_.arm_angles.rotunda, &arm_mc_data_.arm_angles.shoulder,
-        &arm_mc_data_.arm_angles.elbow, &hand_mc_data_.wrist_roll,
-        &hand_mc_data_.wrist_pitch, &hand_mc_data_.fingers.pinky_angle,
+        &arm_mc_data_.arm_angles.elbow, &hand_mc_data_.wrist_data.roll,
+        &hand_mc_data_.wrist_data.pitch, &hand_mc_data_.fingers.pinky_angle,
         &hand_mc_data_.fingers.ring_angle, &hand_mc_data_.fingers.middle_angle,
-        &hand_mc_data_.fingers.pointer_angle, &hand_mc_data_.fingers.thumb_angle);
+        &hand_mc_data_.fingers.pointer_angle,
+        &hand_mc_data_.fingers.thumb_angle);
 
     if (actual_arguments != kExpectedArguments)
     {
@@ -125,7 +126,7 @@ class RoverArmSystem : public sjsu::common::RoverSystem
   void HomeArmSystem()
   {
     arm_.HomeArm(mc_data_.arm_speed);
-    hand_.HomeHand(mc_data_.arm_speed, arm_.GetRotundaOffsetAngle());
+    hand_.HomeHand(arm_.GetRotundaOffsetAngle(), mc_data_.arm_speed);
   }
 
   // TODO: implement different arm drive modes in this function with switch
@@ -140,23 +141,18 @@ class RoverArmSystem : public sjsu::common::RoverSystem
     {
       hand_.SetCurrentHandMode(hand_mc_data_.hand_mode);
     }
-    arm_.HandleMovement(arm_mc_data_.arm_angles.rotunda,
-                        arm_mc_data_.arm_angles.shoulder,
-                        arm_mc_data_.arm_angles.elbow, mc_data_.arm_speed);
-    hand_.HandleMovement(
-        mc_data_.arm_speed, hand_mc_data_.fingers.pinky_angle,
-        hand_mc_data_.fingers.ring_angle, hand_mc_data_.fingers.middle_angle,
-        hand_mc_data_.fingers.pointer_angle, hand_mc_data_.fingers.thumb_angle, hand_mc_data_.wrist_roll, hand_mc_data_.wrist_pitch);
+
+    arm_.HandleMovement(arm_mc_data_.arm_angles, mc_data_.arm_speed);
+    hand_.HandleMovement(hand_mc_data_, mc_data_.arm_speed);
   }
 
  private:
-
   int state_of_charge_         = 90;
   const int kExpectedArguments = 15;
 
   GeneralMissionControlData mc_data_;
-  HumanArm::MissionControlArmData arm_mc_data_;
-  Hand::MissionControlHandData hand_mc_data_;
+  HumanArm::MissionControlData arm_mc_data_;
+  Hand::MissionControlData hand_mc_data_;
 
   HumanArm arm_;
   Hand hand_;

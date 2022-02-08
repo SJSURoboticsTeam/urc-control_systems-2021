@@ -33,18 +33,18 @@ class WristJoint : public Joint
   }
 
   // Sets Roll Position of the wrist joint
-  void SetRollPosition(float speed, float roll_angle)
+  void SetRollPosition(float roll_angle, float speed)
   {
     SetSpeed(speed);
     roll_angle_ = float(std::clamp(roll_angle + roll_offset_angle_,
-                                       kRollMinimumAngle, kRollMaximumAngle));
+                                   kRollMinimumAngle, kRollMaximumAngle));
     units::angle::degree_t angle_to_degrees(roll_angle);
     left_motor_.SetAngle(angle_to_degrees);
     right_motor_.SetAngle(angle_to_degrees);
   }
 
   // Sets Pitch Position of the wrist joint
-  void SetPitchPosition(float speed, float pitch_angle)
+  void SetPitchPosition(float pitch_angle, float speed)
   {
     SetSpeed(speed);
     pitch_angle_ = float(std::clamp(pitch_angle + pitch_offset_angle_,
@@ -54,7 +54,7 @@ class WristJoint : public Joint
     right_motor_.SetAngle(angle_to_degrees);
   }
 
-  void HandleWristMovement(float speed, float roll, float pitch)
+  void HandleWristMovement(float roll, float pitch, float speed)
   {
     SetRollPosition(speed, roll);
     SetPitchPosition(speed, pitch);
@@ -106,14 +106,14 @@ class WristJoint : public Joint
     return speed_;
   }
 
-  void Home(float speed, float rotunda_offset)
+  void Home(float rotunda_offset, float speed)
   {
     GetAccelerometerData();
     HomePitch(speed, rotunda_offset);
     HomeRoll();
   };
 
-  void HomePitch(float speed, float rotunda_offset)
+  void HomePitch(float rotunda_offset, float speed)
   {
     float wrist_pitch_offset =
         float(atan(acceleration_.y / acceleration_.z)) + rotunda_offset;
