@@ -7,7 +7,7 @@ namespace sjsu::arm
 class HumanArm
 {
  public:
-  struct MissionControlArmData
+  struct MissionControlData
   {
     enum class ArmModes : char
     {
@@ -91,44 +91,43 @@ class HumanArm
     MoveElbow(home_angle, speed);
   }
 
-  void HandleConcurrentMode(float rotunda_angle,
-                            float shoulder_angle,
-                            float elbow_angle,
+  void HandleConcurrentMode(MissionControlData::ArmAngles arm_angles,
                             float speed)
   {
-    MoveRotunda(rotunda_angle, speed);
-    MoveShoulder(shoulder_angle, speed);
-    MoveElbow(elbow_angle, speed);
+    MoveRotunda(arm_angles.rotunda, speed);
+    MoveShoulder(arm_angles.shoulder, speed);
+    MoveElbow(arm_angles.elbow, speed);
   }
 
 
-  void HandleMovement(float rotunda, float shoulder, float elbow, float speed)
+  void HandleMovement(MissionControlData::ArmAngles arm_angles,
+                      float speed)
   { 
       switch (current_arm_mode_)
     {
-      case MissionControlArmData::ArmModes::kConcurrent:
-        HandleConcurrentMode(rotunda, shoulder, elbow, speed);
+      case MissionControlData::ArmModes::kConcurrent:
+        HandleConcurrentMode(arm_angles, speed);
         break;
-      case MissionControlArmData::ArmModes::kRotunda:
-        MoveRotunda(rotunda, speed);
+      case MissionControlData::ArmModes::kRotunda:
+        MoveRotunda(arm_angles.rotunda, speed);
         break;
-      case MissionControlArmData::ArmModes::kShoulder:
-        MoveShoulder(shoulder, speed);
+      case MissionControlData::ArmModes::kShoulder:
+        MoveShoulder(arm_angles.shoulder, speed);
         break;
-      case MissionControlArmData::ArmModes::kElbow:
-        MoveElbow(elbow, speed);
+      case MissionControlData::ArmModes::kElbow:
+        MoveElbow(arm_angles.elbow, speed);
         break;
-      case MissionControlArmData::ArmModes::kHand:
+      case MissionControlData::ArmModes::kHand:
         break;
     }
   }
 
-  MissionControlArmData::ArmModes GetCurrentArmMode()
+  MissionControlData::ArmModes GetCurrentArmMode()
   {
     return current_arm_mode_;
   }
 
-  void SetCurrentArmMode(MissionControlArmData::ArmModes current_arm_mode)
+  void SetCurrentArmMode(MissionControlData::ArmModes current_arm_mode)
   {
     current_arm_mode_ = current_arm_mode;
   }
@@ -239,7 +238,7 @@ class HumanArm
   ArmJoint & shoulder_;
   ArmJoint & elbow_;
 
-  MissionControlArmData::ArmModes current_arm_mode_ =
-      MissionControlArmData::ArmModes::kConcurrent;
+  MissionControlData::ArmModes current_arm_mode_ =
+      MissionControlData::ArmModes::kConcurrent;
 };
 }  // namespace sjsu::arm

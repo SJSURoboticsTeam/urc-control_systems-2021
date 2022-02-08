@@ -7,15 +7,13 @@ namespace sjsu::arm
 class Hand
 {
  public:
-  struct MissionControlHandData
+  struct MissionControlData
   {
 
     enum class HandModes : char
     {
       kPitch      = 'P',
       kRoll       = 'R',
-      kClose      = 'F',
-      kOpen       = 'O',
       kConcurrent = 'C'
     };
     HandModes hand_mode = HandModes::kConcurrent;
@@ -30,8 +28,12 @@ class Hand
     };
     Finger fingers;
 
-    int wrist_roll  = 0;
-    int wrist_pitch = 0;
+    struct Wrist
+    {
+    int roll  = 0;
+    int pitch = 0;
+    };
+    Wrist wrist_data;
   };
 
   Hand(sjsu::arm::WristJoint & wrist,
@@ -71,65 +73,52 @@ class Hand
     wrist_.PrintWristData();
   }
 
-  void HandleConcurrentMovement(float speed,
-                          float thumb_position,
-                          float pointer_position,
-                          float middle_position,
-                          float ring_position,
-                          float pinky_position,
-                          float roll_position,
-                          float pitch_position)
+  void HandleConcurrentMovement(
+                          MissionControlData::Finger finger_data,
+                          MissionControlData::Wrist wrist_data,
+                          float speed)
   {
     thumb_.SetSpeed(speed);
-    thumb_.SetPosition(thumb_position);
+    thumb_.SetPosition(finger_data.thumb_angle);
     pointer_.SetSpeed(speed);
-    pointer_.SetPosition(pointer_position);
+    pointer_.SetPosition(finger_data.pointer_angle);
     middle_.SetSpeed(speed);
-    middle_.SetPosition(middle_position);
+    middle_.SetPosition(finger_data.middle_angle);
     ring_.SetSpeed(speed);
-    ring_.SetPosition(ring_position);
+    ring_.SetPosition(finger_data.ring_angle);
     pinky_.SetSpeed(speed);
-    pinky_.SetPosition(pinky_position);
-    wrist_.HandleWristMovement(speed, roll_position, pitch_position);
+    pinky_.SetPosition(finger_data.pinky_angle);
+    wrist_.HandleWristMovement(speed, wrist_data.roll, wrist_data.pitch);
   }
 
   // The following two functions are here to allow the rover arm system to
   // directly control the roll and the pitch of the wrist this is mainly for
   // testing due to the different hand drive modes, when the drive modes are
   // removed this may be removed as well
-  void SetWristRollPosition(float speed, float roll_position)
+  void SetWristRollPosition(float wrist_roll, float speed)
   {
-    wrist_.SetRollPosition(speed, roll_position);
+    wrist_.SetRollPosition(wrist_roll, speed);
   }
 
-  void SetWristPitchPosition(float speed, float pitch_position)
+  void SetWristPitchPosition(float wrist_pitch, float speed)
   {
-    wrist_.SetRollPosition(speed, pitch_position);
+    wrist_.SetRollPosition(wrist_pitch, speed);
   }
 
-  void HandleMovement(float speed,
-                       float thumb_angle,
-                       float pointer_angle,
-                       float middle_angle,
-                       float ring_angle,
-                       float pinky_angle,
-                       float roll,
-                       float pitch)
+  void HandleMovement(
+                      MissionControlData hand_data, float speed)
   {
     switch (current_hand_mode_)
     {
-        case MissionControlHandData::HandModes::kConcurrent:
-        HandleConcurrentMovement(speed, thumb_angle, pointer_angle, middle_angle, ring_angle,
-                           pinky_angle, roll, pitch);
+        case MissionControlData::HandModes::kConcurrent:
+        HandleConcurrentMovement(hand_data.fingers, hand_data.wrist_data, speed);
         break;
-      case MissionControlHandData::HandModes::kPitch:
-        SetWristPitchPosition(speed, pitch);
+      case MissionControlData::HandModes::kPitch:
+        SetWristPitchPosition(hand_data.wrist_data.pitch, speed);
         break;
-      case MissionControlHandData::HandModes::kRoll:
-        SetWristRollPosition(speed, roll);
+      case MissionControlData::HandModes::kRoll:
+        SetWristRollPosition(hand_data.wrist_data.roll, speed);
         break;
-      case MissionControlHandData::HandModes::kClose: CloseHand(speed); break;
-      case MissionControlHandData::HandModes::kOpen: OpenHand(speed); break;
     }
   }
 
@@ -168,45 +157,29 @@ class Hand
     return pinky_.GetPosition();
   };
 
-  MissionControlHandData::HandModes GetCurrentHandMode()
+  MissionControlData::HandModes GetCurrentHandMode()
   {
     return current_hand_mode_;
   }
 
-  void SetCurrentHandMode(MissionControlHandData::HandModes new_mode)
+  void SetCurrentHandMode(MissionControlData::HandModes new_mode)
   {
     current_hand_mode_ = new_mode;
   }
 
-  void HomeHand(float speed, float rotunda_offset_angle)
+  void HomeHand(float rotunda_offset_angle, float speed)
   {
     pinky_.Home();
     ring_.Home();
     middle_.Home();
     pointer_.Home();
     thumb_.Home();
-    wrist_.Home(speed, float(rotunda_offset_angle));
-  }
-
-  void CloseHand(float speed)
-  {
-    HandleConcurrentMovement(speed, thumb_.GetMaxAngle(), pointer_.GetMaxAngle(),
-                       middle_.GetMaxAngle(), ring_.GetMaxAngle(),
-                       pinky_.GetMaxAngle(), wrist_.GetRollPosition(),
-                       wrist_.GetPitchPosition());
-  }
-
-  void OpenHand(float speed)
-  {
-    HandleConcurrentMovement(speed, thumb_.GetMinAngle(), pointer_.GetMinAngle(),
-                       middle_.GetMinAngle(), ring_.GetMinAngle(),
-                       pinky_.GetMinAngle(), wrist_.GetRollPosition(),
-                       wrist_.GetPitchPosition());
+    wrist_.Home(float(rotunda_offset_angle), speed);
   }
 
  private:
-  MissionControlHandData::HandModes current_hand_mode_ =
-      MissionControlHandData::HandModes::kConcurrent;
+  MissionControlData::HandModes current_hand_mode_ =
+      MissionControlData::HandModes::kConcurrent;
 
   sjsu::arm::WristJoint & wrist_;
   sjsu::arm::Finger & pinky_;
