@@ -157,17 +157,6 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
     }
   }
 
-  /// Checks if the rover is operational
-  bool IsOperational()
-  {
-    if (mc_data_.is_operational != 1)
-    {
-      sjsu::LogWarning("Drive mode is not operational!");
-      return false;
-    }
-    return true;
-  }
-
   /// Checks if the rover got a new drive mode command
   bool IsNewMode()
   {

@@ -61,6 +61,7 @@ int main()
                            1800);
   sjsu::arm::ArmJoint shoulder(shoulder_motor, shoulder_mpu);
   sjsu::arm::ArmJoint elbow(elbow_motor, elbow_mpu);
+  sjsu::arm::HumanArm arm(rotunda, shoulder, elbow);
   sjsu::arm::WristJoint wrist(left_wrist_motor, right_wrist_motor, wrist_mpu);
   sjsu::arm::Finger pinky(pinky_servo);
   sjsu::arm::Finger ring(ring_servo);
@@ -68,7 +69,7 @@ int main()
   sjsu::arm::Finger pointer(pointer_servo);
   sjsu::arm::Finger thumb(thumb_servo);
   sjsu::arm::Hand hand(wrist, pinky, ring, middle, pointer, thumb);
-  sjsu::arm::RoverArmSystem arm(rotunda, shoulder, elbow, hand);
+  sjsu::arm::RoverArmSystem arm_system(arm, hand);
 
   esp.Initialize();
   arm.Initialize();
@@ -84,13 +85,13 @@ int main()
     try
     {
       sjsu::LogInfo("Making new request now...");
-      std::string endpoint = "arm" + arm.GETParameters();
+      std::string endpoint = "arm" + arm_system.GETParameters();
       std::string response = esp.GET(endpoint);
       sjsu::TimeoutTimer serverTimeout(5s);  // server has 5s timeout
-      arm.ParseJSONResponse(response);
-      arm.HandleRoverMovement();
-      arm.IncrementHeartbeatCount();
-      arm.PrintRoverData();
+      arm_system.ParseJSONResponse(response);
+      arm_system.HandleRoverMovement();
+      arm_system.IncrementHeartbeatCount();
+      arm_system.PrintRoverData();
       if (serverTimeout.HasExpired())
       {
         sjsu::LogWarning("Server timed out! Reconnecting...");

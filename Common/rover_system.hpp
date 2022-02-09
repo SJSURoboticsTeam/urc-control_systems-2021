@@ -46,6 +46,16 @@ class RoverSystem
     heartbeat_count_++;
   }
 
+  bool IsOperational(int is_operational)
+  {
+    if (is_operational != 1)
+    {
+      sjsu::LogWarning("Rover is not operational!");
+      return false;
+    }
+    return true;
+  }
+
  private:
   void ResetHeartbeatCount()
   {
