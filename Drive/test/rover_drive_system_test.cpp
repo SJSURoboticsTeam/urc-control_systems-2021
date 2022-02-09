@@ -149,23 +149,39 @@ TEST_CASE("Drive system testing")
 
   SECTION("7.2 should return false after all hub wheels start moving")
   {
+<<<<<<< HEAD
     wheels.right_->SetHubSpeed(kNonZero);
     wheels.right_->SetHubSpeed(kNonZero);
     wheels.back_->SetHubSpeed(kNonZero);
+=======
+    drive.left_wheel_->SetHubSpeed(kNonZero);
+    drive.right_wheel_->SetHubSpeed(kNonZero);
+    drive.back_wheel_->SetHubSpeed(kNonZero);
+>>>>>>> 900af90180719c36d0f5d64c6219c66b77c491b8
     CHECK_FALSE(drive.IsStopped());
   }
   
   SECTION("7.3 should return false if at least one hub wheel is moving")
   {
+<<<<<<< HEAD
     wheels.right_->SetHubSpeed(kNonZero);
+=======
+    drive.left_wheel_->SetHubSpeed(kNonZero);
+>>>>>>> 900af90180719c36d0f5d64c6219c66b77c491b8
     CHECK_FALSE(drive.IsStopped());
   }
 
   SECTION("8.1 should stop all wheels after one call")
   {
+<<<<<<< HEAD
     wheels.right_->SetHubSpeed(kNonZero);
     wheels.right_->SetHubSpeed(kNonZero);
     wheels.back_->SetHubSpeed(kNonZero);
+=======
+    drive.left_wheel_->SetHubSpeed(kNonZero);
+    drive.right_wheel_->SetHubSpeed(kNonZero);
+    drive.back_wheel_->SetHubSpeed(kNonZero);
+>>>>>>> 900af90180719c36d0f5d64c6219c66b77c491b8
     drive.StopWheels();
     CHECK(drive.IsStopped());
   }
@@ -173,6 +189,7 @@ TEST_CASE("Drive system testing")
   SECTION("9.1 should lerp to 4 by setting speed to 2 → 3 → 4")
   {
     drive.SetWheelSpeed(4);
+<<<<<<< HEAD
     CHECK_EQ(wheels.right_->GetHubSpeed(), 2);
     CHECK_EQ(wheels.right_->GetHubSpeed(), 2);
     CHECK_EQ(wheels.back_->GetHubSpeed(), 2);
@@ -186,10 +203,26 @@ TEST_CASE("Drive system testing")
     CHECK_GE(wheels.right_->GetHubSpeed(), 3);
     CHECK_GE(wheels.right_->GetHubSpeed(), 3);
     CHECK_GE(wheels.back_->GetHubSpeed(), 3);
+=======
+    CHECK_EQ(drive.left_wheel_->GetHubSpeed(), 2);
+    CHECK_EQ(drive.right_wheel_->GetHubSpeed(), 2);
+    CHECK_EQ(drive.back_wheel_->GetHubSpeed(), 2);
+
+    drive.SetWheelSpeed(4);
+    CHECK_EQ(drive.left_wheel_->GetHubSpeed(), 3);
+    CHECK_EQ(drive.right_wheel_->GetHubSpeed(), 3);
+    CHECK_EQ(drive.back_wheel_->GetHubSpeed(), 3);
+
+    drive.SetWheelSpeed(4);
+    CHECK_GE(drive.left_wheel_->GetHubSpeed(), 3);
+    CHECK_GE(drive.right_wheel_->GetHubSpeed(), 3);
+    CHECK_GE(drive.back_wheel_->GetHubSpeed(), 3);
+>>>>>>> 900af90180719c36d0f5d64c6219c66b77c491b8
   }
 
   SECTION("9.2 Should lerp from 4 to zero by setting speed to 2 → 1 → 0")
   {
+<<<<<<< HEAD
     wheels.right_->SetHubSpeed(4);
     wheels.right_->SetHubSpeed(4);
     wheels.back_->SetHubSpeed(4);
@@ -203,6 +236,21 @@ TEST_CASE("Drive system testing")
     CHECK_EQ(wheels.left_->GetHubSpeed(), 1);
     CHECK_EQ(wheels.right_->GetHubSpeed(), 1);
     CHECK_EQ(wheels.back_->GetHubSpeed(), 1);
+=======
+    drive.left_wheel_->SetHubSpeed(4);
+    drive.right_wheel_->SetHubSpeed(4);
+    drive.back_wheel_->SetHubSpeed(4);
+
+    drive.SetWheelSpeed(0);
+    CHECK_EQ(drive.left_wheel_->GetHubSpeed(), 2);
+    CHECK_EQ(drive.right_wheel_->GetHubSpeed(), 2);
+    CHECK_EQ(drive.back_wheel_->GetHubSpeed(), 2);
+
+    drive.SetWheelSpeed(0);
+    CHECK_EQ(drive.left_wheel_->GetHubSpeed(), 1);
+    CHECK_EQ(drive.right_wheel_->GetHubSpeed(), 1);
+    CHECK_EQ(drive.back_wheel_->GetHubSpeed(), 1);
+>>>>>>> 900af90180719c36d0f5d64c6219c66b77c491b8
 
     drive.SetWheelSpeed(0);
     CHECK(drive.IsStopped());
@@ -211,6 +259,7 @@ TEST_CASE("Drive system testing")
   SECTION("9.3 should lerp to -4 by setting speed to -2 → -3 → -4")
   {
     drive.SetWheelSpeed(-4);
+<<<<<<< HEAD
     CHECK_EQ(wheels.left_->GetHubSpeed(), -2);
     CHECK_EQ(wheels.right_->GetHubSpeed(), -2);
     CHECK_EQ(wheels.back_->GetHubSpeed(), -2);
@@ -224,10 +273,26 @@ TEST_CASE("Drive system testing")
     CHECK_GE(wheels.left_->GetHubSpeed(), -4);
     CHECK_GE(wheels.right_->GetHubSpeed(), -4);
     CHECK_GE(wheels.back_->GetHubSpeed(), -4);
+=======
+    CHECK_EQ(drive.left_wheel_->GetHubSpeed(), -2);
+    CHECK_EQ(drive.right_wheel_->GetHubSpeed(), -2);
+    CHECK_EQ(drive.back_wheel_->GetHubSpeed(), -2);
+
+    drive.SetWheelSpeed(-4);
+    CHECK_EQ(drive.left_wheel_->GetHubSpeed(), -3);
+    CHECK_EQ(drive.right_wheel_->GetHubSpeed(), -3);
+    CHECK_EQ(drive.back_wheel_->GetHubSpeed(), -3);
+
+    drive.SetWheelSpeed(-4);
+    CHECK_GE(drive.left_wheel_->GetHubSpeed(), -4);
+    CHECK_GE(drive.right_wheel_->GetHubSpeed(), -4);
+    CHECK_GE(drive.back_wheel_->GetHubSpeed(), -4);
+>>>>>>> 900af90180719c36d0f5d64c6219c66b77c491b8
   }
 
   SECTION("9.4 Should lerp from -4 to zero by setting speed to -2 → -1 → -0")
   {
+<<<<<<< HEAD
     wheels.left_->SetHubSpeed(-4);
     wheels.right_->SetHubSpeed(-4);
     wheels.back_->SetHubSpeed(-4);
@@ -241,6 +306,21 @@ TEST_CASE("Drive system testing")
     CHECK_EQ(wheels.left_->GetHubSpeed(), -1);
     CHECK_EQ(wheels.right_->GetHubSpeed(), -1);
     CHECK_EQ(wheels.back_->GetHubSpeed(), -1);
+=======
+    drive.left_wheel_->SetHubSpeed(-4);
+    drive.right_wheel_->SetHubSpeed(-4);
+    drive.back_wheel_->SetHubSpeed(-4);
+
+    drive.SetWheelSpeed(0);
+    CHECK_EQ(drive.left_wheel_->GetHubSpeed(), -2);
+    CHECK_EQ(drive.right_wheel_->GetHubSpeed(), -2);
+    CHECK_EQ(drive.back_wheel_->GetHubSpeed(), -2);
+
+    drive.SetWheelSpeed(0);
+    CHECK_EQ(drive.left_wheel_->GetHubSpeed(), -1);
+    CHECK_EQ(drive.right_wheel_->GetHubSpeed(), -1);
+    CHECK_EQ(drive.back_wheel_->GetHubSpeed(), -1);
+>>>>>>> 900af90180719c36d0f5d64c6219c66b77c491b8
 
     drive.SetWheelSpeed(0);
     CHECK(drive.IsStopped());
@@ -248,6 +328,7 @@ TEST_CASE("Drive system testing")
 
   SECTION("10.1 should home wheels after moving")
   {
+<<<<<<< HEAD
     wheels.left_->SetHubSpeed(kNonZero);
     wheels.right_->SetHubSpeed(kNonZero);
     wheels.back_->SetHubSpeed(kNonZero);
@@ -255,6 +336,15 @@ TEST_CASE("Drive system testing")
     CHECK_EQ(wheels.left_->GetSteerAngle(), 0);
     CHECK_EQ(wheels.right_->GetSteerAngle(), 0);
     CHECK_EQ(wheels.back_->GetSteerAngle(), 0);
+=======
+    drive.left_wheel_->SetHubSpeed(kNonZero);
+    drive.right_wheel_->SetHubSpeed(kNonZero);
+    drive.back_wheel_->SetHubSpeed(kNonZero);
+    drive.HomeWheels();
+    CHECK_EQ(drive.left_wheel_->GetSteerAngle(), 0);
+    CHECK_EQ(drive.right_wheel_->GetSteerAngle(), 0);
+    CHECK_EQ(drive.back_wheel_->GetSteerAngle(), 0);
+>>>>>>> 900af90180719c36d0f5d64c6219c66b77c491b8
   }
 
   SECTION("11.1 should return true when at start position")
@@ -264,15 +354,25 @@ TEST_CASE("Drive system testing")
 
   SECTION("11.2 should return false if all wheels are not homed")
   {
+<<<<<<< HEAD
     wheels.left_->SetSteerAngle(kNonZero);
     wheels.right_->SetSteerAngle(kNonZero);
     wheels.back_->SetSteerAngle(kNonZero);
+=======
+    drive.left_wheel_->SetSteerAngle(kNonZero);
+    drive.right_wheel_->SetSteerAngle(kNonZero);
+    drive.back_wheel_->SetSteerAngle(kNonZero);
+>>>>>>> 900af90180719c36d0f5d64c6219c66b77c491b8
     CHECK_FALSE(drive.AllWheelsAreHomed());
   }
 
   SECTION("11.3 should return false if one wheel is not homed")
   {
+<<<<<<< HEAD
     wheels.back_->SetSteerAngle(kNonZero);
+=======
+    drive.back_wheel_->SetSteerAngle(kNonZero);
+>>>>>>> 900af90180719c36d0f5d64c6219c66b77c491b8
     CHECK_FALSE(drive.AllWheelsAreHomed());
   }
 
@@ -281,6 +381,7 @@ TEST_CASE("Drive system testing")
     drive.mc_data_.heartbeat_count = kNonZero;
     drive.mc_data_.is_operational  = 1;
 
+<<<<<<< HEAD
     wheels.left_->SetHubSpeed(kNonZero);
     wheels.right_->SetHubSpeed(kNonZero);
     wheels.back_->SetHubSpeed(kNonZero);
@@ -289,15 +390,31 @@ TEST_CASE("Drive system testing")
     CHECK_LT(wheels.left_->GetHubSpeed(), kNonZero);
     CHECK_LT(wheels.right_->GetHubSpeed(), kNonZero);
     CHECK_LT(wheels.back_->GetHubSpeed(), kNonZero);
+=======
+    drive.left_wheel_->SetHubSpeed(kNonZero);
+    drive.right_wheel_->SetHubSpeed(kNonZero);
+    drive.back_wheel_->SetHubSpeed(kNonZero);
+    drive.HandleRoverMovement();
+
+    CHECK_LT(drive.left_wheel_->GetHubSpeed(), kNonZero);
+    CHECK_LT(drive.right_wheel_->GetHubSpeed(), kNonZero);
+    CHECK_LT(drive.back_wheel_->GetHubSpeed(), kNonZero);
+>>>>>>> 900af90180719c36d0f5d64c6219c66b77c491b8
   }
 
   SECTION("12.2 should stop movement when rover is not operational")
   {
     drive.mc_data_.is_operational = 0;
 
+<<<<<<< HEAD
     wheels.left_->SetHubSpeed(kNonZero);
     wheels.right_->SetHubSpeed(kNonZero);
     wheels.back_->SetHubSpeed(kNonZero);
+=======
+    drive.left_wheel_->SetHubSpeed(kNonZero);
+    drive.right_wheel_->SetHubSpeed(kNonZero);
+    drive.back_wheel_->SetHubSpeed(kNonZero);
+>>>>>>> 900af90180719c36d0f5d64c6219c66b77c491b8
     drive.HandleRoverMovement();
 
     CHECK(drive.IsStopped());
@@ -346,9 +463,15 @@ TEST_CASE("Drive system testing")
     drive.mc_data_.is_operational = 0;
     drive.mc_data_.drive_mode     = RoverDriveSystem::Modes::DriveMode;
 
+<<<<<<< HEAD
     wheels.left_->SetHubSpeed(kNonZero);
     wheels.right_->SetHubSpeed(kNonZero);
     wheels.back_->SetHubSpeed(kNonZero);
+=======
+    drive.left_wheel_->SetHubSpeed(kNonZero);
+    drive.right_wheel_->SetHubSpeed(kNonZero);
+    drive.back_wheel_->SetHubSpeed(kNonZero);
+>>>>>>> 900af90180719c36d0f5d64c6219c66b77c491b8
 
     drive.HandleRoverMovement();
     CHECK_EQ(drive.GetCurrentMode(), RoverDriveSystem::Modes::SpinMode);
@@ -360,6 +483,7 @@ TEST_CASE("Drive system testing")
     drive.mc_data_.is_operational  = 0;
     drive.mc_data_.drive_mode      = RoverDriveSystem::Modes::DriveMode;
 
+<<<<<<< HEAD
     wheels.left_->SetHubSpeed(kNonZero);
     wheels.right_->SetHubSpeed(kNonZero);
     wheels.back_->SetHubSpeed(kNonZero);
@@ -369,6 +493,17 @@ TEST_CASE("Drive system testing")
     CHECK_LT(wheels.left_->GetHubSpeed(), kNonZero);
     CHECK_LT(wheels.right_->GetHubSpeed(), kNonZero);
     CHECK_LT(wheels.back_->GetHubSpeed(), kNonZero);
+=======
+    drive.left_wheel_->SetHubSpeed(kNonZero);
+    drive.right_wheel_->SetHubSpeed(kNonZero);
+    drive.back_wheel_->SetHubSpeed(kNonZero);
+
+    drive.HandleRoverMovement();
+
+    CHECK_LT(drive.left_wheel_->GetHubSpeed(), kNonZero);
+    CHECK_LT(drive.right_wheel_->GetHubSpeed(), kNonZero);
+    CHECK_LT(drive.back_wheel_->GetHubSpeed(), kNonZero);
+>>>>>>> 900af90180719c36d0f5d64c6219c66b77c491b8
     CHECK_FALSE(drive.IsStopped());
     CHECK_EQ(drive.GetCurrentMode(), RoverDriveSystem::Modes::SpinMode);
   }
@@ -379,9 +514,15 @@ TEST_CASE("Drive system testing")
     drive.Initialize();
     drive.HandleRoverMovement();
 
+<<<<<<< HEAD
     CHECK_EQ(wheels.left_->GetSteerAngle(), 90);
     CHECK_EQ(wheels.right_->GetSteerAngle(), 90);
     CHECK_EQ(wheels.back_->GetSteerAngle(), 90);
+=======
+    CHECK_EQ(drive.left_wheel_->GetSteerAngle(), 90);
+    CHECK_EQ(drive.right_wheel_->GetSteerAngle(), 90);
+    CHECK_EQ(drive.back_wheel_->GetSteerAngle(), 90);
+>>>>>>> 900af90180719c36d0f5d64c6219c66b77c491b8
   }
 
   SECTION("12.7.2 should have all hub motors at same non zero speed")
@@ -393,8 +534,15 @@ TEST_CASE("Drive system testing")
     drive.HandleRoverMovement();
     drive.HandleRoverMovement();
 
+<<<<<<< HEAD
     CHECK_EQ(wheels.left_->GetHubSpeed(), wheels.right_->GetHubSpeed());
     CHECK_EQ(wheels.right_->GetHubSpeed(), wheels.back_->GetHubSpeed());
+=======
+    CHECK_EQ(drive.left_wheel_->GetHubSpeed(),
+             drive.right_wheel_->GetHubSpeed());
+    CHECK_EQ(drive.right_wheel_->GetHubSpeed(),
+             drive.back_wheel_->GetHubSpeed());
+>>>>>>> 900af90180719c36d0f5d64c6219c66b77c491b8
     CHECK_FALSE(drive.IsStopped());
   }
 
@@ -407,9 +555,15 @@ TEST_CASE("Drive system testing")
     drive.HandleRoverMovement();
     drive.HandleRoverMovement();
 
+<<<<<<< HEAD
     CHECK_EQ(wheels.left_->GetSteerAngle(), 12);
     CHECK_EQ(wheels.right_->GetSteerAngle(), 45);
     CHECK_EQ(wheels.back_->GetSteerAngle(), -36);
+=======
+    CHECK_EQ(drive.left_wheel_->GetSteerAngle(), 12);
+    CHECK_EQ(drive.right_wheel_->GetSteerAngle(), 45);
+    CHECK_EQ(drive.back_wheel_->GetSteerAngle(), -36);
+>>>>>>> 900af90180719c36d0f5d64c6219c66b77c491b8
   }
 
   SECTION("12.8.2 should clamp steer angles when under 45")
@@ -421,9 +575,15 @@ TEST_CASE("Drive system testing")
     drive.HandleRoverMovement();
     drive.HandleRoverMovement();
 
+<<<<<<< HEAD
     CHECK_EQ(wheels.left_->GetSteerAngle(), -45);
     CHECK_EQ(wheels.right_->GetSteerAngle(), -12);
     CHECK_EQ(wheels.back_->GetSteerAngle(), 36);
+=======
+    CHECK_EQ(drive.left_wheel_->GetSteerAngle(), -45);
+    CHECK_EQ(drive.right_wheel_->GetSteerAngle(), -12);
+    CHECK_EQ(drive.back_wheel_->GetSteerAngle(), 36);
+>>>>>>> 900af90180719c36d0f5d64c6219c66b77c491b8
   }
 
   SECTION("12.8.3 should have correct angles when set 10: L=6, R=-10, B=-12")
@@ -435,9 +595,15 @@ TEST_CASE("Drive system testing")
     drive.HandleRoverMovement();
     drive.HandleRoverMovement();
 
+<<<<<<< HEAD
     CHECK_EQ(wheels.left_->GetSteerAngle(), 6);
     CHECK_EQ(wheels.right_->GetSteerAngle(), 10);
     CHECK_EQ(wheels.back_->GetSteerAngle(), -14);
+=======
+    CHECK_EQ(drive.left_wheel_->GetSteerAngle(), 6);
+    CHECK_EQ(drive.right_wheel_->GetSteerAngle(), 10);
+    CHECK_EQ(drive.back_wheel_->GetSteerAngle(), -14);
+>>>>>>> 900af90180719c36d0f5d64c6219c66b77c491b8
   }
 
   SECTION("12.8.4 should have correct angles when set -10: L=-10, R=-6, B=12")
@@ -449,9 +615,15 @@ TEST_CASE("Drive system testing")
     drive.HandleRoverMovement();
     drive.HandleRoverMovement();
 
+<<<<<<< HEAD
     CHECK_EQ(wheels.left_->GetSteerAngle(), -10);
     CHECK_EQ(wheels.right_->GetSteerAngle(), -6);
     CHECK_EQ(wheels.back_->GetSteerAngle(), 14);
+=======
+    CHECK_EQ(drive.left_wheel_->GetSteerAngle(), -10);
+    CHECK_EQ(drive.right_wheel_->GetSteerAngle(), -6);
+    CHECK_EQ(drive.back_wheel_->GetSteerAngle(), 14);
+>>>>>>> 900af90180719c36d0f5d64c6219c66b77c491b8
   }
 
   SECTION("12.8.5 should get correct speed")
@@ -463,8 +635,15 @@ TEST_CASE("Drive system testing")
     drive.HandleRoverMovement();
     drive.HandleRoverMovement();
     // Currently the hub motors are all set to the same speed
+<<<<<<< HEAD
     CHECK_EQ(wheels.left_->GetHubSpeed(), wheels.right_->GetHubSpeed());
     CHECK_EQ(wheels.right_->GetHubSpeed(), wheels.back_->GetHubSpeed());
+=======
+    CHECK_EQ(drive.left_wheel_->GetHubSpeed(),
+             drive.right_wheel_->GetHubSpeed());
+    CHECK_EQ(drive.right_wheel_->GetHubSpeed(),
+             drive.back_wheel_->GetHubSpeed());
+>>>>>>> 900af90180719c36d0f5d64c6219c66b77c491b8
     CHECK_FALSE(drive.IsStopped());
   }
 
@@ -475,9 +654,15 @@ TEST_CASE("Drive system testing")
 
     drive.HandleRoverMovement();
 
+<<<<<<< HEAD
     CHECK_EQ(wheels.left_->GetSteerAngle(), -45);
     CHECK_EQ(wheels.right_->GetSteerAngle(), -135);
     CHECK_EQ(wheels.back_->GetSteerAngle(), 90);
+=======
+    CHECK_EQ(drive.left_wheel_->GetSteerAngle(), -45);
+    CHECK_EQ(drive.right_wheel_->GetSteerAngle(), -135);
+    CHECK_EQ(drive.back_wheel_->GetSteerAngle(), 90);
+>>>>>>> 900af90180719c36d0f5d64c6219c66b77c491b8
   }
 
   SECTION("12.9.1 should have correct starting angles")
@@ -487,9 +672,15 @@ TEST_CASE("Drive system testing")
 
     drive.HandleRoverMovement();
 
+<<<<<<< HEAD
     CHECK_EQ(wheels.left_->GetSteerAngle(), 0);
     CHECK_EQ(wheels.right_->GetSteerAngle(), 60);
     CHECK_EQ(wheels.back_->GetSteerAngle(), 110);
+=======
+    CHECK_EQ(drive.left_wheel_->GetSteerAngle(), 0);
+    CHECK_EQ(drive.right_wheel_->GetSteerAngle(), 60);
+    CHECK_EQ(drive.back_wheel_->GetSteerAngle(), 110);
+>>>>>>> 900af90180719c36d0f5d64c6219c66b77c491b8
   }
 
   SECTION("12.9.2 should have all hub motors at same non zero speed")
@@ -501,8 +692,15 @@ TEST_CASE("Drive system testing")
     drive.HandleRoverMovement();
     drive.HandleRoverMovement();
 
+<<<<<<< HEAD
     CHECK_EQ(wheels.left_->GetHubSpeed(), wheels.right_->GetHubSpeed());
     CHECK_EQ(wheels.right_->GetHubSpeed(), wheels.back_->GetHubSpeed());
+=======
+    CHECK_EQ(drive.left_wheel_->GetHubSpeed(),
+             drive.right_wheel_->GetHubSpeed());
+    CHECK_EQ(drive.right_wheel_->GetHubSpeed(),
+             drive.back_wheel_->GetHubSpeed());
+>>>>>>> 900af90180719c36d0f5d64c6219c66b77c491b8
     CHECK_FALSE(drive.IsStopped());
   }
 
@@ -516,6 +714,7 @@ TEST_CASE("Drive system testing")
     drive.HandleRoverMovement();
     drive.HandleRoverMovement();
 
+<<<<<<< HEAD
     CHECK_NE(wheels.left_->GetHubSpeed(), 0);
     CHECK_EQ(wheels.right_->GetHubSpeed(), 0);
     CHECK_EQ(wheels.back_->GetHubSpeed(), 0);
@@ -523,10 +722,20 @@ TEST_CASE("Drive system testing")
     CHECK_NE(wheels.left_->GetSteerAngle(), 0);
     CHECK_EQ(wheels.right_->GetSteerAngle(), 0);
     CHECK_EQ(wheels.back_->GetSteerAngle(), 0);
+=======
+    CHECK_NE(drive.left_wheel_->GetHubSpeed(), 0);
+    CHECK_EQ(drive.right_wheel_->GetHubSpeed(), 0);
+    CHECK_EQ(drive.back_wheel_->GetHubSpeed(), 0);
+
+    CHECK_NE(drive.left_wheel_->GetSteerAngle(), 0);
+    CHECK_EQ(drive.right_wheel_->GetSteerAngle(), 0);
+    CHECK_EQ(drive.back_wheel_->GetSteerAngle(), 0);
+>>>>>>> 900af90180719c36d0f5d64c6219c66b77c491b8
   }
 
   SECTION("13.1 left wheel should become right wheel")
   {
+<<<<<<< HEAD
     drive::Wheel *left = wheels.left_;
     drive::Wheel *right = wheels.right_;
     drive::Wheel *back = wheels.back_;
@@ -534,6 +743,15 @@ TEST_CASE("Drive system testing")
     CHECK_EQ(left, wheels.right_);
     CHECK_EQ(right, wheels.back_);
     CHECK_EQ(back, wheels.left_);
+=======
+    drive::Wheel * left  = drive.left_wheel_;
+    drive::Wheel * right = drive.right_wheel_;
+    drive::Wheel * back  = drive.back_wheel_;
+    drive.SwitchLegOrientation(2);
+    CHECK_EQ(left, drive.right_wheel_);
+    CHECK_EQ(right, drive.back_wheel_);
+    CHECK_EQ(back, drive.left_wheel_);
+>>>>>>> 900af90180719c36d0f5d64c6219c66b77c491b8
   }
 }
 }  // namespace sjsu
