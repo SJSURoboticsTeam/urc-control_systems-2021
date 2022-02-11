@@ -147,17 +147,17 @@ class RoverArmSystem : public sjsu::common::RoverSystem
   }
 
   //getters for testing purposes:
-  GeneralMissionControlData GetMCData()
+  GeneralMissionControlData GetMCData() const
   {
     return mc_data_;
   }
 
-  HumanArm::MissionControlData GetArmMCData()
+  HumanArm::MissionControlData GetArmMCData() const
   {
     return arm_mc_data_;
   }
 
-  Hand::MissionControlData GetHandMCData()
+  Hand::MissionControlData GetHandMCData() const
   {
     return hand_mc_data_;
   }
