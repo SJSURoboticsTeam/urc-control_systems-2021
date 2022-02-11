@@ -34,17 +34,17 @@ class Wheel
     printf("%-10s%-10d%-10d%-10f\n", name_.c_str(), GetHubSpeed(), GetSteerAngle(), GetSteerEncoderPosition());
   }
 
-  std::string GetName()
+  std::string GetName() const
   {
     return name_;
   }
 
-  int GetHubSpeed()
+  int GetHubSpeed() const
   {
     return int(hub_speed_);
   };
 
-  int GetSteerAngle()
+  int GetSteerAngle() const
   {
     return int(steer_angle_);
   };
@@ -63,12 +63,12 @@ class Wheel
     steer_motor_.SetAngle(steer_angle_degree, kSteerSpeed);
   };
 
-  int GetHomingOffset()
+  int GetHomingOffset() const
   {
     return homing_offset_angle_;
   }
 
-int GetSteerEncoderPosition()
+int GetSteerEncoderPosition() const
   {
     return int(steer_motor_.RequestFeedbackFromMotor().GetFeedback().encoder_position);
   }

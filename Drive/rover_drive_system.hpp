@@ -128,7 +128,7 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
       SetWheelSpeed(kZeroSpeed);
       return;
     }
-    if (!IsOperational())
+    if (!IsOperational(mc_data_.is_operational))
     {
       StopWheels();
       return;
@@ -168,7 +168,7 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
     return false;
   }
 
-  Modes GetCurrentMode()
+  Modes GetCurrentMode() const
   {
     return current_drive_mode_;
   }
@@ -354,7 +354,7 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
   }
 
   /// Calculates outer wheel angle based off inner wheel angle
-  float GetOutterWheelDriveAngle(float inner_wheel_angle)
+  float GetOutterWheelDriveAngle(float inner_wheel_angle) const
   {
     float outter_wheel_angle = 0.392 + 0.744 * abs(int(inner_wheel_angle)) +
                                -0.0187 * pow(abs(int(inner_wheel_angle)), 2) +
@@ -363,7 +363,7 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
   }
 
   /// Calculates back wheel angle based off inner wheel angle
-  float GetBackWheelDriveAngle(float inner_wheel_angle)
+  float GetBackWheelDriveAngle(float inner_wheel_angle) const
   {
     float back_wheel_angle = -0.378 + -1.79 * abs(int(inner_wheel_angle)) +
                              0.0366 * pow(abs(int(inner_wheel_angle)), 2) +
