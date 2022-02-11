@@ -120,33 +120,6 @@ class Hand
     }
   }
 
-  void HandleMovement(float speed,
-                      float thumb_angle,
-                      float pointer_angle,
-                      float middle_angle,
-                      float ring_angle,
-                      float pinky_angle,
-                      float roll,
-                      float pitch)
-  {
-    switch (current_hand_mode_)
-    {
-      case MissionControlHandData::HandModes::kConcurrent:
-        HandleConcurrentMovement(speed, thumb_angle, pointer_angle,
-                                 middle_angle, ring_angle, pinky_angle, roll,
-                                 pitch);
-        break;
-      case MissionControlHandData::HandModes::kPitch:
-        SetWristPitchPosition(speed, pitch);
-        break;
-      case MissionControlHandData::HandModes::kRoll:
-        SetWristRollPosition(speed, roll);
-        break;
-      case MissionControlHandData::HandModes::kClose: CloseHand(speed); break;
-      case MissionControlHandData::HandModes::kOpen: OpenHand(speed); break;
-    }
-  }
-
   int GetWristPitch()
   {
     return wrist_.GetPitchPosition();
