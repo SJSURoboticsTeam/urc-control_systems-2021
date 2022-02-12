@@ -44,22 +44,22 @@ class Finger
     speed_ = target_speed;
   }
 
-  int GetPosition()
+  int GetPosition() const
   {
     return int(position_);
   }
 
-  int GetSpeed()
+  int GetSpeed() const
   {
     return int(speed_);
   }
 
-  int GetMaxAngle()
+  int GetMaxAngle() const
   {
     return int(max_angle_);
   }
 
-  int GetMinAngle()
+  int GetMinAngle() const
   {
     return int(min_angle_);
   }

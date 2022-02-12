@@ -81,27 +81,27 @@ class WristJoint : public Joint
     right_motor_.SetSpeed(speed_to_rpm);
   }
 
-  int GetPitchPosition()
+  int GetPitchPosition() const
   {
     return int(pitch_angle_);
   }
 
-  int GetRollPosition()
+  int GetRollPosition() const
   {
     return int(roll_angle_);
   }
 
-  int GetPitchOffsetAngle()
+  int GetPitchOffsetAngle() const
   {
     return int(pitch_offset_angle_);
   }
 
-  int GetRollOffsetAngle()
+  int GetRollOffsetAngle() const
   {
     return int(roll_offset_angle_);
   }
 
-  int GetSpeed()
+  int GetSpeed() const
   {
     return speed_;
   }
