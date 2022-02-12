@@ -1,6 +1,7 @@
 #pragma once
 namespace sjsu::drive
 {
+  
 enum class Modes : char
   {
     DriveMode      = 'D',
