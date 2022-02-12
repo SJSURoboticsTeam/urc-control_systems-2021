@@ -3,6 +3,7 @@
 #include "utility/log.hpp"
 
 #include "../Common/state_of_charge.hpp"
+#include "../Drive/Interface/drive.hpp"
 #include "../Common/rover_system.hpp"
 #include "../Common/heartbeat.hpp"
 #include "../Common/esp.hpp"
@@ -20,7 +21,7 @@ const char response_body_format[] =
     "  \"speed\": %d,\n"
     "  \"angle\": %d\n"
     "}";
-class RoverDriveSystem : public sjsu::common::RoverSystem
+class RoverDriveSystem : public sjsu::common::RoverSystem, public sjsu::drive::drive
 {
  public:
   struct ParseError
@@ -33,15 +34,15 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
   {
   };
 
-  enum class Modes : char
-  {
-    DriveMode      = 'D',
-    SpinMode       = 'S',
-    TranslateMode  = 'T',
-    LeftWheelMode  = 'L',
-    RightWheelMode = 'R',
-    BackWheelMode  = 'B'
-  };
+  // enum class Modes : char
+  // {
+  //   DriveMode      = 'D',
+  //   SpinMode       = 'S',
+  //   TranslateMode  = 'T',
+  //   LeftWheelMode  = 'L',
+  //   RightWheelMode = 'R',
+  //   BackWheelMode  = 'B'
+  // };
 
   struct MissionControlData : public RoverMissionControlData
   {
