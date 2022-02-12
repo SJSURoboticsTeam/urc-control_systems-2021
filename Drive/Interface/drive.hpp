@@ -1,6 +1,15 @@
 #pragma once
 namespace sjsu::drive
 {
+enum class Modes : char
+  {
+    DriveMode      = 'D',
+    SpinMode       = 'S',
+    TranslateMode  = 'T',
+    LeftWheelMode  = 'L',
+    RightWheelMode = 'R',
+    BackWheelMode  = 'B'
+  };
 
 class drive{
     virtual void SwitchLegOrientation() = 0;
@@ -15,7 +24,7 @@ class drive{
     virtual void SetDriveMode() = 0;
     virtual void SetSpinMode() = 0;
     virtual void SetTranslationMode() = 0;
-    virtual void SetSingleWheelMode()
+    virtual void SetSingleWheelMode() = 0;
     virtual void HandleDriveMode() = 0;
     virtual float GetOutterWheelDriveAngle() = 0;
     virtual float GetBackWheelDriveAngle() = 0;
