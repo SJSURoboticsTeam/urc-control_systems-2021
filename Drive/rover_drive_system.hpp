@@ -98,7 +98,7 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
         "battery=%d"
         "&left_wheel_speed=%d&left_wheel_angle=%d&right_wheel_speed=%d&right_"
         "wheel_angle=%d&back_wheel_speed=%d&back_wheel_angle=%d",
-        GetHeartbeatCount(), mc_data_.is_operational, mc_data_.wheel_shift, current_mode_,
+        GetHeartbeatCount(), mc_data_.is_operational, mc_data_.wheel_shift, current_drive_mode_,
         state_of_charge_, wheel.left_->GetHubSpeed(),
         wheel.left_->GetSteerAngle(), wheel.right_->GetHubSpeed(),
         wheel.right_->GetSteerAngle(), wheel.back_->GetHubSpeed(),
@@ -305,7 +305,7 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
     wheel.left_->SetSteerAngle(left_wheel_angle);
     wheel.right_->SetSteerAngle(right_wheel_angle);
     wheel.back_->SetSteerAngle(back_wheel_angle);
-    current_mode_ = 'D';
+    current_drive_mode_ = Modes::DriveMode ;
   }
 
   /// Aligns rover wheels perpendicular to their legs using homing slip ring
@@ -317,7 +317,7 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
     wheel.left_->SetSteerAngle(left_wheel_angle);
     wheel.right_->SetSteerAngle(right_wheel_angle);
     wheel.back_->SetSteerAngle(back_wheel_angle);
-    current_mode_ = 'S';
+    current_drive_mode_ = Modes::SpinMode;
   }
 
   /// Aligns rover wheel all in the same direction, facing towards the right
@@ -330,7 +330,7 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
     wheel.left_->SetSteerAngle(left_wheel_angle);
     wheel.right_->SetSteerAngle(right_wheel_angle);
     wheel.back_->SetSteerAngle(back_wheel_angle);
-    current_mode_ = 'T';
+    current_drive_mode_ = Modes::TranslateMode;
   }
 
   void SetSingleWheelMode()
@@ -405,15 +405,15 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
   {
     switch (current_drive_mode_)
     {
-      case 'L':
+      case Modes::LeftWheelMode:
         wheel.left_->SetSteerAngle(angle);
         wheel.left_->SetHubSpeed(speed);
         break;
-      case 'R':
+      case Modes::RightWheelMode:
         wheel.right_->SetSteerAngle(angle);
         wheel.right_->SetHubSpeed(speed);
         break;
-      case 'B':
+      case Modes::BackWheelMode:
         wheel.back_->SetSteerAngle(angle);
         wheel.back_->SetHubSpeed(speed);
         break;
@@ -429,6 +429,7 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
 
 
 private:
+  Modes current_drive_mode_ = Modes::SpinMode;
   MissionControlData mc_data_;
   std::array<Wheel*, 3> wheels{wheel.left_, wheel.right_, wheel.back_};
   struct wheels_{
