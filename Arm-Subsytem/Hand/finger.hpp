@@ -1,7 +1,7 @@
 #pragma once
 
 #include "devices/actuators/servo/servo.hpp"
-
+#include "pca9685.hpp"
 namespace sjsu::arm
 {
 class Finger
@@ -10,15 +10,21 @@ class Finger
   Finger(sjsu::Servo & servo) : servo_(servo) {}
 
   Finger(sjsu::Servo & servo,
+         int pin_number,
+         float min_pulse,
+         float max_pulse,
          float position,
          float speed,
          float max_angle,
          float min_angle)
       : servo_(servo),
+        pin_number_(pin_number),
         position_(position),
         speed_(speed),
         max_angle_(max_angle),
-        min_angle_(min_angle)
+        min_angle_(min_angle),
+        min_pulse_(min_pulse),
+        max_pulse_(max_pulse),
   {
   }
 
@@ -27,9 +33,10 @@ class Finger
     servo_.ModuleInitialize();
   }
 
+
   void SetPosition(float angle)
   {
-    position_ = std::clamp(angle, min_angle_, max_angle_);
+    position_ = sjsu:Map(angle, min_angle_, max_angle_, min_pulse_, max_pulse_);
     units::angle::degree_t angle_to_degrees(position_);
     servo_.SetAngle(angle_to_degrees);
   }
@@ -71,6 +78,8 @@ class Finger
   float speed_     = 0;
   float max_angle_ = 180;
   float min_angle_ = 0;
+  float min_pulse_ = 2.0;
+  float max_pulse_ = 1.0;
 };
 
 }  // namespace sjsu::arm
