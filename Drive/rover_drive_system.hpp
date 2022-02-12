@@ -34,16 +34,6 @@ class RoverDriveSystem : public sjsu::common::RoverSystem, public sjsu::drive::d
   {
   };
 
-  // enum class Modes : char
-  // {
-  //   DriveMode      = 'D',
-  //   SpinMode       = 'S',
-  //   TranslateMode  = 'T',
-  //   LeftWheelMode  = 'L',
-  //   RightWheelMode = 'R',
-  //   BackWheelMode  = 'B'
-  // };
-
   struct MissionControlData : public RoverMissionControlData
   {
     int wheel_shift    = 0;
