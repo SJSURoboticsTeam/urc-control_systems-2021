@@ -120,42 +120,42 @@ class Hand
     }
   }
 
-  int GetWristPitch()
+  int GetWristPitch() const
   {
     return wrist_.GetPitchPosition();
   }
 
-  int GetWristRoll()
+  int GetWristRoll() const
   {
     return wrist_.GetRollPosition();
   }
 
-  int GetThumbPosition()
+  int GetThumbPosition() const
   {
     return thumb_.GetPosition();
   };
 
-  int GetPointerPosition()
+  int GetPointerPosition() const
   {
     return pointer_.GetPosition();
   };
 
-  int GetMiddlePosition()
+  int GetMiddlePosition() const
   {
     return middle_.GetPosition();
   };
 
-  int GetRingPosition()
+  int GetRingPosition() const
   {
     return ring_.GetPosition();
   };
 
-  int GetPinkyPosition()
+  int GetPinkyPosition() const
   {
     return pinky_.GetPosition();
   };
 
-  MissionControlData::HandModes GetCurrentHandMode()
+  MissionControlData::HandModes GetCurrentHandMode() const
   {
     return current_hand_mode_;
   }

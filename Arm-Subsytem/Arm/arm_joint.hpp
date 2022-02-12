@@ -51,17 +51,17 @@ class ArmJoint : public Joint
     motor_.SetSpeed(speed_to_rpm);
   }
 
-  int GetSpeed()
+  int GetSpeed() const
   {
     return int(speed_);
   }
 
-  int GetPosition()
+  int GetPosition() const
   {
     return int(position_);
   }
 
-  int GetOffsetAngle()
+  int GetOffsetAngle() const
   {
     return int(offset_angle_);
   }
