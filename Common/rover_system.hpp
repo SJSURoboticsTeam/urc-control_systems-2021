@@ -36,7 +36,7 @@ class RoverSystem
     return true;
   }
 
-  int GetHeartbeatCount()
+  int GetHeartbeatCount() const
   {
     return heartbeat_count_;
   }
