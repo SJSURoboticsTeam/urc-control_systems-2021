@@ -40,7 +40,6 @@ TEST_CASE("Drive system testing")
   drive::RoverDriveSystem drive(left_wheel, right_wheel, back_wheel);
   
   auto wheels = drive.getWheels();
-  //wheels = sjsu::drive::RoverDriveSystem::getWheels();
 
   const int kNonZero = 50;
 

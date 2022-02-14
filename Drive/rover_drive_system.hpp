@@ -131,7 +131,7 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
       SetWheelSpeed(kZeroSpeed);
       return;
     }
-    if (!IsOperational(mc_data_.is_operational))
+    if (!IsOperational())
     {
       StopWheels();
       return;
