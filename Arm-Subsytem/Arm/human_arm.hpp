@@ -119,7 +119,7 @@ class HumanArm
     }
   }
 
-  MissionControlData::ArmModes GetCurrentArmMode()
+  MissionControlData::ArmModes GetCurrentArmMode() const
   {
     return current_arm_mode_;
   }
@@ -129,37 +129,37 @@ class HumanArm
     current_arm_mode_ = current_arm_mode;
   }
 
-  int GetRotundaPosition()
+  int GetRotundaPosition() const
   {
     return rotunda_.GetPosition();
   }
 
-  int GetRotundaSpeed()
+  int GetRotundaSpeed() const
   {
     return rotunda_.GetSpeed();
   }
 
-  int GetShoulderPosition()
+  int GetShoulderPosition() const
   {
     return shoulder_.GetPosition();
   }
 
-  int GetShoulderSpeed()
+  int GetShoulderSpeed() const
   {
     return shoulder_.GetSpeed();
   }
 
-  int GetElbowPosition()
+  int GetElbowPosition() const
   {
     return elbow_.GetPosition();
   }
 
-  int GetElbowSpeed()
+  int GetElbowSpeed() const
   {
     return elbow_.GetSpeed();
   }
 
-  int GetRotundaOffsetAngle()
+  int GetRotundaOffsetAngle() const
   {
     return rotunda_.GetOffsetAngle();
   }

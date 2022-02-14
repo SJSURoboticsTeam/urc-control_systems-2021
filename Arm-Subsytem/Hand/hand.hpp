@@ -120,69 +120,42 @@ class Hand
     }
   }
 
-  void HandleMovement(float speed,
-                      float thumb_angle,
-                      float pointer_angle,
-                      float middle_angle,
-                      float ring_angle,
-                      float pinky_angle,
-                      float roll,
-                      float pitch)
-  {
-    switch (current_hand_mode_)
-    {
-      case MissionControlHandData::HandModes::kConcurrent:
-        HandleConcurrentMovement(speed, thumb_angle, pointer_angle,
-                                 middle_angle, ring_angle, pinky_angle, roll,
-                                 pitch);
-        break;
-      case MissionControlHandData::HandModes::kPitch:
-        SetWristPitchPosition(speed, pitch);
-        break;
-      case MissionControlHandData::HandModes::kRoll:
-        SetWristRollPosition(speed, roll);
-        break;
-      case MissionControlHandData::HandModes::kClose: CloseHand(speed); break;
-      case MissionControlHandData::HandModes::kOpen: OpenHand(speed); break;
-    }
-  }
-
-  int GetWristPitch()
+  int GetWristPitch() const
   {
     return wrist_.GetPitchPosition();
   }
 
-  int GetWristRoll()
+  int GetWristRoll() const
   {
     return wrist_.GetRollPosition();
   }
 
-  int GetThumbPosition()
+  int GetThumbPosition() const
   {
     return thumb_.GetPosition();
   };
 
-  int GetPointerPosition()
+  int GetPointerPosition() const
   {
     return pointer_.GetPosition();
   };
 
-  int GetMiddlePosition()
+  int GetMiddlePosition() const
   {
     return middle_.GetPosition();
   };
 
-  int GetRingPosition()
+  int GetRingPosition() const
   {
     return ring_.GetPosition();
   };
 
-  int GetPinkyPosition()
+  int GetPinkyPosition() const
   {
     return pinky_.GetPosition();
   };
 
-  MissionControlData::HandModes GetCurrentHandMode()
+  MissionControlData::HandModes GetCurrentHandMode() const
   {
     return current_hand_mode_;
   }

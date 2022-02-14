@@ -115,13 +115,13 @@ TEST_CASE("Drive system testing")
   SECTION("4.1 should return false at start")
   {
     CHECK_EQ(drive.mc_data_.is_operational, 0);
-    CHECK_FALSE(drive.IsOperational());
+    CHECK_FALSE(drive.IsOperational(drive.mc_data_.is_operational));
   }
 
   SECTION("4.2 should return true after setting is_operational")
   {
     drive.mc_data_.is_operational = 1;
-    CHECK(drive.IsOperational());
+    CHECK(drive.IsOperational(drive.mc_data_.is_operational));
   }
 
   SECTION("5.1 should return starting drive mode 'S'")
