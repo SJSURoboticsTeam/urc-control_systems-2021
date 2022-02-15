@@ -43,7 +43,7 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
     BackWheelMode  = 'B'
   };
 
-  struct DriveChassis
+  struct Wheels
   {
     Wheel * left_;
     Wheel * right_;
@@ -53,12 +53,12 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
   struct MissionControlData : public RoverMissionControlData
   {
     int wheel_shift    = 0;
-    Modes drive_mode   = Modes::SpinMode;
     int rotation_angle = 0;
     int speed          = 0;
+    Modes drive_mode   = Modes::SpinMode;
   };
 
-  RoverDriveSystem(DriveChassis & wheels) : wheels_(wheels){};
+  RoverDriveSystem(Wheels & wheels) : wheels_(wheels){};
 
   void Initialize() override
   {
@@ -188,7 +188,7 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
     return current_drive_mode_;
   }
 
-  DriveChassis GetWheels()
+  Wheels GetWheels()
   {
     return wheels_;
   }
@@ -253,7 +253,7 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
       }
       sjsu::Delay(50ms);
     }
-    sjsu::LogInfo("DriveChassis homed!");
+    sjsu::LogInfo("Drive system is homed!");
   }
 
   bool AllWheelsAreHomed()
@@ -442,7 +442,7 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
  private:
   Modes current_drive_mode_ = Modes::SpinMode;
   MissionControlData mc_data_;
-  DriveChassis wheels_;
+  Wheels wheels_;
   std::array<Wheel *, 3> wheel_array_{ wheels_.left_, wheels_.right_,
                                        wheels_.back_ };
 

@@ -57,9 +57,8 @@ TEST_CASE("Drive system testing")
   {
     std::string expected_parameters =
         "?heartbeat_count=0&is_operational=0&wheel_shift=0&drive_mode=S&"
-        "battery=90"
-        "&left_wheel_speed=0&left_wheel_angle=0&right_wheel_speed=0&right_"
-        "wheel_angle=0&back_wheel_speed=0&back_wheel_angle=0";
+        "battery=90&left_wheel_speed=0&left_wheel_angle=0&right_wheel_speed=0&"
+        "right_wheel_angle=0&back_wheel_speed=0&back_wheel_angle=0";
     std::string actual_parameters = drive.GETParameters();
     CHECK_EQ(actual_parameters, expected_parameters);
   }
