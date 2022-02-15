@@ -38,8 +38,8 @@ TEST_CASE("Drive system testing")
   drive::Wheel back_wheel("back", motor, motor, mock_wheel_homing_pin.get());
 
   drive::RoverDriveSystem drive(left_wheel, right_wheel, back_wheel);
-  
-  auto wheels = drive.getWheels();
+
+  auto wheels = drive.GetWheels();
 
   const int kNonZero = 50;
 
@@ -153,7 +153,7 @@ TEST_CASE("Drive system testing")
     wheels.back_->SetHubSpeed(kNonZero);
     CHECK_FALSE(drive.IsStopped());
   }
-  
+
   SECTION("7.3 should return false if at least one hub wheel is moving")
   {
     wheels.right_->SetHubSpeed(kNonZero);
@@ -526,13 +526,13 @@ TEST_CASE("Drive system testing")
 
   SECTION("13.1 left wheel should become right wheel")
   {
-    drive::Wheel *left = wheels.left_;
-    drive::Wheel *right = wheels.right_;
-    drive::Wheel *back = wheels.back_;
+    drive::Wheel * left  = wheels.left_;
+    drive::Wheel * right = wheels.right_;
+    drive::Wheel * back  = wheels.back_;
     drive.SwitchLegOrientation(2);
     CHECK_EQ(left, wheels.right_);
     CHECK_EQ(right, wheels.back_);
     CHECK_EQ(back, wheels.left_);
   }
 }
-}  // namespace sjsu
+}  // namespace sjsu::drive
