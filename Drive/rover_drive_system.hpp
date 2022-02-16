@@ -71,15 +71,9 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
     sjsu::LogInfo("Drive system initialized!");
   }
 
-  // example Call: drive.switchLegOrientation(drive, back_wheel, right_wheel,
-  // back_wheel)
+  /// [0] = {L, R, B}, [1] = {B, L, R}, [2] = {R, B, L}
   void SwitchLegOrientation(int position)
   {
-    /*
-    [0] = left right back
-    [1] = back left right
-    [2] = right back left
-    */
     if (IsStopped())
     {
       wheels_.left_  = wheel_array_[(position + 0) % 3];
@@ -96,9 +90,8 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
     snprintf(
         request_parameter, 300,
         "?heartbeat_count=%d&is_operational=%d&wheel_shift=%d&drive_mode=%c&"
-        "battery=%d"
-        "&left_wheel_speed=%d&left_wheel_angle=%d&right_wheel_speed=%d&right_"
-        "wheel_angle=%d&back_wheel_speed=%d&back_wheel_angle=%d",
+        "battery=%d&left_wheel_speed=%d&left_wheel_angle=%d&right_wheel_speed=%"
+        "d&right_wheel_angle=%d&back_wheel_speed=%d&back_wheel_angle=%d",
         GetHeartbeatCount(), mc_data_.is_operational, mc_data_.wheel_shift,
         static_cast<char>(current_drive_mode_), state_of_charge_,
         wheels_.left_->GetHubSpeed(), wheels_.left_->GetSteerAngle(),
