@@ -12,6 +12,10 @@ TEST_CASE("Arm system testing")
                                                          accel_value,
                                                          accel_value };
 
+  arm::RoverArmSystem::GeneralMissionControlData mc_data;
+  arm::Hand::MissionControlData hand_mc_data;
+  arm::HumanArm::MissionControlData arm_mc_data;
+
   Mock<Can> mock_can;
   Fake(Method(mock_can, Can::ModuleInitialize));
   Fake(OverloadedMethod(mock_can, Can::Send, void(const Can::Message_t &)));
@@ -41,6 +45,7 @@ TEST_CASE("Arm system testing")
   arm::ArmJoint shoulder(motor, spyed_mpu);
   arm::ArmJoint elbow(motor, spyed_mpu);
   arm::ArmJoint rotunda(motor, spyed_mpu, 0, 3600, 1800);
+  arm::HumanArm human_arm(rotunda, shoulder, elbow);
 
   arm::Finger pinky(mock_servo.get());
   arm::Finger ring(mock_servo.get());
@@ -50,7 +55,7 @@ TEST_CASE("Arm system testing")
   arm::WristJoint wrist(motor, motor, spyed_mpu);
   arm::Hand hand(wrist, pinky, ring, middle, pointer, thumb);
 
-  arm::RoverArmSystem arm(rotunda, shoulder, elbow, hand);
+  arm::RoverArmSystem arm_system(human_arm, hand);
 
   SECTION("should initialize and return default values")
   {
@@ -59,7 +64,7 @@ TEST_CASE("Arm system testing")
     CHECK_EQ(hand.GetWristPitch(), 0);
   }
 
-  SECTION("should return default GET parameters")
+  SECTION("1.1 should return default GET parameters")
   {
     std::string expected_parameter =
         "?heartbeat_count=0&is_operational=0&arm_mode=C&hand_mode=C&arm_speed=0&"
@@ -67,11 +72,11 @@ TEST_CASE("Arm system testing")
         "angle=0&wrist_roll=0&wrist_pitch=0&pinky_angle=0&"
         "ring_angle=0&middle_angle=0&pointer_angle=0&thumb_"
         "angle=0";
-    std::string actual_parameter = arm.GETParameters();
+    std::string actual_parameter = arm_system.GETParameters();
     CHECK(expected_parameter == actual_parameter);
   }
 
-  SECTION("should parse json response correctly")
+  SECTION("2.1 should parse json response correctly")
   {
     std::string example_response =
         "\r\n\r\n{\n"
@@ -91,9 +96,25 @@ TEST_CASE("Arm system testing")
         "  \"pointer_angle\": 5,\n"
         "  \"thumb_angle\": 5\n"
         "}";
-    arm.ParseJSONResponse(example_response);
-    CHECK(arm.mc_data_.heartbeat_count == 0);
-    CHECK(arm.mc_data_.is_operational == 1);
+    arm_system.ParseJSONResponse(example_response);
+    mc_data = arm_system.GetMCData();
+    arm_mc_data = arm_system.GetArmMCData();
+    hand_mc_data = arm_system.GetHandMCData();
+    CHECK_EQ(mc_data.heartbeat_count, 0);
+    CHECK_EQ(mc_data.is_operational, 1);
+    CHECK_EQ(arm_mc_data.arm_mode, arm::HumanArm::MissionControlData::ArmModes('A'));
+    CHECK_EQ(hand_mc_data.hand_mode, arm::Hand::MissionControlData::HandModes('H'));
+    CHECK_EQ(mc_data.arm_speed, 5);
+    CHECK_EQ(arm_mc_data.arm_angles.rotunda, 5);
+    CHECK_EQ(arm_mc_data.arm_angles.shoulder, 5);
+    CHECK_EQ(arm_mc_data.arm_angles.elbow, 5);
+    CHECK_EQ(hand_mc_data.wrist_data.roll, 5);
+    CHECK_EQ(hand_mc_data.wrist_data.pitch, 5);
+    CHECK_EQ(hand_mc_data.fingers.pinky_angle, 5);
+    CHECK_EQ(hand_mc_data.fingers.ring_angle, 5);
+    CHECK_EQ(hand_mc_data.fingers.middle_angle, 5);
+    CHECK_EQ(hand_mc_data.fingers.pointer_angle, 5);
+    CHECK_EQ(hand_mc_data.fingers.thumb_angle, 5);
   }
 }
 }  // namespace sjsu

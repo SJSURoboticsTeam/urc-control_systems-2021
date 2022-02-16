@@ -3,7 +3,7 @@
 #include "devices/sensors/movement/accelerometer/mpu6050.hpp"
 
 #include "rover_arm_system.hpp"
-#include "arm_joint.hpp"
+#include "Arm/arm_joint.hpp"
 #include "joint.hpp"
 
 namespace sjsu

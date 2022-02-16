@@ -147,6 +147,23 @@ class RoverArmSystem : public sjsu::common::RoverSystem
     hand_.HandleMovement(hand_mc_data_, mc_data_.arm_speed);
   }
 
+  //getters for testing purposes:
+  GeneralMissionControlData GetMCData() const
+  {
+    return mc_data_;
+  }
+
+  HumanArm::MissionControlData GetArmMCData() const
+  {
+    return arm_mc_data_;
+  }
+
+  Hand::MissionControlData GetHandMCData() const
+  {
+    return hand_mc_data_;
+  }
+
+
  private:
   int state_of_charge_         = 90;
   const int kExpectedArguments = 15;

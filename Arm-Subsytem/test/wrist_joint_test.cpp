@@ -65,61 +65,61 @@ TEST_CASE("Wrist joint system testing")
 
   SECTION("3.1 should return zero when setting pitch to zero")
   {
-    wrist_joint.SetPitchPosition(30, 0);
+    wrist_joint.SetPitchPosition(0, 30);
     CHECK(wrist_joint.GetPitchPosition() == 0);
   }
 
   SECTION("3.2 Should return 90 when setting pitch to 90")
   {
-    wrist_joint.SetPitchPosition(30, 90);
+    wrist_joint.SetPitchPosition(90, 30);
     CHECK(wrist_joint.GetPitchPosition() == 90);
   }
 
   SECTION("3.3 Should return 180 when setting pitch to 180")
   {
-    wrist_joint.SetPitchPosition(30, 180);
+    wrist_joint.SetPitchPosition(180, 30);
     CHECK(wrist_joint.GetPitchPosition() == 180);
   }
 
   SECTION("3.4 Should return 0 when setting pitch to -1")
   {
-    wrist_joint.SetPitchPosition(30, -1);
+    wrist_joint.SetPitchPosition(-1, 30);
     CHECK(wrist_joint.GetPitchPosition() == 0);
   }
 
   SECTION("3.5 Should return 180 when setting pitch to 181")
   {
-    wrist_joint.SetPitchPosition(30, 181);
+    wrist_joint.SetPitchPosition(181, 30);
     CHECK(wrist_joint.GetPitchPosition() == 180);
   }
 
   SECTION("4.1 should return zero when setting roll to zero")
   {
-    wrist_joint.SetRollPosition(30, 0);
+    wrist_joint.SetRollPosition(0, 30);
     CHECK(wrist_joint.GetRollPosition() == 0);
   }
 
   SECTION("4.2 Should return 90 when setting roll to 90")
   {
-    wrist_joint.SetRollPosition(30, 90);
+    wrist_joint.SetRollPosition(90, 30);
     CHECK(wrist_joint.GetRollPosition() == 90);
   }
 
   SECTION("4.3 Should return 180 when setting roll to 180")
   {
-    wrist_joint.SetRollPosition(30, 180);
+    wrist_joint.SetRollPosition(180, 30);
     CHECK(wrist_joint.GetRollPosition() == 180);
   }
 
   SECTION("4.4 Should return 0 when setting roll to -1")
   {
-    wrist_joint.SetRollPosition(30, -1);
+    wrist_joint.SetRollPosition(-1, 30);
     CHECK(wrist_joint.GetRollPosition() == 0);
   }
 
   SECTION("4.5 Should return 180 when setting roll to 181")
   {
-    wrist_joint.SetRollPosition(30, 181);
+    wrist_joint.SetRollPosition(181, 30);
     CHECK(wrist_joint.GetRollPosition() == 180);
   }
 }
