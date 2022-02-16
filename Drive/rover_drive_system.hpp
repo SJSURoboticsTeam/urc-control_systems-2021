@@ -58,6 +58,11 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
     Modes drive_mode   = Modes::SpinMode;
   };
 
+  int main()
+  {
+    return 0;
+  }
+
   RoverDriveSystem(Wheels & wheels) : wheels_(wheels){};
 
   void Initialize() override
@@ -74,7 +79,7 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
   /// [0] = {L, R, B}, [1] = {B, L, R}, [2] = {R, B, L}
   void SwitchLegOrientation(int position)
   {
-    if (IsStopped())
+    if (IsStopped() && position >= 0)
     {
       wheels_.left_  = wheel_array_[(position + 0) % 3];
       wheels_.right_ = wheel_array_[(position + 1) % 3];
@@ -93,7 +98,7 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
         "battery=%d&left_wheel_speed=%d&left_wheel_angle=%d&right_wheel_speed=%"
         "d&right_wheel_angle=%d&back_wheel_speed=%d&back_wheel_angle=%d",
         GetHeartbeatCount(), mc_data_.is_operational, mc_data_.wheel_shift,
-        static_cast<char>(current_drive_mode_), state_of_charge_,
+        static_cast<char>(current_drive_mode_), kStateOfCharge,
         wheels_.left_->GetHubSpeed(), wheels_.left_->GetSteerAngle(),
         wheels_.right_->GetHubSpeed(), wheels_.right_->GetSteerAngle(),
         wheels_.back_->GetHubSpeed(), wheels_.back_->GetSteerAngle());
@@ -128,7 +133,7 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
       SetWheelSpeed(kZeroSpeed);
       return;
     }
-    if (!IsOperational())
+    if (!IsOperational(mc_data_.is_operational))
     {
       StopWheels();
       return;
@@ -155,17 +160,6 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
         // throw DriveModeHandlerError{};
         break;
     }
-  }
-
-  /// Checks if the rover is operational
-  bool IsOperational()
-  {
-    if (mc_data_.is_operational != 1)
-    {
-      sjsu::LogWarning("Drive mode is not operational!");
-      return false;
-    }
-    return true;
   }
 
   /// Checks if the rover got a new drive mode command
@@ -428,19 +422,21 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
     }
   }
 
-  int state_of_charge_ = 90;
-
-  const int kExpectedArguments = 6;
-  const float kZeroSpeed       = 0;
-  const float kMaxTurnRadius   = 45;
-  const float kLerpStep        = 0.5;
+ public:
+  Wheels wheels_;
+  MissionControlData mc_data_;
 
  private:
   Modes current_drive_mode_ = Modes::SpinMode;
-  MissionControlData mc_data_;
-  Wheels wheels_;
   std::array<Wheel *, 3> wheel_array_{ wheels_.left_, wheels_.right_,
                                        wheels_.back_ };
+
+  const int kStateOfCharge     = 90;
+  const int kExpectedArguments = 6;
+
+  const float kZeroSpeed     = 0;
+  const float kMaxTurnRadius = 45;
+  const float kLerpStep      = 0.5;
 
   // TODO: Implement this logic once SOC is tested
   // sjsu::common::StateOfCharge & battery_;
