@@ -110,10 +110,13 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
   /// Parses the GET requests response and updates the mission control variables
   void ParseJSONResponse(std::string & response) override
   {
+    char drive_mode;
     int actual_arguments = sscanf(
         response.c_str(), response_body_format, &mc_data_.heartbeat_count,
-        &mc_data_.is_operational, &mc_data_.wheel_shift, &mc_data_.drive_mode,
+        &mc_data_.is_operational, &mc_data_.wheel_shift, &drive_mode,
         &mc_data_.speed, &mc_data_.rotation_angle);
+
+    mc_data_.drive_mode = Modes{ drive_mode };
 
     if (actual_arguments != kExpectedArguments)
     {
