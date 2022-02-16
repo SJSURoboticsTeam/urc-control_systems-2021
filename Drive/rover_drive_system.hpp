@@ -58,11 +58,6 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
     Modes drive_mode   = Modes::SpinMode;
   };
 
-  int main()
-  {
-    return 0;
-  }
-
   RoverDriveSystem(Wheels & wheels) : wheels_(wheels){};
 
   void Initialize() override
