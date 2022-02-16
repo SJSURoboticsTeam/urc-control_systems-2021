@@ -2,10 +2,11 @@
 
 #include "utility/math/units.hpp"
 #include "joint.hpp"
-#include "Hand/hand.hpp"
+#include "Hand/human_hand.hpp"
 #include "../Common/heartbeat.hpp"
 #include "../Common/rover_system.hpp"
 #include "Arm/human_arm.hpp"
+#include "Interface/hand.hpp"
 
 #include <cmath>
 
