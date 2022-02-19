@@ -45,9 +45,9 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
 
   struct Wheels
   {
-    Wheel * left_;
-    Wheel * right_;
-    Wheel * back_;
+    Wheel * left_  = nullptr;
+    Wheel * right_ = nullptr;
+    Wheel * back_  = nullptr;
   };
 
   struct MissionControlData : public RoverMissionControlData
@@ -66,11 +66,9 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
     wheels_.left_->Initialize();
     wheels_.right_->Initialize();
     wheels_.back_->Initialize();
-
     SetSpinMode();
     sjsu::LogInfo("Drive system initialized!");
   }
-
   /// [0] = {L, R, B}, [1] = {B, L, R}, [2] = {R, B, L}
   void SwitchLegOrientation(int position)
   {
