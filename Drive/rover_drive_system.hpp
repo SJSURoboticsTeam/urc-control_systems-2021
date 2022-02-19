@@ -45,9 +45,9 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
 
   struct Wheels
   {
-    Wheel * left_;
-    Wheel * right_;
-    Wheel * back_;
+    Wheel * left_  = nullptr;
+    Wheel * right_ = nullptr;
+    Wheel * back_  = nullptr;
   };
 
   struct MissionControlData : public RoverMissionControlData
@@ -58,7 +58,10 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
     Modes drive_mode   = Modes::SpinMode;
   };
 
-  RoverDriveSystem(Wheels & wheels) : wheels_(wheels){};
+  RoverDriveSystem(Wheels & wheels)
+      : wheels_(wheels){
+
+        };
 
   void Initialize() override
   {
@@ -66,19 +69,17 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
     wheels_.left_->Initialize();
     wheels_.right_->Initialize();
     wheels_.back_->Initialize();
-
     SetSpinMode();
     sjsu::LogInfo("Drive system initialized!");
   }
-
   /// [0] = {L, R, B}, [1] = {B, L, R}, [2] = {R, B, L}
-  void SwitchLegOrientation(int position)
+  void SwitchLegOrientation(int position)  // 1
   {
     if (IsStopped() && position >= 0)
     {
-      wheels_.left_  = wheel_array_[(position + 0) % 3];
-      wheels_.right_ = wheel_array_[(position + 1) % 3];
-      wheels_.back_  = wheel_array_[(position + 2) % 3];
+      wheels_.left_  = wheel_array_[(position + 0) % 3];  // right index
+      wheels_.right_ = wheel_array_[(position + 1) % 3];  // back index
+      wheels_.back_  = wheel_array_[(position + 2) % 3];  // left index
     }
   };
 

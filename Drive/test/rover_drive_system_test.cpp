@@ -530,46 +530,68 @@ TEST_CASE("Drive system testing")
 
   SECTION("13.1 should keep initial leg orientation")
   {
-    auto original_left_wheel  = std::addressof(drive.wheels_.left_);
-    auto original_right_wheel = std::addressof(drive.wheels_.right_);
-    auto original_back_wheel  = std::addressof(drive.wheels_.back_);
+    drive::Wheel * original_left_wheel  = drive.wheels_.left_;
+    drive::Wheel * original_right_wheel = drive.wheels_.right_;
+    drive::Wheel * original_back_wheel  = drive.wheels_.back_;
     drive.SwitchLegOrientation(0);
-    CHECK_EQ(original_left_wheel, &drive.wheels_.left_);
-    CHECK_EQ(original_right_wheel, &drive.wheels_.right_);
-    CHECK_EQ(original_back_wheel, &drive.wheels_.back_);
+    CHECK_EQ(original_left_wheel, drive.wheels_.left_);
+    CHECK_EQ(original_right_wheel, drive.wheels_.right_);
+    CHECK_EQ(original_back_wheel, drive.wheels_.back_);
   }
 
   SECTION("13.2 keep initial leg orientation with negative position")
   {
-    auto original_left_wheel  = std::addressof(drive.wheels_.left_);
-    auto original_right_wheel = std::addressof(drive.wheels_.right_);
-    auto original_back_wheel  = std::addressof(drive.wheels_.back_);
+    drive::Wheel * original_left_wheel  = drive.wheels_.left_;
+    drive::Wheel * original_right_wheel = drive.wheels_.right_;
+    drive::Wheel * original_back_wheel  = drive.wheels_.back_;
     drive.SwitchLegOrientation(-1);
-    CHECK_EQ(original_left_wheel, &drive.wheels_.left_);
-    CHECK_EQ(original_right_wheel, &drive.wheels_.right_);
-    CHECK_EQ(original_back_wheel, &drive.wheels_.back_);
+    CHECK_EQ(original_left_wheel, drive.wheels_.left_);
+    CHECK_EQ(original_right_wheel, drive.wheels_.right_);
+    CHECK_EQ(original_back_wheel, drive.wheels_.back_);
   }
 
-  SECTION("13.3 keep initial leg orientation with position 4")
+  SECTION("13.3 keep initial leg orientation with position 3")
   {
-    auto original_left_wheel  = std::addressof(drive.wheels_.left_);
-    auto original_right_wheel = std::addressof(drive.wheels_.right_);
-    auto original_back_wheel  = std::addressof(drive.wheels_.back_);
-    drive.SwitchLegOrientation(4);
-    CHECK_EQ(original_left_wheel, &drive.wheels_.left_);
-    CHECK_EQ(original_right_wheel, &drive.wheels_.right_);
-    CHECK_EQ(original_back_wheel, &drive.wheels_.back_);
+    drive::Wheel * original_left_wheel  = drive.wheels_.left_;
+    drive::Wheel * original_right_wheel = drive.wheels_.right_;
+    drive::Wheel * original_back_wheel  = drive.wheels_.back_;
+    drive.SwitchLegOrientation(3);
+    CHECK_EQ(original_left_wheel, drive.wheels_.left_);
+    CHECK_EQ(original_right_wheel, drive.wheels_.right_);
+    CHECK_EQ(original_back_wheel, drive.wheels_.back_);
   }
 
   SECTION("13.4 should rotate wheel orientation by one leg")
   {
-    auto original_left_wheel  = std::addressof(drive.wheels_.left_);
-    auto original_right_wheel = std::addressof(drive.wheels_.right_);
-    auto original_back_wheel  = std::addressof(drive.wheels_.back_);
+    drive::Wheel * original_left_wheel  = drive.wheels_.left_;
+    drive::Wheel * original_right_wheel = drive.wheels_.right_;
+    drive::Wheel * original_back_wheel  = drive.wheels_.back_;
     drive.SwitchLegOrientation(1);
-    CHECK_FALSE(original_left_wheel == &drive.wheels_.left_);
-    CHECK_FALSE(original_right_wheel == &drive.wheels_.right_);
-    CHECK_FALSE(original_back_wheel == &drive.wheels_.back_);
+    CHECK_FALSE(original_left_wheel == drive.wheels_.left_);
+    CHECK_FALSE(original_right_wheel == drive.wheels_.right_);
+    CHECK_FALSE(original_back_wheel == drive.wheels_.back_);
+  }
+
+  SECTION("13.4 should rotate wheel orientation by two leg")
+  {
+    drive::Wheel * original_left_wheel  = drive.wheels_.left_;
+    drive::Wheel * original_right_wheel = drive.wheels_.right_;
+    drive::Wheel * original_back_wheel  = drive.wheels_.back_;
+    drive.SwitchLegOrientation(2);
+    CHECK_FALSE(original_left_wheel == drive.wheels_.back_);
+    CHECK_FALSE(original_right_wheel == drive.wheels_.left_);
+    CHECK_FALSE(original_back_wheel == drive.wheels_.right_);
+  }
+
+  SECTION("13.4 should rotate wheel orientation by two leg")
+  {
+    drive::Wheel * original_left_wheel  = drive.wheels_.left_;
+    drive::Wheel * original_right_wheel = drive.wheels_.right_;
+    drive::Wheel * original_back_wheel  = drive.wheels_.back_;
+    drive.SwitchLegOrientation(5);
+    CHECK_FALSE(original_left_wheel == drive.wheels_.back_);
+    CHECK_FALSE(original_right_wheel == drive.wheels_.left_);
+    CHECK_FALSE(original_back_wheel == drive.wheels_.right_);
   }
 }
 }  // namespace sjsu::drive
