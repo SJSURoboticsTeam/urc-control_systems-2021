@@ -43,14 +43,28 @@ class Hand : public HandInterface
        sjsu::arm::Finger & pointer,
        sjsu::arm::Finger & thumb,
        sjsu::lpc40xx::I2c & i2c = sjsu::lpc40xx::GetI2c<2>(),
-       sjsu::Pca9685 pca(i2c))
+       sjsu::Pca9685 pca(i2c)),
+       int pin_number,
+       float min_pulse,
+       float max_pulse,
+       float position,
+       float speed,
+       float max_angle,
+       float min_angle)
       : wrist_(wrist),
         pinky_(pinky),
         ring_(ring),
         middle_(middle),
         pointer_(pointer),
         thumb_(thumb),
-        pca_(pca)
+        pca_(pca),
+        pin_number_(pin_number),
+        position_(position),
+        speed_(speed),
+        max_angle_(max_angle),
+        min_angle_(min_angle),
+        min_pulse_(min_pulse),
+        max_pulse_(max_pulse)
   {
   }
 
@@ -209,6 +223,15 @@ class Hand : public HandInterface
   sjsu::arm::Finger & middle_;
   sjsu::arm::Finger & pointer_;
   sjsu::arm::Finger & thumb_;
+  sjsu::lpc40xx::I2c & i2c_;
+  sjsu::Pca9685 pca_;
+  float position_  = 0;
+  float speed_     = 0;
+  float max_angle_ = 180;
+  float min_angle_ = 0;
+  float min_pulse_ = 2.0;
+  float max_pulse_ = 1.0;
+  int pin_number_ = 0;
 };
 
 }  // namespace sjsu::arm
