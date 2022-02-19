@@ -1,9 +1,8 @@
 #pragma once
 #include "peripherals/uart.hpp"
 #include "wrist_joint.hpp"
-#include "finger.hpp"
 #include "Interface/hand.hpp"
-
+#include "pca9685.hpp" 
 namespace sjsu::arm
 {
 class Hand : public HandInterface
@@ -42,13 +41,16 @@ class Hand : public HandInterface
        sjsu::arm::Finger & ring,
        sjsu::arm::Finger & middle,
        sjsu::arm::Finger & pointer,
-       sjsu::arm::Finger & thumb)
+       sjsu::arm::Finger & thumb,
+       sjsu::lpc40xx::I2c & i2c = sjsu::lpc40xx::GetI2c<2>(),
+       sjsu::Pca9685 pca(i2c))
       : wrist_(wrist),
         pinky_(pinky),
         ring_(ring),
         middle_(middle),
         pointer_(pointer),
-        thumb_(thumb)
+        thumb_(thumb),
+        pca_(pca)
   {
   }
 
@@ -60,6 +62,7 @@ class Hand : public HandInterface
     middle_.Initialize();
     pointer_.Initialize();
     thumb_.Initialize();
+    pca_.ModuleInitialize();
   }
 
   void PrintHandData() 
@@ -79,15 +82,15 @@ class Hand : public HandInterface
                                 float speed)
   {
     thumb_.SetSpeed(speed);
-    thumb_.SetPosition(finger_data.thumb_angle);
+    thumb_.SetPosition(finger_data.thumb_angle, 0);
     pointer_.SetSpeed(speed);
-    pointer_.SetPosition(finger_data.pointer_angle);
+    pointer_.SetPosition(finger_data.pointer_angle, 1);
     middle_.SetSpeed(speed);
-    middle_.SetPosition(finger_data.middle_angle);
+    middle_.SetPosition(finger_data.middle_angle, 2);
     ring_.SetSpeed(speed);
-    ring_.SetPosition(finger_data.ring_angle);
+    ring_.SetPosition(finger_data.ring_angle, 3);
     pinky_.SetSpeed(speed);
-    pinky_.SetPosition(finger_data.pinky_angle);
+    pinky_.SetPosition(finger_data.pinky_angle, 4);
     wrist_.HandleWristMovement(speed, wrist_data.roll, wrist_data.pitch);
   }
 
@@ -120,6 +123,25 @@ class Hand : public HandInterface
         SetWristRollPosition(hand_data.wrist_data.roll, speed);
         break;
     }
+  }
+
+  void Home()
+  {
+    return;
+  }
+
+  void SetSpeed(float target_speed)
+  {
+    speed_ = target_speed;
+  }
+
+  void SetPosition(float angle, int pin_number_)
+  {
+    position_ = sjsu::Map(angle, min_angle_, max_angle_, min_pulse_, max_pulse_);
+    units::chrono::milliseconds position_(position_);
+    // units::angle::degree_t angle_to_degrees(position_);
+    // servo_.SetAngle(angle_to_degrees);
+    pca_.setPulseWidth(pin_number_,position_);
   }
 
   int GetWristPitch() const
