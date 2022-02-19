@@ -2,12 +2,14 @@
 #include "peripherals/uart.hpp"
 #include "wrist_joint.hpp"
 #include "finger.hpp"
+#include "Interface/hand.hpp"
+
 namespace sjsu::arm
 {
-class Hand
+class Hand : public HandInterface
 {
  public:
-  struct MissionControlData
+  struct MissionControlData : HandInterface::MissionControl 
   {
     enum class HandModes : char
     {
@@ -50,7 +52,7 @@ class Hand
   {
   }
 
-  void Initialize()
+  void Initialize() 
   {
     wrist_.Initialize();
     pinky_.Initialize();
@@ -60,7 +62,7 @@ class Hand
     thumb_.Initialize();
   }
 
-  void PrintHandData()
+  void PrintHandData() 
   {
     printf("Hand Finger Positions:\n");
     printf("Pinky Angle: %d\n", pinky_.GetPosition());
@@ -103,7 +105,7 @@ class Hand
     wrist_.SetRollPosition(wrist_pitch, speed);
   }
 
-  void HandleMovement(MissionControlData hand_data, float speed)
+  void HandleMovement(MissionControlData hand_data, float speed) 
   {
     switch (current_hand_mode_)
     {
@@ -165,7 +167,7 @@ class Hand
     current_hand_mode_ = new_mode;
   }
 
-  void HomeHand(float rotunda_offset_angle, float speed)
+  void HomeHand(float rotunda_offset_angle, float speed) 
   {
     pinky_.Home();
     ring_.Home();
