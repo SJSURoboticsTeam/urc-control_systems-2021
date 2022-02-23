@@ -44,6 +44,8 @@ int main()
   sjsu::lpc40xx::Pwm & pointer_pwm = sjsu::lpc40xx::GetPwm<1, 3>();
   sjsu::lpc40xx::Pwm & thumb_pwm   = sjsu::lpc40xx::GetPwm<1, 4>();
 
+  sjsu::Pca9685 pca(i2c);
+
   sjsu::arm::Finger pinky_servo(4);
   sjsu::arm::Finger ring_servo(3);
   sjsu::arm::Finger middle_servo(2);
@@ -66,7 +68,7 @@ int main()
   sjsu::arm::Finger middle(middle_servo);
   sjsu::arm::Finger pointer(pointer_servo);
   sjsu::arm::Finger thumb(thumb_servo);
-  sjsu::arm::Hand hand(wrist, pinky, ring, middle, pointer, thumb);
+  sjsu::arm::Hand hand(pca, wrist, pinky, ring, middle, pointer, thumb);
   sjsu::arm::RoverArmSystem arm_system(arm, hand);
 
   esp.Initialize();

@@ -3,6 +3,7 @@
 #include "wrist_joint.hpp"
 #include "finger.hpp"
 #include "Interface/hand.hpp"
+#include "pca9685.hpp"
 
 namespace sjsu::arm
 {
@@ -37,13 +38,15 @@ class Hand
     Wrist wrist_data;
   };
 
-  Hand(WristJoint & wrist,
+  Hand(Pca9685 & pca,
+       WristJoint & wrist,
        Finger & pinky,
        Finger & ring,
        Finger & middle,
        Finger & pointer,
        Finger & thumb)
-      : wrist_(wrist),
+      : pca_(pca),
+        wrist_(wrist),
         pinky_(pinky),
         ring_(ring),
         middle_(middle),
@@ -54,12 +57,8 @@ class Hand
 
   void Initialize()
   {
+    pca_.ModuleInitialize();
     wrist_.Initialize();
-    pinky_.Initialize();
-    ring_.Initialize();
-    middle_.Initialize();
-    pointer_.Initialize();
-    thumb_.Initialize();
   }
 
   void PrintHandData()
@@ -78,16 +77,11 @@ class Hand
                                 MissionControlData::Wrist wrist_data,
                                 float speed)
   {
-    thumb_.SetSpeed(speed);
-    thumb_.SetPosition(finger_data.thumb_angle);
-    pointer_.SetSpeed(speed);
-    pointer_.SetPosition(finger_data.pointer_angle);
-    middle_.SetSpeed(speed);
-    middle_.SetPosition(finger_data.middle_angle);
-    ring_.SetSpeed(speed);
-    ring_.SetPosition(finger_data.ring_angle);
-    pinky_.SetSpeed(speed);
-    pinky_.SetPosition(finger_data.pinky_angle);
+    MoveFinger(finger_data.pinky_angle, pinky_);
+    MoveFinger(finger_data.ring_angle, ring_);
+    MoveFinger(finger_data.middle_angle, middle_);
+    MoveFinger(finger_data.pointer_angle, pointer_);
+    MoveFinger(finger_data.thumb_angle, thumb_);
     wrist_.HandleWristMovement(speed, wrist_data.roll, wrist_data.pitch);
   }
 
@@ -121,6 +115,17 @@ class Hand
         break;
     }
   }
+
+  void HomeHand(float rotunda_offset_angle, float speed)
+  {
+    MoveFinger(pinky_.GetMaxAngle(), pinky_);
+    MoveFinger(ring_.GetMaxAngle(), ring_);
+    MoveFinger(middle_.GetMaxAngle(), middle_);
+    MoveFinger(pointer_.GetMaxAngle(), pointer_);
+    MoveFinger(thumb_.GetMaxAngle(), thumb_);
+    wrist_.Home(float(rotunda_offset_angle), speed);
+  }
+
 
   int GetWristPitch() const
   {
@@ -167,19 +172,20 @@ class Hand
     current_hand_mode_ = new_mode;
   }
 
-  void HomeHand(float rotunda_offset_angle, float speed)
+ private:
+
+  //private member functions
+  void MoveFinger(int angle, Finger & finger)
   {
-    pinky_.Home();
-    ring_.Home();
-    middle_.Home();
-    pointer_.Home();
-    thumb_.Home();
-    wrist_.Home(float(rotunda_offset_angle), speed);
+    finger.SetPositionAndPwm(angle);
+    pca_.setPulseWidth(finger.GetPwmPin(), finger.GetPWM());
   }
 
- private:
+  //private member variables
   MissionControlData::HandModes current_hand_mode_ =
       MissionControlData::HandModes::kConcurrent;
+  
+  Pca9685 & pca_;
 
   WristJoint & wrist_;
   Finger & pinky_;
