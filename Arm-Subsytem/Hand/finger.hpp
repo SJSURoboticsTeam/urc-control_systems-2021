@@ -13,12 +13,14 @@ class Finger
          float position,
          float speed,
          float max_angle,
-         float min_angle)
+         float min_angle,
+         int pwm_pin)
       : servo_(servo),
         position_(position),
         speed_(speed),
         max_angle_(max_angle),
-        min_angle_(min_angle)
+        min_angle_(min_angle),
+        pwm_pin_(pwm_pin)
   {
   }
 
@@ -64,8 +66,14 @@ class Finger
     return int(min_angle_);
   }
 
+  int GetPwmPin() const
+  {
+    return pwm_pin_;
+  }
+
  private:
   sjsu::Servo & servo_;
+  int pwm_pin_;
 
   float position_  = 0;
   float speed_     = 0;
