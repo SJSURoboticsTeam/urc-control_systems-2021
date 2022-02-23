@@ -72,11 +72,11 @@ class RoverArmSystem : public sjsu::common::RoverSystem
     printf("FINGER-DATA \n");
     printf("=========================================\n");
     printf("Hand Mode: %c\n", hand_mc_data_.hand_mode);
-    printf("Pinky Angle: %d\n", hand_mc_data_.fingers.pinky_angle);
-    printf("Ring Angle: %d\n", hand_mc_data_.fingers.ring_angle);
-    printf("Middle Angle: %d\n", hand_mc_data_.fingers.middle_angle);
-    printf("Pointer Angle: %d\n", hand_mc_data_.fingers.pointer_angle);
-    printf("Thumb Angle: %d\n", hand_mc_data_.fingers.thumb_angle);
+    printf("Pinky Angle: %d\n", hand_mc_data_.finger_angles.pinky_angle);
+    printf("Ring Angle: %d\n", hand_mc_data_.finger_angles.ring_angle);
+    printf("Middle Angle: %d\n", hand_mc_data_.finger_angles.middle_angle);
+    printf("Pointer Angle: %d\n", hand_mc_data_.finger_angles.pointer_angle);
+    printf("Thumb Angle: %d\n", hand_mc_data_.finger_angles.thumb_angle);
     printf("=========================================\n");
 
     hand_.PrintHandData();
@@ -111,10 +111,12 @@ class RoverArmSystem : public sjsu::common::RoverSystem
         &hand_mc_data_.hand_mode, &mc_data_.arm_speed,
         &arm_mc_data_.arm_angles.rotunda, &arm_mc_data_.arm_angles.shoulder,
         &arm_mc_data_.arm_angles.elbow, &hand_mc_data_.wrist_data.roll,
-        &hand_mc_data_.wrist_data.pitch, &hand_mc_data_.fingers.pinky_angle,
-        &hand_mc_data_.fingers.ring_angle, &hand_mc_data_.fingers.middle_angle,
-        &hand_mc_data_.fingers.pointer_angle,
-        &hand_mc_data_.fingers.thumb_angle);
+        &hand_mc_data_.wrist_data.pitch,
+        &hand_mc_data_.finger_angles.pinky_angle,
+        &hand_mc_data_.finger_angles.ring_angle,
+        &hand_mc_data_.finger_angles.middle_angle,
+        &hand_mc_data_.finger_angles.pointer_angle,
+        &hand_mc_data_.finger_angles.thumb_angle);
 
     if (actual_arguments != kExpectedArguments)
     {
@@ -147,7 +149,7 @@ class RoverArmSystem : public sjsu::common::RoverSystem
     hand_.HandleMovement(hand_mc_data_, mc_data_.arm_speed);
   }
 
-  //getters for testing purposes:
+  // getters for testing purposes:
   GeneralMissionControlData GetMCData() const
   {
     return mc_data_;
@@ -162,7 +164,6 @@ class RoverArmSystem : public sjsu::common::RoverSystem
   {
     return hand_mc_data_;
   }
-
 
  private:
   int state_of_charge_         = 90;

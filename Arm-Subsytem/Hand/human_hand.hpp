@@ -6,10 +6,10 @@
 
 namespace sjsu::arm
 {
-class Hand : public HandInterface
+class Hand
 {
  public:
-  struct MissionControlData : HandInterface::MissionControl 
+  struct MissionControlData
   {
     enum class HandModes : char
     {
@@ -19,7 +19,7 @@ class Hand : public HandInterface
     };
     HandModes hand_mode = HandModes::kConcurrent;
 
-    struct Finger
+    struct FingerAngles
     {
       int pinky_angle   = 0;
       int ring_angle    = 0;
@@ -27,7 +27,7 @@ class Hand : public HandInterface
       int pointer_angle = 0;
       int thumb_angle   = 0;
     };
-    Finger fingers;
+    FingerAngles finger_angles;
 
     struct Wrist
     {
@@ -37,12 +37,12 @@ class Hand : public HandInterface
     Wrist wrist_data;
   };
 
-  Hand(sjsu::arm::WristJoint & wrist,
-       sjsu::arm::Finger & pinky,
-       sjsu::arm::Finger & ring,
-       sjsu::arm::Finger & middle,
-       sjsu::arm::Finger & pointer,
-       sjsu::arm::Finger & thumb)
+  Hand(WristJoint & wrist,
+       Finger & pinky,
+       Finger & ring,
+       Finger & middle,
+       Finger & pointer,
+       Finger & thumb)
       : wrist_(wrist),
         pinky_(pinky),
         ring_(ring),
@@ -52,7 +52,7 @@ class Hand : public HandInterface
   {
   }
 
-  void Initialize() 
+  void Initialize()
   {
     wrist_.Initialize();
     pinky_.Initialize();
@@ -62,7 +62,7 @@ class Hand : public HandInterface
     thumb_.Initialize();
   }
 
-  void PrintHandData() 
+  void PrintHandData()
   {
     printf("Hand Finger Positions:\n");
     printf("Pinky Angle: %d\n", pinky_.GetPosition());
@@ -74,7 +74,7 @@ class Hand : public HandInterface
     wrist_.PrintWristData();
   }
 
-  void HandleConcurrentMovement(MissionControlData::Finger finger_data,
+  void HandleConcurrentMovement(MissionControlData::FingerAngles finger_data,
                                 MissionControlData::Wrist wrist_data,
                                 float speed)
   {
@@ -105,12 +105,12 @@ class Hand : public HandInterface
     wrist_.SetRollPosition(wrist_pitch, speed);
   }
 
-  void HandleMovement(MissionControlData hand_data, float speed) 
+  void HandleMovement(MissionControlData hand_data, float speed)
   {
     switch (current_hand_mode_)
     {
       case MissionControlData::HandModes::kConcurrent:
-        HandleConcurrentMovement(hand_data.fingers, hand_data.wrist_data,
+        HandleConcurrentMovement(hand_data.finger_angles, hand_data.wrist_data,
                                  speed);
         break;
       case MissionControlData::HandModes::kPitch:
@@ -167,7 +167,7 @@ class Hand : public HandInterface
     current_hand_mode_ = new_mode;
   }
 
-  void HomeHand(float rotunda_offset_angle, float speed) 
+  void HomeHand(float rotunda_offset_angle, float speed)
   {
     pinky_.Home();
     ring_.Home();
@@ -181,12 +181,12 @@ class Hand : public HandInterface
   MissionControlData::HandModes current_hand_mode_ =
       MissionControlData::HandModes::kConcurrent;
 
-  sjsu::arm::WristJoint & wrist_;
-  sjsu::arm::Finger & pinky_;
-  sjsu::arm::Finger & ring_;
-  sjsu::arm::Finger & middle_;
-  sjsu::arm::Finger & pointer_;
-  sjsu::arm::Finger & thumb_;
+  WristJoint & wrist_;
+  Finger & pinky_;
+  Finger & ring_;
+  Finger & middle_;
+  Finger & pointer_;
+  Finger & thumb_;
 };
 
 }  // namespace sjsu::arm

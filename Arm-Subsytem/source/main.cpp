@@ -24,7 +24,7 @@ int main()
   // sjsu::Mpu6050 elbow_mpu(i2c, 0x68);
   // sjsu::Mpu6050 wrist_mpu(i2c, 0x69);
 
-//Testing Purposes
+  // Testing Purposes
   sjsu::Mpu6050 rotunda_mpu(i2c);
   sjsu::Mpu6050 shoulder_mpu(i2c);
   sjsu::Mpu6050 elbow_mpu(i2c);
@@ -37,19 +37,18 @@ int main()
   sjsu::RmdX left_wrist_motor(can_network, 0x144);
   sjsu::RmdX right_wrist_motor(can_network, 0x145);
 
-  //PWM for the servo motors for fingers
-  sjsu::lpc40xx::Pwm & pinky_pwm = sjsu::lpc40xx::GetPwm<1, 0>();
-  sjsu::lpc40xx::Pwm & ring_pwm = sjsu::lpc40xx::GetPwm<1, 1>();
-  sjsu::lpc40xx::Pwm & middle_pwm = sjsu::lpc40xx::GetPwm<1, 2>();
+  // PWM for the servo motors for fingers
+  sjsu::lpc40xx::Pwm & pinky_pwm   = sjsu::lpc40xx::GetPwm<1, 0>();
+  sjsu::lpc40xx::Pwm & ring_pwm    = sjsu::lpc40xx::GetPwm<1, 1>();
+  sjsu::lpc40xx::Pwm & middle_pwm  = sjsu::lpc40xx::GetPwm<1, 2>();
   sjsu::lpc40xx::Pwm & pointer_pwm = sjsu::lpc40xx::GetPwm<1, 3>();
-  sjsu::lpc40xx::Pwm & thumb_pwm = sjsu::lpc40xx::GetPwm<1, 4>();
+  sjsu::lpc40xx::Pwm & thumb_pwm   = sjsu::lpc40xx::GetPwm<1, 4>();
 
-  //Servo Motors for fingers
-  sjsu::Servo pinky_servo(pinky_pwm);
-  sjsu::Servo ring_servo(ring_pwm);
-  sjsu::Servo middle_servo(middle_pwm);
-  sjsu::Servo pointer_servo(pointer_pwm);
-  sjsu::Servo thumb_servo(thumb_pwm);
+  sjsu::arm::Finger pinky_servo(4);
+  sjsu::arm::Finger ring_servo(3);
+  sjsu::arm::Finger middle_servo(2);
+  sjsu::arm::Finger pointer_servo(1);
+  sjsu::arm::Finger thumb_servo(0);
 
   rotunda_motor.settings.gear_ratio     = 8;
   shoulder_motor.settings.gear_ratio    = 8;
@@ -57,8 +56,7 @@ int main()
   left_wrist_motor.settings.gear_ratio  = 8;
   right_wrist_motor.settings.gear_ratio = 8;
 
-  sjsu::arm::ArmJoint rotunda(rotunda_motor, rotunda_mpu, 0, 3600,
-                           1800);
+  sjsu::arm::ArmJoint rotunda(rotunda_motor, rotunda_mpu, 0, 3600, 1800);
   sjsu::arm::ArmJoint shoulder(shoulder_motor, shoulder_mpu);
   sjsu::arm::ArmJoint elbow(elbow_motor, elbow_mpu);
   sjsu::arm::HumanArm arm(rotunda, shoulder, elbow);

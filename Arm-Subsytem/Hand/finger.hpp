@@ -7,33 +7,18 @@ namespace sjsu::arm
 class Finger
 {
  public:
-  Finger(sjsu::Servo & servo) : servo_(servo) {}
-
-  Finger(sjsu::Servo & servo,
-         float position,
-         float speed,
-         float max_angle,
-         float min_angle,
-         int pwm_pin)
-      : servo_(servo),
-        position_(position),
-        speed_(speed),
-        max_angle_(max_angle),
-        min_angle_(min_angle),
-        pwm_pin_(pwm_pin)
-  {
-  }
+  Finger(int pwm_pin) : pwm_pin_(pwm_pin) {}
 
   void Initialize()
   {
-    servo_.ModuleInitialize();
+    // servo_.ModuleInitialize();
   }
 
   void SetPosition(float angle)
   {
     position_ = std::clamp(angle, min_angle_, max_angle_);
     units::angle::degree_t angle_to_degrees(position_);
-    servo_.SetAngle(angle_to_degrees);
+    // servo_.SetAngle(angle_to_degrees);
   }
 
   void Home()
@@ -72,7 +57,7 @@ class Finger
   }
 
  private:
-  sjsu::Servo & servo_;
+  // sjsu::Servo & servo_;
   int pwm_pin_;
 
   float position_  = 0;
