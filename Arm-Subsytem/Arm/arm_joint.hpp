@@ -61,9 +61,9 @@ class ArmJoint : public Joint
     return int(position_);
   }
 
-  int GetOffsetAngle() const
+  float GetOffsetAngle() const
   {
-    return int(offset_angle_);
+    return offset_angle_;
   }
 
  private:

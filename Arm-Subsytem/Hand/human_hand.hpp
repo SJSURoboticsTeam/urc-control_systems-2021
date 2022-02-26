@@ -82,7 +82,7 @@ class Hand
     MoveFinger(finger_data.middle_angle, middle_);
     MoveFinger(finger_data.pointer_angle, pointer_);
     MoveFinger(finger_data.thumb_angle, thumb_);
-    wrist_.HandleWristMovement(speed, wrist_data.roll, wrist_data.pitch);
+    wrist_.HandleWristMovement(speed, static_cast<float>(wrist_data.roll), static_cast<float>(wrist_data.pitch));
   }
 
   // The following two functions are here to allow the rover arm system to
@@ -108,10 +108,10 @@ class Hand
                                  speed);
         break;
       case MissionControlData::HandModes::kPitch:
-        SetWristPitchPosition(hand_data.wrist_data.pitch, speed);
+        SetWristPitchPosition(static_cast<float>(hand_data.wrist_data.pitch), speed);
         break;
       case MissionControlData::HandModes::kRoll:
-        SetWristRollPosition(hand_data.wrist_data.roll, speed);
+        SetWristRollPosition(static_cast<float>(hand_data.wrist_data.roll), speed);
         break;
     }
   }
@@ -177,7 +177,7 @@ class Hand
   //private member functions
   void MoveFinger(int angle, Finger & finger)
   {
-    finger.SetPositionAndPwm(angle);
+    finger.SetPositionAndPwm(static_cast<float>(angle));
     pca_.setPulseWidth(finger.GetPwmPin(), finger.GetPWM());
   }
 

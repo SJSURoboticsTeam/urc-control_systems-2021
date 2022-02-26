@@ -60,7 +60,7 @@ class RoverArmSystem : public sjsu::common::RoverSystem
 
     printf("ARM-DATA\n");
     printf("=========================================\n");
-    printf("Mode: %c\n", arm_mc_data_.arm_mode);
+    printf("Mode: %c\n", static_cast<char>(arm_mc_data_.arm_mode));
     printf("Arm speed: %d\n", mc_data_.arm_speed);
     printf("Rotunda Angle: %d\n", arm_mc_data_.arm_angles.rotunda);
     printf("Shoulder Angle: %d\n", arm_mc_data_.arm_angles.shoulder);
@@ -71,7 +71,7 @@ class RoverArmSystem : public sjsu::common::RoverSystem
 
     printf("FINGER-DATA \n");
     printf("=========================================\n");
-    printf("Hand Mode: %c\n", hand_mc_data_.hand_mode);
+    printf("Hand Mode: %c\n", static_cast<char>(hand_mc_data_.hand_mode));
     printf("Pinky Angle: %d\n", hand_mc_data_.finger_angles.pinky_angle);
     printf("Ring Angle: %d\n", hand_mc_data_.finger_angles.ring_angle);
     printf("Middle Angle: %d\n", hand_mc_data_.finger_angles.middle_angle);
@@ -93,7 +93,7 @@ class RoverArmSystem : public sjsu::common::RoverSystem
              "wrist_pitch=%d&pinky_angle=%d&ring_angle=%d&middle_angle=%d&"
              "pointer_angle=%d&thumb_angle=%d",
              GetHeartbeatCount(), mc_data_.is_operational,
-             char(arm_mc_data_.arm_mode), char(hand_mc_data_.hand_mode),
+             arm_mc_data_.arm_mode, hand_mc_data_.hand_mode,
              int(mc_data_.arm_speed), state_of_charge_,
              arm_.GetRotundaPosition(), arm_.GetShoulderPosition(),
              arm_.GetElbowPosition(), hand_.GetWristRoll(),
@@ -128,8 +128,8 @@ class RoverArmSystem : public sjsu::common::RoverSystem
 
   void HomeArmSystem()
   {
-    arm_.HomeArm(mc_data_.arm_speed);
-    hand_.HomeHand(arm_.GetRotundaOffsetAngle(), mc_data_.arm_speed);
+    arm_.HomeArm(static_cast<float>(mc_data_.arm_speed));
+    hand_.HomeHand(arm_.GetRotundaOffsetAngle(), static_cast<float>(mc_data_.arm_speed));
   }
 
   // TODO: implement different arm drive modes in this function with switch
@@ -145,8 +145,8 @@ class RoverArmSystem : public sjsu::common::RoverSystem
       hand_.SetCurrentHandMode(hand_mc_data_.hand_mode);
     }
 
-    arm_.HandleMovement(arm_mc_data_.arm_angles, mc_data_.arm_speed);
-    hand_.HandleMovement(hand_mc_data_, mc_data_.arm_speed);
+    arm_.HandleMovement(arm_mc_data_.arm_angles, static_cast<float>(mc_data_.arm_speed));
+    hand_.HandleMovement(hand_mc_data_, static_cast<float>(mc_data_.arm_speed));
   }
 
   // getters for testing purposes:

@@ -18,7 +18,7 @@ class Finger
 
   void SetSpeed(float target_speed)
   {
-    speed_ = target_speed;
+    speed_ = (target_speed);
   }
 
   int GetPosition() const
@@ -41,9 +41,9 @@ class Finger
     return int(min_angle_);
   }
 
-  int GetPwmPin() const
+  uint8_t GetPwmPin() const
   {
-    return pwm_pin_;
+    return static_cast<uint8_t>(pwm_pin_);
   }
 
   units::time::microsecond_t GetPWM()
@@ -53,9 +53,9 @@ class Finger
 
  private:
 
-  units::time::microsecond_t MapAngleToPWM(int angle)
+  units::time::microsecond_t MapAngleToPWM(float angle)
   {
-    float angle_to_pwm = sjsu::Map(angle, 0.0, 180.0, 1.0, 2.0);
+    float angle_to_pwm = static_cast<float>(sjsu::Map(angle, 0.0, 180.0, 1.0, 2.0));
     units::time::microsecond_t float_to_pwm(angle_to_pwm);
     return float_to_pwm;
   }

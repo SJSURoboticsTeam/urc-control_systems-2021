@@ -38,11 +38,11 @@ int main()
   sjsu::RmdX right_wrist_motor(can_network, 0x145);
 
   // PWM for the servo motors for fingers
-  sjsu::lpc40xx::Pwm & pinky_pwm   = sjsu::lpc40xx::GetPwm<1, 0>();
-  sjsu::lpc40xx::Pwm & ring_pwm    = sjsu::lpc40xx::GetPwm<1, 1>();
-  sjsu::lpc40xx::Pwm & middle_pwm  = sjsu::lpc40xx::GetPwm<1, 2>();
-  sjsu::lpc40xx::Pwm & pointer_pwm = sjsu::lpc40xx::GetPwm<1, 3>();
-  sjsu::lpc40xx::Pwm & thumb_pwm   = sjsu::lpc40xx::GetPwm<1, 4>();
+  // sjsu::lpc40xx::Pwm & pinky_pwm   = sjsu::lpc40xx::GetPwm<1, 0>();
+  // sjsu::lpc40xx::Pwm & ring_pwm    = sjsu::lpc40xx::GetPwm<1, 1>();
+  // sjsu::lpc40xx::Pwm & middle_pwm  = sjsu::lpc40xx::GetPwm<1, 2>();
+  // sjsu::lpc40xx::Pwm & pointer_pwm = sjsu::lpc40xx::GetPwm<1, 3>();
+  // sjsu::lpc40xx::Pwm & thumb_pwm   = sjsu::lpc40xx::GetPwm<1, 4>();
 
   sjsu::Pca9685 pca(i2c);
 

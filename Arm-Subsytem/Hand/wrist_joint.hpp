@@ -28,8 +28,8 @@ class WristJoint : public Joint
   void PrintWristData()
   {
     printf("Wrist Positions:\n");
-    printf("Wrist pitch position: %d\n", pitch_angle_);
-    printf("Wrist roll position: %d\n", roll_angle_);
+    printf("Wrist pitch position: %f\n", static_cast<double>(pitch_angle_));
+    printf("Wrist roll position: %f\n", static_cast<double>(roll_angle_));
   }
 
   // Sets Roll Position of the wrist joint
@@ -103,7 +103,7 @@ class WristJoint : public Joint
 
   int GetSpeed() const
   {
-    return speed_;
+    return static_cast<int>(speed_);
   }
 
   void Home(float rotunda_offset, float speed)

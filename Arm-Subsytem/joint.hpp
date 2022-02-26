@@ -35,7 +35,8 @@ class Joint
   /// Checks if value is zero. If it's zero make it not zero
   float ReturnChangedIfZero(float acceleration)
   {
-    return (acceleration == 0 ? .001 : acceleration);
+    double swap_to = .001;
+    return static_cast<float>(!(acceleration > 0 || acceleration < 0) ? swap_to : static_cast<double>(acceleration));
   }
 
   sjsu::Accelerometer & accelerometer_;
