@@ -15,7 +15,8 @@ class Hand : public HandInterface
     {
       kPitch      = 'P',
       kRoll       = 'R',
-      kConcurrent = 'C'
+      kConcurrent = 'C',
+      kTransport  = 'T'
     };
     HandModes hand_mode = HandModes::kConcurrent;
 
@@ -109,6 +110,7 @@ class Hand : public HandInterface
   {
     switch (current_hand_mode_)
     {
+      float transport_angles = 0;
       case MissionControlData::HandModes::kConcurrent:
         HandleConcurrentMovement(hand_data.fingers, hand_data.wrist_data,
                                  speed);
@@ -119,6 +121,15 @@ class Hand : public HandInterface
       case MissionControlData::HandModes::kRoll:
         SetWristRollPosition(hand_data.wrist_data.roll, speed);
         break;
+      case MissionControlData::HandModes::kTransport:
+        thumb_.SetPosition(transport_angles);
+        pointer_.SetPosition(transport_angles);
+        middle_.SetPosition(transport_angles);
+        ring_.SetPosition(transport_angles);
+        pinky_.SetPosition(transport_angles);
+        wrist_.HandleWristMovement(transport_angles, transport_angles);
+        break;
+
     }
   }
 
