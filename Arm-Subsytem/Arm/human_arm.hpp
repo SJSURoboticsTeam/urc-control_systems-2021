@@ -104,6 +104,8 @@ class HumanArm
   {
     switch (current_arm_mode_)
     {
+      float trasnport_speed = 10;
+      float shoulder_transport_angle = 90;
       case MissionControlData::ArmModes::kConcurrent:
         HandleConcurrentMode(arm_angles, speed);
         break;
@@ -117,8 +119,8 @@ class HumanArm
         MoveElbow(arm_angles.elbow, speed);
         break;
       case MissionControlData::ArmModes::kTransport:
-        HomeArm(10);
-        MoveShoulder(90, 10);
+        HomeArm(trasnport_speed);
+        MoveShoulder(shoulder_transport_angle, trasnport_speed);
         //Have hand turn into a fist
         break;  
       case MissionControlData::ArmModes::kHand: break;
