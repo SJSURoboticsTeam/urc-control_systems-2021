@@ -11,6 +11,7 @@ class HumanArm
   {
     enum class ArmModes : char
     {
+      kTransport  = 'T',
       kConcurrent = 'C',
       kRotunda    = 'R',
       kShoulder   = 'S',
@@ -115,6 +116,11 @@ class HumanArm
       case MissionControlData::ArmModes::kElbow:
         MoveElbow(arm_angles.elbow, speed);
         break;
+      case MissionControlData::ArmModes::kTransport:
+        HomeArm(10);
+        MoveShoulder(90, 10);
+        //Have hand turn into a fist
+        break;  
       case MissionControlData::ArmModes::kHand: break;
     }
   }
