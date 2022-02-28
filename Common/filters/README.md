@@ -1,0 +1,1 @@
+These files are intended to be filters such that we can filter noisy sensor data coming from various subsystems of the robot. It's a work-in-progress and there's no guarantee if this will actually be needed. I'm just playing around with different filters.

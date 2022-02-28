@@ -238,8 +238,6 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
 
  private:
 
-  // https://github.com/SJSURoboticsTeam/urc-central-2021/issues/196
-  // S, D, T, L, R, B = Spin, Drive, Translate, Left, Right, Back.
   enum class Modes : char
     {
       kDefault = 'D',
@@ -316,6 +314,30 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
     current_mode_ = mc_data_.drive_mode;
   }
 
+  // TODO: Develop pseudocode for setting the wheel speeds in drive mode for the robot
+  void SetDriveWheelSpeed(float steering_wheel_heading_angle, float steering_wheel_velocity)
+  {
+    /* Pseudocode:
+
+      // initializing variables:
+      current_time = the current time read from the microcontroller
+      wheel_radius = radius of wheels
+      distance_between_static_wheels = distance between the center of the 2 static wheels 
+
+      steering_wheel_angular_velocity = steering_wheel_velocity / wheel_radius
+
+      robots_angular_velocity = tan(steering_wheel_heading_angle) / current_time
+
+      curvature_of_path = 1 / instantaneous_radius_of_curvature
+
+      robots_forward_velocity = robot_angular_velocity / curvature_of_path
+
+      left_wheel_velocity = robots_forward_velocity - (distance_between_static_wheels/2)*robots_angular_velocity
+      right_wheel_velocity = robots_forward_velocity + (distance_between_static_wheels/2)*robots_angular_velocity
+
+    */
+  }
+
   // =======================
   // = DRIVE MODE HANDLERS =
   // =======================
@@ -341,6 +363,7 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
       back_wheel_.SetSteerAngle(back_wheel_angle);
     }
     // TODO: Need logic for controling wheel speed for each wheel
+    // one wheel needs to steer while the other 2 wheels maintain a constant angle
     SetWheelSpeed(speed);
   }
 
