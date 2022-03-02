@@ -93,7 +93,8 @@ class RoverArmSystem : public sjsu::common::RoverSystem
              "wrist_pitch=%d&pinky_angle=%d&ring_angle=%d&middle_angle=%d&"
              "pointer_angle=%d&thumb_angle=%d",
              GetHeartbeatCount(), mc_data_.is_operational,
-             arm_mc_data_.arm_mode, hand_mc_data_.hand_mode,
+             static_cast<char>(arm_mc_data_.arm_mode),
+             static_cast<char>(hand_mc_data_.hand_mode),
              int(mc_data_.arm_speed), state_of_charge_,
              arm_.GetRotundaPosition(), arm_.GetShoulderPosition(),
              arm_.GetElbowPosition(), hand_.GetWristRoll(),
@@ -105,10 +106,10 @@ class RoverArmSystem : public sjsu::common::RoverSystem
 
   void ParseJSONResponse(std::string & response) override
   {
+    char arm_mode, hand_mode;
     int actual_arguments = sscanf(
         response.c_str(), response_body_format, &mc_data_.heartbeat_count,
-        &mc_data_.is_operational, &arm_mc_data_.arm_mode,
-        &hand_mc_data_.hand_mode, &mc_data_.arm_speed,
+        &mc_data_.is_operational, &arm_mode, &hand_mode, &mc_data_.arm_speed,
         &arm_mc_data_.arm_angles.rotunda, &arm_mc_data_.arm_angles.shoulder,
         &arm_mc_data_.arm_angles.elbow, &hand_mc_data_.wrist_data.roll,
         &hand_mc_data_.wrist_data.pitch,
@@ -118,6 +119,8 @@ class RoverArmSystem : public sjsu::common::RoverSystem
         &hand_mc_data_.finger_angles.pointer_angle,
         &hand_mc_data_.finger_angles.thumb_angle);
 
+    arm_mc_data_.arm_mode = HumanArm::MissionControlData::ArmModes{ arm_mode };
+    hand_mc_data_.hand_mode = Hand::MissionControlData::HandModes{ hand_mode };
     if (actual_arguments != kExpectedArguments)
     {
       sjsu::LogError("Arguments# %d != expected# %d!", actual_arguments,
@@ -129,7 +132,8 @@ class RoverArmSystem : public sjsu::common::RoverSystem
   void HomeArmSystem()
   {
     arm_.HomeArm(static_cast<float>(mc_data_.arm_speed));
-    hand_.HomeHand(arm_.GetRotundaOffsetAngle(), static_cast<float>(mc_data_.arm_speed));
+    hand_.HomeHand(arm_.GetRotundaOffsetAngle(),
+                   static_cast<float>(mc_data_.arm_speed));
   }
 
   // TODO: implement different arm drive modes in this function with switch
@@ -145,7 +149,8 @@ class RoverArmSystem : public sjsu::common::RoverSystem
       hand_.SetCurrentHandMode(hand_mc_data_.hand_mode);
     }
 
-    arm_.HandleMovement(arm_mc_data_.arm_angles, static_cast<float>(mc_data_.arm_speed));
+    arm_.HandleMovement(arm_mc_data_.arm_angles,
+                        static_cast<float>(mc_data_.arm_speed));
     hand_.HandleMovement(hand_mc_data_, static_cast<float>(mc_data_.arm_speed));
   }
 
