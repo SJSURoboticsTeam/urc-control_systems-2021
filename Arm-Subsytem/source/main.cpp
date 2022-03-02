@@ -19,16 +19,10 @@ int main()
   sjsu::CanNetwork can_network(can, &memory_resource);
 
   // Need to use an address translator
-  // sjsu::Mpu6050 rotunda_mpu(i2c, 0x66);
-  // sjsu::Mpu6050 shoulder_mpu(i2c, 0x67);
-  // sjsu::Mpu6050 elbow_mpu(i2c, 0x68);
-  // sjsu::Mpu6050 wrist_mpu(i2c, 0x69);
-
-  // Testing Purposes
-  sjsu::Mpu6050 rotunda_mpu(i2c);
-  sjsu::Mpu6050 shoulder_mpu(i2c);
-  sjsu::Mpu6050 elbow_mpu(i2c);
-  sjsu::Mpu6050 wrist_mpu(i2c);
+  sjsu::Mpu6050 rotunda_mpu(i2c, 0x66);
+  sjsu::Mpu6050 shoulder_mpu(i2c, 0x67);
+  sjsu::Mpu6050 elbow_mpu(i2c, 0x68);
+  sjsu::Mpu6050 wrist_mpu(i2c, 0x69);
 
   // RMD addresses 0x141 - 0x148 are available
   sjsu::RmdX rotunda_motor(can_network, 0x141);
@@ -37,20 +31,13 @@ int main()
   sjsu::RmdX left_wrist_motor(can_network, 0x144);
   sjsu::RmdX right_wrist_motor(can_network, 0x145);
 
-  // PWM for the servo motors for fingers
-  // sjsu::lpc40xx::Pwm & pinky_pwm   = sjsu::lpc40xx::GetPwm<1, 0>();
-  // sjsu::lpc40xx::Pwm & ring_pwm    = sjsu::lpc40xx::GetPwm<1, 1>();
-  // sjsu::lpc40xx::Pwm & middle_pwm  = sjsu::lpc40xx::GetPwm<1, 2>();
-  // sjsu::lpc40xx::Pwm & pointer_pwm = sjsu::lpc40xx::GetPwm<1, 3>();
-  // sjsu::lpc40xx::Pwm & thumb_pwm   = sjsu::lpc40xx::GetPwm<1, 4>();
+  sjsu::Pca9685 pca(i2c, 0x70);
 
-  sjsu::Pca9685 pca(i2c);
-
-  sjsu::arm::Finger pinky_servo(4);
-  sjsu::arm::Finger ring_servo(3);
-  sjsu::arm::Finger middle_servo(2);
-  sjsu::arm::Finger pointer_servo(1);
-  sjsu::arm::Finger thumb_servo(0);
+  sjsu::arm::Finger pinky(4);
+  sjsu::arm::Finger ring(3);
+  sjsu::arm::Finger middle(2);
+  sjsu::arm::Finger pointer(1);
+  sjsu::arm::Finger thumb(0);
 
   rotunda_motor.settings.gear_ratio     = 8;
   shoulder_motor.settings.gear_ratio    = 8;
@@ -63,11 +50,7 @@ int main()
   sjsu::arm::ArmJoint elbow(elbow_motor, elbow_mpu);
   sjsu::arm::HumanArm arm(rotunda, shoulder, elbow);
   sjsu::arm::WristJoint wrist(left_wrist_motor, right_wrist_motor, wrist_mpu);
-  sjsu::arm::Finger pinky(pinky_servo);
-  sjsu::arm::Finger ring(ring_servo);
-  sjsu::arm::Finger middle(middle_servo);
-  sjsu::arm::Finger pointer(pointer_servo);
-  sjsu::arm::Finger thumb(thumb_servo);
+
   sjsu::arm::Hand hand(pca, wrist, pinky, ring, middle, pointer, thumb);
   sjsu::arm::RoverArmSystem arm_system(arm, hand);
 

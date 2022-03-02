@@ -4,7 +4,7 @@
 int main(void)
 {
   sjsu::lpc40xx::I2c & i2c = sjsu::lpc40xx::GetI2c<2>();
-  sjsu::Pca9685 pca(i2c);
+  sjsu::Pca9685 pca(i2c, 0x70);  // address is from figure 4 of datasheet
   pca.ModuleInitialize();
   sjsu::LogInfo("Starting program");
 
