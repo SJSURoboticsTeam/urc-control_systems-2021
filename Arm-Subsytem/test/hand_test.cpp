@@ -1,21 +1,20 @@
 #include "testing/testing_frameworks.hpp"
 #include "devices/actuators/servo/servo.hpp"
 #include "Hand/finger.hpp"
-#include "Hand/hand.hpp"
+#include "Hand/human_hand.hpp"
 
 namespace sjsu::arm
 {
 TEST_CASE("Hand Testing Case...")
 {
-    Mock<sjsu::Servo> mock_servo;
+  Mock<Pca9685> pca;
+  Finger pinky_finger(0);
+  Finger ring_finger(1);
+  Finger middle_finger(2);
+  Finger pointer_finger(3);
+  Finger thumb_finger(4);
 
-    Finger pinky_finger(mock_servo.get());
-    Finger ring_finger(mock_servo.get());
-    Finger middle_finger(mock_servo.get());
-    Finger pointer_finger(mock_servo.get());
-    Finger thumb_finger(mock_servo.get());
-
-      auto accel_value = units::acceleration::meters_per_second_squared_t(5);
+  auto accel_value = units::acceleration::meters_per_second_squared_t(5);
   Accelerometer::Acceleration_t example_acceleration = { accel_value,
                                                          accel_value,
                                                          accel_value };
@@ -44,10 +43,10 @@ TEST_CASE("Hand Testing Case...")
 
   WristJoint wrist(left_motor, right_motor, spyed_mpu);
 
-  Hand hand(wrist, pinky_finger, ring_finger, middle_finger, pointer_finger, thumb_finger);
+  Hand hand(pca.get(), wrist, pinky_finger, ring_finger, middle_finger,
+            pointer_finger, thumb_finger);
 
-  SECTION()
-  {}
+  SECTION() {}
 }
 
-}//sjsu::arm
+}  // namespace sjsu::arm
