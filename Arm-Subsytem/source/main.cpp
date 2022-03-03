@@ -19,16 +19,10 @@ int main()
   sjsu::CanNetwork can_network(can, &memory_resource);
 
   // Need to use an address translator
-  // sjsu::Mpu6050 rotunda_mpu(i2c, 0x66);
-  // sjsu::Mpu6050 shoulder_mpu(i2c, 0x67);
-  // sjsu::Mpu6050 elbow_mpu(i2c, 0x68);
-  // sjsu::Mpu6050 wrist_mpu(i2c, 0x69);
-
-//Testing Purposes
-  sjsu::Mpu6050 rotunda_mpu(i2c);
-  sjsu::Mpu6050 shoulder_mpu(i2c);
-  sjsu::Mpu6050 elbow_mpu(i2c);
-  sjsu::Mpu6050 wrist_mpu(i2c);
+  sjsu::Mpu6050 rotunda_mpu(i2c, 0x66);
+  sjsu::Mpu6050 shoulder_mpu(i2c, 0x67);
+  sjsu::Mpu6050 elbow_mpu(i2c, 0x68);
+  sjsu::Mpu6050 wrist_mpu(i2c, 0x69);
 
   // RMD addresses 0x141 - 0x148 are available
   sjsu::RmdX rotunda_motor(can_network, 0x141);
@@ -37,19 +31,13 @@ int main()
   sjsu::RmdX left_wrist_motor(can_network, 0x144);
   sjsu::RmdX right_wrist_motor(can_network, 0x145);
 
-  //PWM for the servo motors for fingers
-  sjsu::lpc40xx::Pwm & pinky_pwm = sjsu::lpc40xx::GetPwm<1, 0>();
-  sjsu::lpc40xx::Pwm & ring_pwm = sjsu::lpc40xx::GetPwm<1, 1>();
-  sjsu::lpc40xx::Pwm & middle_pwm = sjsu::lpc40xx::GetPwm<1, 2>();
-  sjsu::lpc40xx::Pwm & pointer_pwm = sjsu::lpc40xx::GetPwm<1, 3>();
-  sjsu::lpc40xx::Pwm & thumb_pwm = sjsu::lpc40xx::GetPwm<1, 4>();
+  sjsu::Pca9685 pca(i2c, 0x70);
 
-  //Servo Motors for fingers
-  sjsu::Servo pinky_servo(pinky_pwm);
-  sjsu::Servo ring_servo(ring_pwm);
-  sjsu::Servo middle_servo(middle_pwm);
-  sjsu::Servo pointer_servo(pointer_pwm);
-  sjsu::Servo thumb_servo(thumb_pwm);
+  sjsu::arm::Finger pinky(4);
+  sjsu::arm::Finger ring(3);
+  sjsu::arm::Finger middle(2);
+  sjsu::arm::Finger pointer(1);
+  sjsu::arm::Finger thumb(0);
 
   rotunda_motor.settings.gear_ratio     = 8;
   shoulder_motor.settings.gear_ratio    = 8;
@@ -57,18 +45,13 @@ int main()
   left_wrist_motor.settings.gear_ratio  = 8;
   right_wrist_motor.settings.gear_ratio = 8;
 
-  sjsu::arm::ArmJoint rotunda(rotunda_motor, rotunda_mpu, 0, 3600,
-                           1800);
+  sjsu::arm::ArmJoint rotunda(rotunda_motor, rotunda_mpu, 0, 3600, 1800);
   sjsu::arm::ArmJoint shoulder(shoulder_motor, shoulder_mpu);
   sjsu::arm::ArmJoint elbow(elbow_motor, elbow_mpu);
   sjsu::arm::HumanArm arm(rotunda, shoulder, elbow);
   sjsu::arm::WristJoint wrist(left_wrist_motor, right_wrist_motor, wrist_mpu);
-  sjsu::arm::Finger pinky(pinky_servo);
-  sjsu::arm::Finger ring(ring_servo);
-  sjsu::arm::Finger middle(middle_servo);
-  sjsu::arm::Finger pointer(pointer_servo);
-  sjsu::arm::Finger thumb(thumb_servo);
-  sjsu::arm::Hand hand(wrist, pinky, ring, middle, pointer, thumb);
+
+  sjsu::arm::Hand hand(pca, wrist, pinky, ring, middle, pointer, thumb);
   sjsu::arm::RoverArmSystem arm_system(arm, hand);
 
   esp.Initialize();

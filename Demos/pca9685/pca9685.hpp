@@ -116,9 +116,7 @@ class Pca9685 : public Module<pca9685Settings_t>
       /// Actually it can, see PCA9685 documentation to implement (p.17).
     }
     uint16_t onTime = 0;
-    // this does nothing? Might need to delete upon further testing
-    // delay == 0 ? 0 : static_cast<uint16_t>(4096.f * delay + 0.5f) - 1;
-
+    delay == 0 ? 0 : static_cast<uint16_t>(4096.f * delay + 0.5f) - 1;
     uint16_t offTime =
         static_cast<uint16_t>((4096.f * duty_cycle + 0.5f) + onTime);
     setPWM(outputNumber, onTime, offTime);

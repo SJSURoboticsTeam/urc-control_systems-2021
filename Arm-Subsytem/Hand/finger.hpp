@@ -7,41 +7,18 @@ namespace sjsu::arm
 class Finger
 {
  public:
-  Finger(sjsu::Servo & servo) : servo_(servo) {}
+  Finger(int pwm_pin) : pwm_pin_(pwm_pin) {}
 
-  Finger(sjsu::Servo & servo,
-         float position,
-         float speed,
-         float max_angle,
-         float min_angle)
-      : servo_(servo),
-        position_(position),
-        speed_(speed),
-        max_angle_(max_angle),
-        min_angle_(min_angle)
-  {
-  }
-
-  void Initialize()
-  {
-    servo_.ModuleInitialize();
-  }
-
-  void SetPosition(float angle)
+  void SetPositionAndPwm(float angle)
   {
     position_ = std::clamp(angle, min_angle_, max_angle_);
-    units::angle::degree_t angle_to_degrees(position_);
-    servo_.SetAngle(angle_to_degrees);
-  }
-
-  void Home()
-  {
-    return;
+    pwm_ = MapAngleToPWM(position_);
+    // servo_.SetAngle(angle_to_degrees);
   }
 
   void SetSpeed(float target_speed)
   {
-    speed_ = target_speed;
+    speed_ = (target_speed);
   }
 
   int GetPosition() const
@@ -64,9 +41,28 @@ class Finger
     return int(min_angle_);
   }
 
- private:
-  sjsu::Servo & servo_;
+  uint8_t GetPwmPin() const
+  {
+    return static_cast<uint8_t>(pwm_pin_);
+  }
 
+  units::time::microsecond_t GetPWM()
+  {
+    return pwm_;
+  }
+
+ private:
+
+  units::time::microsecond_t MapAngleToPWM(float angle)
+  {
+    float angle_to_pwm = static_cast<float>(sjsu::Map(angle, 0.0, 180.0, 1.0, 2.0));
+    units::time::microsecond_t float_to_pwm(angle_to_pwm);
+    return float_to_pwm;
+  }
+
+  int pwm_pin_;
+
+  units::time::microsecond_t pwm_ = 0_us;
   float position_  = 0;
   float speed_     = 0;
   float max_angle_ = 180;

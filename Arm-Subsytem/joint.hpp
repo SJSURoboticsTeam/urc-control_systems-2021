@@ -23,7 +23,8 @@ class Joint
 
   void GetAccelerometerData()
   {
-    sjsu::Accelerometer::Acceleration_t acceleration_to_float(accelerometer_.Read());
+    sjsu::Accelerometer::Acceleration_t acceleration_to_float(
+        accelerometer_.Read());
     acceleration_.x =
         ReturnChangedIfZero(static_cast<float>(acceleration_to_float.x));
     acceleration_.y =
@@ -35,7 +36,10 @@ class Joint
   /// Checks if value is zero. If it's zero make it not zero
   float ReturnChangedIfZero(float acceleration)
   {
-    return (acceleration == 0 ? .001 : acceleration);
+    double nonzero_value = .001;
+    return static_cast<float>(!(acceleration > 0 || acceleration < 0)  // 0
+                                  ? nonzero_value
+                                  : static_cast<double>(acceleration));
   }
 
   sjsu::Accelerometer & accelerometer_;

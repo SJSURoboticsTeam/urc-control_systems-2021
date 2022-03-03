@@ -95,9 +95,9 @@ class HumanArm
   void HandleConcurrentMode(MissionControlData::ArmAngles arm_angles,
                             float speed)
   {
-    MoveRotunda(arm_angles.rotunda, speed);
-    MoveShoulder(arm_angles.shoulder, speed);
-    MoveElbow(arm_angles.elbow, speed);
+    MoveRotunda(static_cast<float>(arm_angles.rotunda), speed);
+    MoveShoulder(static_cast<float>(arm_angles.shoulder), speed);
+    MoveElbow(static_cast<float>(arm_angles.elbow), speed);
   }
 
   void HandleMovement(MissionControlData::ArmAngles arm_angles, float speed)
@@ -110,13 +110,13 @@ class HumanArm
         HandleConcurrentMode(arm_angles, speed);
         break;
       case MissionControlData::ArmModes::kRotunda:
-        MoveRotunda(arm_angles.rotunda, speed);
+        MoveRotunda(static_cast<float>(arm_angles.rotunda), speed);
         break;
       case MissionControlData::ArmModes::kShoulder:
-        MoveShoulder(arm_angles.shoulder, speed);
+        MoveShoulder(static_cast<float>(arm_angles.shoulder), speed);
         break;
       case MissionControlData::ArmModes::kElbow:
-        MoveElbow(arm_angles.elbow, speed);
+        MoveElbow(static_cast<float>(arm_angles.elbow), speed);
         break;
       case MissionControlData::ArmModes::kTransport:
         TransportShoulder();  
@@ -165,7 +165,7 @@ class HumanArm
     return elbow_.GetSpeed();
   }
 
-  int GetRotundaOffsetAngle() const
+  float GetRotundaOffsetAngle() const
   {
     return rotunda_.GetOffsetAngle();
   }
