@@ -31,8 +31,13 @@ TEST_CASE("Wheel testing")
 
   drive::Wheel wheel("wheel", hub_motor, steer_motor,
                      mock_wheel_homing_pin.get());
+  SECTION("1.1 should call the initialize function twice")
+  {
+    wheel.Initialize();
+    Verify(Method(mock_can, ModuleInitialize)).Twice();
+  }
 
-  SECTION("checking default values")
+  SECTION("1.2 should start with default values")
   {
     CHECK(wheel.GetName() == "wheel");
     CHECK(wheel.GetHubSpeed() == 0);
@@ -40,13 +45,7 @@ TEST_CASE("Wheel testing")
     CHECK(wheel.GetHomingOffset() == 0);
   }
 
-  SECTION("initializing wheel")
-  {
-    wheel.Initialize();
-    Verify(Method(mock_can, ModuleInitialize)).Twice();
-  }
-
-  SECTION("setting hub speed to random normal speed")
+  SECTION("2.1 should set hub speed within min and max range")
   {
     int random_num = rand() % 100 + 1;
     wheel.SetHubSpeed(random_num);
@@ -60,7 +59,7 @@ TEST_CASE("Wheel testing")
     CHECK(wheel.GetHubSpeed() == 0);
   }
 
-  SECTION("setting hub speed beyond maximum speed")
+  SECTION("2.2 should set hub speed beyond the min and max range")
   {
     wheel.SetHubSpeed(150);
     CHECK(wheel.GetHubSpeed() == 100);
@@ -69,7 +68,7 @@ TEST_CASE("Wheel testing")
     CHECK(wheel.GetHubSpeed() == -100);
   }
 
-  SECTION("setting steer angle to random normal angle")
+  SECTION("3.1 should set steer angle within min and max range")
   {
     int random_num = rand() % 360 + 1;
     wheel.SetSteerAngle(random_num);
@@ -83,7 +82,8 @@ TEST_CASE("Wheel testing")
     CHECK(wheel.GetSteerAngle() == 0);
   }
 
-  SECTION("setting steer angle beyond maximum angle")
+  SECTION(
+      "3.2 should set mod 360 of steer angle  when beyond min and max range")
   {
     wheel.SetSteerAngle(400);
     CHECK(wheel.GetSteerAngle() == 40);
