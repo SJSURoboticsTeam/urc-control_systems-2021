@@ -11,6 +11,7 @@ class HumanArm
   {
     enum class ArmModes : char
     {
+      kTransport  = 'T',
       kConcurrent = 'C',
       kRotunda    = 'R',
       kShoulder   = 'S',
@@ -103,6 +104,8 @@ class HumanArm
   {
     switch (current_arm_mode_)
     {
+      
+      
       case MissionControlData::ArmModes::kConcurrent:
         HandleConcurrentMode(arm_angles, speed);
         break;
@@ -115,6 +118,9 @@ class HumanArm
       case MissionControlData::ArmModes::kElbow:
         MoveElbow(static_cast<float>(arm_angles.elbow), speed);
         break;
+      case MissionControlData::ArmModes::kTransport:
+        TransportShoulder();  
+        break;  
       case MissionControlData::ArmModes::kHand: break;
     }
   }
@@ -228,6 +234,15 @@ class HumanArm
     rotunda_.GetAccelerometerData();
     shoulder_.GetAccelerometerData();
     elbow_.GetAccelerometerData();
+  }
+
+  void TransportShoulder()
+  {
+    float transport_speed = 10;
+    float shoulder_transport_angle = 90;
+    HomeArm(transport_speed);
+    MoveShoulder(shoulder_transport_angle, transport_speed);
+
   }
 
   ArmJoint & rotunda_;

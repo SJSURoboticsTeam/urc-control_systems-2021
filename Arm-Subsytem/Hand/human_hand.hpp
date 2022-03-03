@@ -16,7 +16,8 @@ class Hand
     {
       kPitch      = 'P',
       kRoll       = 'R',
-      kConcurrent = 'C'
+      kConcurrent = 'C',
+      kTransport  = 'T'
     };
     HandModes hand_mode = HandModes::kConcurrent;
 
@@ -99,6 +100,17 @@ class Hand
     wrist_.SetRollPosition(wrist_pitch, speed);
   }
 
+  void SetHandTransportPosition()
+  {
+    float transport_angles = 0;
+    thumb_.SetPosition(transport_angles);
+    pointer_.SetPosition(transport_angles);
+    middle_.SetPosition(transport_angles);
+    ring_.SetPosition(transport_angles);
+    pinky_.SetPosition(transport_angles);
+    wrist_.HandleWristMovement(transport_angles, transport_angles);
+  }
+
   void HandleMovement(MissionControlData hand_data, float speed)
   {
     switch (current_hand_mode_)
@@ -112,6 +124,9 @@ class Hand
         break;
       case MissionControlData::HandModes::kRoll:
         SetWristRollPosition(static_cast<float>(hand_data.wrist_data.roll), speed);
+        break;
+      case MissionControlData::HandModes::kTransport: 
+        SetHandTransportPosition();
         break;
     }
   }
@@ -172,6 +187,7 @@ class Hand
     current_hand_mode_ = new_mode;
   }
 
+  void HomeHand(float rotunda_offset_angle, float speed)
  private:
 
   //private member functions
