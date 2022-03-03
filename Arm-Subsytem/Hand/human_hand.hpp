@@ -9,7 +9,7 @@ namespace sjsu::arm
 class Hand : public HandInterface
 {
  public:
-  struct MissionControlData : HandInterface::MissionControl 
+  struct MissionControlData : HandInterface::MissionControl
   {
     enum class HandModes : char
     {
@@ -53,7 +53,7 @@ class Hand : public HandInterface
   {
   }
 
-  void Initialize() 
+  void Initialize()
   {
     wrist_.Initialize();
     pinky_.Initialize();
@@ -63,7 +63,7 @@ class Hand : public HandInterface
     thumb_.Initialize();
   }
 
-  void PrintHandData() 
+  void PrintHandData()
   {
     printf("Hand Finger Positions:\n");
     printf("Pinky Angle: %d\n", pinky_.GetPosition());
@@ -106,11 +106,21 @@ class Hand : public HandInterface
     wrist_.SetRollPosition(wrist_pitch, speed);
   }
 
-  void HandleMovement(MissionControlData hand_data, float speed) 
+  void SetHandTransportPosition()
+  {
+    float transport_angles = 0;
+    thumb_.SetPosition(transport_angles);
+    pointer_.SetPosition(transport_angles);
+    middle_.SetPosition(transport_angles);
+    ring_.SetPosition(transport_angles);
+    pinky_.SetPosition(transport_angles);
+    wrist_.HandleWristMovement(transport_angles, transport_angles);
+  }
+
+  void HandleMovement(MissionControlData hand_data, float speed)
   {
     switch (current_hand_mode_)
     {
-      float transport_angles = 0;
       case MissionControlData::HandModes::kConcurrent:
         HandleConcurrentMovement(hand_data.fingers, hand_data.wrist_data,
                                  speed);
@@ -121,15 +131,9 @@ class Hand : public HandInterface
       case MissionControlData::HandModes::kRoll:
         SetWristRollPosition(hand_data.wrist_data.roll, speed);
         break;
-      case MissionControlData::HandModes::kTransport:
-        thumb_.SetPosition(transport_angles);
-        pointer_.SetPosition(transport_angles);
-        middle_.SetPosition(transport_angles);
-        ring_.SetPosition(transport_angles);
-        pinky_.SetPosition(transport_angles);
-        wrist_.HandleWristMovement(transport_angles, transport_angles);
+      case MissionControlData::HandModes::kTransport: 
+        SetHandTransportPosition();
         break;
-
     }
   }
 
@@ -178,7 +182,7 @@ class Hand : public HandInterface
     current_hand_mode_ = new_mode;
   }
 
-  void HomeHand(float rotunda_offset_angle, float speed) 
+  void HomeHand(float rotunda_offset_angle, float speed)
   {
     pinky_.Home();
     ring_.Home();
