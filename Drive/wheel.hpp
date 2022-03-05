@@ -4,6 +4,7 @@
 #include "peripherals/lpc40xx/gpio.hpp"
 //#include "../Common/gpio.hpp"
 #include "devices/switches/button.hpp"
+#include "string_view"
 
 namespace sjsu::drive
 {
@@ -11,7 +12,7 @@ namespace sjsu::drive
 class Wheel
 {
  public:
-  Wheel(std::string name,
+  Wheel(std::string_view name,
         sjsu::RmdX & hub_motor,
         sjsu::RmdX & steer_motor,
         sjsu::Gpio & homing_pin)
@@ -22,7 +23,7 @@ class Wheel
 
   void Initialize()
   {
-    sjsu::LogInfo("Initializing %s wheel...", name_.c_str());
+    sjsu::LogInfo("Initializing %s wheel...", name_);
     hub_motor_.Initialize();
     steer_motor_.Initialize();
     homing_pin_.Initialize();
@@ -31,10 +32,10 @@ class Wheel
 
   void Print()
   {
-    printf("%-10s%-10d%-10d\n", name_.c_str(), GetHubSpeed(), GetSteerAngle());
+    printf("%-10s%-10d%-10d\n", name_, GetHubSpeed(), GetSteerAngle());
   }
 
-  std::string GetName() const
+  std::string_view GetName() const
   {
     return name_;
   }
@@ -82,7 +83,7 @@ class Wheel
   }
 
  private:
-  std::string name_        = "";
+  std::string_view name_ ;
   int homing_offset_angle_ = 0;
   float steer_angle_       = 0;
   float hub_speed_         = 0;
