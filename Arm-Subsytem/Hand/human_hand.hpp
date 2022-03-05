@@ -100,15 +100,15 @@ class Hand
     wrist_.SetRollPosition(wrist_pitch, speed);
   }
 
-  void SetHandTransportPosition()
+  void SetHandTransportPosition(float speed)
   {
     float transport_angles = 0;
-    thumb_.SetPosition(transport_angles);
-    pointer_.SetPosition(transport_angles);
-    middle_.SetPosition(transport_angles);
-    ring_.SetPosition(transport_angles);
-    pinky_.SetPosition(transport_angles);
-    wrist_.HandleWristMovement(transport_angles, transport_angles);
+    thumb_.SetPositionAndPwm(transport_angles);
+    pointer_.SetPositionAndPwm(transport_angles);
+    middle_.SetPositionAndPwm(transport_angles);
+    ring_.SetPositionAndPwm(transport_angles);
+    pinky_.SetPositionAndPwm(transport_angles);
+    wrist_.HandleWristMovement(transport_angles, transport_angles, speed);
   }
 
   void HandleMovement(MissionControlData hand_data, float speed)
@@ -126,7 +126,7 @@ class Hand
         SetWristRollPosition(static_cast<float>(hand_data.wrist_data.roll), speed);
         break;
       case MissionControlData::HandModes::kTransport: 
-        SetHandTransportPosition();
+        SetHandTransportPosition(speed);
         break;
     }
   }
@@ -187,7 +187,6 @@ class Hand
     current_hand_mode_ = new_mode;
   }
 
-  void HomeHand(float rotunda_offset_angle, float speed)
  private:
 
   //private member functions
