@@ -314,9 +314,24 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
     current_mode_ = mc_data_.drive_mode;
   }
 
-  // TODO: Develop pseudocode for setting the wheel speeds in drive mode for the robot
-  void SetDriveWheelSpeed(float steering_wheel_heading_angle, float steering_wheel_velocity)
+  // TODO: Develop/implement pseudocode for setting the wheel speeds in drive mode for the robot
+  void SetDriveWheelSpeed(float steering_wheel_heading_angle, 
+                          float steering_wheel_velocity, 
+                          sjsu::lpc40xx::Timer wheel_timer)
   {
+    /* Sets the wheel speed for the two static motors based on the angle of the robot itself
+       and the speed of the front steering motor.
+
+       Params:
+         steering_wheel_heading_angle: The angle the steering wheel is facing wrt xy plane & robot
+         steering_wheel_velocity: the linear velocity of the steering wheel
+         currentCount: the currentCount from the timer peripheral, sjsu::lpc40xx::Timer
+
+       Returns:
+         Null
+
+    */
+    
     /* Pseudocode:
 
       // initializing variables:
@@ -334,8 +349,26 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
 
       left_wheel_velocity = robots_forward_velocity - (distance_between_static_wheels/2)*robots_angular_velocity
       right_wheel_velocity = robots_forward_velocity + (distance_between_static_wheels/2)*robots_angular_velocity
-
     */
+
+
+    // timer0 in Drive/source/main.cpp is set to 1 Mhz or 1 microsecond per timer count
+    // I need to enforce a delay to get consistent timing to accurately integrate angular accelerations and velocities
+    // I have a feeling this isn't something that I would do in the actual SetDriveWheelSpeed function...
+    uint32_t current_count = wheel_timer.GetCount();
+    uint32_t current_time_in_milliseconds = current_count / 1000; 
+    uint32_t initial_time = current_time_in_milliseconds;
+
+    // TODO: Need to assume an initial_ and final_time for the 1st round of computations
+    // TODO: Insert computations here...
+
+    // Delay for 50 milliseconds.. this is an arbitrary value that I picked
+    sjsu::Delay(50000000);
+
+    uint32_t next_count = wheel_timer.GetCount();
+    uint32_t next_time_in_milliseconds = next_count / 1000;
+    uint32_t final_time = next_time_in_milliseconds;
+
   }
 
   // =======================

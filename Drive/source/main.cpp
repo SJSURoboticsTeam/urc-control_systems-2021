@@ -9,6 +9,23 @@
 
 int main(void)
 {
+  sjsu::LogInfo("Timer Application Starting...");
+
+
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+
+  // TODO: Need to use this timer as input for 'drive mode'
+  sjsu::lpc40xx::Timer timer0(sjsu::lpc40xx::Timer::Peripheral::kTimer0);
+  timer0.Initialize(1_MHz, Timer0ISR);
+  timer0.SetMatchBehavior(1'000'000,
+                          sjsu::Timer::MatchAction::kInterruptRestart);
+  timer0.Start();
+  uint32_t current_count = timer0.GetCount();
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+
+
   sjsu::lpc40xx::SetMaximumClockSpeed();
   sjsu::LogInfo("Starting the rover drive system...");
   sjsu::common::Esp esp;
