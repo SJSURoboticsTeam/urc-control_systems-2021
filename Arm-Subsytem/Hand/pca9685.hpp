@@ -1,6 +1,3 @@
-// This device allows us to control multiple servo motors which is used in the
-// control of the hand. *Might need some additional work*
-
 #pragma once
 
 #include "module.hpp"

@@ -1,19 +1,19 @@
 #pragma once
-#include "utility/math/units.hpp"
+#include <cmath>
+
+#include "Interface/joint_interface.hpp"
 #include "devices/actuators/servo/rmd_x.hpp"
 #include "devices/sensors/movement/accelerometer/mpu6050.hpp"
-#include "joint.hpp"
-#include <cmath>
 
 namespace sjsu::arm
 {
-class WristJoint : public Joint
+class WristJoint : public JointInterface
 {
  public:
   WristJoint(sjsu::RmdX & left_joint_motor,
              sjsu::RmdX & right_joint_motor,
              sjsu::Mpu6050 & accelerometer)
-      : Joint(accelerometer),
+      : JointInterface(accelerometer),
         left_motor_(left_joint_motor),
         right_motor_(right_joint_motor)
   {
@@ -23,7 +23,7 @@ class WristJoint : public Joint
   {
     left_motor_.Initialize();
     right_motor_.Initialize();
-    Joint::Initialize();
+    JointInterface::Initialize();
   }
   void PrintWristData()
   {
@@ -32,7 +32,6 @@ class WristJoint : public Joint
     printf("Wrist roll position: %f\n", static_cast<double>(roll_angle_));
   }
 
-  // Sets Roll Position of the wrist joint
   void SetRollPosition(float roll_angle, float speed)
   {
     SetSpeed(speed);
@@ -43,7 +42,6 @@ class WristJoint : public Joint
     right_motor_.SetAngle(angle_to_degrees);
   }
 
-  // Sets Pitch Position of the wrist joint
   void SetPitchPosition(float pitch_angle, float speed)
   {
     SetSpeed(speed);
@@ -72,7 +70,6 @@ class WristJoint : public Joint
     roll_offset_angle_ = roll_offset;
   }
 
-  // Sets speed of the wrist joints
   void SetSpeed(float target_speed)
   {
     speed_ = std::clamp(target_speed, -kMaxSpeed, kMaxSpeed);
@@ -121,19 +118,18 @@ class WristJoint : public Joint
     SetZeroPitchOffsets(wrist_pitch_offset);
   }
 
-  // can't home yet
+  // TODO: can't home yet
   void HomeRoll(){};
 
  private:
   sjsu::RmdX & left_motor_;
   sjsu::RmdX & right_motor_;
 
+  float speed_              = 0;
   float pitch_angle_        = 0;
   float roll_angle_         = 0;
   float pitch_offset_angle_ = 0;
   float roll_offset_angle_  = 0;
-
-  float speed_ = 0;
 
   const float kPitchMinimumAngle = 0;
   const float kPitchMaximumAngle = 180;

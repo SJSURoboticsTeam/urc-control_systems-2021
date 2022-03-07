@@ -1,13 +1,13 @@
+#pragma once
 #include "utility/log.hpp"
 #include "peripherals/lpc40xx/i2c.hpp"
 #include "peripherals/lpc40xx/can.hpp"
 #include "peripherals/lpc17xx/pwm.hpp"
 #include "utility/time/timeout_timer.hpp"
+#include "arm_system.hpp"
+#include "../../Common/esp.hpp"
 #include "devices/actuators/servo/rmd_x.hpp"
 #include "devices/sensors/movement/accelerometer/mpu6050.hpp"
-
-#include "rover_arm_system.hpp"
-#include "../../Common/esp.hpp"
 
 int main()
 {
@@ -48,7 +48,7 @@ int main()
   sjsu::arm::ArmJoint rotunda(rotunda_motor, rotunda_mpu, 0, 3600, 1800);
   sjsu::arm::ArmJoint shoulder(shoulder_motor, shoulder_mpu);
   sjsu::arm::ArmJoint elbow(elbow_motor, elbow_mpu);
-  sjsu::arm::HumanArm arm(rotunda, shoulder, elbow);
+  sjsu::arm::Arm arm(rotunda, shoulder, elbow);
   sjsu::arm::WristJoint wrist(left_wrist_motor, right_wrist_motor, wrist_mpu);
 
   sjsu::arm::Hand hand(pca, wrist, pinky, ring, middle, pointer, thumb);

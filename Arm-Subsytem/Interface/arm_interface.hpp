@@ -3,7 +3,7 @@
 namespace sjsu::arm
 {
 
-class Arm
+class ArmInterface
 {
   virtual void Initialize()     = 0;
   virtual void HomeArm()        = 0;

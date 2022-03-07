@@ -4,7 +4,7 @@
 
 namespace sjsu::arm
 {
-class Joint
+class JointInterface
 {
  public:
   struct Acceleration
@@ -14,7 +14,8 @@ class Joint
     float z = 0;
   };
 
-  Joint(sjsu::Accelerometer & accelerometer) : accelerometer_(accelerometer){};
+  JointInterface(sjsu::Accelerometer & accelerometer)
+      : accelerometer_(accelerometer){};
 
   void Initialize()
   {

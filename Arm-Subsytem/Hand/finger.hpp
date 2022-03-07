@@ -1,6 +1,6 @@
 #pragma once
 
-#include "devices/actuators/servo/servo.hpp"
+#include "utility/math/map.hpp"
 
 namespace sjsu::arm
 {

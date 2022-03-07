@@ -2,9 +2,9 @@
 #include "devices/actuators/servo/rmd_x.hpp"
 #include "devices/sensors/movement/accelerometer/mpu6050.hpp"
 
-#include "rover_arm_system.hpp"
+#include "arm_system.hpp"
 #include "Hand/wrist_joint.hpp"
-#include "joint.hpp"
+#include "Interface/joint_interface.hpp"
 
 namespace sjsu
 {

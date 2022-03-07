@@ -1,9 +1,8 @@
 #pragma once
-#include "peripherals/uart.hpp"
 #include "wrist_joint.hpp"
 #include "finger.hpp"
-#include "Interface/hand.hpp"
 #include "pca9685.hpp"
+#include "Interface/hand_interface.hpp"
 
 namespace sjsu::arm
 {
@@ -83,7 +82,8 @@ class Hand
     MoveFinger(finger_data.middle_angle, middle_);
     MoveFinger(finger_data.pointer_angle, pointer_);
     MoveFinger(finger_data.thumb_angle, thumb_);
-    wrist_.HandleWristMovement(speed, static_cast<float>(wrist_data.roll), static_cast<float>(wrist_data.pitch));
+    wrist_.HandleWristMovement(speed, static_cast<float>(wrist_data.roll),
+                               static_cast<float>(wrist_data.pitch));
   }
 
   // The following two functions are here to allow the rover arm system to
@@ -120,12 +120,14 @@ class Hand
                                  speed);
         break;
       case MissionControlData::HandModes::kPitch:
-        SetWristPitchPosition(static_cast<float>(hand_data.wrist_data.pitch), speed);
+        SetWristPitchPosition(static_cast<float>(hand_data.wrist_data.pitch),
+                              speed);
         break;
       case MissionControlData::HandModes::kRoll:
-        SetWristRollPosition(static_cast<float>(hand_data.wrist_data.roll), speed);
+        SetWristRollPosition(static_cast<float>(hand_data.wrist_data.roll),
+                             speed);
         break;
-      case MissionControlData::HandModes::kTransport: 
+      case MissionControlData::HandModes::kTransport:
         SetHandTransportPosition(speed);
         break;
     }
@@ -140,7 +142,6 @@ class Hand
     MoveFinger(thumb_.GetMaxAngle(), thumb_);
     wrist_.Home(float(rotunda_offset_angle), speed);
   }
-
 
   int GetWristPitch() const
   {
@@ -188,18 +189,17 @@ class Hand
   }
 
  private:
-
-  //private member functions
+  // private member functions
   void MoveFinger(int angle, Finger & finger)
   {
     finger.SetPositionAndPwm(static_cast<float>(angle));
     pca_.setPulseWidth(finger.GetPwmPin(), finger.GetPWM());
   }
 
-  //private member variables
+  // private member variables
   MissionControlData::HandModes current_hand_mode_ =
       MissionControlData::HandModes::kConcurrent;
-  
+
   Pca9685 & pca_;
 
   WristJoint & wrist_;

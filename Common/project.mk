@@ -1,1 +1,1 @@
-TESTS += test/rover_system.cpp
+TESTS += test/system.cpp

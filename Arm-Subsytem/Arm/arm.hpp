@@ -4,7 +4,7 @@
 
 namespace sjsu::arm
 {
-class HumanArm
+class Arm
 {
  public:
   struct MissionControlData
@@ -29,7 +29,7 @@ class HumanArm
     ArmAngles arm_angles;
   };
 
-  HumanArm(ArmJoint & rotunda, ArmJoint & shoulder, ArmJoint & elbow)
+  Arm(ArmJoint & rotunda, ArmJoint & shoulder, ArmJoint & elbow)
       : rotunda_(rotunda), shoulder_(shoulder), elbow_(elbow){};
 
   void Initialize()
@@ -104,8 +104,6 @@ class HumanArm
   {
     switch (current_arm_mode_)
     {
-      
-      
       case MissionControlData::ArmModes::kConcurrent:
         HandleConcurrentMode(arm_angles, speed);
         break;
@@ -118,9 +116,7 @@ class HumanArm
       case MissionControlData::ArmModes::kElbow:
         MoveElbow(static_cast<float>(arm_angles.elbow), speed);
         break;
-      case MissionControlData::ArmModes::kTransport:
-        TransportShoulder();  
-        break;  
+      case MissionControlData::ArmModes::kTransport: TransportShoulder(); break;
       case MissionControlData::ArmModes::kHand: break;
     }
   }
@@ -238,11 +234,10 @@ class HumanArm
 
   void TransportShoulder()
   {
-    float transport_speed = 10;
+    float transport_speed          = 10;
     float shoulder_transport_angle = 90;
     HomeArm(transport_speed);
     MoveShoulder(shoulder_transport_angle, transport_speed);
-
   }
 
   ArmJoint & rotunda_;

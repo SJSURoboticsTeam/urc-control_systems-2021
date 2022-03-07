@@ -1,24 +1,22 @@
 #pragma once
-#include "utility/math/units.hpp"
+#include "Interface/joint_interface.hpp"
 #include "devices/actuators/servo/rmd_x.hpp"
 #include "devices/sensors/movement/accelerometer/mpu6050.hpp"
-#include "joint.hpp"
 
 namespace sjsu::arm
 {
-// the ArmJoint class is used for the rotunda, elbow, and shoulder motors.
-class ArmJoint : public Joint
+class ArmJoint : public JointInterface
 {
  public:
   ArmJoint(sjsu::RmdX & joint_motor, sjsu::Mpu6050 & accelerometer)
-      : Joint(accelerometer), motor_(joint_motor){};
+      : JointInterface(accelerometer), motor_(joint_motor){};
 
   ArmJoint(sjsu::RmdX & joint_motor,
            sjsu::Mpu6050 & accelerometer,
            float min_angle,
            float max_angle,
            float standby_angle)
-      : Joint(accelerometer),
+      : JointInterface(accelerometer),
         motor_(joint_motor),
         kMinimumAngle(min_angle),
         kMaximumAngle(max_angle),
@@ -27,7 +25,7 @@ class ArmJoint : public Joint
   void Initialize()
   {
     motor_.Initialize();
-    Joint::Initialize();
+    JointInterface::Initialize();
   }
 
   // Move the motor to the (calibrated) angle desired.

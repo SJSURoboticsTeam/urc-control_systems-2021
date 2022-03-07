@@ -1,7 +1,7 @@
 #include "testing/testing_frameworks.hpp"
 #include "devices/actuators/servo/servo.hpp"
 #include "Hand/finger.hpp"
-#include "Hand/human_hand.hpp"
+#include "Hand/hand.hpp"
 
 namespace sjsu::arm
 {

@@ -1,7 +1,7 @@
 #include "testing/testing_frameworks.hpp"
 #include "devices/actuators/servo/rmd_x.hpp"
 
-#include "rover_arm_system.hpp"
+#include "arm_system.hpp"
 
 namespace sjsu
 {
@@ -14,7 +14,7 @@ TEST_CASE("Arm system testing")
 
   arm::RoverArmSystem::GeneralMissionControlData mc_data;
   arm::Hand::MissionControlData hand_mc_data;
-  arm::HumanArm::MissionControlData arm_mc_data;
+  arm::Arm::MissionControlData arm_mc_data;
 
   Mock<Pca9685> pca;
 
@@ -26,8 +26,6 @@ TEST_CASE("Arm system testing")
 
   Mock<I2c> mock_i2c;
   Fake(Method(mock_i2c, I2c::ModuleInitialize));
-
-  Mock<Servo> mock_servo;
 
   StaticMemoryResource<1024> memory_resource;
   CanNetwork network(mock_can.get(), &memory_resource);
@@ -47,7 +45,7 @@ TEST_CASE("Arm system testing")
   arm::ArmJoint shoulder(motor, spyed_mpu);
   arm::ArmJoint elbow(motor, spyed_mpu);
   arm::ArmJoint rotunda(motor, spyed_mpu, 0, 3600, 1800);
-  arm::HumanArm human_arm(rotunda, shoulder, elbow);
+  arm::Arm human_arm(rotunda, shoulder, elbow);
 
   arm::Finger pinky(0);
   arm::Finger ring(1);
@@ -61,7 +59,6 @@ TEST_CASE("Arm system testing")
 
   SECTION("should initialize and return default values")
   {
-    // arm.Initialize();
     CHECK_EQ(hand.GetWristRoll(), 0);
     CHECK_EQ(hand.GetWristPitch(), 0);
   }
@@ -76,7 +73,7 @@ TEST_CASE("Arm system testing")
         "ring_angle=0&middle_angle=0&pointer_angle=0&thumb_"
         "angle=0";
     std::string actual_parameter = arm_system.GETParameters();
-    CHECK(expected_parameter == actual_parameter);
+    CHECK_EQ(expected_parameter, actual_parameter);
   }
 
   SECTION("2.1 should parse json response correctly")
@@ -105,11 +102,10 @@ TEST_CASE("Arm system testing")
     hand_mc_data = arm_system.GetHandMCData();
     CHECK_EQ(mc_data.heartbeat_count, 0);
     CHECK_EQ(mc_data.is_operational, 1);
-    CHECK_EQ(arm_mc_data.arm_mode,
-             arm::HumanArm::MissionControlData::ArmModes('A'));
+    CHECK_EQ(arm_mc_data.arm_mode, arm::Arm::MissionControlData::ArmModes('A'));
     CHECK_EQ(hand_mc_data.hand_mode,
              arm::Hand::MissionControlData::HandModes('H'));
-    CHECK_EQ(mc_data.arm_speed, 5);
+    CHECK_EQ(mc_data.speed, 5);
     CHECK_EQ(arm_mc_data.arm_angles.rotunda, 5);
     CHECK_EQ(arm_mc_data.arm_angles.shoulder, 5);
     CHECK_EQ(arm_mc_data.arm_angles.elbow, 5);
