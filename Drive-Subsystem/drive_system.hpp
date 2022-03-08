@@ -5,7 +5,7 @@
 #include "utility/log.hpp"
 #include "../Common/heartbeat.hpp"
 #include "../Common/state_of_charge.hpp"
-#include "../Common/Interface/rover_system.hpp"
+#include "../Common/Interface/rover_system_interface.hpp"
 
 namespace sjsu::drive
 {
@@ -18,7 +18,7 @@ const char response_body_format[] =
     "  \"speed\": %d,\n"
     "  \"angle\": %d\n"
     "}";
-class RoverDriveSystem : public sjsu::common::RoverSystem
+class RoverDriveSystem : public sjsu::common::RoverSystemInterface
 {
  public:
   struct ParseError

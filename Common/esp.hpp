@@ -17,7 +17,7 @@ class Esp
       : esp_(sjsu::lpc40xx::GetUart<3>()),
         wifi_(esp_.GetWiFi()),
         socket_(esp_.GetInternetSocket()){};
-  /// Initializes the Wi-Fi module by connecting to WiFi
+
   void Initialize()
   {
     sjsu::LogInfo("Initializing esp module...");

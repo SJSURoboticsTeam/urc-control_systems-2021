@@ -5,7 +5,7 @@
 
 namespace sjsu::common
 {
-class RoverSystem
+class RoverSystemInterface
 {
  public:
   struct RoverMissionControlData

@@ -5,7 +5,7 @@
 #include "Hand/hand.hpp"
 #include "Interface/hand_interface.hpp"
 #include "Interface/joint_interface.hpp"
-#include "../Common/Interface/rover_system.hpp"
+#include "../Common/Interface/rover_system_interface.hpp"
 
 namespace sjsu::arm
 {
@@ -28,7 +28,7 @@ const char response_body_format[] =
     "  \"thumb_angle\": %d\n"
     "}";
 
-class RoverArmSystem : public sjsu::common::RoverSystem
+class RoverArmSystem : public sjsu::common::RoverSystemInterface
 {
  public:
   struct ParseError
