@@ -30,5 +30,5 @@ jobs:
 
       - name: Testing drive system 🦿
         run: |
-          cd Drive/
+          cd Drive-Subsystem/
           make test
