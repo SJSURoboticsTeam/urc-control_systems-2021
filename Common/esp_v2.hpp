@@ -15,10 +15,18 @@ const char GET_request_format[] = "GET /%s%s HTTP/1.1\r\nHost: %s\r\n\r\n";
 class Esp_v2 : public CommunicationInterface
 {
  public:
-  Esp_v2(string ssid, string password, string url, string port_number)
-      : ssid_(ssid),
+  Esp_v2(std::string ssid,
+         std::string password,
+         std::string url,
+         std::string endpoint,
+         int port_number)
+      : esp_(sjsu::lpc40xx::GetUart<3>()),
+        wifi_(esp_.GetWiFi()),
+        socket_(esp_.GetInternetSocket()),
+        ssid_(ssid),
         password_(password),
         url_(url),
+        endpoint_(endpoint),
         port_number_(port_number){};
 
   void Initialize()
@@ -28,70 +36,55 @@ class Esp_v2 : public CommunicationInterface
     Connect();
   };
 
-  void Connect()
+  void Connect() override
   {
     ConnectToWifi();
-    ConnectToServer();
+    ConnectToWebServer();
   }
 
-  void Disconnect()
+  void Disconnect() override
   {
     wifi_.DisconnectFromAccessPoint();
   }
 
-  void CreateRequest(string endpoint, string parameters)
+  void SendMessage(std::string parameters) override
   {
-    char request_message[500];
-    snprintf(request_message, 500, GET_request_format, endpoint, parameters,
-             url_);
-    request_message_ = request_message;
+    CreateMessage(parameters);
+    SendHTTPRequest();
+    ParseResponse();
   }
 
-  string GetResponse()
+  std::string GetMessageResponse() override
   {
     return response_body_;
   }
 
-  void SendRequest()
+  void ReconnectIfServerTimedOut(sjsu::TimeoutTimer & serverTimer)
   {
-    WriteToServer();
+    if (serverTimer.HasExpired())
+    {
+      sjsu::LogWarning("Server timed out! Reconnecting...");
+      Connect();
+    }
   }
 
  private:
+  void CreateMessage(std::string parameters)
+  {
+    char request_message[500];
+    snprintf(request_message, 500, GET_request_format, endpoint_.c_str(),
+             parameters.c_str(), url_.c_str());
+    request_message_ = request_message;
+  }
+
   void ParseResponse()
   {
     std::fill(raw_.begin(), raw_.end(), 0);
     size_t read_back = socket_.Read(raw_, kDefaultTimeout);
     std::string response(reinterpret_cast<char *>(raw_.data()), read_back);
-    response_header_ = response.substr(response.find)
+    response_header_ = response.substr(0, response.find("\r\n\r\n"));
   }
 
-  /// Sends a GET request to the hardcoded URL
-  /// @param endpoint i.e. /endpoint?example=parameter
-  /// @return the response body of the GET request
-  std::string GET(std::string endpoint)
-  {
-    try
-    {
-      try
-      {
-        response = response.substr(response.find("\r\n\r\n{"));
-        printf("Response Body:%s", response.c_str());
-        return response;
-      }
-      catch (const std::exception & e)
-      {
-        sjsu::LogError("Error parsing response from server!");
-      }
-    }
-    catch (const std::exception & e)
-    {
-      sjsu::LogError("Error reading response from server!");
-    }
-    return "Error";
-  };
-
-  /// Attempts to connect to the local WiFi network
   void ConnectToWifi()
   {
     while (true)
@@ -105,23 +98,13 @@ class Esp_v2 : public CommunicationInterface
     }
   }
 
-  void IsServerExpired(sjsu::TimeoutTimer & serverTimer)
-  {
-    if (serverTimer.HasExpired())
-    {
-      sjsu::LogWarning("Server timed out! Reconnecting...");
-      Connect();
-    }
-  }
-
-  /// Connects to the URL provided in member function
-  void ConnectToServer()
+  void ConnectToWebServer()
   {
     try
     {
       sjsu::LogInfo("Connecting to %s...", url_.data());
-      socket_.Connect(sjsu::InternetSocket::Protocol::kTCP, url_, port_number_,
-                      kDefaultTimeout);
+      socket_.Connect(sjsu::InternetSocket::Protocol::kTCP, url_,
+                      static_cast<uint16_t>(port_number_), kDefaultTimeout);
     }
     catch (const std::exception & e)
     {
@@ -129,13 +112,7 @@ class Esp_v2 : public CommunicationInterface
     }
   }
 
-  bool IsConnected()
-  {
-    return wifi_.IsConnected();  // TODO: Always returns false
-  };
-
-  /// Sends an HTTP request to the connected server
-  void WriteToServer()
+  void SendHTTPRequest()
   {
     try
     {
@@ -150,18 +127,19 @@ class Esp_v2 : public CommunicationInterface
     }
   }
 
-  std::array<uint8_t, 1024 * 2> raw_;
+  sjsu::Esp8266 esp_;
+  sjsu::WiFi & wifi_;
+  sjsu::InternetSocket & socket_;
 
-  int port_number_                     = 5000;
-  std::string url_                     = "";
   std::string ssid_                    = "";
   std::string password_                = "";
+  std::string url_                     = "";
+  std::string endpoint_                = "";
   std::string request_message_         = "";
   std::string response_header_         = "";
   std::string response_body_           = "";
+  int port_number_                     = 5000;
   std::chrono::seconds kDefaultTimeout = 10s;
-  sjsu::Esp8266 esp_                   = sjsu::lpc40xx::GetUart<3>();
-  sjsu::WiFi & wifi_                   = esp_.GetWiFi();
-  sjsu::InternetSocket & socket_       = esp_.GetInternetSocket();
+  std::array<uint8_t, 1024 * 2> raw_   = {};
 };
 }  // namespace sjsu::common

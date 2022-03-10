@@ -23,7 +23,7 @@ class Esp
     sjsu::LogInfo("Initializing esp module...");
     esp_.Initialize();
     ConnectToWifi();
-    ConnectToServer();
+    ConnectToWebServer();
   };
 
   /// Sends a GET request to the hardcoded URL
@@ -72,7 +72,7 @@ class Esp
     }
   }
 
-  void IsServerExpired(sjsu::TimeoutTimer & serverTimer)
+  void ReconnectIfServerTimedOut(sjsu::TimeoutTimer & serverTimer)
   {
     if (serverTimer.HasExpired())
     {
@@ -81,8 +81,7 @@ class Esp
     }
   }
 
-  /// Connects to the URL provided in member function
-  void ConnectToServer()
+  void ConnectToWebServer()
   {
     try
     {

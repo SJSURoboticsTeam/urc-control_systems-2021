@@ -5,6 +5,7 @@
 
 #include "wheel.hpp"
 #include "../Common/esp.hpp"
+#include "../Common/esp_v2.hpp"
 #include "drive_system.hpp"
 
 int main(void)
@@ -58,7 +59,7 @@ int main(void)
   {
     try
     {
-      sjsu::TimeoutTimer serverTimeout(5s);  // server has 5s timeout
+      sjsu::TimeoutTimer server_timeout(5s);  // server has 5s timeout
       sjsu::LogInfo("Making new request now...");
       std::string endpoint =
           "drive" + drive.CreateGETRequestParameterWithRoverStatus();
@@ -67,7 +68,7 @@ int main(void)
       drive.HandleRoverCommands();
       drive.IncrementHeartbeatCount();
       drive.PrintRoverData();
-      esp.IsServerExpired(serverTimeout);
+      esp.ReconnectIfServerTimedOut(server_timeout);
     }
     catch (const std::exception & e)
     {
@@ -76,7 +77,7 @@ int main(void)
       if (!esp.IsConnected())
       {
         esp.ConnectToWifi();
-        esp.ConnectToServer();
+        esp.ConnectToWebServer();
       }
     }
     catch (const sjsu::drive::RoverDriveSystem::ParseError &)
