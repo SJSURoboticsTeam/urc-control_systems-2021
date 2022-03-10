@@ -4,11 +4,11 @@ name: Arm CI
 on:
   push:
     paths:
-      - "Arm/**"
+      - "Arm-Subsystem/**"
     branches: [master]
   pull_request:
     paths:
-      - "Arm/**"
+      - "Arm-Subsystem/**"
     branches: [master]
   workflow_dispatch:
 
