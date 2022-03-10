@@ -1,4 +1,3 @@
-#pragma once
 #include "utility/log.hpp"
 #include "peripherals/lpc40xx/i2c.hpp"
 #include "peripherals/lpc40xx/can.hpp"
@@ -68,11 +67,12 @@ int main()
     try
     {
       sjsu::LogInfo("Making new request now...");
-      std::string endpoint = "arm" + arm_system.GETParameters();
+      std::string endpoint =
+          "arm" + arm_system.CreateGETRequestParameterWithRoverStatus();
       std::string response = esp.GET(endpoint);
       sjsu::TimeoutTimer serverTimeout(5s);  // server has 5s timeout
-      arm_system.ParseJSONResponse(response);
-      arm_system.HandleRoverMovement();
+      arm_system.ParseMissionControlCommands(response);
+      arm_system.HandleRoverCommands();
       arm_system.IncrementHeartbeatCount();
       arm_system.PrintRoverData();
       if (serverTimeout.HasExpired())

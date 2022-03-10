@@ -57,26 +57,25 @@ TEST_CASE("Arm system testing")
 
   arm::RoverArmSystem arm_system(human_arm, hand);
 
-  SECTION("should initialize and return default values")
+  SECTION("1.1 should initialize and return default values")
   {
     CHECK_EQ(hand.GetWristRoll(), 0);
     CHECK_EQ(hand.GetWristPitch(), 0);
   }
 
-  SECTION("1.1 should return default GET parameters")
+  SECTION("2.1 should return default GET parameters")
   {
     std::string expected_parameter =
         "?heartbeat_count=0&is_operational=0&arm_mode=C&hand_mode=C&arm_speed="
-        "0&"
-        "battery=90&rotunda_angle=0&shoulder_angle=0&elbow_"
-        "angle=0&wrist_roll=0&wrist_pitch=0&pinky_angle=0&"
-        "ring_angle=0&middle_angle=0&pointer_angle=0&thumb_"
-        "angle=0";
-    std::string actual_parameter = arm_system.GETParameters();
+        "0&battery=90&rotunda_angle=0&shoulder_angle=0&elbow_angle=0&wrist_"
+        "roll=0&wrist_pitch=0&pinky_angle=0&ring_angle=0&middle_angle=0&"
+        "pointer_angle=0&thumb_angle=0";
+    std::string actual_parameter =
+        arm_system.CreateGETRequestParameterWithRoverStatus();
     CHECK_EQ(expected_parameter, actual_parameter);
   }
 
-  SECTION("2.1 should parse json response correctly")
+  SECTION("3.1 should parse json response correctly")
   {
     std::string example_response =
         "\r\n\r\n{\n"
@@ -96,7 +95,7 @@ TEST_CASE("Arm system testing")
         "  \"pointer_angle\": 5,\n"
         "  \"thumb_angle\": 5\n"
         "}";
-    arm_system.ParseJSONResponse(example_response);
+    arm_system.ParseMissionControlCommands(example_response);
     mc_data      = arm_system.GetMCData();
     arm_mc_data  = arm_system.GetArmMCData();
     hand_mc_data = arm_system.GetHandMCData();

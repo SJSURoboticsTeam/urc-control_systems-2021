@@ -5,7 +5,7 @@
 
 #include "wheel.hpp"
 #include "../Common/esp.hpp"
-#include "rover_drive_system.hpp"
+#include "drive_system.hpp"
 
 int main(void)
 {
@@ -60,10 +60,11 @@ int main(void)
     {
       sjsu::TimeoutTimer serverTimeout(5s);  // server has 5s timeout
       sjsu::LogInfo("Making new request now...");
-      std::string endpoint = "drive" + drive.GETParameters();
+      std::string endpoint =
+          "drive" + drive.CreateGETRequestParameterWithRoverStatus();
       std::string response = esp.GET(endpoint);
-      drive.ParseJSONResponse(response);
-      drive.HandleRoverMovement();
+      drive.ParseMissionControlCommands(response);
+      drive.HandleRoverCommands();
       drive.IncrementHeartbeatCount();
       drive.PrintRoverData();
       esp.IsServerExpired(serverTimeout);

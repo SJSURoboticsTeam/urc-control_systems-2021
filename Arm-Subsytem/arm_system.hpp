@@ -80,15 +80,14 @@ class RoverArmSystem : public sjsu::common::RoverSystemInterface
     arm_.PrintArmData();
   }
 
-  std::string GETParameters() override
+  std::string CreateGETRequestParameterWithRoverStatus() override
   {
     char request_parameter[300];
     snprintf(request_parameter, 300,
              "?heartbeat_count=%d&is_operational=%d&arm_mode=%c&hand_mode=%c&"
-             "arm_speed=%d&battery=%d&"
-             "rotunda_angle=%d&shoulder_angle=%d&elbow_angle=%d&wrist_roll=%d&"
-             "wrist_pitch=%d&pinky_angle=%d&ring_angle=%d&middle_angle=%d&"
-             "pointer_angle=%d&thumb_angle=%d",
+             "arm_speed=%d&battery=%d&rotunda_angle=%d&shoulder_angle=%d&elbow_"
+             "angle=%d&wrist_roll=%d&wrist_pitch=%d&pinky_angle=%d&ring_angle=%"
+             "d&middle_angle=%d&pointer_angle=%d&thumb_angle=%d",
              GetHeartbeatCount(), mc_data_.is_operational,
              static_cast<char>(arm_mc_data_.arm_mode),
              static_cast<char>(hand_mc_data_.hand_mode), int(mc_data_.speed),
@@ -101,7 +100,7 @@ class RoverArmSystem : public sjsu::common::RoverSystemInterface
     return request_parameter;
   }
 
-  void ParseJSONResponse(std::string & response) override
+  void ParseMissionControlCommands(std::string & response) override
   {
     char arm_mode, hand_mode;
     int actual_arguments = sscanf(
@@ -135,7 +134,7 @@ class RoverArmSystem : public sjsu::common::RoverSystemInterface
 
   // TODO: implement different arm drive modes in this function with switch
   // statements
-  void HandleRoverMovement() override
+  void HandleRoverCommands() override
   {
     if (arm_mc_data_.arm_mode != arm_.GetCurrentArmMode())
     {

@@ -56,8 +56,9 @@ TEST_CASE("Drive system testing")
         "?heartbeat_count=0&is_operational=0&wheel_shift=0&drive_mode=S&"
         "battery=90&left_wheel_speed=0&left_wheel_angle=0&right_wheel_speed=0&"
         "right_wheel_angle=0&back_wheel_speed=0&back_wheel_angle=0";
-    std::string actual_parameters = drive.GETParameters();
-    CHECK_EQ(actual_parameters, expected_parameters);
+    std::string actual_parameters =
+        drive.CreateGETRequestParameterWithRoverStatus();
+    CHECK_EQ(expected_parameters, actual_parameters);
   }
 
   SECTION("3.1 should parse expected values")
@@ -71,7 +72,7 @@ TEST_CASE("Drive system testing")
         "  \"speed\": 15,\n"
         "  \"angle\": 15\n"
         "}";
-    drive.ParseJSONResponse(example_response);
+    drive.ParseMissionControlCommands(example_response);
     CHECK_EQ(drive.mc_data_.heartbeat_count, 0);
     CHECK_EQ(drive.mc_data_.is_operational, 1);
     CHECK_EQ(drive.mc_data_.wheel_shift, 0);
@@ -89,7 +90,7 @@ TEST_CASE("Drive system testing")
         "  \"drive_mode\": \"S\",\n"
         "  \"speed\": 15,\n"
         "}";
-    CHECK_THROWS(drive.ParseJSONResponse(example_response));
+    CHECK_THROWS(drive.ParseMissionControlCommands(example_response));
   }
 
   SECTION("3.3 should not throw exception when given more than expected args")
@@ -104,7 +105,7 @@ TEST_CASE("Drive system testing")
         "  \"angle\": 15\n"
         "  \"misc\": 15\n"
         "}";
-    CHECK_NOTHROW(drive.ParseJSONResponse(example_response));
+    CHECK_NOTHROW(drive.ParseMissionControlCommands(example_response));
   }
 
   SECTION("4.1 should return false at start")
@@ -279,7 +280,7 @@ TEST_CASE("Drive system testing")
     drive.wheels_.left_->SetHubSpeed(kNonZero);
     drive.wheels_.right_->SetHubSpeed(kNonZero);
     drive.wheels_.back_->SetHubSpeed(kNonZero);
-    drive.HandleRoverMovement();
+    drive.HandleRoverCommands();
 
     CHECK_LT(drive.wheels_.left_->GetHubSpeed(), kNonZero);
     CHECK_LT(drive.wheels_.right_->GetHubSpeed(), kNonZero);
@@ -293,7 +294,7 @@ TEST_CASE("Drive system testing")
     drive.wheels_.left_->SetHubSpeed(kNonZero);
     drive.wheels_.right_->SetHubSpeed(kNonZero);
     drive.wheels_.back_->SetHubSpeed(kNonZero);
-    drive.HandleRoverMovement();
+    drive.HandleRoverCommands();
 
     CHECK(drive.IsStopped());
   }
@@ -303,27 +304,27 @@ TEST_CASE("Drive system testing")
     drive.mc_data_.is_operational = 1;
 
     drive.mc_data_.drive_mode = RoverDriveSystem::Modes::DriveMode;
-    drive.HandleRoverMovement();
+    drive.HandleRoverCommands();
     CHECK_EQ(drive.GetCurrentMode(), RoverDriveSystem::Modes::DriveMode);
 
     drive.mc_data_.drive_mode = RoverDriveSystem::Modes::TranslateMode;
-    drive.HandleRoverMovement();
+    drive.HandleRoverCommands();
     CHECK_EQ(drive.GetCurrentMode(), RoverDriveSystem::Modes::TranslateMode);
 
     drive.mc_data_.drive_mode = RoverDriveSystem::Modes::SpinMode;
-    drive.HandleRoverMovement();
+    drive.HandleRoverCommands();
     CHECK_EQ(drive.GetCurrentMode(), RoverDriveSystem::Modes::SpinMode);
 
     drive.mc_data_.drive_mode = RoverDriveSystem::Modes::BackWheelMode;
-    drive.HandleRoverMovement();
+    drive.HandleRoverCommands();
     CHECK_EQ(drive.GetCurrentMode(), RoverDriveSystem::Modes::BackWheelMode);
 
     drive.mc_data_.drive_mode = RoverDriveSystem::Modes::LeftWheelMode;
-    drive.HandleRoverMovement();
+    drive.HandleRoverCommands();
     CHECK_EQ(drive.GetCurrentMode(), RoverDriveSystem::Modes::LeftWheelMode);
 
     drive.mc_data_.drive_mode = RoverDriveSystem::Modes::RightWheelMode;
-    drive.HandleRoverMovement();
+    drive.HandleRoverCommands();
     CHECK_EQ(drive.GetCurrentMode(), RoverDriveSystem::Modes::RightWheelMode);
   }
 
@@ -332,7 +333,7 @@ TEST_CASE("Drive system testing")
     drive.mc_data_.is_operational = 1;
 
     drive.mc_data_.drive_mode = RoverDriveSystem::Modes::SpinMode;
-    drive.HandleRoverMovement();
+    drive.HandleRoverCommands();
     CHECK_EQ(drive.GetCurrentMode(), RoverDriveSystem::Modes::SpinMode);
   }
 
@@ -345,7 +346,7 @@ TEST_CASE("Drive system testing")
     drive.wheels_.right_->SetHubSpeed(kNonZero);
     drive.wheels_.back_->SetHubSpeed(kNonZero);
 
-    drive.HandleRoverMovement();
+    drive.HandleRoverCommands();
     CHECK_EQ(drive.GetCurrentMode(), RoverDriveSystem::Modes::SpinMode);
   }
 
@@ -359,7 +360,7 @@ TEST_CASE("Drive system testing")
     drive.wheels_.right_->SetHubSpeed(kNonZero);
     drive.wheels_.back_->SetHubSpeed(kNonZero);
 
-    drive.HandleRoverMovement();
+    drive.HandleRoverCommands();
 
     CHECK_LT(drive.wheels_.left_->GetHubSpeed(), kNonZero);
     CHECK_LT(drive.wheels_.right_->GetHubSpeed(), kNonZero);
@@ -372,7 +373,7 @@ TEST_CASE("Drive system testing")
   {
     drive.mc_data_.is_operational = 1;
     drive.Initialize();
-    drive.HandleRoverMovement();
+    drive.HandleRoverCommands();
 
     CHECK_EQ(drive.wheels_.left_->GetSteerAngle(), 90);
     CHECK_EQ(drive.wheels_.right_->GetSteerAngle(), 90);
@@ -385,8 +386,8 @@ TEST_CASE("Drive system testing")
     drive.mc_data_.drive_mode     = RoverDriveSystem::Modes::DriveMode;
     drive.mc_data_.speed          = kNonZero;
 
-    drive.HandleRoverMovement();
-    drive.HandleRoverMovement();
+    drive.HandleRoverCommands();
+    drive.HandleRoverCommands();
 
     CHECK_EQ(drive.wheels_.left_->GetHubSpeed(),
              drive.wheels_.right_->GetHubSpeed());
@@ -401,8 +402,8 @@ TEST_CASE("Drive system testing")
     drive.mc_data_.drive_mode     = RoverDriveSystem::Modes::DriveMode;
     drive.mc_data_.rotation_angle = 1000;
 
-    drive.HandleRoverMovement();
-    drive.HandleRoverMovement();
+    drive.HandleRoverCommands();
+    drive.HandleRoverCommands();
 
     CHECK_EQ(drive.wheels_.left_->GetSteerAngle(), 12);
     CHECK_EQ(drive.wheels_.right_->GetSteerAngle(), 45);
@@ -415,8 +416,8 @@ TEST_CASE("Drive system testing")
     drive.mc_data_.drive_mode     = RoverDriveSystem::Modes::DriveMode;
     drive.mc_data_.rotation_angle = -1000;
 
-    drive.HandleRoverMovement();
-    drive.HandleRoverMovement();
+    drive.HandleRoverCommands();
+    drive.HandleRoverCommands();
 
     CHECK_EQ(drive.wheels_.left_->GetSteerAngle(), -45);
     CHECK_EQ(drive.wheels_.right_->GetSteerAngle(), -12);
@@ -429,8 +430,8 @@ TEST_CASE("Drive system testing")
     drive.mc_data_.drive_mode     = RoverDriveSystem::Modes::DriveMode;
     drive.mc_data_.rotation_angle = 10;
 
-    drive.HandleRoverMovement();
-    drive.HandleRoverMovement();
+    drive.HandleRoverCommands();
+    drive.HandleRoverCommands();
 
     CHECK_EQ(drive.wheels_.left_->GetSteerAngle(), 6);
     CHECK_EQ(drive.wheels_.right_->GetSteerAngle(), 10);
@@ -443,8 +444,8 @@ TEST_CASE("Drive system testing")
     drive.mc_data_.drive_mode     = RoverDriveSystem::Modes::DriveMode;
     drive.mc_data_.rotation_angle = -10;
 
-    drive.HandleRoverMovement();
-    drive.HandleRoverMovement();
+    drive.HandleRoverCommands();
+    drive.HandleRoverCommands();
 
     CHECK_EQ(drive.wheels_.left_->GetSteerAngle(), -10);
     CHECK_EQ(drive.wheels_.right_->GetSteerAngle(), -6);
@@ -457,8 +458,8 @@ TEST_CASE("Drive system testing")
     drive.mc_data_.drive_mode     = RoverDriveSystem::Modes::DriveMode;
     drive.mc_data_.speed          = kNonZero;
 
-    drive.HandleRoverMovement();
-    drive.HandleRoverMovement();
+    drive.HandleRoverCommands();
+    drive.HandleRoverCommands();
     // Currently the hub motors are all set to the same speed
     CHECK_EQ(drive.wheels_.left_->GetHubSpeed(),
              drive.wheels_.right_->GetHubSpeed());
@@ -472,7 +473,7 @@ TEST_CASE("Drive system testing")
     drive.mc_data_.is_operational = 1;
     drive.mc_data_.drive_mode     = RoverDriveSystem::Modes::DriveMode;
 
-    drive.HandleRoverMovement();
+    drive.HandleRoverCommands();
 
     CHECK_EQ(drive.wheels_.left_->GetSteerAngle(), -45);
     CHECK_EQ(drive.wheels_.right_->GetSteerAngle(), -135);
@@ -484,7 +485,7 @@ TEST_CASE("Drive system testing")
     drive.mc_data_.is_operational = 1;
     drive.mc_data_.drive_mode     = RoverDriveSystem::Modes::TranslateMode;
 
-    drive.HandleRoverMovement();
+    drive.HandleRoverCommands();
 
     CHECK_EQ(drive.wheels_.left_->GetSteerAngle(), 0);
     CHECK_EQ(drive.wheels_.right_->GetSteerAngle(), 60);
@@ -497,8 +498,8 @@ TEST_CASE("Drive system testing")
     drive.mc_data_.drive_mode     = RoverDriveSystem::Modes::TranslateMode;
     drive.mc_data_.speed          = kNonZero;
 
-    drive.HandleRoverMovement();
-    drive.HandleRoverMovement();
+    drive.HandleRoverCommands();
+    drive.HandleRoverCommands();
 
     CHECK_EQ(drive.wheels_.left_->GetHubSpeed(),
              drive.wheels_.right_->GetHubSpeed());
@@ -514,8 +515,8 @@ TEST_CASE("Drive system testing")
     drive.mc_data_.speed          = kNonZero;
     drive.mc_data_.rotation_angle = kNonZero;
 
-    drive.HandleRoverMovement();
-    drive.HandleRoverMovement();
+    drive.HandleRoverCommands();
+    drive.HandleRoverCommands();
 
     CHECK_NE(drive.wheels_.left_->GetHubSpeed(), 0);
     CHECK_EQ(drive.wheels_.right_->GetHubSpeed(), 0);

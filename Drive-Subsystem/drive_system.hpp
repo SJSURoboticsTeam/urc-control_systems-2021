@@ -3,7 +3,6 @@
 
 #include "wheel.hpp"
 #include "utility/log.hpp"
-#include "../Common/heartbeat.hpp"
 #include "../Common/state_of_charge.hpp"
 #include "../Common/Interface/rover_system_interface.hpp"
 
@@ -80,7 +79,7 @@ class RoverDriveSystem : public sjsu::common::RoverSystemInterface
 
   /// Constructs parameters for an HTTP GET request
   /// @return ?heartbeat_count=0&is_operational=1&drive_mode=S ...
-  std::string GETParameters() override
+  std::string CreateGETRequestParameterWithRoverStatus() override
   {
     char request_parameter[300];
     snprintf(
@@ -88,16 +87,17 @@ class RoverDriveSystem : public sjsu::common::RoverSystemInterface
         "?heartbeat_count=%d&is_operational=%d&wheel_shift=%d&drive_mode=%c&"
         "battery=%d&left_wheel_speed=%d&left_wheel_angle=%d&right_wheel_speed=%"
         "d&right_wheel_angle=%d&back_wheel_speed=%d&back_wheel_angle=%d",
-        GetHeartbeatCount(), mc_data_.is_operational, mc_data_.wheel_shift,
-        static_cast<char>(current_drive_mode_), kStateOfCharge,
-        wheels_.left_->GetHubSpeed(), wheels_.left_->GetSteerAngle(),
-        wheels_.right_->GetHubSpeed(), wheels_.right_->GetSteerAngle(),
-        wheels_.back_->GetHubSpeed(), wheels_.back_->GetSteerAngle());
+        heartbeat_.GetHeartbeatCount(), mc_data_.is_operational,
+        mc_data_.wheel_shift, static_cast<char>(current_drive_mode_),
+        kStateOfCharge, wheels_.left_->GetHubSpeed(),
+        wheels_.left_->GetSteerAngle(), wheels_.right_->GetHubSpeed(),
+        wheels_.right_->GetSteerAngle(), wheels_.back_->GetHubSpeed(),
+        wheels_.back_->GetSteerAngle());
     return request_parameter;
   }
 
   /// Parses the GET requests response and updates the mission control variables
-  void ParseJSONResponse(std::string & response) override
+  void ParseMissionControlCommands(std::string & response) override
   {
     char drive_mode;
     int actual_arguments = sscanf(
@@ -117,9 +117,9 @@ class RoverDriveSystem : public sjsu::common::RoverSystemInterface
 
   /// Handles the rover movement depending on the mode.
   /// D = Drive, S = Spin, T = Translation, L/R/B = Left/Right/Back Wheel
-  void HandleRoverMovement() override
+  void HandleRoverCommands() override
   {
-    if (!IsHeartbeatSynced(mc_data_.heartbeat_count))
+    if (!IsSyncedWithMissionControl(mc_data_.heartbeat_count))
     {
       SetWheelSpeed(kZeroSpeed);
       return;
