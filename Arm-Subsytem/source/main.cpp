@@ -70,16 +70,12 @@ int main()
       std::string endpoint =
           "arm" + arm_system.CreateGETRequestParameterWithRoverStatus();
       std::string response = esp.GET(endpoint);
-      sjsu::TimeoutTimer serverTimeout(5s);  // server has 5s timeout
+      sjsu::TimeoutTimer server_timeout(5s);  // server has 5s timeout
       arm_system.ParseMissionControlCommands(response);
       arm_system.HandleRoverCommands();
       arm_system.IncrementHeartbeatCount();
       arm_system.PrintRoverData();
-      if (serverTimeout.HasExpired())
-      {
-        sjsu::LogWarning("Server timed out! Reconnecting...");
-        esp.ConnectToServer();
-      }
+      esp.ReconnectIfServerTimedOut(server_timeout);
     }
     catch (const std::exception & e)
     {
@@ -88,7 +84,7 @@ int main()
       if (!esp.IsConnected())
       {
         esp.ConnectToWifi();
-        esp.ConnectToServer();
+        esp.ConnectToWebServer();
       }
     }
     catch (const sjsu::arm::RoverArmSystem::ParseError &)
