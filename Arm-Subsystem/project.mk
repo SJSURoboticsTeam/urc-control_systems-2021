@@ -1,3 +1,4 @@
+TESTS += test/joint_test.cpp
 TESTS += test/hand/finger_test.cpp
 TESTS += test/hand/hand_test.cpp
 TESTS += test/hand/pca9685_test.cpp

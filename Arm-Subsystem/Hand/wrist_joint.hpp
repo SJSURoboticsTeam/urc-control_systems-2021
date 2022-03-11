@@ -1,19 +1,19 @@
 #pragma once
 #include <cmath>
 
-#include "Interface/joint_interface.hpp"
+#include "joint.hpp"
 #include "devices/actuators/servo/rmd_x.hpp"
 #include "devices/sensors/movement/accelerometer/mpu6050.hpp"
 
 namespace sjsu::arm
 {
-class WristJoint : public JointInterface
+class WristJoint : public Joint
 {
  public:
   WristJoint(sjsu::RmdX & left_joint_motor,
              sjsu::RmdX & right_joint_motor,
              sjsu::Mpu6050 & accelerometer)
-      : JointInterface(accelerometer),
+      : Joint(accelerometer),
         left_motor_(left_joint_motor),
         right_motor_(right_joint_motor)
   {
@@ -23,7 +23,7 @@ class WristJoint : public JointInterface
   {
     left_motor_.Initialize();
     right_motor_.Initialize();
-    JointInterface::Initialize();
+    Joint::Initialize();
   }
   void PrintWristData()
   {

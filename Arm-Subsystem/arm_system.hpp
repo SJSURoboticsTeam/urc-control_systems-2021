@@ -4,7 +4,7 @@
 #include "Arm/arm.hpp"
 #include "Hand/hand.hpp"
 #include "Interface/hand_interface.hpp"
-#include "Interface/joint_interface.hpp"
+#include "joint.hpp"
 #include "../Common/Interface/rover_system_interface.hpp"
 
 namespace sjsu::arm

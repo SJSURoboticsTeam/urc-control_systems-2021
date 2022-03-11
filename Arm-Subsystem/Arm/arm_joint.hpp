@@ -1,22 +1,22 @@
 #pragma once
-#include "Interface/joint_interface.hpp"
+#include "joint.hpp"
 #include "devices/actuators/servo/rmd_x.hpp"
 #include "devices/sensors/movement/accelerometer/mpu6050.hpp"
 
 namespace sjsu::arm
 {
-class ArmJoint : public JointInterface
+class ArmJoint : public Joint
 {
  public:
   ArmJoint(sjsu::RmdX & joint_motor, sjsu::Mpu6050 & accelerometer)
-      : JointInterface(accelerometer), motor_(joint_motor){};
+      : Joint(accelerometer), motor_(joint_motor){};
 
   ArmJoint(sjsu::RmdX & joint_motor,
            sjsu::Mpu6050 & accelerometer,
            float min_angle,
            float max_angle,
            float standby_angle)
-      : JointInterface(accelerometer),
+      : Joint(accelerometer),
         motor_(joint_motor),
         kMinimumAngle(min_angle),
         kMaximumAngle(max_angle),
@@ -25,7 +25,7 @@ class ArmJoint : public JointInterface
   void Initialize()
   {
     motor_.Initialize();
-    JointInterface::Initialize();
+    Joint::Initialize();
   }
 
   // Move the motor to the (calibrated) angle desired.
