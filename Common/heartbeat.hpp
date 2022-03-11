@@ -6,20 +6,8 @@ namespace sjsu::common
 {
 class Heartbeat
 {
-  /// Checks if the mission control heartbeat matches rover heartbeat
-  bool IsHeartbeatSynced(int mission_control_heartbeat)
-  {
-    if (heartbeat_count_ != mission_control_heartbeat)
-    {
-      // TODO: Should throw error in an attempt to reconnect?
-      sjsu::LogError("Heartbeat out of sync - resetting!");
-      ResetHeartbeat();
-      return false;
-    }
-    return true;
-  }
-
-  int GetHeartbeatCount()
+ public:
+  int GetHeartbeatCount() const
   {
     return heartbeat_count_;
   }
@@ -29,8 +17,20 @@ class Heartbeat
     heartbeat_count_++;
   }
 
+  bool IsSyncedWithMissionControl(int heartbeat_count)
+  {
+    if (heartbeat_count_ != heartbeat_count)
+    {
+      // TODO: Should throw error ?
+      sjsu::LogError("Heartbeat out of sync - resetting!");
+      ResetHeartbeatCount();
+      return false;
+    }
+    return true;
+  }
+
  private:
-  void ResetHeartbeat()
+  void ResetHeartbeatCount()
   {
     heartbeat_count_ = 0;
   }
