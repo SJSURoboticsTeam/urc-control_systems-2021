@@ -4,7 +4,6 @@
 
 #include "arm_system.hpp"
 #include "Arm/arm_joint.hpp"
-#include "Interface/accelerometer.hpp"
 
 namespace sjsu
 {

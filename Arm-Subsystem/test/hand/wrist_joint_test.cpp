@@ -4,7 +4,7 @@
 
 #include "arm_system.hpp"
 #include "Hand/wrist_joint.hpp"
-#include "Interface/accelerometer.hpp"
+#include "Interface/joint_interface.hpp"
 
 namespace sjsu
 {
