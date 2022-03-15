@@ -49,35 +49,29 @@ class RoverArmSystem : public sjsu::common::RoverSystemInterface
 
   void PrintRoverData() override
   {
-    printf("SERVER-DATA");
-    printf("=========================================\n");
-    printf("Operational: %d\n", mc_data_.heartbeat_count);
-    printf("Operational: %d\n", mc_data_.is_operational);
-    printf("=========================================\n");
-
-    printf("ARM-DATA\n");
-    printf("=========================================\n");
-    printf("Mode: %c\n", static_cast<char>(arm_mc_data_.arm_mode));
-    printf("Arm speed: %d\n", mc_data_.speed);
-    printf("Rotunda Angle: %d\n", arm_mc_data_.arm_angles.rotunda);
-    printf("Shoulder Angle: %d\n", arm_mc_data_.arm_angles.shoulder);
-    printf("Elbow Angle: %d\n", arm_mc_data_.arm_angles.elbow);
-    printf("Wrist Roll Angle: %d\n", hand_mc_data_.wrist_data.roll);
-    printf("Wrist Pitch Angle: %d\n", hand_mc_data_.wrist_data.pitch);
-    printf("=========================================\n");
-
-    printf("FINGER-DATA \n");
-    printf("=========================================\n");
-    printf("Hand Mode: %c\n", static_cast<char>(hand_mc_data_.hand_mode));
-    printf("Pinky Angle: %d\n", hand_mc_data_.finger_angles.pinky_angle);
-    printf("Ring Angle: %d\n", hand_mc_data_.finger_angles.ring_angle);
-    printf("Middle Angle: %d\n", hand_mc_data_.finger_angles.middle_angle);
-    printf("Pointer Angle: %d\n", hand_mc_data_.finger_angles.pointer_angle);
-    printf("Thumb Angle: %d\n", hand_mc_data_.finger_angles.thumb_angle);
-    printf("=========================================\n");
-
-    hand_.PrintHandData();
+    printf("%s\t%d\n", "HEARTBEAT", heartbeat_);
+    printf("%s\t%d\n", "OPERATIONAL", mc_data_.is_operational);
+    printf("%s\t%c\n", "ARM MODE", static_cast<char>(arm_mc_data_.arm_mode));
+    printf("%s\t%c\n", "HAND MODE", static_cast<char>(hand_mc_data_.hand_mode));
+    printf("%s\t%d\n", "ARM SPEED", mc_data_.speed);
+    printf("JOINT     ANGLE     SPEED\n");
+    printf("===========================MC-DATA=======\n");
+    printf("%-10s%-10d\n", "ROTUNDA", arm_mc_data_.arm_angles.rotunda);
+    printf("%-10s%-10d\n", "SHOULDER", arm_mc_data_.arm_angles.shoulder);
+    printf("%-10s%-10d\n", "ELBOW", arm_mc_data_.arm_angles.elbow);
+    printf("%-10s%-10d\n", "ROLL", hand_mc_data_.wrist_data.roll);
+    printf("%-10s%-10d\n", "PITCH", hand_mc_data_.wrist_data.pitch);
+    printf("%-10s%-10c\n", "MODE", static_cast<char>(hand_mc_data_.hand_mode));
+    printf("%-10s%-10d\n", "PINKY", hand_mc_data_.finger_angles.pinky_angle);
+    printf("%-10s%-10d\n", "RING", hand_mc_data_.finger_angles.ring_angle);
+    printf("%-10s%-10d\n", "MIDDLE", hand_mc_data_.finger_angles.middle_angle);
+    printf("%-10s%-10d\n", "POINTER",
+           hand_mc_data_.finger_angles.pointer_angle);
+    printf("%-10s%-10d\n", "THUMB", hand_mc_data_.finger_angles.thumb_angle);
+    printf("============================ACTUAL=======\n");
     arm_.PrintArmData();
+    hand_.PrintHandData();
+    printf("=========================================\n");
   }
 
   std::string CreateGETRequestParameterWithRoverStatus() override

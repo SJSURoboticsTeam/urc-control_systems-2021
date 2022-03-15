@@ -27,9 +27,8 @@ class WristJoint : public Joint
   }
   void PrintWristData()
   {
-    printf("Wrist Positions:\n");
-    printf("Wrist pitch position: %f\n", static_cast<double>(pitch_angle_));
-    printf("Wrist roll position: %f\n", static_cast<double>(roll_angle_));
+    printf("%-10s%-10d%-10d\n", "PITCH", GetPitchPosition(), GetSpeed());
+    printf("%-10s%-10d%-10d\n", "ROLL", GetRollPosition(), GetSpeed());
   }
 
   void SetRollPosition(float roll_angle, float speed)

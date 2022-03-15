@@ -41,16 +41,12 @@ class Arm
 
   void PrintArmData()
   {
-    printf("JOINTS-DATA:\n");
-    printf("=========================================\n");
-    printf("Rotunda speed: %d\n", rotunda_.GetSpeed());
-    printf("Rotunda position: %d\n", rotunda_.GetPosition());
-
-    printf("Shoulder speed: %d\n", shoulder_.GetSpeed());
-    printf("Shoulder position: %d\n", shoulder_.GetPosition());
-
-    printf("Elbow speed: %d\n", elbow_.GetSpeed());
-    printf("Elbow position: %d\n", elbow_.GetPosition());
+    printf("%-10s%-10d%-10d\n", "ROTUNDA", rotunda_.GetPosition(),
+           rotunda_.GetSpeed());
+    printf("%-10s%-10d%-10d\n", "SHOULDER", shoulder_.GetPosition(),
+           shoulder_.GetSpeed());
+    printf("%-10s%-10d%-10d\n", "ELBOW", elbow_.GetPosition(),
+           elbow_.GetSpeed());
   }
 
   void HomeArm(float speed)

@@ -66,8 +66,9 @@ int main(void)
       std::string response = esp.GET(endpoint);
       drive.ParseMissionControlCommands(response);
       drive.HandleRoverCommands();
-      drive.IncrementHeartbeatCount();
+      // drive.IncrementHeartbeatCount();
       drive.PrintRoverData();
+      sjsu::Delay(3s);
       esp.ReconnectIfServerTimedOut(server_timeout);
     }
     catch (const std::exception & e)
