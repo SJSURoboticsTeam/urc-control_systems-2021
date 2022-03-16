@@ -51,12 +51,12 @@ class ArmJoint : public Joint
 
   int GetSpeed() const
   {
-    return int(speed_);
+    return static_cast<int>(speed_);
   }
 
   int GetPosition() const
   {
-    return int(position_);
+    return static_cast<int>(position_);
   }
 
   float GetOffsetAngle() const

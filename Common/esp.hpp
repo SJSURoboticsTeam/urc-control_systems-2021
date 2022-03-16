@@ -42,7 +42,7 @@ class Esp
       try
       {
         response = response.substr(response.find("\r\n\r\n{"));
-        printf("Response Body:%s", response.c_str());
+        printf("Response Body:%s\n", response.c_str());
         return response;
       }
       catch (const std::exception & e)
@@ -124,11 +124,11 @@ class Esp
   sjsu::WiFi & wifi_;
   sjsu::InternetSocket & socket_;
   std::string request_;
-  std::string url_                               = "192.168.50.243";
+  std::string url_                               = "192.168.1.12";
   std::string kErrorResponse                     = "ERROR";
   const uint16_t kPort                           = 5000;
-  const char * kSsid                             = "kingdom2";
-  const char * kPassword                         = "22039622";
+  const char * kSsid                             = "Izzys 2.4GHz";
+  const char * kPassword                         = "Nezzy559";
   const std::chrono::nanoseconds kDefaultTimeout = 10s;
 };
 }  // namespace sjsu::common

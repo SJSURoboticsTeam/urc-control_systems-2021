@@ -73,8 +73,9 @@ int main()
       sjsu::TimeoutTimer server_timeout(5s);  // server has 5s timeout
       arm_system.ParseMissionControlCommands(response);
       arm_system.HandleRoverCommands();
-      arm_system.IncrementHeartbeatCount();
+      // arm_system.IncrementHeartbeatCount();
       arm_system.PrintRoverData();
+      sjsu::Delay(3s);
       esp.ReconnectIfServerTimedOut(server_timeout);
     }
     catch (const std::exception & e)

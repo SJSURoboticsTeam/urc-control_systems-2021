@@ -57,19 +57,21 @@ class Hand
 
   void Initialize()
   {
-    pca_.ModuleInitialize();
+    pca_.Initialize();
     wrist_.Initialize();
   }
 
   void PrintHandData()
   {
-    printf("Hand Finger Positions:\n");
-    printf("Pinky Angle: %d\n", pinky_.GetPosition());
-    printf("Ring Angle: %d\n", ring_.GetPosition());
-    printf("Middle Angle: %d\n", middle_.GetPosition());
-    printf("Pointer Angle: %d\n", pointer_.GetPosition());
-    printf("Thumb Angle: %d\n", thumb_.GetPosition());
-
+    printf("%-10s%-10d%-10d\n", "PINKY", pinky_.GetPosition(),
+           pinky_.GetSpeed());
+    printf("%-10s%-10d%-10d\n", "RING", ring_.GetPosition(), ring_.GetSpeed());
+    printf("%-10s%-10d%-10d\n", "MIDDLE", middle_.GetPosition(),
+           middle_.GetSpeed());
+    printf("%-10s%-10d%-10d\n", "POINTER", pointer_.GetPosition(),
+           pointer_.GetSpeed());
+    printf("%-10s%-10d%-10d\n", "THUMB", thumb_.GetPosition(),
+           thumb_.GetSpeed());
     wrist_.PrintWristData();
   }
 
