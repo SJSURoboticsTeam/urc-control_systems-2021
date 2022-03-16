@@ -46,7 +46,71 @@ TEST_CASE("Hand Testing Case...")
   Hand hand(pca.get(), wrist, pinky_finger, ring_finger, middle_finger,
             pointer_finger, thumb_finger);
 
-  SECTION() {}
+  Hand::MissionControlData hand_data;
+
+  SECTION("1.1 Should return default angles at hand startup")
+  {
+    int default_angle = 0;
+
+    CHECK_EQ(hand.GetThumbPosition(), default_angle);
+    CHECK_EQ(hand.GetPointerPosition(), default_angle);
+    CHECK_EQ(hand.GetMiddlePosition(), default_angle);
+    CHECK_EQ(hand.GetRingPosition(), default_angle);
+    CHECK_EQ(hand.GetPinkyPosition(), default_angle);
+    CHECK_EQ(hand.GetCurrentHandMode(),
+             Hand::MissionControlData::HandModes::kConcurrent);
+    CHECK_EQ(hand.GetWristPitch(), default_angle);
+    CHECK_EQ(hand.GetWristRoll(), default_angle);
+  }
+
+  SECTION("2.1 Should home the hand by setting the finger to max angles")
+  {
+    int max_angle = 0;
+
+    hand.HomeHand(0, 0);
+    CHECK_EQ(hand.GetThumbPosition(), max_angle);
+    CHECK_EQ(hand.GetPointerPosition(), max_angle);
+    CHECK_EQ(hand.GetMiddlePosition(), max_angle);
+    CHECK_EQ(hand.GetRingPosition(), max_angle);
+    CHECK_EQ(hand.GetPinkyPosition(), max_angle);
+    // TODO - Add wrist homing tests
+  }
+
+  SECTION("3.1 Should correctly set the hand mode for every mode")
+  {
+    hand_data.hand_mode = Hand::MissionControlData::HandModes::kConcurrent;
+    hand.HandleMovement(hand_data, 0);
+    CHECK_EQ(hand.GetCurrentHandMode(),
+             Hand::MissionControlData::HandModes::kConcurrent);
+
+    hand_data.hand_mode = Hand::MissionControlData::HandModes::kPitch;
+    hand.HandleMovement(hand_data, 0);
+    CHECK_EQ(hand.GetCurrentHandMode(),
+             Hand::MissionControlData::HandModes::kPitch);
+
+    hand_data.hand_mode = Hand::MissionControlData::HandModes::kRoll;
+    hand.HandleMovement(hand_data, 0);
+    CHECK_EQ(hand.GetCurrentHandMode(),
+             Hand::MissionControlData::HandModes::kRoll);
+
+    hand_data.hand_mode = Hand::MissionControlData::HandModes::kTransport;
+    hand.HandleMovement(hand_data, 0);
+    CHECK_EQ(hand.GetCurrentHandMode(),
+             Hand::MissionControlData::HandModes::kTransport);
+  }
+
+  SECTION("3.2 Should set hand to transport mode angles")
+  {
+    int transport_angle = 0;
+
+    hand_data.hand_mode = Hand::MissionControlData::HandModes::kTransport;
+    hand.HandleMovement(hand_data, 0);
+    CHECK_EQ(hand.GetThumbPosition(), transport_angle);
+    CHECK_EQ(hand.GetPointerPosition(), transport_angle);
+    CHECK_EQ(hand.GetMiddlePosition(), transport_angle);
+    CHECK_EQ(hand.GetRingPosition(), transport_angle);
+    CHECK_EQ(hand.GetPinkyPosition(), transport_angle);
+  }
 }
 
 }  // namespace sjsu::arm
