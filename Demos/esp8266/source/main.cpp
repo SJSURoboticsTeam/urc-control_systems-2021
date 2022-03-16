@@ -57,7 +57,7 @@ int main()
   while (true)
   {
     sjsu::LogInfo("Connecting to WiFi...");
-    if (wifi.ConnectToAccessPoint("GarzaLine", "NRG523509", 5s))
+    if (wifi.ConnectToAccessPoint("Izzys 2.4GHz", "Nezzy559", 5s))
     {
       break;
     }
