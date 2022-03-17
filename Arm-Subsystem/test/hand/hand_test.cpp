@@ -65,7 +65,7 @@ TEST_CASE("Hand Testing Case...")
 
   SECTION("2.1 Should home the hand by setting the finger to max angles")
   {
-    int max_angle = 0;
+    int max_angle = 180;
 
     hand.HomeHand(0, 0);
     CHECK_EQ(hand.GetThumbPosition(), max_angle);
