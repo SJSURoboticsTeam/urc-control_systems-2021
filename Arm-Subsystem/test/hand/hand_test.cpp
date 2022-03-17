@@ -112,21 +112,113 @@ TEST_CASE("Hand Testing Case...")
     CHECK_EQ(hand.GetPinkyPosition(), transport_angle);
   }
 
-  SECTION("3.3 Should boundary test the wrist for setting roll position") {}
+  SECTION("3.3 Should boundary test the wrist for setting roll position")
+  {
+    hand_data.hand_mode       = Hand::MissionControlData::HandModes::kRoll;
+    hand_data.wrist_data.roll = -1;
+    hand.HandleMovement(hand_data, 0);
+    CHECK_EQ(hand.GetWristRoll(), 0);
 
-  SECTION("3.4 Should boundary test the wrist for setting pitch position") {}
+    hand_data.wrist_data.roll = 180;
+    hand.HandleMovement(hand_data, 0);
+    CHECK_EQ(hand.GetWristRoll(), 180);
 
-  SECTION("3.5.1 Should set the fingers to the maximum angle") {}
+    hand_data.wrist_data.roll = 181;
+    hand.HandleMovement(hand_data, 0);
+    CHECK_EQ(hand.GetWristRoll(), 180);
+  }
 
-  SECTION("3.5.2 Should set the fingers to the minimum angle") {}
+  SECTION("3.4 Should boundary test the wrist for setting pitch position")
+  {
+    hand_data.hand_mode        = Hand::MissionControlData::HandModes::kPitch;
+    hand_data.wrist_data.pitch = -1;
+    hand.HandleMovement(hand_data, 0);
+    CHECK_EQ(hand.GetWristPitch(), 0);
+
+    hand_data.wrist_data.pitch = 180;
+    hand.HandleMovement(hand_data, 0);
+    CHECK_EQ(hand.GetWristPitch(), 180);
+
+    hand_data.wrist_data.pitch = 181;
+    hand.HandleMovement(hand_data, 0);
+    CHECK_EQ(hand.GetWristPitch(), 180);
+  }
+
+  SECTION("3.5.1 Should set the fingers to the maximum angle")
+  {
+    int expected_angle                    = 180;
+    hand_data.finger_angles.thumb_angle   = expected_angle;
+    hand_data.finger_angles.pointer_angle = expected_angle;
+    hand_data.finger_angles.middle_angle  = expected_angle;
+    hand_data.finger_angles.ring_angle    = expected_angle;
+    hand_data.finger_angles.pinky_angle   = expected_angle;
+    hand_data.hand_mode = Hand::MissionControlData::HandModes::kConcurrent;
+
+    hand.HandleMovement(hand_data, 0);
+    CHECK_EQ(hand.GetThumbPosition(), expected_angle);
+    CHECK_EQ(hand.GetPointerPosition(), expected_angle);
+    CHECK_EQ(hand.GetMiddlePosition(), expected_angle);
+    CHECK_EQ(hand.GetRingPosition(), expected_angle);
+    CHECK_EQ(hand.GetPinkyPosition(), expected_angle);
+  }
+
+  SECTION("3.5.2 Should set the fingers to the minimum angle")
+  {
+    int expected_angle                    = 0;
+    hand_data.finger_angles.thumb_angle   = expected_angle;
+    hand_data.finger_angles.pointer_angle = expected_angle;
+    hand_data.finger_angles.middle_angle  = expected_angle;
+    hand_data.finger_angles.ring_angle    = expected_angle;
+    hand_data.finger_angles.pinky_angle   = expected_angle;
+    hand_data.hand_mode = Hand::MissionControlData::HandModes::kConcurrent;
+
+    hand.HandleMovement(hand_data, 0);
+    CHECK_EQ(hand.GetThumbPosition(), expected_angle);
+    CHECK_EQ(hand.GetPointerPosition(), expected_angle);
+    CHECK_EQ(hand.GetMiddlePosition(), expected_angle);
+    CHECK_EQ(hand.GetRingPosition(), expected_angle);
+    CHECK_EQ(hand.GetPinkyPosition(), expected_angle);
+  }
 
   SECTION("3.5.3 Should set the speed to the maximum") {}
 
   SECTION("3.5.4 Should set the speed to the minimum") {}
 
-  SECTION("3.5.5 Should set the fingers to one beyond the maximum") {}
+  SECTION("3.5.5 Should set the fingers to one beyond the maximum")
+  {
+    int expected_angle                    = 180;
+    hand_data.finger_angles.thumb_angle   = expected_angle + 1;
+    hand_data.finger_angles.pointer_angle = expected_angle + 1;
+    hand_data.finger_angles.middle_angle  = expected_angle + 1;
+    hand_data.finger_angles.ring_angle    = expected_angle + 1;
+    hand_data.finger_angles.pinky_angle   = expected_angle + 1;
+    hand_data.hand_mode = Hand::MissionControlData::HandModes::kConcurrent;
 
-  SECTION("3.5.6 Should set the fingers to one beyond the minimum") {}
+    hand.HandleMovement(hand_data, 0);
+    CHECK_EQ(hand.GetThumbPosition(), expected_angle);
+    CHECK_EQ(hand.GetPointerPosition(), expected_angle);
+    CHECK_EQ(hand.GetMiddlePosition(), expected_angle);
+    CHECK_EQ(hand.GetRingPosition(), expected_angle);
+    CHECK_EQ(hand.GetPinkyPosition(), expected_angle);
+  }
+
+  SECTION("3.5.6 Should set the fingers to one beyond the minimum")
+  {
+    int expected_angle                    = 0;
+    hand_data.finger_angles.thumb_angle   = expected_angle - 1;
+    hand_data.finger_angles.pointer_angle = expected_angle - 1;
+    hand_data.finger_angles.middle_angle  = expected_angle - 1;
+    hand_data.finger_angles.ring_angle    = expected_angle - 1;
+    hand_data.finger_angles.pinky_angle   = expected_angle - 1;
+    hand_data.hand_mode = Hand::MissionControlData::HandModes::kConcurrent;
+
+    hand.HandleMovement(hand_data, 0);
+    CHECK_EQ(hand.GetThumbPosition(), expected_angle);
+    CHECK_EQ(hand.GetPointerPosition(), expected_angle);
+    CHECK_EQ(hand.GetMiddlePosition(), expected_angle);
+    CHECK_EQ(hand.GetRingPosition(), expected_angle);
+    CHECK_EQ(hand.GetPinkyPosition(), expected_angle);
+  }
 
   SECTION("3.5.7 Should set the speed to one beyond the maximum") {}
 

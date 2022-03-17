@@ -168,7 +168,7 @@ class Hand
 
   void SetWristPitchPosition(float wrist_pitch, float speed)
   {
-    wrist_.SetRollPosition(wrist_pitch, speed);
+    wrist_.SetPitchPosition(wrist_pitch, speed);
   }
 
   void SetTransportPosition(float speed)
