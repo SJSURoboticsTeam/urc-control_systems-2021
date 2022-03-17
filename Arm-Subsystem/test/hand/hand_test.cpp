@@ -111,6 +111,26 @@ TEST_CASE("Hand Testing Case...")
     CHECK_EQ(hand.GetRingPosition(), transport_angle);
     CHECK_EQ(hand.GetPinkyPosition(), transport_angle);
   }
+
+  SECTION("3.3 Should boundary test the wrist for setting roll position") {}
+
+  SECTION("3.4 Should boundary test the wrist for setting pitch position") {}
+
+  SECTION("3.5.1 Should set the fingers to the maximum angle") {}
+
+  SECTION("3.5.2 Should set the fingers to the minimum angle") {}
+
+  SECTION("3.5.3 Should set the speed to the maximum") {}
+
+  SECTION("3.5.4 Should set the speed to the minimum") {}
+
+  SECTION("3.5.5 Should set the fingers to one beyond the maximum") {}
+
+  SECTION("3.5.6 Should set the fingers to one beyond the minimum") {}
+
+  SECTION("3.5.7 Should set the speed to one beyond the maximum") {}
+
+  SECTION("3.5.8 Should set the speed to one beyond the minimum") {}
 }
 
 }  // namespace sjsu::arm
