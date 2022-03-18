@@ -57,10 +57,10 @@ TEST_CASE("Hand Testing Case...")
     CHECK_EQ(hand.GetMiddlePosition(), default_angle);
     CHECK_EQ(hand.GetRingPosition(), default_angle);
     CHECK_EQ(hand.GetPinkyPosition(), default_angle);
-    CHECK_EQ(hand.GetCurrentHandMode(),
-             Hand::MissionControlData::HandModes::kConcurrent);
     CHECK_EQ(hand.GetWristPitch(), default_angle);
     CHECK_EQ(hand.GetWristRoll(), default_angle);
+    CHECK_EQ(hand.GetCurrentHandMode(),
+             Hand::MissionControlData::HandModes::kConcurrent);
   }
 
   SECTION("2.1 Should home the hand by setting the finger to max angles")
