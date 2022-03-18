@@ -53,8 +53,8 @@ class WristJoint : public Joint
 
   void HandleWristMovement(float roll, float pitch, float speed)
   {
-    SetRollPosition(speed, roll);
-    SetPitchPosition(speed, pitch);
+    SetRollPosition(roll, speed);
+    SetPitchPosition(pitch, speed);
   }
 
   /// Sets the zero_offset_angle value that the motors use to know its true '0'
@@ -105,7 +105,7 @@ class WristJoint : public Joint
   void Home(float rotunda_offset, float speed)
   {
     GetAccelerometerData();
-    HomePitch(speed, rotunda_offset);
+    HomePitch(rotunda_offset, speed);
     HomeRoll();
   };
 

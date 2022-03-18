@@ -18,7 +18,6 @@ class Hand
       kConcurrent = 'C',
       kTransport  = 'T'
     };
-    HandModes hand_mode = HandModes::kConcurrent;
 
     struct FingerAngles
     {
@@ -28,13 +27,15 @@ class Hand
       int pointer_angle = 0;
       int thumb_angle   = 0;
     };
-    FingerAngles finger_angles;
 
     struct Wrist
     {
       int roll  = 0;
       int pitch = 0;
     };
+
+    HandModes hand_mode = HandModes::kConcurrent;
+    FingerAngles finger_angles;
     Wrist wrist_data;
   };
 
@@ -75,46 +76,24 @@ class Hand
     wrist_.PrintWristData();
   }
 
-  void HandleConcurrentMovement(MissionControlData::FingerAngles finger_data,
-                                MissionControlData::Wrist wrist_data,
-                                float speed)
+  void HomeHand(float rotunda_offset_angle, float speed)
   {
-    MoveFinger(finger_data.pinky_angle, pinky_);
-    MoveFinger(finger_data.ring_angle, ring_);
-    MoveFinger(finger_data.middle_angle, middle_);
-    MoveFinger(finger_data.pointer_angle, pointer_);
-    MoveFinger(finger_data.thumb_angle, thumb_);
-    wrist_.HandleWristMovement(speed, static_cast<float>(wrist_data.roll),
-                               static_cast<float>(wrist_data.pitch));
+    MoveFinger(pinky_.GetMaxAngle(), pinky_);
+    MoveFinger(ring_.GetMaxAngle(), ring_);
+    MoveFinger(middle_.GetMaxAngle(), middle_);
+    MoveFinger(pointer_.GetMaxAngle(), pointer_);
+    MoveFinger(thumb_.GetMaxAngle(), thumb_);
+    // wrist_.Home(float(rotunda_offset_angle), speed);
   }
 
-  // The following two functions are here to allow the rover arm system to
-  // directly control the roll and the pitch of the wrist this is mainly for
-  // testing due to the different hand drive modes, when the drive modes are
-  // removed this may be removed as well
-  void SetWristRollPosition(float wrist_roll, float speed)
+  void SetCurrentHandMode(MissionControlData::HandModes new_mode)
   {
-    wrist_.SetRollPosition(wrist_roll, speed);
-  }
-
-  void SetWristPitchPosition(float wrist_pitch, float speed)
-  {
-    wrist_.SetRollPosition(wrist_pitch, speed);
-  }
-
-  void SetHandTransportPosition(float speed)
-  {
-    float transport_angles = 0;
-    thumb_.SetPositionAndPwm(transport_angles);
-    pointer_.SetPositionAndPwm(transport_angles);
-    middle_.SetPositionAndPwm(transport_angles);
-    ring_.SetPositionAndPwm(transport_angles);
-    pinky_.SetPositionAndPwm(transport_angles);
-    wrist_.HandleWristMovement(transport_angles, transport_angles, speed);
+    current_hand_mode_ = new_mode;
   }
 
   void HandleMovement(MissionControlData hand_data, float speed)
   {
+    SetCurrentHandMode(hand_data.hand_mode);
     switch (current_hand_mode_)
     {
       case MissionControlData::HandModes::kConcurrent:
@@ -130,19 +109,9 @@ class Hand
                              speed);
         break;
       case MissionControlData::HandModes::kTransport:
-        SetHandTransportPosition(speed);
+        SetTransportPosition(speed);
         break;
     }
-  }
-
-  void HomeHand(float rotunda_offset_angle, float speed)
-  {
-    MoveFinger(pinky_.GetMaxAngle(), pinky_);
-    MoveFinger(ring_.GetMaxAngle(), ring_);
-    MoveFinger(middle_.GetMaxAngle(), middle_);
-    MoveFinger(pointer_.GetMaxAngle(), pointer_);
-    MoveFinger(thumb_.GetMaxAngle(), thumb_);
-    wrist_.Home(float(rotunda_offset_angle), speed);
   }
 
   int GetWristPitch() const
@@ -185,25 +154,51 @@ class Hand
     return current_hand_mode_;
   }
 
-  void SetCurrentHandMode(MissionControlData::HandModes new_mode)
-  {
-    current_hand_mode_ = new_mode;
-  }
-
  private:
-  // private member functions
   void MoveFinger(int angle, Finger & finger)
   {
     finger.SetPositionAndPwm(static_cast<float>(angle));
-    pca_.setPulseWidth(finger.GetPwmPin(), finger.GetPWM());
+    // pca_.setPulseWidth(finger.GetPwmPin(), finger.GetPWM());
   }
 
-  // private member variables
+  void SetWristRollPosition(float wrist_roll, float speed)
+  {
+    wrist_.SetRollPosition(wrist_roll, speed);
+  }
+
+  void SetWristPitchPosition(float wrist_pitch, float speed)
+  {
+    wrist_.SetPitchPosition(wrist_pitch, speed);
+  }
+
+  void SetTransportPosition(float speed)
+  {
+    float transport_angles = 0;
+    thumb_.SetPositionAndPwm(transport_angles);
+    pointer_.SetPositionAndPwm(transport_angles);
+    middle_.SetPositionAndPwm(transport_angles);
+    ring_.SetPositionAndPwm(transport_angles);
+    pinky_.SetPositionAndPwm(transport_angles);
+    wrist_.HandleWristMovement(transport_angles, transport_angles, speed);
+  }
+
+  void HandleConcurrentMovement(MissionControlData::FingerAngles finger_data,
+                                MissionControlData::Wrist wrist_data,
+                                float speed)
+  {
+    MoveFinger(finger_data.pinky_angle, pinky_);
+    MoveFinger(finger_data.ring_angle, ring_);
+    MoveFinger(finger_data.middle_angle, middle_);
+    MoveFinger(finger_data.pointer_angle, pointer_);
+    MoveFinger(finger_data.thumb_angle, thumb_);
+    wrist_.HandleWristMovement(static_cast<float>(wrist_data.roll),
+                               static_cast<float>(wrist_data.pitch), speed);
+  }
+
   MissionControlData::HandModes current_hand_mode_ =
       MissionControlData::HandModes::kConcurrent;
 
   Pca9685 & pca_;
-
   WristJoint & wrist_;
   Finger & pinky_;
   Finger & ring_;

@@ -45,7 +45,7 @@ TEST_CASE("Arm system testing")
   arm::ArmJoint shoulder(motor, spyed_mpu);
   arm::ArmJoint elbow(motor, spyed_mpu);
   arm::ArmJoint rotunda(motor, spyed_mpu, 0, 3600, 1800);
-  arm::Arm human_arm(rotunda, shoulder, elbow);
+  arm::Arm arm(rotunda, shoulder, elbow);
 
   arm::Finger pinky(0);
   arm::Finger ring(1);
@@ -55,12 +55,30 @@ TEST_CASE("Arm system testing")
   arm::WristJoint wrist(motor, motor, spyed_mpu);
   arm::Hand hand(pca.get(), wrist, pinky, ring, middle, pointer, thumb);
 
-  arm::RoverArmSystem arm_system(human_arm, hand);
+  arm::RoverArmSystem arm_system(arm, hand);
 
   SECTION("1.1 should initialize and return default values")
   {
-    CHECK_EQ(hand.GetWristRoll(), 0);
-    CHECK_EQ(hand.GetWristPitch(), 0);
+    int default_angle = 0;
+    CHECK_EQ(hand.GetWristRoll(), default_angle);
+    CHECK_EQ(hand.GetWristPitch(), default_angle);
+    CHECK_EQ(hand.GetThumbPosition(), default_angle);
+    CHECK_EQ(hand.GetPointerPosition(), default_angle);
+    CHECK_EQ(hand.GetMiddlePosition(), default_angle);
+    CHECK_EQ(hand.GetRingPosition(), default_angle);
+    CHECK_EQ(hand.GetPinkyPosition(), default_angle);
+    CHECK_EQ(hand.GetCurrentHandMode(),
+             arm::Hand::MissionControlData::HandModes::kConcurrent);
+
+    CHECK_EQ(arm.GetElbowPosition(), 0);
+    CHECK_EQ(arm.GetElbowSpeed(), 0);
+    CHECK_EQ(arm.GetRotundaPosition(), 0);
+    CHECK_EQ(arm.GetRotundaOffsetAngle(), 0);
+    CHECK_EQ(arm.GetRotundaSpeed(), 0);
+    CHECK_EQ(arm.GetShoulderPosition(), 0);
+    CHECK_EQ(arm.GetShoulderSpeed(), 0);
+    CHECK_EQ(arm.GetCurrentArmMode(),
+             arm::Arm::MissionControlData::ArmModes::kConcurrent);
   }
 
   SECTION("2.1 should return default GET parameters")

@@ -123,5 +123,4 @@ TEST_CASE("Wrist joint system testing")
     CHECK(wrist_joint.GetRollPosition() == 180);
   }
 }
-
 }  // namespace sjsu

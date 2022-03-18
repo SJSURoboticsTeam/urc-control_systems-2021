@@ -37,8 +37,9 @@ TEST_CASE("ArmJoint system testing")
   SECTION("1.1 - 3.1 should initialize and return default values")
   {
     joint.Initialize();
-    CHECK(joint.GetSpeed() == 0);
-    CHECK(joint.GetPosition() == 0);
+    CHECK_EQ(joint.GetSpeed(), 0);
+    CHECK_EQ(joint.GetPosition(), 0);
+    CHECK_EQ(joint.GetOffsetAngle(), 0);
   }
 
   SECTION("4.1  Mock MPU return .001 for X,Y, Z")
