@@ -1,48 +1,19 @@
 #pragma once
 #include "devices/sensors/movement/accelerometer/mpu6050.hpp"
 #include "devices/actuators/servo/rmd_x.hpp"
+#include "Common/accelerometer.hpp"
 
 namespace sjsu::arm
 {
-class Joint
+class Joint // interface
 {
- public:
-  struct Acceleration
-  {
-    float x = 0;
-    float y = 0;
-    float z = 0;
-  };
 
-  Joint(sjsu::Accelerometer & accelerometer) : accelerometer_(accelerometer){};
-
-  void Initialize()
-  {
-    accelerometer_.Initialize();
-  }
-
-  void GetAccelerometerData()
-  {
-    sjsu::Accelerometer::Acceleration_t acceleration_to_float(
-        accelerometer_.Read());
-    acceleration_.x =
-        ReturnChangedIfZero(static_cast<float>(acceleration_to_float.x));
-    acceleration_.y =
-        ReturnChangedIfZero(static_cast<float>(acceleration_to_float.y));
-    acceleration_.z =
-        ReturnChangedIfZero(static_cast<float>(acceleration_to_float.z));
-  }
-
-  /// Checks if value is zero. If it's zero make it not zero
-  float ReturnChangedIfZero(float acceleration)
-  {
-    double nonzero_value = .001;
-    return static_cast<float>(!(acceleration > 0 || acceleration < 0)  // 0
-                                  ? nonzero_value
-                                  : static_cast<double>(acceleration));
-  }
-
-  sjsu::Accelerometer & accelerometer_;
-  Acceleration acceleration_;
+  virtual void Initialize()             = 0;
+  virtual void SetPosition(float angle) = 0;
+  virtual int GetSpeed()                = 0;
+  virtual int GetPosition()             = 0;
+  
+  protected:
+  sjsu::Common::Accelerometer test;
 };
 }  // namespace sjsu::arm
