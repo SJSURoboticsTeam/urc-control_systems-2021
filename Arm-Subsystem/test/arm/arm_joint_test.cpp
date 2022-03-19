@@ -46,9 +46,9 @@ TEST_CASE("ArmJoint system testing")
   {
     joint.GetAccelerometerData();
     float mpu_correction = .001;
-    CHECK_EQ(joint.acceleration_.x, mpu_correction);
-    CHECK_EQ(joint.acceleration_.y, mpu_correction);
-    CHECK_EQ(joint.acceleration_.z, mpu_correction);
+    CHECK_EQ(joint.ReadAccelerometerData().x, mpu_correction);
+    CHECK_EQ(joint.ReadAccelerometerData().y, mpu_correction);
+    CHECK_EQ(joint.ReadAccelerometerData().z, mpu_correction);
   }
 
   SECTION("4.2  Mock MPU return 90 for X,Y, Z")
@@ -59,9 +59,9 @@ TEST_CASE("ArmJoint system testing")
     When(Method(mock_mpu, Mpu6050::Read)).AlwaysReturn(example_acceleration);
 
     joint.GetAccelerometerData();
-    CHECK_EQ(joint.acceleration_.x, 90.0);
-    CHECK_EQ(joint.acceleration_.y, 90.0);
-    CHECK_EQ(joint.acceleration_.z, 90.0);
+    CHECK_EQ(joint.ReadAccelerometerData().x, 90.0);
+    CHECK_EQ(joint.ReadAccelerometerData().y, 90.0);
+    CHECK_EQ(joint.ReadAccelerometerData().z, 90.0);
   }
 
   SECTION("5.1 Should return 0 when joint speed is set to 0")

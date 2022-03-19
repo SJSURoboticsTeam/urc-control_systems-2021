@@ -7,23 +7,26 @@
 
 namespace sjsu::arm
 {
-class WristJoint : public Joint
+class WristJoint
 {
  public:
   WristJoint(sjsu::RmdX & left_joint_motor,
              sjsu::RmdX & right_joint_motor,
              sjsu::Mpu6050 & accelerometer)
-      : Joint(accelerometer),
+      : joint_(accelerometer),
         left_motor_(left_joint_motor),
         right_motor_(right_joint_motor)
   {
   }
-
+  void GetAccelerometerData()
+  {
+    joint_.GetAccelerometerData();
+  }
   void Initialize()
   {
     left_motor_.Initialize();
     right_motor_.Initialize();
-    Joint::Initialize();
+    joint_.Initialize();
   }
   void PrintWristData()
   {
@@ -112,7 +115,7 @@ class WristJoint : public Joint
   void HomePitch(float rotunda_offset, float speed)
   {
     float wrist_pitch_offset =
-        float(atan(acceleration_.y / acceleration_.z)) + rotunda_offset;
+        float(atan(joint_.acceleration_.y / joint_.acceleration_.z)) + rotunda_offset;
     SetPitchPosition(speed, wrist_pitch_offset);
     SetZeroPitchOffsets(wrist_pitch_offset);
   }
@@ -123,7 +126,7 @@ class WristJoint : public Joint
  private:
   sjsu::RmdX & left_motor_;
   sjsu::RmdX & right_motor_;
-
+  Joint joint_;
   float speed_              = 0;
   float pitch_angle_        = 0;
   float roll_angle_         = 0;

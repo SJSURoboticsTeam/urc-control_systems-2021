@@ -5,18 +5,18 @@
 
 namespace sjsu::arm
 {
-class ArmJoint : public Joint
+class ArmJoint
 {
  public:
   ArmJoint(sjsu::RmdX & joint_motor, sjsu::Mpu6050 & accelerometer)
-      : Joint(accelerometer), motor_(joint_motor){};
+      : joint_(accelerometer), motor_(joint_motor){};
 
   ArmJoint(sjsu::RmdX & joint_motor,
            sjsu::Mpu6050 & accelerometer,
            float min_angle,
            float max_angle,
            float standby_angle)
-      : Joint(accelerometer),
+      : joint_(accelerometer),
         motor_(joint_motor),
         kMinimumAngle(min_angle),
         kMaximumAngle(max_angle),
@@ -25,7 +25,7 @@ class ArmJoint : public Joint
   void Initialize()
   {
     motor_.Initialize();
-    Joint::Initialize();
+    joint_.Initialize();
   }
 
   // Move the motor to the (calibrated) angle desired.
@@ -64,9 +64,20 @@ class ArmJoint : public Joint
     return offset_angle_;
   }
 
+void GetAccelerometerData()
+{
+    joint_.GetAccelerometerData();
+
+}
+  Joint::Acceleration ReadAccelerometerData()
+  {
+    return joint_.acceleration_;
+  }
+  
+
  private:
   sjsu::RmdX & motor_;
-
+  Joint joint_;
   float offset_angle_ = 0;
   float speed_        = 0;
   float position_     = 0;
