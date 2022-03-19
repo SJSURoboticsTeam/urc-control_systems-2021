@@ -14,6 +14,6 @@ class Joint // interface
   virtual int GetPosition()             = 0;
   
   protected:
-  sjsu::Common::Accelerometer test;
+  sjsu::common::Accelerometer test;
 };
 }  // namespace sjsu::arm
