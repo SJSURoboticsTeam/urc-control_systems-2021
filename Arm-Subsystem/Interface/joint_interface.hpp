@@ -1,7 +1,7 @@
 #pragma once
 #include "devices/sensors/movement/accelerometer/mpu6050.hpp"
 #include "devices/actuators/servo/rmd_x.hpp"
-#include "Common/accelerometer.hpp"
+#include "../Common/accelerometer.hpp"
 
 namespace sjsu::arm
 {
@@ -14,6 +14,6 @@ class Joint // interface
   virtual int GetPosition()             = 0;
   
   protected:
-  sjsu::Common::Accelerometer test;
+  sjsu::common::Accelerometer test;
 };
 }  // namespace sjsu::arm

@@ -1,7 +1,7 @@
 #pragma once
 #include <cmath>
 
-#include "joint.hpp"
+#include "joint_interface.hpp"
 #include "devices/actuators/servo/rmd_x.hpp"
 #include "devices/sensors/movement/accelerometer/mpu6050.hpp"
 
