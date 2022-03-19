@@ -22,14 +22,14 @@ class ArmJoint : public Joint
         kMaximumAngle(max_angle),
         kRestAngle(standby_angle){};
 
-  void Initialize()
+  void Initialize() override
   {
     motor_.Initialize();
     Joint::Initialize();
   }
 
   // Move the motor to the (calibrated) angle desired.
-  void SetPosition(float angle)
+  void SetPosition(float angle) override
   {
     angle += offset_angle_;
     position_ = std::clamp(angle, kMinimumAngle, kMaximumAngle);
@@ -49,12 +49,12 @@ class ArmJoint : public Joint
     motor_.SetSpeed(speed_to_rpm);
   }
 
-  int GetSpeed() const
+  int GetSpeed() const override
   {
     return static_cast<int>(speed_);
   }
 
-  int GetPosition() const
+  int GetPosition() const override
   {
     return static_cast<int>(position_);
   }

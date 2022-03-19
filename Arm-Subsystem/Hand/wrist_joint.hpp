@@ -19,7 +19,7 @@ class WristJoint : public Joint
   {
   }
 
-  void Initialize()
+  void Initialize() override
   {
     left_motor_.Initialize();
     right_motor_.Initialize();
@@ -69,7 +69,7 @@ class WristJoint : public Joint
     roll_offset_angle_ = roll_offset;
   }
 
-  void SetSpeed(float target_speed)
+  void SetSpeed(float target_speed) 
   {
     speed_ = std::clamp(target_speed, -kMaxSpeed, kMaxSpeed);
     units::angular_velocity::revolutions_per_minute_t speed_to_rpm(speed_);
@@ -97,7 +97,7 @@ class WristJoint : public Joint
     return int(roll_offset_angle_);
   }
 
-  int GetSpeed() const
+  int GetSpeed() const override
   {
     return static_cast<int>(speed_);
   }
