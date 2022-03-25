@@ -1,35 +1,36 @@
 #pragma once
-#include "Interface/joint_interface.hpp"
+
 #include "devices/actuators/servo/rmd_x.hpp"
 #include "devices/sensors/movement/accelerometer/mpu6050.hpp"
+#include "../Common/accelerometer.hpp"
 
 namespace sjsu::arm
 {
-class ArmJoint : public Joint
+class ArmJoint  
 {
  public:
   ArmJoint(sjsu::RmdX & joint_motor, sjsu::Mpu6050 & accelerometer)
-      : Joint(accelerometer), motor_(joint_motor){};
+      : accelerometer_(accelerometer), motor_(joint_motor){};
 
   ArmJoint(sjsu::RmdX & joint_motor,
            sjsu::Mpu6050 & accelerometer,
            float min_angle,
            float max_angle,
            float standby_angle)
-      : Joint(accelerometer),
+      : accelerometer_(accelerometer),
         motor_(joint_motor),
         kMinimumAngle(min_angle),
         kMaximumAngle(max_angle),
         kRestAngle(standby_angle){};
 
-  void Initialize() override
+  void Initialize() 
   {
     motor_.Initialize();
-    Joint::Initialize();
+    accelerometer_.Initialize();
   }
 
   // Move the motor to the (calibrated) angle desired.
-  void SetPosition(float angle) override
+  void SetPosition(float angle) 
   {
     angle += offset_angle_;
     position_ = std::clamp(angle, kMinimumAngle, kMaximumAngle);
@@ -49,12 +50,12 @@ class ArmJoint : public Joint
     motor_.SetSpeed(speed_to_rpm);
   }
 
-  int GetSpeed() const override
+  int GetSpeed() const 
   {
     return static_cast<int>(speed_);
   }
 
-  int GetPosition() const override
+  int GetPosition() const 
   {
     return static_cast<int>(position_);
   }
@@ -64,8 +65,18 @@ class ArmJoint : public Joint
     return offset_angle_;
   }
 
+void GetAccelerometerData()
+{
+  accelerometer_.GetAccelerometerData();
+}
+ sjsu::common::Accelerometer::Acceleration ReadAccelerometerData()
+{ 
+  accelerometer_.GetAccelerometerData();
+  return accelerometer_.acceleration_;
+}
  private:
   sjsu::RmdX & motor_;
+  sjsu::common::Accelerometer accelerometer_;
 
   float offset_angle_ = 0;
   float speed_        = 0;

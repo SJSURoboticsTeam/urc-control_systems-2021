@@ -165,10 +165,10 @@ class Arm
  private:
   float CalculateShoulderHomeAngle()
   {
-    float home_angle = 0;
 
-    float acceleration_x = rotunda_.acceleration_.x + shoulder_.acceleration_.x;
-    float acceleration_y = rotunda_.acceleration_.y + shoulder_.acceleration_.y;
+    float home_angle = 0;
+    float acceleration_x = rotunda_.ReadAccelerometerData().x + shoulder_.ReadAccelerometerData().x;
+    float acceleration_y = rotunda_.ReadAccelerometerData().y + shoulder_.ReadAccelerometerData().y;
 
     home_angle = float(atan(acceleration_y / acceleration_x));
     return home_angle;
@@ -176,8 +176,8 @@ class Arm
 
   float CalculateUncorrectedElbowHomeAngle()
   {
-    float acceleration_x = rotunda_.acceleration_.x + elbow_.acceleration_.x;
-    float acceleration_y = rotunda_.acceleration_.y + elbow_.acceleration_.y;
+    float acceleration_x = rotunda_.ReadAccelerometerData().x + elbow_.ReadAccelerometerData().x;
+    float acceleration_y = rotunda_.ReadAccelerometerData().y + elbow_.ReadAccelerometerData().y;
     float angle_without_correction =
         float(atan(acceleration_y / acceleration_x));
     return angle_without_correction;
@@ -185,8 +185,8 @@ class Arm
 
   bool ShoulderIsInSecondQuadrantOfGraph()
   {
-    if (elbow_.acceleration_.x + rotunda_.acceleration_.x >= 0 &&
-        elbow_.acceleration_.y + rotunda_.acceleration_.y <= 0)
+    if (elbow_.ReadAccelerometerData().x + rotunda_.ReadAccelerometerData().x >= 0 &&
+        elbow_.ReadAccelerometerData().y + rotunda_.ReadAccelerometerData().y <= 0)
     {
       return true;
     }
@@ -195,8 +195,8 @@ class Arm
 
   bool ShoulderIsInThirdQuadrantOfGraph()
   {
-    if (elbow_.acceleration_.x + rotunda_.acceleration_.x >= 0 &&
-        elbow_.acceleration_.y + rotunda_.acceleration_.y >= 0)
+    if (elbow_.ReadAccelerometerData().x + rotunda_.ReadAccelerometerData().x >= 0 &&
+        elbow_.ReadAccelerometerData().y + rotunda_.ReadAccelerometerData().y >= 0)
     {
       return true;
     }
@@ -243,4 +243,6 @@ class Arm
   MissionControlData::ArmModes current_arm_mode_ =
       MissionControlData::ArmModes::kConcurrent;
 };
+
 }  // namespace sjsu::arm
+

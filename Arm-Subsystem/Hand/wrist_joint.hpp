@@ -1,29 +1,29 @@
 #pragma once
-#include <cmath>
 
-#include "Interface/joint_interface.hpp"
+#include <cmath>
 #include "devices/actuators/servo/rmd_x.hpp"
 #include "devices/sensors/movement/accelerometer/mpu6050.hpp"
-
+#include "../Common/accelerometer.hpp"
 namespace sjsu::arm
 {
-class WristJoint : public Joint
+class WristJoint 
 {
+
  public:
-  WristJoint(sjsu::RmdX & left_joint_motor,
+  WristJoint(sjsu::RmdX &  left_joint_motor,
              sjsu::RmdX & right_joint_motor,
              sjsu::Mpu6050 & accelerometer)
-      : Joint(accelerometer),
+      : accelerometer_(accelerometer),
         left_motor_(left_joint_motor),
         right_motor_(right_joint_motor)
   {
   }
 
-  void Initialize() override
+  void Initialize() 
   {
     left_motor_.Initialize();
     right_motor_.Initialize();
-    Joint::Initialize();
+    accelerometer_.Initialize();
   }
   void PrintWristData()
   {
@@ -69,7 +69,7 @@ class WristJoint : public Joint
     roll_offset_angle_ = roll_offset;
   }
 
-  void SetSpeed(float target_speed) 
+  void SetSpeed(float target_speed)  
   {
     speed_ = std::clamp(target_speed, -kMaxSpeed, kMaxSpeed);
     units::angular_velocity::revolutions_per_minute_t speed_to_rpm(speed_);
@@ -82,11 +82,19 @@ class WristJoint : public Joint
     return int(pitch_angle_);
   }
 
+  void SetPosition(float angle) 
+  {
+    //do nothing just here until refactoring
+  }
+
   int GetRollPosition() const
   {
     return int(roll_angle_);
   }
-
+  int GetPosition() const 
+  {
+    return int(roll_angle_);
+  }
   int GetPitchOffsetAngle() const
   {
     return int(pitch_offset_angle_);
@@ -97,14 +105,14 @@ class WristJoint : public Joint
     return int(roll_offset_angle_);
   }
 
-  int GetSpeed() const override
+  int GetSpeed() const 
   {
     return static_cast<int>(speed_);
   }
 
   void Home(float rotunda_offset, float speed)
   {
-    GetAccelerometerData();
+    accelerometer_.GetAccelerometerData();
     HomePitch(rotunda_offset, speed);
     HomeRoll();
   };
@@ -112,7 +120,7 @@ class WristJoint : public Joint
   void HomePitch(float rotunda_offset, float speed)
   {
     float wrist_pitch_offset =
-        float(atan(acceleration_.y / acceleration_.z)) + rotunda_offset;
+        float(atan(accelerometer_.acceleration_.y / accelerometer_.acceleration_.z)) + rotunda_offset;
     SetPitchPosition(speed, wrist_pitch_offset);
     SetZeroPitchOffsets(wrist_pitch_offset);
   }
@@ -123,7 +131,7 @@ class WristJoint : public Joint
  private:
   sjsu::RmdX & left_motor_;
   sjsu::RmdX & right_motor_;
-
+  sjsu::common::Accelerometer accelerometer_;
   float speed_              = 0;
   float pitch_angle_        = 0;
   float roll_angle_         = 0;
