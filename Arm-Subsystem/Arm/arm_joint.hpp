@@ -65,10 +65,6 @@ class ArmJoint
     return offset_angle_;
   }
 
-void GetAccelerometerData()
-{
-  accelerometer_.GetAccelerometerData();
-}
  sjsu::common::Accelerometer::Acceleration ReadAccelerometerData()
 { 
   accelerometer_.GetAccelerometerData();
