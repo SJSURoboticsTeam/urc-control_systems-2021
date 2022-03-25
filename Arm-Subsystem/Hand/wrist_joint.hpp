@@ -91,10 +91,6 @@ class WristJoint
   {
     return int(roll_angle_);
   }
-  int GetPosition() const 
-  {
-    return int(roll_angle_);
-  }
   int GetPitchOffsetAngle() const
   {
     return int(pitch_offset_angle_);
