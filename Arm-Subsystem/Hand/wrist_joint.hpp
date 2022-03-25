@@ -82,11 +82,6 @@ class WristJoint
     return int(pitch_angle_);
   }
 
-  void SetPosition(float angle) 
-  {
-    //do nothing just here until refactoring
-  }
-
   int GetRollPosition() const
   {
     return int(roll_angle_);
