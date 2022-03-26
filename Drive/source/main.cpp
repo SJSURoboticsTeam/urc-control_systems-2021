@@ -1,97 +1,71 @@
-#include "utility/log.hpp"
-#include "peripherals/lpc40xx/can.hpp"
-#include "utility/time/timeout_timer.hpp"
-#include "devices/actuators/servo/rmd_x.hpp"
 
-#include "wheel.hpp"
-#include "../Common/esp.hpp"
-#include "rover_drive_system.hpp"
-
-int main(void)
+#include "devices/sensors/battery/max17043.hpp"
+#include "peripherals/lpc17xx/i2c.hpp"
+#include "peripherals/lpc40xx/gpio.hpp"
+#include "peripherals/hardware_counter.hpp"
+#include "devices/sensors/battery/ltc4150.hpp" 
+namespace sjsu::common
 {
-  sjsu::lpc40xx::SetMaximumClockSpeed();
-  sjsu::LogInfo("Starting the rover drive system...");
-  sjsu::common::Esp esp;
-  sjsu::lpc40xx::Can & can = sjsu::lpc40xx::GetCan<2>();
-  sjsu::StaticMemoryResource<1024> memory_resource;
-  sjsu::CanNetwork can_network(can, &memory_resource);
+/// State of charge manages ltc4150 and max17043
+class StateOfCharge
+{
+public:
+  StateOfCharge(){}
+void Initialize(){
+  //TODO - impliment initialize for state of charge
+}
 
-  // RMD addresses 0x141 - 0x148 are available
-  sjsu::RmdX left_steer_motor(can_network, 0x141);
-  sjsu::RmdX left_hub_motor(can_network, 0x142);
-  sjsu::RmdX right_steer_motor(can_network, 0x143);
-  sjsu::RmdX right_hub_motor(can_network, 0x144);
-  sjsu::RmdX back_steer_motor(can_network, 0x145);
-  sjsu::RmdX back_hub_motor(can_network, 0x146);
+double StateOfCharge_MAX(){
+  sjsu::lpc40xx::I2c & i2c = sjsu::lpc40xx::GetI2c<2>();
+  i2c.Initialize();
+  sjsu::lpc40xx::Gpio & alert_pin = sjsu::lpc40xx::GetGpio<0, 6>();
+  alert_pin.Initialize();
+  bool callback_was_called   = false;
+        InterruptCallback callback = [&callback_was_called]() {
+          callback_was_called = true;
+        };
+  uint8_t address = 0b0110110;
 
-  left_steer_motor.settings.gear_ratio  = 8;
-  left_hub_motor.settings.gear_ratio    = 8;
-  right_steer_motor.settings.gear_ratio = 8;
-  right_hub_motor.settings.gear_ratio   = 8;
-  back_steer_motor.settings.gear_ratio  = 8;
-  back_hub_motor.settings.gear_ratio    = 8;
+  Max170343 *battery_sensor = new Max170343(i2c, alert_pin, callback, address);
 
-  sjsu::Gpio & left_wheel_homing_pin  = sjsu::lpc40xx::GetGpio<0, 15>();
-  sjsu::Gpio & right_wheel_homing_pin = sjsu::lpc40xx::GetGpio<2, 9>();
-  sjsu::Gpio & back_wheel_homing_pin  = sjsu::lpc40xx::GetGpio<0, 18>();
+  units::voltage::volt_t battery_voltage = battery_sensor -> GetVoltage();
+  double voltage = battery_voltage.to<double>();
 
-  sjsu::drive::Wheel left_wheel("left", left_hub_motor, left_steer_motor,
-                                left_wheel_homing_pin);
-  sjsu::drive::Wheel right_wheel("right", right_hub_motor, right_steer_motor,
-                                 right_wheel_homing_pin);
-  sjsu::drive::Wheel back_wheel("back", back_hub_motor, back_steer_motor,
-                                back_wheel_homing_pin);
-  sjsu::drive::RoverDriveSystem::Wheels wheels = { &left_wheel, &right_wheel,
-                                                   &back_wheel };
-  sjsu::drive::RoverDriveSystem drive(wheels);
-
-  esp.Initialize();
-  drive.Initialize();
-
-  // Drive control loop
-  // 1. Drive sys creates GET request parameters - returns endpoint+parameters
-  // 2. Make GET request using esp - returns response body as string
-  // 3. Drive sys parses GET response
-  // 4. Drive sys handles rover movement - move or switch driving modes
-
-  while (1)
+  if(voltage < 3.05)
   {
-    try
-    {
-      sjsu::TimeoutTimer serverTimeout(5s);  // server has 5s timeout
-      sjsu::LogInfo("Making new request now...");
-      std::string endpoint = "drive" + drive.GETParameters();
-      std::string response = esp.GET(endpoint);
-      drive.ParseJSONResponse(response);
-      drive.HandleRoverMovement();
-      drive.IncrementHeartbeatCount();
-      drive.PrintRoverData();
-      esp.IsServerExpired(serverTimeout);
-    }
-    catch (const std::exception & e)
-    {
-      sjsu::LogError("Uncaught error in main() - Stopping Rover!");
-      drive.SetWheelSpeed(0);
-      if (!esp.IsConnected())
-      {
-        esp.ConnectToWifi();
-        esp.ConnectToServer();
-      }
-    }
-    catch (const sjsu::drive::RoverDriveSystem::ParseError &)
-    {
-      sjsu::LogError("Parsing Error: Arguments not equal");
-    }
-    catch (const sjsu::drive::RoverDriveSystem::DriveModeHandlerError &)
-    {
-      sjsu::LogError(
-          "DriveModeHandlerError: Unable to assign drive mode handler!");
-    }
-    catch (const sjsu::drive::RoverDriveSystem::DriveModeError &)
-    {
-      sjsu::LogError("DriveModeError: Unable to set drive mode!");
-    }
+    sjsu::LogWarning("Cell Voltage below 3. Battery dangerously low!");
+  }
+  else if(voltage < 3.25 )
+  {
+    sjsu::LogWarning("Cell Voltage below 3.25. Battery is low");
   }
 
-  return 0;
+    voltage = (voltage-3)/(4.2 - 3);
+
+  sjsu::LogInfo("Max: %f", voltage);
+  return voltage;
+
 }
+
+double StateOfCharge_LTC(){
+  
+  sjsu::lpc40xx::Gpio &gpio = sjsu::lpc40xx::GetGpio<0, 1>();
+  sjsu::GpioCounter counter(gpio, sjsu::Gpio::Edge::kRising);
+
+  sjsu::lpc40xx::Gpio &pol = sjsu::lpc40xx::GetGpio<2, 3>();
+  units::impedance::ohm_t resistance = 10'000_Ohm;
+
+  Ltc4150 *battery_sensor = new Ltc4150(
+                             counter,
+                             pol,
+                             resistance);
+
+  units::charge::microampere_hour_t battery_charge = battery_sensor->GetCharge();
+  double charge = battery_charge.to<double>();
+  return charge/100.0; // 100 is a temporary and will need to be updated when we know the battery mA/h
+
+}
+
+  };
+}  // namespace sjsu::common
+
