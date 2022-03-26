@@ -5,7 +5,8 @@
 
 #include "wheel.hpp"
 #include "../Common/esp.hpp"
-#include "rover_drive_system.hpp"
+#include "../Common/esp_v2.hpp"
+#include "drive_system.hpp"
 
 int main(void)
 {
@@ -45,8 +46,6 @@ int main(void)
                                                    &back_wheel };
   sjsu::drive::RoverDriveSystem drive(wheels);
 
-  sjsu::common::StateOfCharge st;
-
   esp.Initialize();
   drive.Initialize();
 
@@ -60,15 +59,17 @@ int main(void)
   {
     try
     {
-      sjsu::TimeoutTimer serverTimeout(5s);  // server has 5s timeout
+      sjsu::TimeoutTimer server_timeout(5s);  // server has 5s timeout
       sjsu::LogInfo("Making new request now...");
-      std::string endpoint = "drive" + drive.GETParameters();
+      std::string endpoint =
+          "drive" + drive.CreateGETRequestParameterWithRoverStatus();
       std::string response = esp.GET(endpoint);
-      drive.ParseJSONResponse(response);
-      drive.HandleRoverMovement();
-      drive.IncrementHeartbeatCount();
+      drive.ParseMissionControlCommands(response);
+      drive.HandleRoverCommands();
+      // drive.IncrementHeartbeatCount();
       drive.PrintRoverData();
-      esp.IsServerExpired(serverTimeout);
+      sjsu::Delay(3s);
+      esp.ReconnectIfServerTimedOut(server_timeout);
     }
     catch (const std::exception & e)
     {
@@ -77,7 +78,7 @@ int main(void)
       if (!esp.IsConnected())
       {
         esp.ConnectToWifi();
-        esp.ConnectToServer();
+        esp.ConnectToWebServer();
       }
     }
     catch (const sjsu::drive::RoverDriveSystem::ParseError &)
