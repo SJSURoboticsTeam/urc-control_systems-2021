@@ -10,7 +10,6 @@ int main(void)
       sjsu::common::StateOfCharge st;
       sjsu::Delay(1000ms);
       sjsu::LogInfo("Max: %f%% remaining", st.StateOfCharge_MAX());
-     // esp.IsServerExpired(serverTimeout);
     }
     catch (const std::exception & e)
     {

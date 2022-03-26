@@ -416,7 +416,9 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
         break;
     }
   }
-
+  void ShowBatteryPercent(){
+    sjsu::LogInfo("Max: %f%% remaining", kStateOfCharge);
+  }
  public:
   Wheels wheels_;
   MissionControlData mc_data_;
@@ -425,8 +427,8 @@ class RoverDriveSystem : public sjsu::common::RoverSystem
   Modes current_drive_mode_ = Modes::SpinMode;
   std::array<Wheel *, 3> wheel_array_{ wheels_.left_, wheels_.right_,
                                        wheels_.back_ };
-
-  const int kStateOfCharge     = 90;
+  sjsu::common::StateOfCharge st;
+  double kStateOfCharge     = st.StateOfCharge_MAX();
   const int kExpectedArguments = 6;
 
   const float kZeroSpeed     = 0;
