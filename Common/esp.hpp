@@ -125,12 +125,11 @@ class Esp
   sjsu::WiFi & wifi_;
   sjsu::InternetSocket & socket_;
   std::string request_;
-  std::string url_                               = "10.251.234.235";//"172.20.10.3";
-  //"127.0.0.1";//"192.168.50.243";
+  std::string url_                               = "192.168.50.243";
   std::string kErrorResponse                     = "ERROR";
   const uint16_t kPort                           = 5000;
-  const char * kSsid                             = "Maaz's iPhone";//"Adrien";
-  const char * kPassword                         = "siliconmart786";//"LetsFly!";
+  const char * kSsid                             = "kingdom2";
+  const char * kPassword                         = "22039622";
   const std::chrono::nanoseconds kDefaultTimeout = 10s;
 };
 }  // namespace sjsu::common
