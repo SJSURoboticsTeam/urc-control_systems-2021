@@ -89,7 +89,7 @@ class RoverDriveSystem : public sjsu::common::RoverSystemInterface
         "d&right_wheel_angle=%d&back_wheel_speed=%d&back_wheel_angle=%d",
         heartbeat_.GetHeartbeatCount(), mc_data_.is_operational,
         mc_data_.wheel_shift, static_cast<char>(current_drive_mode_),
-        kStateOfCharge, wheels_.left_->GetHubSpeed(),
+        static_cast<int>(st.StateOfCharge_MAX()), wheels_.left_->GetHubSpeed(),
         wheels_.left_->GetSteerAngle(), wheels_.right_->GetHubSpeed(),
         wheels_.right_->GetSteerAngle(), wheels_.back_->GetHubSpeed(),
         wheels_.back_->GetSteerAngle());
@@ -412,7 +412,9 @@ class RoverDriveSystem : public sjsu::common::RoverSystemInterface
         break;
     }
   }
-
+  void GetBatteryPercent(){
+    sjsu::LogInfo("%f%% of battery remaining on the drive", st.StateOfCharge_MAX());
+  }
  public:
   Wheels wheels_;
   MissionControlData mc_data_;
@@ -422,7 +424,7 @@ class RoverDriveSystem : public sjsu::common::RoverSystemInterface
   std::array<Wheel *, 3> wheel_array_{ wheels_.left_, wheels_.right_,
                                        wheels_.back_ };
 
-  const int kStateOfCharge     = 90;
+  sjsu::common::max17043 st;
   const int kExpectedArguments = 6;
 
   const float kZeroSpeed     = 0;
