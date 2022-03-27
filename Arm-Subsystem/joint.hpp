@@ -18,7 +18,7 @@ class Joint
 
   void Initialize()
   {
-    accelerometer_.Initialize();
+    //accelerometer_.Initialize();
   }
 
   void GetAccelerometerData()
