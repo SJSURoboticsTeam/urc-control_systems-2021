@@ -89,7 +89,7 @@ class RoverDriveSystem : public sjsu::common::RoverSystemInterface
         "d&right_wheel_angle=%d&back_wheel_speed=%d&back_wheel_angle=%d",
         heartbeat_.GetHeartbeatCount(), mc_data_.is_operational,
         mc_data_.wheel_shift, static_cast<char>(current_drive_mode_),
-        static_cast<int>(st.StateOfCharge_MAX()), wheels_.left_->GetHubSpeed(),
+        static_cast<int>(state_of_charge_.StateOfCharge_MAX()), wheels_.left_->GetHubSpeed(),
         wheels_.left_->GetSteerAngle(), wheels_.right_->GetHubSpeed(),
         wheels_.right_->GetSteerAngle(), wheels_.back_->GetHubSpeed(),
         wheels_.back_->GetSteerAngle());
@@ -285,7 +285,7 @@ class RoverDriveSystem : public sjsu::common::RoverSystemInterface
   // ======================
 
   /// Aligns rover wheels all in the same direction, facing forward
-  void SetDriveMode()
+  void SetDriveMode() // are these initial values as in when we first call these modes?
   {
     const int left_wheel_angle  = -45;
     const int right_wheel_angle = -135;
@@ -309,7 +309,8 @@ class RoverDriveSystem : public sjsu::common::RoverSystemInterface
   }
 
   /// Aligns rover wheel all in the same direction, facing towards the right
-  void SetTranslationMode()
+  void SetTranslationMode() 
+  //do we want to set up multiple translate modes
   {
     // TODO: Find the angles for translation mode
     const float left_wheel_angle  = 0;
@@ -321,7 +322,7 @@ class RoverDriveSystem : public sjsu::common::RoverSystemInterface
     current_drive_mode_ = Modes::TranslateMode;
   }
 
-  void SetSingleWheelMode()
+  void SetSingleWheelMode() 
   {
     current_drive_mode_ = mc_data_.drive_mode;
   }
@@ -381,7 +382,7 @@ class RoverDriveSystem : public sjsu::common::RoverSystemInterface
   }
 
   /// Adjusts all the wheels by keeping them in parallel
-  void HandleTranslationMode(float speed, float angle)
+  void HandleTranslationMode(float speed, float angle) // precision may be off, we will have to see
   {
     // TODO: Need to find correct angles
     wheels_.left_->SetSteerAngle(angle);
@@ -413,7 +414,7 @@ class RoverDriveSystem : public sjsu::common::RoverSystemInterface
     }
   }
   void GetBatteryPercent(){
-    sjsu::LogInfo("%f%% of battery remaining on the drive", st.StateOfCharge_MAX());
+    sjsu::LogInfo("%f%% of battery remaining on the drive", state_of_charge_.StateOfCharge_MAX());
   }
  public:
   Wheels wheels_;
@@ -424,7 +425,7 @@ class RoverDriveSystem : public sjsu::common::RoverSystemInterface
   std::array<Wheel *, 3> wheel_array_{ wheels_.left_, wheels_.right_,
                                        wheels_.back_ };
 
-  sjsu::common::max17043 st;
+  sjsu::common::max17043 state_of_charge_;
   const int kExpectedArguments = 6;
 
   const float kZeroSpeed     = 0;
