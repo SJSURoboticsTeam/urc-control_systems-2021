@@ -5,6 +5,7 @@
 
 #include "wheel.hpp"
 #include "../Common/esp.hpp"
+#include "../Common/esp_v2.hpp"
 #include "drive_system.hpp"
 
 int main(void)
@@ -45,60 +46,55 @@ int main(void)
                                                    &back_wheel };
   sjsu::drive::RoverDriveSystem drive(wheels);
 
-  sjsu::LogInfo("Initializing esp and drive system...");
   esp.Initialize();
   drive.Initialize();
-  drive.mc_data_.is_operational = 1;
 
-  sjsu::Delay(5s);
+  // Drive control loop
+  // 1. Drive sys creates GET request parameters - returns endpoint+parameters
+  // 2. Make GET request using esp - returns response body as string
+  // 3. Drive sys parses GET response
+  // 4. Drive sys handles rover movement - move or switch driving modes
 
-  while (true)
+  while (1)
   {
-    //   sjsu::logInfo("Homing wheels...");
-    //   drive.HomeWheels();
-    //   sjsu::Delay(5s);
-
-    sjsu::LogInfo("Setting wheel speed to 50 RPMS for 5 seconds...");
-    drive.SetWheelSpeed(50.0);
-    sjsu::Delay(5s);
-    sjsu::LogInfo("Setting wheel speed to 0 RPMS for 5 seconds...");
-    drive.SetWheelSpeed(0);
-    sjsu::Delay(5s);
-    sjsu::LogInfo("Setting wheel speed to -50 RPMS for 5 seconds...");
-    drive.SetWheelSpeed(-50.0);
-    sjsu::Delay(5s);
-
-    sjsu::LogInfo("Spinning steer wheel to for 1 full rotation...");
-    drive.wheels_.left_->SetSteerAngle(180);
-    sjsu::Delay(10s);
-    sjsu::LogInfo("Spinning steer wheel to for 1 full rotation...");
-    drive.wheels_.right_->SetSteerAngle(180);
-    sjsu::Delay(10s);
-    sjsu::LogInfo("Spinning steer wheel to for 1 full rotation...");
-    drive.wheels_.back_->SetSteerAngle(180);
-    sjsu::Delay(10s);
-
-    sjsu::LogInfo("Setting steer angle to 0...");
-    drive.wheels_.left_->SetSteerAngle(0);
-    sjsu::Delay(10s);
-    sjsu::LogInfo("Setting steer angle to 0...");
-    drive.wheels_.right_->SetSteerAngle(0);
-    sjsu::Delay(10s);
-    sjsu::LogInfo("Setting steer angle to 0...");
-    drive.wheels_.back_->SetSteerAngle(0);
-    sjsu::Delay(10s);
-
-    sjsu::LogInfo("Setting `D` mode waiting 5s...");
-    drive.mc_data_.drive_mode = sjsu::drive::RoverDriveSystem::Modes::DriveMode;
-    drive.HandleRoverCommands();
-    sjsu::Delay(5s);
-
-    sjsu::LogInfo("Setting `T` mode waiting 5s...");
-    drive.mc_data_.drive_mode =
-        sjsu::drive::RoverDriveSystem::Modes::TranslateMode;
-    drive.HandleRoverCommands();
-    sjsu::Delay(5s);
-
-    sjsu::LogInfo("Setting angle of wheels to ");
+    try
+    {
+      sjsu::TimeoutTimer server_timeout(5s);  // server has 5s timeout
+      sjsu::LogInfo("Making new request now...");
+      std::string endpoint =
+          "drive" + drive.CreateGETRequestParameterWithRoverStatus();
+      std::string response = esp.GET(endpoint);
+      drive.ParseMissionControlCommands(response);
+      drive.HandleRoverCommands();
+      // drive.IncrementHeartbeatCount();
+      drive.PrintRoverData();
+      sjsu::Delay(3s);
+      esp.ReconnectIfServerTimedOut(server_timeout);
+    }
+    catch (const std::exception & e)
+    {
+      sjsu::LogError("Uncaught error in main() - Stopping Rover!");
+      drive.SetWheelSpeed(0);
+      if (!esp.IsConnected())
+      {
+        esp.ConnectToWifi();
+        esp.ConnectToWebServer();
+      }
+    }
+    catch (const sjsu::drive::RoverDriveSystem::ParseError &)
+    {
+      sjsu::LogError("Parsing Error: Arguments not equal");
+    }
+    catch (const sjsu::drive::RoverDriveSystem::DriveModeHandlerError &)
+    {
+      sjsu::LogError(
+          "DriveModeHandlerError: Unable to assign drive mode handler!");
+    }
+    catch (const sjsu::drive::RoverDriveSystem::DriveModeError &)
+    {
+      sjsu::LogError("DriveModeError: Unable to set drive mode!");
+    }
   }
+
+  return 0;
 }
