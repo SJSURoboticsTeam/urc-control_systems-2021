@@ -123,6 +123,13 @@ class Arm
     elbow_.SetPosition(angle);
   }
 
+  void StopArm()
+  {
+    rotunda_.SetJointSpeed(0);
+    shoulder_.SetJointSpeed(0);
+    elbow_.SetJointSpeed(0);
+  }
+
   void SetCurrentArmMode(MissionControlData::ArmModes current_arm_mode)
   {
     current_arm_mode_ = current_arm_mode;
