@@ -114,6 +114,12 @@ class Hand
     }
   }
 
+  void MoveFinger(int angle, Finger & finger)
+  {
+    finger.SetPositionAndPwm(static_cast<float>(angle));
+    // pca_.setPulseWidth(finger.GetPwmPin(), finger.GetPWM());
+  }
+
   int GetWristPitch() const
   {
     return wrist_.GetPitchPosition();
@@ -155,11 +161,6 @@ class Hand
   }
 
  private:
-  void MoveFinger(int angle, Finger & finger)
-  {
-    finger.SetPositionAndPwm(static_cast<float>(angle));
-    // pca_.setPulseWidth(finger.GetPwmPin(), finger.GetPWM());
-  }
 
   void SetWristRollPosition(float wrist_roll, float speed)
   {
