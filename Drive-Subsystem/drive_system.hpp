@@ -425,7 +425,6 @@ class RoverDriveSystem : public sjsu::common::RoverSystemInterface
   std::array<Wheel *, 3> wheel_array_{ wheels_.left_, wheels_.right_,
                                        wheels_.back_ };
 
-  sjsu::common::max17043 state_of_charge_;
   const int kExpectedArguments = 6;
 
   const float kZeroSpeed     = 0;
@@ -433,6 +432,6 @@ class RoverDriveSystem : public sjsu::common::RoverSystemInterface
   const float kLerpStep      = 0.5;
 
   // TODO: Implement this logic once SOC is tested
-  // sjsu::common::StateOfCharge & battery_;
+  sjsu::common::StateOfCharge state_of_charge_;
 };
 }  // namespace sjsu::drive
