@@ -592,5 +592,23 @@ TEST_CASE("Drive system testing")
     CHECK_FALSE(original_right_wheel == drive.wheels_.left_);
     CHECK_FALSE(original_back_wheel == drive.wheels_.right_);
   }
+  SECTION("14.1 should return greater than 100% when voltage is greater than 4.2"){
+
+  }
+  SECTION("14.2 should return a warning when voltage is lower than 3.05V"){
+    
+  }
+  SECTION("14.2 should return a low battery warning at voltage = 3.05V"){
+
+  }
+  SECTION("14.3 should return another warning when voltage is lower than 3.25V"){
+    
+  }
+  SECTION("14.3.1 Shouldn’t return a warning at voltage = 3.25V"){
+    
+  }
+  SECTION("14.4 Should return the percentage of the useable battery remains at any value"){
+    
+  }
 }
 }  // namespace sjsu::drive
