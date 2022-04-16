@@ -6,6 +6,7 @@
 #include "Interface/hand_interface.hpp"
 #include "joint.hpp"
 #include "../Common/Interface/rover_system_interface.hpp"
+#include "../Common/state_of_charge.hpp"
 
 namespace sjsu::arm
 {
@@ -85,7 +86,7 @@ class RoverArmSystem : public sjsu::common::RoverSystemInterface
              GetHeartbeatCount(), mc_data_.is_operational,
              static_cast<char>(arm_mc_data_.arm_mode),
              static_cast<char>(hand_mc_data_.hand_mode), int(mc_data_.speed),
-             state_of_charge_, arm_.GetRotundaPosition(),
+             static_cast<int>(st.StateOfCharge_MAX()), arm_.GetRotundaPosition(),
              arm_.GetShoulderPosition(), arm_.GetElbowPosition(),
              hand_.GetWristRoll(), hand_.GetWristPitch(),
              hand_.GetPinkyPosition(), hand_.GetRingPosition(),
@@ -159,8 +160,12 @@ class RoverArmSystem : public sjsu::common::RoverSystemInterface
     return hand_mc_data_;
   }
 
+  void GetBatteryPercent(){
+    sjsu::LogInfo("%f%% of battery remaining on the arms", st.StateOfCharge_MAX());
+  }
+
  private:
-  int state_of_charge_         = 90;
+  sjsu::common::max17043 st;
   const int kExpectedArguments = 15;
 
   GeneralMissionControlData mc_data_;
