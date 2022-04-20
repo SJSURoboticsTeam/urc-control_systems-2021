@@ -95,7 +95,9 @@ class Arm
       case MissionControlData::ArmModes::kElbow:
         MoveElbow(static_cast<float>(arm_angles.elbow), speed);
         break;
-      case MissionControlData::ArmModes::kTransport: HandleTransportMode(); break;
+      case MissionControlData::ArmModes::kTransport:
+        HandleTransportMode();
+        break;
       case MissionControlData::ArmModes::kHand: break;
     }
   }

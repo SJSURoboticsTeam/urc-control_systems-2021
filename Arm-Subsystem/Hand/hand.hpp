@@ -171,7 +171,6 @@ class Hand
   }
 
  private:
-
   void SetWristRollPosition(float wrist_roll, float speed)
   {
     wrist_.SetRollPosition(wrist_roll, speed);
