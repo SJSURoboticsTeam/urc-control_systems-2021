@@ -167,7 +167,7 @@ class RoverArmSystem : public sjsu::common::RoverSystemInterface
   }
 
  private:
-  sjsu::common::max17043 st;
+  sjsu::common::StateOfCharge st;
   const int kExpectedArguments = 15;
 
   GeneralMissionControlData mc_data_;
