@@ -86,7 +86,7 @@ class RoverArmSystem : public sjsu::common::RoverSystemInterface
              GetHeartbeatCount(), mc_data_.is_operational,
              static_cast<char>(arm_mc_data_.arm_mode),
              static_cast<char>(hand_mc_data_.hand_mode), int(mc_data_.speed),
-             static_cast<int>(st.StateOfCharge_MAX()), arm_.GetRotundaPosition(),
+             static_cast<int>(st.GetStateOfCharge()), arm_.GetRotundaPosition(),
              arm_.GetShoulderPosition(), arm_.GetElbowPosition(),
              hand_.GetWristRoll(), hand_.GetWristPitch(),
              hand_.GetPinkyPosition(), hand_.GetRingPosition(),
@@ -160,8 +160,10 @@ class RoverArmSystem : public sjsu::common::RoverSystemInterface
     return hand_mc_data_;
   }
 
-  void GetBatteryPercent(){
-    sjsu::LogInfo("%f%% of battery remaining on the arms", st.StateOfCharge_MAX());
+  void GetBatteryPercent()
+  {
+    sjsu::LogInfo("%f%% of battery remaining on the arms",
+                  st.GetStateOfCharge());
   }
 
  private:
