@@ -95,7 +95,9 @@ class Arm
       case MissionControlData::ArmModes::kElbow:
         MoveElbow(static_cast<float>(arm_angles.elbow), speed);
         break;
-      case MissionControlData::ArmModes::kTransport: HandleTransportMode(); break;
+      case MissionControlData::ArmModes::kTransport:
+        HandleTransportMode();
+        break;
       case MissionControlData::ArmModes::kHand: break;
     }
   }
@@ -121,6 +123,13 @@ class Arm
   {
     elbow_.SetJointSpeed(speed);
     elbow_.SetPosition(angle);
+  }
+
+  void StopArm()
+  {
+    rotunda_.SetJointSpeed(0);
+    shoulder_.SetJointSpeed(0);
+    elbow_.SetJointSpeed(0);
   }
 
   void SetCurrentArmMode(MissionControlData::ArmModes current_arm_mode)

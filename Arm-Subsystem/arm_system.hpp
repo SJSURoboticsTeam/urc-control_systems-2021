@@ -132,16 +132,24 @@ class RoverArmSystem : public sjsu::common::RoverSystemInterface
   {
     if (arm_mc_data_.arm_mode != arm_.GetCurrentArmMode())
     {
+      StopArmSystem();
       arm_.SetCurrentArmMode(arm_mc_data_.arm_mode);
     }
     if (hand_mc_data_.hand_mode != hand_.GetCurrentHandMode())
     {
+      StopArmSystem();
       hand_.SetCurrentHandMode(hand_mc_data_.hand_mode);
     }
 
     arm_.HandleMovement(arm_mc_data_.arm_angles,
                         static_cast<float>(mc_data_.speed));
     hand_.HandleMovement(hand_mc_data_, static_cast<float>(mc_data_.speed));
+  }
+
+  void StopArmSystem()
+  {
+    hand_.stopHand();
+    arm_.StopArm();
   }
 
   GeneralMissionControlData GetMCData() const
