@@ -213,9 +213,17 @@ class RoverDriveSystem : public sjsu::common::RoverSystemInterface
   {
     StopWheels();
     sjsu::LogInfo("Homing the wheels...");
-    wheels_.left_->PrintRMDSteerEncoderPosition();
-    wheels_.right_->PrintRMDSteerEncoderPosition();
-    wheels_.back_->PrintRMDSteerEncoderPosition();
+    float left_steer_angle  = wheels_.left_->PrintRMDSteerEncoderPosition();
+    float right_steer_angle = wheels_.right_->PrintRMDSteerEncoderPosition();
+    float back_steer_angle  = wheels_.back_->PrintRMDSteerEncoderPosition();
+
+    wheels_.left_->SetSteerAngle(left_steer_angle);
+    wheels_.right_->SetSteerAngle(right_steer_angle);
+    wheels_.back_->SetSteerAngle(back_steer_angle);
+
+    wheels_.left_->homing_offset_angle_  = left_steer_angle;
+    wheels_.right_->homing_offset_angle_ = right_steer_angle;
+    wheels_.back_->homing_offset_angle_  = back_steer_angle;
 
     // Setting wheels to zero (normally angle) until slip ring gets fixed
     // for (int angle = 0; angle < 360; angle += 2)

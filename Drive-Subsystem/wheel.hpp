@@ -34,10 +34,11 @@ class Wheel
     printf("%-10s%-10d%-10d\n", name_.c_str(), GetHubSpeed(), GetSteerAngle());
   }
 
-  void PrintRMDSteerEncoderPosition()
+  float PrintRMDSteerEncoderPosition()
   {
     printf("%s steer encoder angle: %d\n", name_,
-           steer_motor_.feedback_.encoder_position);
+           steer_motor_.GetFeedback().encoder_position);
+    return static_cast<float>(steer_motor_.GetFeedback().encoder_position);
   }
 
   std::string GetName() const
@@ -74,6 +75,11 @@ class Wheel
     return homing_offset_angle_;
   }
 
+  void SetHomingOffset(float steer_angle)
+  {
+    homing_offset_angle_ = steer_angle;
+  }
+
   /// Checks if the steer wheel is aligned with slip ring
   bool IsHomed()
   {
@@ -81,17 +87,16 @@ class Wheel
     // if (homing_pin_.Read() == kHomeLevel) // w/ slip ring
     if (GetSteerAngle() == 0)  // no slip ring - for testing purposes
     {
-      homing_offset_angle_ = int(steer_angle_);
       return true;
     }
     return false;
   }
+  float homing_offset_angle_ = 0;
 
  private:
-  std::string name_        = "";
-  int homing_offset_angle_ = 0;
-  float steer_angle_       = 0;
-  float hub_speed_         = 0;
+  std::string name_  = "";
+  float steer_angle_ = 0;
+  float hub_speed_   = 0;
 
   sjsu::RmdX & hub_motor_;
   sjsu::RmdX & steer_motor_;
