@@ -34,6 +34,12 @@ class Wheel
     printf("%-10s%-10d%-10d\n", name_.c_str(), GetHubSpeed(), GetSteerAngle());
   }
 
+  void PrintRMDSteerEncoderPosition()
+  {
+    printf("%s steer encoder angle: %d\n", name_,
+           steer_motor_.feedback_.encoder_position);
+  }
+
   std::string GetName() const
   {
     return name_;

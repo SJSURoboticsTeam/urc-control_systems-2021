@@ -213,27 +213,31 @@ class RoverDriveSystem : public sjsu::common::RoverSystemInterface
   {
     StopWheels();
     sjsu::LogInfo("Homing the wheels...");
+    wheels_.left_->PrintRMDSteerEncoderPosition();
+    wheels_.right_->PrintRMDSteerEncoderPosition();
+    wheels_.back_->PrintRMDSteerEncoderPosition();
+
     // Setting wheels to zero (normally angle) until slip ring gets fixed
-    for (int angle = 0; angle < 360; angle += 2)
-    {
-      if (AllWheelsAreHomed())
-      {
-        break;
-      }
-      if (!wheels_.left_->IsHomed())
-      {
-        wheels_.left_->SetSteerAngle(0);
-      }
-      if (!wheels_.right_->IsHomed())
-      {
-        wheels_.right_->SetSteerAngle(0);
-      }
-      if (!wheels_.back_->IsHomed())
-      {
-        wheels_.back_->SetSteerAngle(0);
-      }
-      sjsu::Delay(50ms);
-    }
+    // for (int angle = 0; angle < 360; angle += 2)
+    // {
+    //   if (AllWheelsAreHomed())
+    //   {
+    //     break;
+    //   }
+    //   if (!wheels_.left_->IsHomed())
+    //   {
+    //     wheels_.left_->SetSteerAngle(0);
+    //   }
+    //   if (!wheels_.right_->IsHomed())
+    //   {
+    //     wheels_.right_->SetSteerAngle(0);
+    //   }
+    //   if (!wheels_.back_->IsHomed())
+    //   {
+    //     wheels_.back_->SetSteerAngle(0);
+    //   }
+    //   sjsu::Delay(50ms);
+    // }
     sjsu::LogInfo("Drive system is homed!");
   }
 
@@ -416,6 +420,7 @@ class RoverDriveSystem : public sjsu::common::RoverSystemInterface
         break;
     }
   }
+
   void GetBatteryPercent()
   {
     sjsu::LogInfo("%f%% of battery remaining on the drive",
