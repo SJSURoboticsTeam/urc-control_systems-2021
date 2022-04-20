@@ -9,7 +9,7 @@ int main(void)
     {
       sjsu::common::StateOfCharge st;
       sjsu::Delay(1000ms);
-      sjsu::LogInfo("Max: %f%% remaining", st.StateOfCharge_MAX());
+      sjsu::LogInfo("Max: %f%% remaining", st.GetStateOfCharge());
     }
     catch (const std::exception & e)
     {
