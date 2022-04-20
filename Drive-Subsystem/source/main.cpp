@@ -11,8 +11,9 @@ int main(void)
 {
   sjsu::lpc40xx::SetMaximumClockSpeed();
   sjsu::LogInfo("Starting the rover drive system...");
+  sjsu::LogInfo("You are here...");
   sjsu::common::Esp esp;
-  sjsu::lpc40xx::Can & can = sjsu::lpc40xx::GetCan<2>();
+  sjsu::lpc40xx::Can & can = sjsu::lpc40xx::GetCan<1>();
   sjsu::StaticMemoryResource<1024> memory_resource;
   sjsu::CanNetwork can_network(can, &memory_resource);
 
@@ -24,12 +25,12 @@ int main(void)
   sjsu::RmdX back_steer_motor(can_network, 0x145);
   sjsu::RmdX back_hub_motor(can_network, 0x146);
 
-  left_steer_motor.settings.gear_ratio  = 8;
-  left_hub_motor.settings.gear_ratio    = 8;
-  right_steer_motor.settings.gear_ratio = 8;
-  right_hub_motor.settings.gear_ratio   = 8;
-  back_steer_motor.settings.gear_ratio  = 8;
-  back_hub_motor.settings.gear_ratio    = 8;
+  left_steer_motor.settings.gear_ratio  = 6;
+  left_hub_motor.settings.gear_ratio    = 15;
+  right_steer_motor.settings.gear_ratio = 6;
+  right_hub_motor.settings.gear_ratio   = 15;
+  back_steer_motor.settings.gear_ratio  = 6;
+  back_hub_motor.settings.gear_ratio    = 15;
 
   sjsu::Gpio & left_wheel_homing_pin  = sjsu::lpc40xx::GetGpio<0, 15>();
   sjsu::Gpio & right_wheel_homing_pin = sjsu::lpc40xx::GetGpio<2, 9>();
@@ -45,60 +46,76 @@ int main(void)
                                                    &back_wheel };
   sjsu::drive::RoverDriveSystem drive(wheels);
 
+
   sjsu::LogInfo("Initializing esp and drive system...");
-  esp.Initialize();
+  // esp.Initialize();
   drive.Initialize();
   drive.mc_data_.is_operational = 1;
 
   sjsu::Delay(5s);
+  sjsu::LogInfo("Homing wheels...");
+  drive.HomeWheels();
+  sjsu::Delay(5s);
 
   while (true)
-  {
-    //   sjsu::logInfo("Homing wheels...");
-    //   drive.HomeWheels();
-    //   sjsu::Delay(5s);
+  { 
+    // sjsu::LogInfo("Setting wheel speed to 50 RPMS for 5 seconds...");
+    // drive.wheels_.right_->SetHubSpeed(50.0);
+    // drive.wheels_.left_->SetHubSpeed(50.0);
+    // drive.wheels_.back_->SetHubSpeed(50.0);
+    // sjsu::Delay(5s);
+    // sjsu::LogInfo("Setting wheel speed to 0 RPMS for 5 seconds...");
+    // drive.wheels_.right_->SetHubSpeed(0);
+    // drive.wheels_.left_->SetHubSpeed(0);
+    // drive.wheels_.back_->SetHubSpeed(0);
+    // sjsu::Delay(5s);
+    // sjsu::LogInfo("Setting wheel speed to -50 RPMS for 5 seconds...");
+    // drive.wheels_.right_->SetHubSpeed(-50.0);
+    // drive.wheels_.left_->SetHubSpeed(-50.0);
+    // drive.wheels_.back_->SetHubSpeed(-50.0);
+    // sjsu::Delay(5s);
 
-    sjsu::LogInfo("Setting wheel speed to 50 RPMS for 5 seconds...");
-    drive.SetWheelSpeed(50.0);
-    sjsu::Delay(5s);
-    sjsu::LogInfo("Setting wheel speed to 0 RPMS for 5 seconds...");
-    drive.SetWheelSpeed(0);
-    sjsu::Delay(5s);
-    sjsu::LogInfo("Setting wheel speed to -50 RPMS for 5 seconds...");
-    drive.SetWheelSpeed(-50.0);
-    sjsu::Delay(5s);
+    // sjsu::LogInfo("Spinning steer wheels to 20 degrees...");
+    // drive.wheels_.left_->SetSteerAngle(20);
+    // drive.wheels_.right_->SetSteerAngle(20);
+    // drive.wheels_.back_->SetSteerAngle(20);
+    // sjsu::Delay(5s);
+    // sjsu::LogInfo("Spinning steer wheel to 0 degrees..");
+    // drive.wheels_.left_->SetSteerAngle(0);
+    // drive.wheels_.right_->SetSteerAngle(0);
+    // drive.wheels_.back_->SetSteerAngle(0);
+    // sjsu::Delay(5s);
 
-    sjsu::LogInfo("Spinning steer wheel to for 1 full rotation...");
-    drive.wheels_.left_->SetSteerAngle(180);
-    sjsu::Delay(10s);
-    sjsu::LogInfo("Spinning steer wheel to for 1 full rotation...");
-    drive.wheels_.right_->SetSteerAngle(180);
-    sjsu::Delay(10s);
-    sjsu::LogInfo("Spinning steer wheel to for 1 full rotation...");
-    drive.wheels_.back_->SetSteerAngle(180);
-    sjsu::Delay(10s);
+    // sjsu::LogInfo("Spinning steer wheels to 20 degrees...");
+    // drive.wheels_.left_->SetSteerAngle(20);
+    // drive.wheels_.right_->SetSteerAngle(20);
+    // drive.wheels_.back_->SetSteerAngle(20);
+    // sjsu::LogInfo("Spinning speed to 0 rpms..");
+    // drive.wheels_.left_->SetHubSpeed(0);
+    // drive.wheels_.right_->SetHubSpeed(0);
+    // drive.wheels_.back_->SetHubSpeed(0);
+    // sjsu::Delay(5s);
 
-    sjsu::LogInfo("Setting steer angle to 0...");
-    drive.wheels_.left_->SetSteerAngle(0);
-    sjsu::Delay(10s);
-    sjsu::LogInfo("Setting steer angle to 0...");
-    drive.wheels_.right_->SetSteerAngle(0);
-    sjsu::Delay(10s);
-    sjsu::LogInfo("Setting steer angle to 0...");
-    drive.wheels_.back_->SetSteerAngle(0);
-    sjsu::Delay(10s);
+    // sjsu::LogInfo("Spinning steer wheels to 0 degrees...");
+    // drive.wheels_.left_->SetSteerAngle(0);
+    // drive.wheels_.right_->SetSteerAngle(0);
+    // drive.wheels_.back_->SetSteerAngle(0);
+    // sjsu::LogInfo("Spinning speed to 50 rpms...");
+    // drive.wheels_.left_->SetHubSpeed(50);
+    // drive.wheels_.right_->SetHubSpeed(50);
+    // drive.wheels_.back_->SetHubSpeed(50);
+    // sjsu::Delay(5s);
 
     sjsu::LogInfo("Setting `D` mode waiting 5s...");
+    drive.mc_data_.rotation_angle = 60;
     drive.mc_data_.drive_mode = sjsu::drive::RoverDriveSystem::Modes::DriveMode;
     drive.HandleRoverCommands();
-    sjsu::Delay(5s);
+    sjsu::Delay(2s);
 
-    sjsu::LogInfo("Setting `T` mode waiting 5s...");
-    drive.mc_data_.drive_mode =
-        sjsu::drive::RoverDriveSystem::Modes::TranslateMode;
-    drive.HandleRoverCommands();
-    sjsu::Delay(5s);
-
-    sjsu::LogInfo("Setting angle of wheels to ");
+    // sjsu::LogInfo("Setting `T` mode waiting 5s...");
+    // drive.mc_data_.drive_mode =
+    //     sjsu::drive::RoverDriveSystem::Modes::TranslateMode;
+    // drive.HandleRoverCommands();
+    // sjsu::Delay(5s);
   }
 }

@@ -68,6 +68,16 @@ class Wheel
     return homing_offset_angle_;
   }
 
+  sjsu::RmdX & GetSteerMotor()
+  {
+    return steer_motor_;
+  }
+
+  void SetHomingOffset(float angle)
+  {
+    homing_offset_angle_ = angle;
+  }
+
   /// Checks if the steer wheel is aligned with slip ring
   bool IsHomed()
   {
@@ -83,7 +93,7 @@ class Wheel
 
  private:
   std::string name_        = "";
-  int homing_offset_angle_ = 0;
+  float homing_offset_angle_ = 0;
   float steer_angle_       = 0;
   float hub_speed_         = 0;
 
@@ -92,7 +102,7 @@ class Wheel
   sjsu::Gpio & homing_pin_;
 
   const bool kHomeLevel  = sjsu::Gpio::kHigh;
-  const int kMaxRotation = 360;
+  const int kMaxRotation = 180;
   const float kMaxSpeed  = 100;
   const float kZero      = 0;
   const units::angular_velocity::revolutions_per_minute_t kSteerSpeed = 10_rpm;

@@ -63,7 +63,7 @@ class RoverDriveSystem : public sjsu::common::RoverSystemInterface
     wheels_.left_->Initialize();
     wheels_.right_->Initialize();
     wheels_.back_->Initialize();
-    SetSpinMode();
+    // SetSpinMode();
     sjsu::LogInfo("Drive system initialized!");
   }
   /// [0] = {L, R, B}, [1] = {B, L, R}, [2] = {R, B, L}
@@ -95,7 +95,6 @@ class RoverDriveSystem : public sjsu::common::RoverSystemInterface
         wheels_.back_->GetHubSpeed(), wheels_.back_->GetSteerAngle());
     return request_parameter;
   }
-
   /// Parses the GET requests response and updates the mission control variables
   void ParseMissionControlCommands(std::string & response) override
   {
@@ -199,41 +198,47 @@ class RoverDriveSystem : public sjsu::common::RoverSystemInterface
     float right_wheel_speed = float(wheels_.right_->GetHubSpeed());
     float back_wheel_speed  = float(wheels_.back_->GetHubSpeed());
 
-    left_wheel_speed  = std::lerp(left_wheel_speed, target_speed, kLerpStep);
-    right_wheel_speed = std::lerp(right_wheel_speed, target_speed, kLerpStep);
-    back_wheel_speed  = std::lerp(back_wheel_speed, target_speed, kLerpStep);
+      left_wheel_speed  = std::lerp(left_wheel_speed, target_speed, kLerpStep);
+      right_wheel_speed = std::lerp(right_wheel_speed, target_speed, kLerpStep);
+      back_wheel_speed  = std::lerp(back_wheel_speed, target_speed, kLerpStep);
 
-    wheels_.left_->SetHubSpeed(left_wheel_speed);
-    wheels_.right_->SetHubSpeed(right_wheel_speed);
-    wheels_.back_->SetHubSpeed(back_wheel_speed);
+      wheels_.left_->SetHubSpeed(left_wheel_speed);
+      wheels_.right_->SetHubSpeed(right_wheel_speed);
+      wheels_.back_->SetHubSpeed(back_wheel_speed);
   }
 
   /// Locks thread until all wheels are homed
   void HomeWheels()
   {
-    StopWheels();
+    // StopWheels();
     sjsu::LogInfo("Homing the wheels...");
     // Setting wheels to zero (normally angle) until slip ring gets fixed
-    for (int angle = 0; angle < 360; angle += 2)
-    {
-      if (AllWheelsAreHomed())
-      {
-        break;
-      }
-      if (!wheels_.left_->IsHomed())
-      {
-        wheels_.left_->SetSteerAngle(0);
-      }
-      if (!wheels_.right_->IsHomed())
-      {
-        wheels_.right_->SetSteerAngle(0);
-      }
-      if (!wheels_.back_->IsHomed())
-      {
-        wheels_.back_->SetSteerAngle(0);
-      }
-      sjsu::Delay(50ms);
-    }
+    // for (int angle = 0; angle < 360; angle += 2)
+    // {
+    //   if (AllWheelsAreHomed())
+    //   {
+    //     break;
+    //   }
+    //   if (!wheels_.left_->IsHomed())
+    //   {
+    //     wheels_.left_->SetSteerAngle(0);
+    //   }
+    //   if (!wheels_.right_->IsHomed())
+    //   {
+    //     wheels_.right_->SetSteerAngle(0);
+    //   }
+    //   if (!wheels_.back_->IsHomed())
+    //   {
+    //     wheels_.back_->SetSteerAngle(0);
+    //   }
+    //   sjsu::Delay(50ms);
+    wheels_.back_->SetHomingOffset(60.0*(wheels_.back_->GetSteerMotor().RequestFeedbackFromMotor().GetFeedback().encoder_position>>8)/256);
+    wheels_.left_->SetHomingOffset(60.0*(wheels_.left_->GetSteerMotor().RequestFeedbackFromMotor().GetFeedback().encoder_position>>8)/256);
+    wheels_.right_->SetHomingOffset(60.0*(wheels_.right_->GetSteerMotor().RequestFeedbackFromMotor().GetFeedback().encoder_position>>8)/256);
+    wheels_.back_->SetSteerAngle(0);
+    wheels_.left_->SetSteerAngle(0);
+    wheels_.right_->SetSteerAngle(0);
+
     sjsu::LogInfo("Drive system is homed!");
   }
 
@@ -288,9 +293,9 @@ class RoverDriveSystem : public sjsu::common::RoverSystemInterface
   void SetDriveMode()  // are these initial values as in when we first call
                        // these modes?
   {
-    const int left_wheel_angle  = -45;
-    const int right_wheel_angle = -135;
-    const int back_wheel_angle  = 90;
+    const int left_wheel_angle  = 60;
+    const int right_wheel_angle = -60;
+    const int back_wheel_angle  = 0;
     wheels_.left_->SetSteerAngle(left_wheel_angle);
     wheels_.right_->SetSteerAngle(right_wheel_angle);
     wheels_.back_->SetSteerAngle(back_wheel_angle);
