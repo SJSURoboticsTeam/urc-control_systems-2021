@@ -139,12 +139,12 @@ TEST_CASE("ArmJoint system testing")
       units::acceleration::meters_per_second_squared_t(9.81)
     };
 
-    joint.SetZeroOffset(25);
+    joint.SetOffset(25);
   }
 
   SECTION("7.2 Sets offset to 90 when MPU is vertical")
   {
-    joint.SetZeroOffset(25);
+    joint.SetOffset(25);
     // TODO: verify the offset
   }
 }
