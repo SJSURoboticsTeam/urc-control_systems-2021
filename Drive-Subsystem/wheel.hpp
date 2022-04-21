@@ -63,7 +63,7 @@ class Wheel
     steer_motor_.SetAngle(steer_angle_degree, kSteerSpeed);
   };
 
-  int GetHomingOffset() const
+  float GetHomingOffset() const
   {
     return homing_offset_angle_;
   }
@@ -92,10 +92,10 @@ class Wheel
   }
 
  private:
-  std::string name_        = "";
+  std::string name_          = "";
   float homing_offset_angle_ = 0;
-  float steer_angle_       = 0;
-  float hub_speed_         = 0;
+  float steer_angle_         = 0;
+  float hub_speed_           = 0;
 
   sjsu::RmdX & hub_motor_;
   sjsu::RmdX & steer_motor_;

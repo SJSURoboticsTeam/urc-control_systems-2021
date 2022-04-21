@@ -55,6 +55,7 @@ int main(void)
   sjsu::Delay(5s);
   sjsu::LogInfo("Homing wheels...");
   drive.HomeWheels();
+  sjsu::LogInfo("Right wheel %f", drive.wheels_.right_->GetHomingOffset());
   sjsu::Delay(5s);
 
   while (true)
@@ -105,12 +106,24 @@ int main(void)
     // drive.wheels_.right_->SetHubSpeed(50);
     // drive.wheels_.back_->SetHubSpeed(50);
     // sjsu::Delay(5s);
+  int i, j;
+  drive.mc_data_.speed = 100;
+    for(i = 0; i<=40; i += 10){
+      sjsu::LogInfo("Setting `D` mode waiting 5s...");
+      drive.mc_data_.rotation_angle = i;
+      drive.mc_data_.drive_mode = sjsu::drive::RoverDriveSystem::Modes::DriveMode;
+      drive.HandleRoverCommands();
+      sjsu::Delay(4s);
+    }
 
-    sjsu::LogInfo("Setting `D` mode waiting 5s...");
-    drive.mc_data_.rotation_angle = 60;
-    drive.mc_data_.drive_mode = sjsu::drive::RoverDriveSystem::Modes::DriveMode;
-    drive.HandleRoverCommands();
-    sjsu::Delay(2s);
+  drive.mc_data_.speed = -100;
+    for(j = i; i>=-40; i -= 10){
+      sjsu::LogInfo("Setting `D` mode waiting 5s...");
+      drive.mc_data_.rotation_angle = i;
+      drive.mc_data_.drive_mode = sjsu::drive::RoverDriveSystem::Modes::DriveMode;
+      drive.HandleRoverCommands();
+      sjsu::Delay(4s);
+    }
 
     // sjsu::LogInfo("Setting `T` mode waiting 5s...");
     // drive.mc_data_.drive_mode =
