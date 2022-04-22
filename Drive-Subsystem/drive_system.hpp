@@ -271,8 +271,7 @@ class RoverDriveSystem : public sjsu::common::RoverSystemInterface
   // ======================
 
   /// Aligns rover wheels all in the same direction, facing forward
-  void SetDriveMode()  // are these initial values as in when we first call
-                       // these modes?
+  void SetDriveMode()
   {
     const int left_wheel_angle  = (-wheels_.left_->GetHomingOffset())+60;
     const int right_wheel_angle = -(wheels_.right_->GetHomingOffset()+120);
