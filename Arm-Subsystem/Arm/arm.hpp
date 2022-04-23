@@ -57,34 +57,17 @@ class Arm
 
   void HomeShoulder(float speed)
   {
-    UpdateAccelerations();
-    float home_angle = 0;
+    float home_angle = CalculateShoulderHomeAngle();
 
-    home_angle = CalculateShoulderHomeAngle();
-    shoulder_.SetZeroOffset(home_angle);
+    shoulder_.SetOffset(home_angle);
     MoveShoulder(home_angle, speed);
   }
 
   void HomeElbow(float speed)
   {
-    UpdateAccelerations();
-    float home_angle = 0;
+    float home_angle = CalculateElbowHomeAngle();
 
-    float angle_without_correction = CalculateUncorrectedElbowHomeAngle();
-
-    if (ShoulderIsInSecondQuadrantOfGraph())
-    {
-      home_angle = 90 - angle_without_correction;
-    }
-    else if (ShoulderIsInThirdQuadrantOfGraph())
-    {
-      home_angle = 180 + angle_without_correction;
-    }
-    else
-    {
-      home_angle = angle_without_correction;
-    }
-    elbow_.SetZeroOffset(home_angle);
+    elbow_.SetOffset(home_angle);
     MoveElbow(home_angle, speed);
   }
 
@@ -112,7 +95,9 @@ class Arm
       case MissionControlData::ArmModes::kElbow:
         MoveElbow(static_cast<float>(arm_angles.elbow), speed);
         break;
-      case MissionControlData::ArmModes::kTransport: TransportShoulder(); break;
+      case MissionControlData::ArmModes::kTransport:
+        HandleTransportMode();
+        break;
       case MissionControlData::ArmModes::kHand: break;
     }
   }
@@ -120,6 +105,31 @@ class Arm
   MissionControlData::ArmModes GetCurrentArmMode() const
   {
     return current_arm_mode_;
+  }
+
+  void MoveRotunda(float angle, float speed)
+  {
+    rotunda_.SetJointSpeed(speed);
+    rotunda_.SetPosition(angle);
+  }
+
+  void MoveShoulder(float angle, float speed)
+  {
+    shoulder_.SetJointSpeed(speed);
+    shoulder_.SetPosition(angle);
+  }
+
+  void MoveElbow(float angle, float speed)
+  {
+    elbow_.SetJointSpeed(speed);
+    elbow_.SetPosition(angle);
+  }
+
+  void StopArm()
+  {
+    rotunda_.SetJointSpeed(0);
+    shoulder_.SetJointSpeed(0);
+    elbow_.SetJointSpeed(0);
   }
 
   void SetCurrentArmMode(MissionControlData::ArmModes current_arm_mode)
@@ -165,60 +175,21 @@ class Arm
  private:
   float CalculateShoulderHomeAngle()
   {
-    float home_angle = 0;
-
+    UpdateAccelerations();
     float acceleration_x = rotunda_.acceleration_.x + shoulder_.acceleration_.x;
     float acceleration_y = rotunda_.acceleration_.y + shoulder_.acceleration_.y;
 
-    home_angle = float(atan(acceleration_y / acceleration_x));
-    return home_angle;
+    float shoulder_home = float(atan(acceleration_x / acceleration_y));
+    return shoulder_home;
   }
 
-  float CalculateUncorrectedElbowHomeAngle()
+  float CalculateElbowHomeAngle()
   {
+    UpdateAccelerations();
     float acceleration_x = rotunda_.acceleration_.x + elbow_.acceleration_.x;
     float acceleration_y = rotunda_.acceleration_.y + elbow_.acceleration_.y;
-    float angle_without_correction =
-        float(atan(acceleration_y / acceleration_x));
-    return angle_without_correction;
-  }
-
-  bool ShoulderIsInSecondQuadrantOfGraph()
-  {
-    if (elbow_.acceleration_.x + rotunda_.acceleration_.x >= 0 &&
-        elbow_.acceleration_.y + rotunda_.acceleration_.y <= 0)
-    {
-      return true;
-    }
-    return false;
-  }
-
-  bool ShoulderIsInThirdQuadrantOfGraph()
-  {
-    if (elbow_.acceleration_.x + rotunda_.acceleration_.x >= 0 &&
-        elbow_.acceleration_.y + rotunda_.acceleration_.y >= 0)
-    {
-      return true;
-    }
-    return false;
-  }
-
-  void MoveRotunda(float angle, float speed)
-  {
-    rotunda_.SetJointSpeed(speed);
-    rotunda_.SetPosition(angle);
-  }
-
-  void MoveShoulder(float angle, float speed)
-  {
-    shoulder_.SetJointSpeed(speed);
-    shoulder_.SetPosition(angle);
-  }
-
-  void MoveElbow(float angle, float speed)
-  {
-    elbow_.SetJointSpeed(speed);
-    elbow_.SetPosition(angle);
+    float elbow_home     = float(atan(acceleration_y / acceleration_x));
+    return elbow_home;
   }
 
   void UpdateAccelerations()
@@ -228,11 +199,13 @@ class Arm
     elbow_.GetAccelerometerData();
   }
 
-  void TransportShoulder()
+  void HandleTransportMode()
   {
     float transport_speed          = 10;
+    float elbow_transport_angle    = CalculateElbowHomeAngle();
     float shoulder_transport_angle = 90;
-    HomeArm(transport_speed);
+
+    MoveElbow(elbow_transport_angle, transport_speed);
     MoveShoulder(shoulder_transport_angle, transport_speed);
   }
 

@@ -38,10 +38,11 @@ class ArmJoint : public Joint
   }
 
   // Sets the offset angle so motor can find its true zero
-  void SetZeroOffset(float offset)
+  void SetOffset(float offset)
   {
     offset_angle_ = offset;
   }
+
   void SetJointSpeed(float target_speed)
   {
     speed_ = std::clamp(target_speed, -kMaxSpeed, kMaxSpeed);
