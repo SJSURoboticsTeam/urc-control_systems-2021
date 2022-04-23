@@ -63,7 +63,7 @@ class RoverDriveSystem : public sjsu::common::RoverSystemInterface
     wheels_.left_->Initialize();
     wheels_.right_->Initialize();
     wheels_.back_->Initialize();
-    SetSpinMode();
+    // SetSpinMode();
     sjsu::LogInfo("Drive system initialized!");
   }
   /// [0] = {L, R, B}, [1] = {B, L, R}, [2] = {R, B, L}
@@ -89,13 +89,12 @@ class RoverDriveSystem : public sjsu::common::RoverSystemInterface
         "d&right_wheel_angle=%d&back_wheel_speed=%d&back_wheel_angle=%d",
         heartbeat_.GetHeartbeatCount(), mc_data_.is_operational,
         mc_data_.wheel_shift, static_cast<char>(current_drive_mode_),
-        static_cast<int>(state_of_charge_.GetStateOfCharge()),
+        static_cast<int>(state_of_charge_.StateOfCharge_MAX()),
         wheels_.left_->GetHubSpeed(), wheels_.left_->GetSteerAngle(),
         wheels_.right_->GetHubSpeed(), wheels_.right_->GetSteerAngle(),
         wheels_.back_->GetHubSpeed(), wheels_.back_->GetSteerAngle());
     return request_parameter;
   }
-
   /// Parses the GET requests response and updates the mission control variables
   void ParseMissionControlCommands(std::string & response) override
   {
@@ -199,8 +198,8 @@ class RoverDriveSystem : public sjsu::common::RoverSystemInterface
     float right_wheel_speed = float(wheels_.right_->GetHubSpeed());
     float back_wheel_speed  = float(wheels_.back_->GetHubSpeed());
 
-    left_wheel_speed  = std::lerp(left_wheel_speed, target_speed, kLerpStep);
-    right_wheel_speed = std::lerp(right_wheel_speed, target_speed, kLerpStep);
+    left_wheel_speed  = std::lerp(left_wheel_speed, -target_speed, kLerpStep);
+    right_wheel_speed = std::lerp(right_wheel_speed, -target_speed, kLerpStep);
     back_wheel_speed  = std::lerp(back_wheel_speed, target_speed, kLerpStep);
 
     wheels_.left_->SetHubSpeed(left_wheel_speed);
@@ -211,29 +210,34 @@ class RoverDriveSystem : public sjsu::common::RoverSystemInterface
   /// Locks thread until all wheels are homed
   void HomeWheels()
   {
-    StopWheels();
+    // StopWheels();
     sjsu::LogInfo("Homing the wheels...");
-    // Setting wheels to zero (normally angle) until slip ring gets fixed
-    for (int angle = 0; angle < 360; angle += 2)
-    {
-      if (AllWheelsAreHomed())
-      {
-        break;
-      }
-      if (!wheels_.left_->IsHomed())
-      {
-        wheels_.left_->SetSteerAngle(0);
-      }
-      if (!wheels_.right_->IsHomed())
-      {
-        wheels_.right_->SetSteerAngle(0);
-      }
-      if (!wheels_.back_->IsHomed())
-      {
-        wheels_.back_->SetSteerAngle(0);
-      }
-      sjsu::Delay(50ms);
-    }
+
+    wheels_.back_->SetHomingOffset(60.0 *
+                                   (wheels_.back_->GetSteerMotor()
+                                        .RequestFeedbackFromMotor()
+                                        .GetFeedback()
+                                        .encoder_position >>
+                                    8) /
+                                   256);
+    wheels_.left_->SetHomingOffset(60.0 *
+                                   (wheels_.left_->GetSteerMotor()
+                                        .RequestFeedbackFromMotor()
+                                        .GetFeedback()
+                                        .encoder_position >>
+                                    8) /
+                                   256);
+    wheels_.right_->SetHomingOffset(60.0 *
+                                    (wheels_.right_->GetSteerMotor()
+                                         .RequestFeedbackFromMotor()
+                                         .GetFeedback()
+                                         .encoder_position >>
+                                     8) /
+                                    256);
+    wheels_.back_->SetSteerAngle(0);
+    wheels_.left_->SetSteerAngle(0);
+    wheels_.right_->SetSteerAngle(0);
+
     sjsu::LogInfo("Drive system is homed!");
   }
 
@@ -285,12 +289,11 @@ class RoverDriveSystem : public sjsu::common::RoverSystemInterface
   // ======================
 
   /// Aligns rover wheels all in the same direction, facing forward
-  void SetDriveMode()  // are these initial values as in when we first call
-                       // these modes?
+  void SetDriveMode()
   {
-    const int left_wheel_angle  = -45;
-    const int right_wheel_angle = -135;
-    const int back_wheel_angle  = 90;
+    const int left_wheel_angle  = (-wheels_.left_->GetHomingOffset()) + 60;
+    const int right_wheel_angle = -(wheels_.right_->GetHomingOffset() + 120);
+    const int back_wheel_angle  = 0;
     wheels_.left_->SetSteerAngle(left_wheel_angle);
     wheels_.right_->SetSteerAngle(right_wheel_angle);
     wheels_.back_->SetSteerAngle(back_wheel_angle);
@@ -334,6 +337,8 @@ class RoverDriveSystem : public sjsu::common::RoverSystemInterface
 
   void HandleDriveMode(float speed, float inner_wheel_angle)
   {
+    const int left_wheel_angle  = (-wheels_.left_->GetHomingOffset()) + 60;
+    const int right_wheel_angle = -(wheels_.right_->GetHomingOffset() + 120);
     inner_wheel_angle =
         std::clamp(inner_wheel_angle, -kMaxTurnRadius, kMaxTurnRadius);
 
@@ -342,14 +347,14 @@ class RoverDriveSystem : public sjsu::common::RoverSystemInterface
 
     if (inner_wheel_angle > 0)
     {
-      wheels_.right_->SetSteerAngle(inner_wheel_angle);
-      wheels_.left_->SetSteerAngle(outter_wheel_angle);
+      wheels_.right_->SetSteerAngle(inner_wheel_angle + right_wheel_angle);
+      wheels_.left_->SetSteerAngle(outter_wheel_angle + left_wheel_angle);
       wheels_.back_->SetSteerAngle(back_wheel_angle);
     }
     else
     {
-      wheels_.right_->SetSteerAngle(outter_wheel_angle);
-      wheels_.left_->SetSteerAngle(inner_wheel_angle);
+      wheels_.right_->SetSteerAngle(outter_wheel_angle + right_wheel_angle);
+      wheels_.left_->SetSteerAngle(inner_wheel_angle + left_wheel_angle);
       wheels_.back_->SetSteerAngle(back_wheel_angle);
     }
     // TODO: Need logic for controling wheel speed for each wheel
@@ -419,7 +424,7 @@ class RoverDriveSystem : public sjsu::common::RoverSystemInterface
   void GetBatteryPercent()
   {
     sjsu::LogInfo("%f%% of battery remaining on the drive",
-                  state_of_charge_.GetStateOfCharge());
+                  state_of_charge_.StateOfCharge_MAX());
   }
 
  public:
@@ -431,6 +436,7 @@ class RoverDriveSystem : public sjsu::common::RoverSystemInterface
   std::array<Wheel *, 3> wheel_array_{ wheels_.left_, wheels_.right_,
                                        wheels_.back_ };
 
+  sjsu::common::StateOfCharge state_of_charge_;
   const int kExpectedArguments = 6;
 
   const float kZeroSpeed     = 0;

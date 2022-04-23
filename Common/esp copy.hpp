@@ -6,11 +6,12 @@
 #include "utility/log.hpp"
 #include "peripherals/lpc40xx/uart.hpp"
 #include "devices/communication/esp8266.hpp"
+#include "./Interface/communication_interface.hpp"
 
 namespace sjsu::common
 {
 /// Esp class manages the esp01/esp8266 WiFi module on the rover
-class Esp
+class Esp : public CommunicationInterface
 {
  public:
   Esp()
@@ -22,8 +23,23 @@ class Esp
   {
     sjsu::LogInfo("Initializing esp module...");
     esp_.Initialize();
+    Connect();
+  };
+
+  void Connect() override
+  {
     ConnectToWifi();
     ConnectToWebServer();
+  }
+
+  void Disconnect() override
+  {
+    esp_.Close();
+  }
+
+    bool IsConnected() override
+  {
+    return wifi_.IsConnected();  // TODO: Always returns false
   };
 
   /// Sends a GET request to the hardcoded URL
@@ -58,6 +74,16 @@ class Esp
     }
   };
 
+  void ReconnectIfTimedOut(sjsu::TimeoutTimer & serverTimer)
+  {
+    if (serverTimer.HasExpired())
+    {
+      sjsu::LogWarning("Server timed out! Reconnecting...");
+      Initialize();
+    }
+  }
+
+ private:
   /// Attempts to connect to the local WiFi network
   void ConnectToWifi()
   {
@@ -69,15 +95,6 @@ class Esp
         break;
       }
       sjsu::LogWarning("Connecting...", kSsid);
-    }
-  }
-
-  void ReconnectIfServerTimedOut(sjsu::TimeoutTimer & serverTimer)
-  {
-    if (serverTimer.HasExpired())
-    {
-      sjsu::LogWarning("Server timed out! Reconnecting...");
-      Initialize();
     }
   }
 
@@ -96,14 +113,6 @@ class Esp
     }
   }
 
-  /// Verifies that the Wi-Fi module is still connected to the network
-  /// @return true if the module is still connected to the internet
-  bool IsConnected()
-  {
-    return wifi_.IsConnected();  // TODO: Always returns false
-  };
-
- private:
   /// Sends an HTTP request to the connected server
   void WriteToServer()
   {
@@ -124,10 +133,10 @@ class Esp
   sjsu::WiFi & wifi_;
   sjsu::InternetSocket & socket_;
   std::string request_;
-  std::string url_                               = "172.23.163.9";
+  std::string url_                               = "192.168.1.12";
   std::string kErrorResponse                     = "ERROR";
   const uint16_t kPort                           = 5000;
-  const char * kSsid                             = "Izzys 5GHz";
+  const char * kSsid                             = "Izzys 2.4GHz";
   const char * kPassword                         = "Nezzy559";
   const std::chrono::nanoseconds kDefaultTimeout = 10s;
 };
