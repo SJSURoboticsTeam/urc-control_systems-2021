@@ -52,83 +52,27 @@ int main(void)
   drive.Initialize();
   drive.mc_data_.is_operational = 1;
 
-  sjsu::Delay(5s);
+  sjsu::Delay(2s);
   sjsu::LogInfo("Homing wheels...");
   drive.HomeWheels();
   sjsu::LogInfo("Right wheel %f", drive.wheels_.right_->GetHomingOffset());
-  sjsu::Delay(5s);
+  sjsu::Delay(2s);
+      //   drive.mc_data_.drive_mode = sjsu::drive::RoverDriveSystem::Modes::DriveMode;
+      // sjsu::LogInfo("Setting `D` mode waiting 5s...");
+      // drive.HandleRoverCommands();
+      // sjsu::Delay(5s);
 
   while (true)
   { 
-    // sjsu::LogInfo("Setting wheel speed to 50 RPMS for 5 seconds...");
-    // drive.wheels_.right_->SetHubSpeed(50.0);
-    // drive.wheels_.left_->SetHubSpeed(50.0);
-    // drive.wheels_.back_->SetHubSpeed(50.0);
-    // sjsu::Delay(5s);
-    // sjsu::LogInfo("Setting wheel speed to 0 RPMS for 5 seconds...");
-    // drive.wheels_.right_->SetHubSpeed(0);
-    // drive.wheels_.left_->SetHubSpeed(0);
-    // drive.wheels_.back_->SetHubSpeed(0);
-    // sjsu::Delay(5s);
-    // sjsu::LogInfo("Setting wheel speed to -50 RPMS for 5 seconds...");
-    // drive.wheels_.right_->SetHubSpeed(-50.0);
-    // drive.wheels_.left_->SetHubSpeed(-50.0);
-    // drive.wheels_.back_->SetHubSpeed(-50.0);
-    // sjsu::Delay(5s);
-
-    // sjsu::LogInfo("Spinning steer wheels to 20 degrees...");
-    // drive.wheels_.left_->SetSteerAngle(20);
-    // drive.wheels_.right_->SetSteerAngle(20);
-    // drive.wheels_.back_->SetSteerAngle(20);
-    // sjsu::Delay(5s);
-    // sjsu::LogInfo("Spinning steer wheel to 0 degrees..");
-    // drive.wheels_.left_->SetSteerAngle(0);
-    // drive.wheels_.right_->SetSteerAngle(0);
-    // drive.wheels_.back_->SetSteerAngle(0);
-    // sjsu::Delay(5s);
-
-    // sjsu::LogInfo("Spinning steer wheels to 20 degrees...");
-    // drive.wheels_.left_->SetSteerAngle(20);
-    // drive.wheels_.right_->SetSteerAngle(20);
-    // drive.wheels_.back_->SetSteerAngle(20);
-    // sjsu::LogInfo("Spinning speed to 0 rpms..");
-    // drive.wheels_.left_->SetHubSpeed(0);
-    // drive.wheels_.right_->SetHubSpeed(0);
-    // drive.wheels_.back_->SetHubSpeed(0);
-    // sjsu::Delay(5s);
-
-    // sjsu::LogInfo("Spinning steer wheels to 0 degrees...");
-    // drive.wheels_.left_->SetSteerAngle(0);
-    // drive.wheels_.right_->SetSteerAngle(0);
-    // drive.wheels_.back_->SetSteerAngle(0);
-    // sjsu::LogInfo("Spinning speed to 50 rpms...");
-    // drive.wheels_.left_->SetHubSpeed(50);
-    // drive.wheels_.right_->SetHubSpeed(50);
-    // drive.wheels_.back_->SetHubSpeed(50);
-    // sjsu::Delay(5s);
-  int i, j;
-  drive.mc_data_.speed = 1;
-    for(i = 0; i<=40; i += 10){
-      sjsu::LogInfo("Setting `D` mode waiting 5s...");
-      drive.mc_data_.rotation_angle = i;
       drive.mc_data_.drive_mode = sjsu::drive::RoverDriveSystem::Modes::DriveMode;
       drive.HandleRoverCommands();
-      sjsu::Delay(4s);
-    }
-
-  // drive.mc_data_.speed = -1;
-  //   for(j = i; i>=-40; i -= 10){
-  //     sjsu::LogInfo("Setting `D` mode waiting 5s...");
-  //     drive.mc_data_.rotation_angle = i;
-  //     drive.mc_data_.drive_mode = sjsu::drive::RoverDriveSystem::Modes::DriveMode;
-  //     drive.HandleRoverCommands();
-  //     sjsu::Delay(4s);
-  //   }
-
-    // sjsu::LogInfo("Setting `T` mode waiting 5s...");
-    // drive.mc_data_.drive_mode =
-    //     sjsu::drive::RoverDriveSystem::Modes::TranslateMode;
-    // drive.HandleRoverCommands();
-    // sjsu::Delay(5s);
+      drive.mc_data_.speed = 10;
+      sjsu::Delay(5s);
+      drive.mc_data_.rotation_angle = -45;
+      drive.HandleRoverCommands();
+      sjsu::Delay(5s);
+      drive.mc_data_.rotation_angle = -35;
+      drive.HandleRoverCommands();
+      sjsu::Delay(5s);
   }
 }
