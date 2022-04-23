@@ -28,10 +28,10 @@ class StateOfCharge
         new Max170343(i2c, alert_pin, callback, address);
 
     units::voltage::volt_t battery_voltage = battery_sensor->GetVoltage();
-    double voltage                         = battery_voltage.to<double>();
+    voltage                         = battery_voltage.to<double>();
   }
 
-  double StateOfCharge_MAX()
+  float StateOfCharge_MAX()
   {
     if (voltage < 3.05)
     {
@@ -67,6 +67,11 @@ class StateOfCharge
   {
     return voltage;
   } 
+
+  private:
+    float voltage = 0;
+
+
 
 };
 }  // namespace sjsu::common
