@@ -46,7 +46,6 @@ int main(void)
                                                    &back_wheel };
   sjsu::drive::RoverDriveSystem drive(wheels);
 
-
   sjsu::LogInfo("Initializing esp and drive system...");
   // esp.Initialize();
   drive.Initialize();
@@ -59,7 +58,7 @@ int main(void)
   sjsu::Delay(5s);
 
   while (true)
-  { 
+  {
     // sjsu::LogInfo("Setting wheel speed to 50 RPMS for 5 seconds...");
     // drive.wheels_.right_->SetHubSpeed(50.0);
     // drive.wheels_.left_->SetHubSpeed(50.0);
@@ -106,47 +105,56 @@ int main(void)
     // drive.wheels_.right_->SetHubSpeed(50);
     // drive.wheels_.back_->SetHubSpeed(50);
     // sjsu::Delay(5s);
-  // int i, j;
-      drive.mc_data_.speed = 10;
-          
-  //   for(i = 0; i<=40; i += 10){
-      sjsu::LogInfo("Setting `D` mode waiting 5s...");
-      drive.mc_data_.drive_mode = sjsu::drive::RoverDriveSystem::Modes::DriveMode;
-      drive.HandleRoverCommands();
-      sjsu::Delay(5s);
-      // drive.mc_data_.speed = 3;
-      drive.mc_data_.rotation_angle = -45;
-      drive.HandleRoverCommands();
-      sjsu::Delay(4s);
-      drive.mc_data_.rotation_angle = -37;
-      drive.HandleRoverCommands();
-      sjsu::Delay(4s);
-      drive.mc_data_.rotation_angle = 37;
-      drive.HandleRoverCommands();
-      sjsu::Delay(4s);
-      drive.mc_data_.rotation_angle = -25;
-      drive.HandleRoverCommands();
-      sjsu::Delay(4s);
-      drive.mc_data_.rotation_angle = 5;
-      drive.HandleRoverCommands();
-      sjsu::Delay(4s);
-      drive.mc_data_.rotation_angle = 0;
-      drive.HandleRoverCommands();
-      sjsu::Delay(4s);
-      // drive.mc_data_.speed = 3;
-      drive.mc_data_.rotation_angle = 45;
-      drive.HandleRoverCommands();
-      sjsu::Delay(4s);
-  //   }
+    // int i, j;
+    drive.mc_data_.drive_mode =
+        sjsu::drive::RoverDriveSystem::Modes::RightWheelMode;
+    drive.mc_data_.rotation_angle = 45;
+    drive.mc_data_.speed          = 20;
+    drive.HandleRoverCommands();
+    sjsu::Delay(5s);
+    drive.mc_data_.rotation_angle = -45;
+    drive.mc_data_.speed          = 20;
+    drive.HandleRoverCommands();
 
-  // drive.mc_data_.speed = -1;
-  //   for(j = i; i>=-40; i -= 10){
-  //     sjsu::LogInfo("Setting `D` mode waiting 5s...");
-  //     drive.mc_data_.rotation_angle = i;
-  //     drive.mc_data_.drive_mode = sjsu::drive::RoverDriveSystem::Modes::DriveMode;
-  //     drive.HandleRoverCommands();
-  //     sjsu::Delay(4s);
-  //   }
+    //   for(i = 0; i<=40; i += 10){
+    sjsu::LogInfo("Setting `D` mode waiting 5s...");
+    drive.mc_data_.drive_mode = sjsu::drive::RoverDriveSystem::Modes::DriveMode;
+    drive.HandleRoverCommands();
+    sjsu::Delay(5s);
+    // drive.mc_data_.speed = 3;
+    drive.mc_data_.rotation_angle = -45;
+    drive.HandleRoverCommands();
+    sjsu::Delay(4s);
+    drive.mc_data_.rotation_angle = -37;
+    drive.HandleRoverCommands();
+    sjsu::Delay(4s);
+    drive.mc_data_.rotation_angle = 37;
+    drive.HandleRoverCommands();
+    sjsu::Delay(4s);
+    drive.mc_data_.rotation_angle = -25;
+    drive.HandleRoverCommands();
+    sjsu::Delay(4s);
+    drive.mc_data_.rotation_angle = 5;
+    drive.HandleRoverCommands();
+    sjsu::Delay(4s);
+    drive.mc_data_.rotation_angle = 0;
+    drive.HandleRoverCommands();
+    sjsu::Delay(4s);
+    // drive.mc_data_.speed = 3;
+    drive.mc_data_.rotation_angle = 45;
+    drive.HandleRoverCommands();
+    sjsu::Delay(4s);
+    //   }
+
+    // drive.mc_data_.speed = -1;
+    //   for(j = i; i>=-40; i -= 10){
+    //     sjsu::LogInfo("Setting `D` mode waiting 5s...");
+    //     drive.mc_data_.rotation_angle = i;
+    //     drive.mc_data_.drive_mode =
+    //     sjsu::drive::RoverDriveSystem::Modes::DriveMode;
+    //     drive.HandleRoverCommands();
+    //     sjsu::Delay(4s);
+    //   }
 
     // sjsu::LogInfo("Setting `T` mode waiting 5s...");
     // drive.mc_data_.drive_mode =
