@@ -25,11 +25,11 @@ int main(void)
   sjsu::RmdX back_steer_motor(can_network, 0x145);
   sjsu::RmdX back_hub_motor(can_network, 0x146);
 
-  left_steer_motor.settings.gear_ratio  = 6;
+  left_steer_motor.settings.gear_ratio  = 8;
   left_hub_motor.settings.gear_ratio    = 15;
-  right_steer_motor.settings.gear_ratio = 6;
+  right_steer_motor.settings.gear_ratio = 8;
   right_hub_motor.settings.gear_ratio   = 15;
-  back_steer_motor.settings.gear_ratio  = 6;
+  back_steer_motor.settings.gear_ratio  = 8;
   back_hub_motor.settings.gear_ratio    = 15;
 
   sjsu::Gpio & left_wheel_homing_pin  = sjsu::lpc40xx::GetGpio<0, 15>();
@@ -46,7 +46,6 @@ int main(void)
                                                    &back_wheel };
   sjsu::drive::RoverDriveSystem drive(wheels);
 
-
   sjsu::LogInfo("Initializing esp and drive system...");
   // esp.Initialize();
   drive.Initialize();
@@ -59,7 +58,7 @@ int main(void)
   sjsu::Delay(5s);
 
   while (true)
-  { 
+  {
     // sjsu::LogInfo("Setting wheel speed to 50 RPMS for 5 seconds...");
     // drive.wheels_.right_->SetHubSpeed(50.0);
     // drive.wheels_.left_->SetHubSpeed(50.0);
@@ -106,29 +105,27 @@ int main(void)
     // drive.wheels_.right_->SetHubSpeed(50);
     // drive.wheels_.back_->SetHubSpeed(50);
     // sjsu::Delay(5s);
-  int i, j;
-  drive.mc_data_.speed = 100;
-    for(i = 0; i<=40; i += 10){
+    int i, j;
+    drive.mc_data_.speed = 100;
+    for (i = 0; i <= 40; i += 10)
+    {
       sjsu::LogInfo("Setting `D` mode waiting 5s...");
       drive.mc_data_.rotation_angle = i;
-      drive.mc_data_.drive_mode = sjsu::drive::RoverDriveSystem::Modes::DriveMode;
+      drive.mc_data_.drive_mode =
+          sjsu::drive::RoverDriveSystem::Modes::DriveMode;
       drive.HandleRoverCommands();
       sjsu::Delay(4s);
     }
 
-  drive.mc_data_.speed = -100;
-    for(j = i; i>=-40; i -= 10){
+    drive.mc_data_.speed = -100;
+    for (j = i; i >= -40; i -= 10)
+    {
       sjsu::LogInfo("Setting `D` mode waiting 5s...");
       drive.mc_data_.rotation_angle = i;
-      drive.mc_data_.drive_mode = sjsu::drive::RoverDriveSystem::Modes::DriveMode;
+      drive.mc_data_.drive_mode =
+          sjsu::drive::RoverDriveSystem::Modes::DriveMode;
       drive.HandleRoverCommands();
       sjsu::Delay(4s);
     }
-
-    // sjsu::LogInfo("Setting `T` mode waiting 5s...");
-    // drive.mc_data_.drive_mode =
-    //     sjsu::drive::RoverDriveSystem::Modes::TranslateMode;
-    // drive.HandleRoverCommands();
-    // sjsu::Delay(5s);
   }
 }
