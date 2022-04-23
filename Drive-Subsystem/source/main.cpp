@@ -117,11 +117,26 @@ int main(void)
       // drive.mc_data_.speed = 3;
       drive.mc_data_.rotation_angle = -45;
       drive.HandleRoverCommands();
-      sjsu::Delay(2s);
+      sjsu::Delay(4s);
+      drive.mc_data_.rotation_angle = -37;
+      drive.HandleRoverCommands();
+      sjsu::Delay(4s);
+      drive.mc_data_.rotation_angle = 37;
+      drive.HandleRoverCommands();
+      sjsu::Delay(4s);
+      drive.mc_data_.rotation_angle = -25;
+      drive.HandleRoverCommands();
+      sjsu::Delay(4s);
+      drive.mc_data_.rotation_angle = 5;
+      drive.HandleRoverCommands();
+      sjsu::Delay(4s);
+      drive.mc_data_.rotation_angle = 0;
+      drive.HandleRoverCommands();
+      sjsu::Delay(4s);
       // drive.mc_data_.speed = 3;
       drive.mc_data_.rotation_angle = 45;
       drive.HandleRoverCommands();
-      sjsu::Delay(2s);
+      sjsu::Delay(4s);
   //   }
 
   // drive.mc_data_.speed = -1;

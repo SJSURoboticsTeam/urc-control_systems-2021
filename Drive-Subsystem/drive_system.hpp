@@ -200,15 +200,15 @@ class RoverDriveSystem : public sjsu::common::RoverSystemInterface
 
     if(inner_wheel_angle > 0)
     {
-      left_wheel_speed  = std::lerp(left_wheel_speed, -(GetOutterWheelHubSpeed(target_speed)), kLerpStep);
-      right_wheel_speed = std::lerp(right_wheel_speed, -(GetInnerWheelHubSpeed(target_speed)), kLerpStep);
+      left_wheel_speed  = std::lerp(left_wheel_speed, -(GetOutterWheelHubSpeed(target_speed, inner_wheel_angle)), kLerpStep);
+      right_wheel_speed = std::lerp(right_wheel_speed, -(GetInnerWheelHubSpeed(target_speed, inner_wheel_angle)), kLerpStep);
       back_wheel_speed  = std::lerp(back_wheel_speed, target_speed, kLerpStep);
     }
 
     if(inner_wheel_angle < 0)
     {
-      left_wheel_speed  = std::lerp(left_wheel_speed, -(GetInnerWheelHubSpeed(target_speed)), kLerpStep);
-      right_wheel_speed = std::lerp(right_wheel_speed, -(GetOutterWheelHubSpeed(target_speed)), kLerpStep);
+      left_wheel_speed  = std::lerp(left_wheel_speed, -(GetInnerWheelHubSpeed(target_speed, inner_wheel_angle)), kLerpStep);
+      right_wheel_speed = std::lerp(right_wheel_speed, -(GetOutterWheelHubSpeed(target_speed, inner_wheel_angle)), kLerpStep);
       back_wheel_speed  = std::lerp(back_wheel_speed, target_speed, kLerpStep);
     }
     if(inner_wheel_angle == 0)
