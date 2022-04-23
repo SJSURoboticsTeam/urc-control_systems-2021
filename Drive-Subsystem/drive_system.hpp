@@ -120,7 +120,7 @@ class RoverDriveSystem : public sjsu::common::RoverSystemInterface
   {
     if (!IsSyncedWithMissionControl(mc_data_.heartbeat_count))
     {
-      SetWheelSpeed(kZeroSpeed);
+      SetWheelSpeed(kZeroSpeed, 0);
       return;
     }
     if (!IsOperational(mc_data_.is_operational))
@@ -179,7 +179,7 @@ class RoverDriveSystem : public sjsu::common::RoverSystemInterface
     sjsu::LogInfo("Stopping rover...");
     while (!IsStopped())
     {
-      SetWheelSpeed(kZeroSpeed);
+      SetWheelSpeed(kZeroSpeed, 0);
     }
   }
 
@@ -192,19 +192,52 @@ class RoverDriveSystem : public sjsu::common::RoverSystemInterface
   }
 
   /// Slowly lerps the wheels toward the target speed
-  void SetWheelSpeed(float target_speed)
+  void SetWheelSpeed(float target_speed, float inner_wheel_angle)
   {
     float left_wheel_speed  = float(wheels_.left_->GetHubSpeed());
     float right_wheel_speed = float(wheels_.right_->GetHubSpeed());
     float back_wheel_speed  = float(wheels_.back_->GetHubSpeed());
 
+    if(inner_wheel_angle > 0)
+    {
+      left_wheel_speed  = std::lerp(left_wheel_speed, -(GetOutterWheelHubSpeed(target_speed)), kLerpStep);
+      right_wheel_speed = std::lerp(right_wheel_speed, -(GetInnerWheelHubSpeed(target_speed)), kLerpStep);
+      back_wheel_speed  = std::lerp(back_wheel_speed, target_speed, kLerpStep);
+    }
+
+    if(inner_wheel_angle < 0)
+    {
+      left_wheel_speed  = std::lerp(left_wheel_speed, -(GetInnerWheelHubSpeed(target_speed)), kLerpStep);
+      right_wheel_speed = std::lerp(right_wheel_speed, -(GetOutterWheelHubSpeed(target_speed)), kLerpStep);
+      back_wheel_speed  = std::lerp(back_wheel_speed, target_speed, kLerpStep);
+    }
+    if(inner_wheel_angle == 0)
+    {
       left_wheel_speed  = std::lerp(left_wheel_speed, -target_speed, kLerpStep);
       right_wheel_speed = std::lerp(right_wheel_speed, -target_speed, kLerpStep);
       back_wheel_speed  = std::lerp(back_wheel_speed, target_speed, kLerpStep);
+    }
 
-      wheels_.left_->SetHubSpeed(left_wheel_speed);
-      wheels_.right_->SetHubSpeed(right_wheel_speed);
-      wheels_.back_->SetHubSpeed(back_wheel_speed);
+    // if(mc_data_.rotation_angle == 45)
+    // {
+    //   wheels_.left_->SetHubSpeed(left_wheel_speed*3.23451073);
+    //   wheels_.right_->SetHubSpeed(std::clamp(double(right_wheel_speed),
+    //   -100/3.23451073, 100/3.23451073));
+    //   wheels_.back_->SetHubSpeed(std::clamp(back_wheel_speed*2.39415485,
+    //   -100/2.39415485, 100/2.39415485));
+    // }
+    // if(mc_data_.rotation_angle == -45)
+    // {
+    //   wheels_.left_->SetHubSpeed(std::clamp(double(left_wheel_speed),
+    //   -100/3.23451073, 100/3.23451073));
+    //   wheels_.right_->SetHubSpeed(right_wheel_speed*3.23451073);
+    //   wheels_.back_->SetHubSpeed(std::clamp(back_wheel_speed*2.39415485,
+    //   -100/2.39415485, 100/2.39415485));
+    // }
+
+    wheels_.left_->SetHubSpeed(left_wheel_speed);
+    wheels_.right_->SetHubSpeed(right_wheel_speed);
+    wheels_.back_->SetHubSpeed(back_wheel_speed);
   }
 
   /// Locks thread until all wheels are homed
@@ -213,9 +246,27 @@ class RoverDriveSystem : public sjsu::common::RoverSystemInterface
     // StopWheels();
     sjsu::LogInfo("Homing the wheels...");
 
-    wheels_.back_->SetHomingOffset(60.0*(wheels_.back_->GetSteerMotor().RequestFeedbackFromMotor().GetFeedback().encoder_position>>8)/256);
-    wheels_.left_->SetHomingOffset(60.0*(wheels_.left_->GetSteerMotor().RequestFeedbackFromMotor().GetFeedback().encoder_position>>8)/256);
-    wheels_.right_->SetHomingOffset(60.0*(wheels_.right_->GetSteerMotor().RequestFeedbackFromMotor().GetFeedback().encoder_position>>8)/256);
+    wheels_.back_->SetHomingOffset(60.0 *
+                                   (wheels_.back_->GetSteerMotor()
+                                        .RequestFeedbackFromMotor()
+                                        .GetFeedback()
+                                        .encoder_position >>
+                                    8) /
+                                   256);
+    wheels_.left_->SetHomingOffset(60.0 *
+                                   (wheels_.left_->GetSteerMotor()
+                                        .RequestFeedbackFromMotor()
+                                        .GetFeedback()
+                                        .encoder_position >>
+                                    8) /
+                                   256);
+    wheels_.right_->SetHomingOffset(60.0 *
+                                    (wheels_.right_->GetSteerMotor()
+                                         .RequestFeedbackFromMotor()
+                                         .GetFeedback()
+                                         .encoder_position >>
+                                     8) /
+                                    256);
     wheels_.back_->SetSteerAngle(0);
     wheels_.left_->SetSteerAngle(0);
     wheels_.right_->SetSteerAngle(0);
@@ -273,9 +324,10 @@ class RoverDriveSystem : public sjsu::common::RoverSystemInterface
   /// Aligns rover wheels all in the same direction, facing forward
   void SetDriveMode()
   {
-    const int left_wheel_angle  = (-wheels_.left_->GetHomingOffset())+60;
-    const int right_wheel_angle = -(wheels_.right_->GetHomingOffset()+120);
-    const int back_wheel_angle  = 0;
+    const float left_wheel_angle = (-wheels_.left_->GetHomingOffset()) + 62.3;
+    const float right_wheel_angle =
+        -(wheels_.right_->GetHomingOffset() + 120 - 11);
+    const int back_wheel_angle = 0;
     wheels_.left_->SetSteerAngle(left_wheel_angle);
     wheels_.right_->SetSteerAngle(right_wheel_angle);
     wheels_.back_->SetSteerAngle(back_wheel_angle);
@@ -319,8 +371,9 @@ class RoverDriveSystem : public sjsu::common::RoverSystemInterface
 
   void HandleDriveMode(float speed, float inner_wheel_angle)
   {
-    const int left_wheel_angle  = (-wheels_.left_->GetHomingOffset())+60;
-    const int right_wheel_angle = -(wheels_.right_->GetHomingOffset()+120);
+    const float left_wheel_angle = (-wheels_.left_->GetHomingOffset()) + 62.3;
+    const float right_wheel_angle =
+        -(wheels_.right_->GetHomingOffset() + 120 - 11);
     inner_wheel_angle =
         std::clamp(inner_wheel_angle, -kMaxTurnRadius, kMaxTurnRadius);
 
@@ -339,8 +392,8 @@ class RoverDriveSystem : public sjsu::common::RoverSystemInterface
       wheels_.left_->SetSteerAngle(inner_wheel_angle + left_wheel_angle);
       wheels_.back_->SetSteerAngle(back_wheel_angle);
     }
-    // TODO: Need logic for controling wheel speed for each wheel
-    SetWheelSpeed(speed);
+
+    SetWheelSpeed(speed, inner_wheel_angle);
   }
 
   /// Calculates outer wheel angle based off inner wheel angle
@@ -363,10 +416,55 @@ class RoverDriveSystem : public sjsu::common::RoverSystemInterface
     return (inner_wheel_angle > 0) ? back_wheel_angle : -back_wheel_angle;
   }
 
+  float GetInnerWheelHubSpeed(float inner_wheel_speed, float inner_wheel_angle)
+  {
+    // clamps the inner wheel speed to be no faster then what will mess up the
+    // correct ackerman velocity this clamp will then ensure the same for the
+    // back wheel speed since its based on this angle
+    float ratio = GetOutterWheelRadius(inner_wheel_angle) /
+                  GetInnerWheelRadius(inner_wheel_angle);
+    std::clamp(inner_wheel_speed, -100 / ratio, 100 / ratio);
+    return inner_wheel_speed;
+  }
+
+  float GetBackWheelHubSpeed(float inner_wheel_speed, float inner_wheel_angle)
+  {
+    float ratio = GetBackWheelRadius(inner_wheel_angle) /
+                  GetInnerWheelRadius(inner_wheel_angle);
+    float back_wheel_speed = inner_wheel_speed * ratio;
+    return back_wheel_speed;
+  }
+
+  float GetOutterWheelHubSpeed(float inner_wheel_speed, float inner_wheel_angle) 
+  {
+    float ratio = GetOutterWheelRadius(inner_wheel_angle) /
+                  GetInnerWheelRadius(inner_wheel_angle);
+    float outter_wheel_speed = inner_wheel_speed * ratio;
+    return outter_wheel_speed;
+  }
+
+  float GetInnerWheelRadius(float inner_wheel_angle)
+  {
+    float inner_wheel_radius = 15 * pow(inner_wheel_angle, -.971);
+    return inner_wheel_radius;
+  }
+
+  float GetBackWheelRadius(float inner_wheel_angle)
+  {
+    float back_wheel_radius = 11.6 * pow(inner_wheel_angle, -.698);
+    return back_wheel_radius;
+  }
+
+  float GetOutterWheelRadius(float inner_wheel_angle)
+  {
+    float outter_wheel_radius = 11.6 * pow(inner_wheel_angle, -.616);
+    return outter_wheel_radius;
+  }
+
   /// Adjusts only the hub speed since rover will spin in place
   void HandleSpinMode(float speed)
   {
-    SetWheelSpeed(speed);
+    SetWheelSpeed(speed, 0);
   }
 
   /// Adjusts all the wheels by keeping them in parallel
@@ -378,7 +476,7 @@ class RoverDriveSystem : public sjsu::common::RoverSystemInterface
     wheels_.left_->SetSteerAngle(angle);
     wheels_.right_->SetSteerAngle(angle);
     wheels_.back_->SetSteerAngle(angle);
-    SetWheelSpeed(speed);
+    SetWheelSpeed(speed, 0);
   }
 
   /// Adjusts the hub speed and steer angle of the specified wheel

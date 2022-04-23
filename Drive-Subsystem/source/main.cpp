@@ -52,7 +52,7 @@ int main(void)
   drive.Initialize();
   drive.mc_data_.is_operational = 1;
 
-  sjsu::Delay(5s);
+  // sjsu::Delay();
   sjsu::LogInfo("Homing wheels...");
   drive.HomeWheels();
   sjsu::LogInfo("Right wheel %f", drive.wheels_.right_->GetHomingOffset());
@@ -106,15 +106,23 @@ int main(void)
     // drive.wheels_.right_->SetHubSpeed(50);
     // drive.wheels_.back_->SetHubSpeed(50);
     // sjsu::Delay(5s);
-  int i, j;
-  drive.mc_data_.speed = 1;
-    for(i = 0; i<=40; i += 10){
+  // int i, j;
+      drive.mc_data_.speed = 10;
+          
+  //   for(i = 0; i<=40; i += 10){
       sjsu::LogInfo("Setting `D` mode waiting 5s...");
-      drive.mc_data_.rotation_angle = i;
       drive.mc_data_.drive_mode = sjsu::drive::RoverDriveSystem::Modes::DriveMode;
       drive.HandleRoverCommands();
-      sjsu::Delay(4s);
-    }
+      sjsu::Delay(5s);
+      // drive.mc_data_.speed = 3;
+      drive.mc_data_.rotation_angle = -45;
+      drive.HandleRoverCommands();
+      sjsu::Delay(2s);
+      // drive.mc_data_.speed = 3;
+      drive.mc_data_.rotation_angle = 45;
+      drive.HandleRoverCommands();
+      sjsu::Delay(2s);
+  //   }
 
   // drive.mc_data_.speed = -1;
   //   for(j = i; i>=-40; i -= 10){
