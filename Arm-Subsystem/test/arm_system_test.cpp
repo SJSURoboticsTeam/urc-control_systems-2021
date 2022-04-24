@@ -85,7 +85,7 @@ TEST_CASE("Arm system testing")
   {
     std::string expected_parameter =
         "?heartbeat_count=0&is_operational=0&arm_mode=C&hand_mode=C&arm_speed="
-        "0&battery=90&rotunda_angle=0&shoulder_angle=0&elbow_angle=0&wrist_"
+        "0&battery=0&rotunda_angle=0&shoulder_angle=0&elbow_angle=0&wrist_"
         "roll=0&wrist_pitch=0&pinky_angle=0&ring_angle=0&middle_angle=0&"
         "pointer_angle=0&thumb_angle=0";
     std::string actual_parameter =

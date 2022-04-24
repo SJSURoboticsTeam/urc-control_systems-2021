@@ -529,6 +529,6 @@ class RoverDriveSystem : public sjsu::common::RoverSystemInterface
   const float kLerpStep      = 0.5;
 
   // TODO: Implement this logic once SOC is tested
-  // sjsu::common::StateOfCharge & battery_;
+  sjsu::common::StateOfCharge state_of_charge_;
 };
 }  // namespace sjsu::drive
