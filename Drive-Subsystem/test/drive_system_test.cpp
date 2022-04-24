@@ -168,17 +168,17 @@ TEST_CASE("Drive system testing")
 
   SECTION("9.1 should lerp to 4 by setting speed to 2 → 3 → 4")
   {
-    drive.SetWheelSpeed(4);
+    drive.SetWheelSpeed(4, 0);
     CHECK_EQ(drive.wheels_.right_->GetHubSpeed(), 2);
     CHECK_EQ(drive.wheels_.right_->GetHubSpeed(), 2);
     CHECK_EQ(drive.wheels_.back_->GetHubSpeed(), 2);
 
-    drive.SetWheelSpeed(4);
+    drive.SetWheelSpeed(4, 0);
     CHECK_EQ(drive.wheels_.right_->GetHubSpeed(), 3);
     CHECK_EQ(drive.wheels_.right_->GetHubSpeed(), 3);
     CHECK_EQ(drive.wheels_.back_->GetHubSpeed(), 3);
 
-    drive.SetWheelSpeed(4);
+    drive.SetWheelSpeed(4, 0);
     CHECK_GE(drive.wheels_.right_->GetHubSpeed(), 3);
     CHECK_GE(drive.wheels_.right_->GetHubSpeed(), 3);
     CHECK_GE(drive.wheels_.back_->GetHubSpeed(), 3);
@@ -190,33 +190,33 @@ TEST_CASE("Drive system testing")
     drive.wheels_.right_->SetHubSpeed(4);
     drive.wheels_.back_->SetHubSpeed(4);
 
-    drive.SetWheelSpeed(0);
+    drive.SetWheelSpeed(0, 0);
     CHECK_EQ(drive.wheels_.left_->GetHubSpeed(), 2);
     CHECK_EQ(drive.wheels_.right_->GetHubSpeed(), 2);
     CHECK_EQ(drive.wheels_.back_->GetHubSpeed(), 2);
 
-    drive.SetWheelSpeed(0);
+    drive.SetWheelSpeed(0, 0);
     CHECK_EQ(drive.wheels_.left_->GetHubSpeed(), 1);
     CHECK_EQ(drive.wheels_.right_->GetHubSpeed(), 1);
     CHECK_EQ(drive.wheels_.back_->GetHubSpeed(), 1);
 
-    drive.SetWheelSpeed(0);
+    drive.SetWheelSpeed(0, 0);
     CHECK(drive.IsStopped());
   }
 
   SECTION("9.3 should lerp to -4 by setting speed to -2 → -3 → -4")
   {
-    drive.SetWheelSpeed(-4);
+    drive.SetWheelSpeed(-4, 0);
     CHECK_EQ(drive.wheels_.left_->GetHubSpeed(), -2);
     CHECK_EQ(drive.wheels_.right_->GetHubSpeed(), -2);
     CHECK_EQ(drive.wheels_.back_->GetHubSpeed(), -2);
 
-    drive.SetWheelSpeed(-4);
+    drive.SetWheelSpeed(-4, 0);
     CHECK_EQ(drive.wheels_.left_->GetHubSpeed(), -3);
     CHECK_EQ(drive.wheels_.right_->GetHubSpeed(), -3);
     CHECK_EQ(drive.wheels_.back_->GetHubSpeed(), -3);
 
-    drive.SetWheelSpeed(-4);
+    drive.SetWheelSpeed(-4, 0);
     CHECK_GE(drive.wheels_.left_->GetHubSpeed(), -4);
     CHECK_GE(drive.wheels_.right_->GetHubSpeed(), -4);
     CHECK_GE(drive.wheels_.back_->GetHubSpeed(), -4);
@@ -228,29 +228,23 @@ TEST_CASE("Drive system testing")
     drive.wheels_.right_->SetHubSpeed(-4);
     drive.wheels_.back_->SetHubSpeed(-4);
 
-    drive.SetWheelSpeed(0);
+    drive.SetWheelSpeed(0, 0);
     CHECK_EQ(drive.wheels_.left_->GetHubSpeed(), -2);
     CHECK_EQ(drive.wheels_.right_->GetHubSpeed(), -2);
     CHECK_EQ(drive.wheels_.back_->GetHubSpeed(), -2);
 
-    drive.SetWheelSpeed(0);
+    drive.SetWheelSpeed(0, 0);
     CHECK_EQ(drive.wheels_.left_->GetHubSpeed(), -1);
     CHECK_EQ(drive.wheels_.right_->GetHubSpeed(), -1);
     CHECK_EQ(drive.wheels_.back_->GetHubSpeed(), -1);
 
-    drive.SetWheelSpeed(0);
+    drive.SetWheelSpeed(0, 0);
     CHECK(drive.IsStopped());
   }
 
   SECTION("10.1 should home wheels after moving")
   {
-    drive.wheels_.left_->SetHubSpeed(kNonZero);
-    drive.wheels_.right_->SetHubSpeed(kNonZero);
-    drive.wheels_.back_->SetHubSpeed(kNonZero);
-    drive.HomeWheels();
-    CHECK_EQ(drive.wheels_.left_->GetSteerAngle(), 0);
-    CHECK_EQ(drive.wheels_.right_->GetSteerAngle(), 0);
-    CHECK_EQ(drive.wheels_.back_->GetSteerAngle(), 0);
+
   }
 
   SECTION("11.1 should return true when at start position")
@@ -394,6 +388,12 @@ TEST_CASE("Drive system testing")
     CHECK_EQ(drive.wheels_.right_->GetHubSpeed(),
              drive.wheels_.back_->GetHubSpeed());
     CHECK_FALSE(drive.IsStopped());
+  }
+
+  SECTION("12.7.3 Testing when inner angle is -45...")
+  {
+    drive.mc_data_.is_operational = 1;
+    
   }
 
   SECTION("12.8.1 should clamp steer angles when over 45")
