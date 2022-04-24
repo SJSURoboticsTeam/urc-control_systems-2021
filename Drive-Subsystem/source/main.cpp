@@ -64,15 +64,30 @@ int main(void)
 
   while (true)
   { 
-      drive.mc_data_.drive_mode = sjsu::drive::RoverDriveSystem::Modes::DriveMode;
+      drive.mc_data_.drive_mode = sjsu::drive::RoverDriveSystem::Modes::SpinMode;
       drive.HandleRoverCommands();
-      drive.mc_data_.speed = 10;
-      sjsu::Delay(5s);
-      drive.mc_data_.rotation_angle = -45;
-      drive.HandleRoverCommands();
-      sjsu::Delay(5s);
-      drive.mc_data_.rotation_angle = -35;
-      drive.HandleRoverCommands();
-      sjsu::Delay(5s);
+      drive.mc_data_.speed = 20;
+      sjsu::Delay(2s);
+      // drive.mc_data_.rotation_angle = -45;
+      // drive.HandleRoverCommands();
+      // sjsu::Delay(2s);
+      // drive.mc_data_.rotation_angle = -25;
+      // drive.HandleRoverCommands();
+      // sjsu::Delay(2s);
+      //       drive.mc_data_.rotation_angle = -15;
+      // drive.HandleRoverCommands();
+      // sjsu::Delay(2s);
+      //       drive.mc_data_.rotation_angle = 5;
+      // drive.HandleRoverCommands();
+      // sjsu::Delay(2s);
+      //       drive.mc_data_.rotation_angle = 25;
+      // drive.HandleRoverCommands();
+      // sjsu::Delay(2s);
+      //       drive.mc_data_.rotation_angle = 35;
+      // drive.HandleRoverCommands();
+      // sjsu::Delay(2s);
+      //       drive.mc_data_.rotation_angle = 45;
+      // drive.HandleRoverCommands();
+      // sjsu::Delay(2s);
   }
 }
