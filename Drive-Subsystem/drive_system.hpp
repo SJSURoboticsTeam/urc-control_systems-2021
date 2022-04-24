@@ -201,30 +201,36 @@ class RoverDriveSystem : public sjsu::common::RoverSystemInterface
     if (inner_wheel_angle > 0)
     {
       left_wheel_speed =
-        std::lerp(left_wheel_speed,-(GetOutterWheelHubSpeed(target_speed, inner_wheel_angle)),kLerpStep);
-      right_wheel_speed = 
-        std::lerp(right_wheel_speed, -(GetInnerWheelHubSpeed(target_speed, inner_wheel_angle)), kLerpStep);
-      back_wheel_speed = 
-        std::lerp(back_wheel_speed, GetBackWheelHubSpeed(target_speed, inner_wheel_angle), kLerpStep);
+          std::lerp(left_wheel_speed,
+                    -(GetOutterWheelHubSpeed(target_speed, inner_wheel_angle)),
+                    kLerpStep);
+      right_wheel_speed = std::lerp(
+          right_wheel_speed,
+          -(GetInnerWheelHubSpeed(target_speed, inner_wheel_angle)), kLerpStep);
+      back_wheel_speed = std::lerp(
+          back_wheel_speed,
+          GetBackWheelHubSpeed(target_speed, inner_wheel_angle), kLerpStep);
     }
 
     if (inner_wheel_angle < 0)
     {
-      left_wheel_speed = 
-        std::lerp(left_wheel_speed, -(GetInnerWheelHubSpeed(target_speed, inner_wheel_angle)), kLerpStep);
+      left_wheel_speed = std::lerp(
+          left_wheel_speed,
+          -(GetInnerWheelHubSpeed(target_speed, inner_wheel_angle)), kLerpStep);
       right_wheel_speed =
-        std::lerp(right_wheel_speed, -(GetOutterWheelHubSpeed(target_speed, inner_wheel_angle)), kLerpStep);
-      back_wheel_speed = 
-        std::lerp(back_wheel_speed, GetBackWheelHubSpeed(target_speed, inner_wheel_angle), kLerpStep);
+          std::lerp(right_wheel_speed,
+                    -(GetOutterWheelHubSpeed(target_speed, inner_wheel_angle)),
+                    kLerpStep);
+      back_wheel_speed = std::lerp(
+          back_wheel_speed,
+          GetBackWheelHubSpeed(target_speed, inner_wheel_angle), kLerpStep);
     }
     if (inner_wheel_angle == 0)
     {
-      left_wheel_speed = 
-        std::lerp(left_wheel_speed, -target_speed, kLerpStep);
+      left_wheel_speed = std::lerp(left_wheel_speed, -target_speed, kLerpStep);
       right_wheel_speed =
           std::lerp(right_wheel_speed, -target_speed, kLerpStep);
-      back_wheel_speed = 
-        std::lerp(back_wheel_speed, target_speed, kLerpStep);
+      back_wheel_speed = std::lerp(back_wheel_speed, target_speed, kLerpStep);
     }
 
     wheels_.left_->SetHubSpeed(left_wheel_speed);
@@ -247,7 +253,8 @@ class RoverDriveSystem : public sjsu::common::RoverSystemInterface
   {
     float ratio = GetBackWheelRadius(inner_wheel_angle) /
                   GetInnerWheelRadius(inner_wheel_angle);
-    float back_wheel_speed = std::clamp(inner_wheel_speed * ratio, -100/ratio, 100/ratio);
+    float back_wheel_speed =
+        std::clamp(inner_wheel_speed * ratio, -100 / ratio, 100 / ratio);
     return back_wheel_speed;
   }
 
@@ -432,6 +439,12 @@ class RoverDriveSystem : public sjsu::common::RoverSystemInterface
     // TODO: Need logic for controling wheel speed for each wheel
     SetWheelSpeed(speed, inner_wheel_angle);
   }
+
+  void GetLeftWheelSpeed(float speed, float inner_wheel_angle) {}
+
+  void GetRightWheelSpeed(float speed, float inner_wheel_angle) {}
+
+  void GetBackWheelSpeed(float speed, float inner_wheel_angle) {}
 
   /// Calculates outer wheel angle based off inner wheel angle
   float GetOutterWheelDriveAngle(float inner_wheel_angle) const
