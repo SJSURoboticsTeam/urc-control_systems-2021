@@ -3,8 +3,6 @@
 #include "peripherals/lpc40xx/gpio.hpp"
 #include "peripherals/hardware_counter.hpp"
 #include "devices/sensors/battery/ltc4150.hpp"
-#include "Interface/state_of_charge_interface.hpp"
-
 namespace sjsu::common
 {
 /// State of charge manages ltc4150 and max17043
